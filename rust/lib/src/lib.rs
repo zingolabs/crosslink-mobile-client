@@ -1,4 +1,4 @@
-uniffi::include_scaffolding!("zingo");
+uniffi::setup_scaffolding!();
 
 #[macro_use]
 extern crate lazy_static;
@@ -39,13 +39,13 @@ use tokio::runtime::Runtime;
 use zcash_address::ZcashAddress;
 use zcash_primitives::memo::MemoBytes;
 use zcash_protocol::value::Zatoshis;
+use zingo_common_components::protocol::activation_heights::for_test::{self, all_height_one_nus};
 use zingolib::config::{ChainType, ZingoConfig, construct_lightwalletd_uri};
 use zingolib::data::PollReport;
 use zingolib::data::proposal::total_fee;
 use zingolib::data::receivers::Receivers;
 use zingolib::data::receivers::transaction_request_from_receivers;
 use zingolib::lightclient::LightClient;
-use zingo_common_components::protocol::activation_heights::for_test;
 use zingolib::utils::{conversion::address_from_str, conversion::txid_from_hex_encoded_str};
 use zingolib::wallet::keys::{
     WalletAddressRef,
@@ -53,7 +53,7 @@ use zingolib::wallet::keys::{
 };
 use zingolib::wallet::{LightWallet, WalletBase, WalletSettings};
 
-#[derive(Debug, thiserror::Error)]
+#[derive(uniffi::Enum, Debug, thiserror::Error)]
 pub enum ZingolibError {
     #[error("Error: Lightclient is not initialized")]
     LightclientNotInitialized,
@@ -61,6 +61,69 @@ pub enum ZingolibError {
     LightclientLockPoisoned,
     #[error("Error: panic: {0}")]
     Panic(String),
+}
+
+#[derive(Debug, thiserror::Error, uniffi::Error)]
+pub enum InitError {
+    #[error("invalid input: {0}")]
+    InvalidInput(String),
+
+    #[error("base64 decode failed")]
+    Base64Decode,
+
+    #[error("config error")]
+    Config(#[from] ConfigError),
+
+    #[error("wallet read failed")]
+    WalletRead,
+
+    #[error("lightwalletd query failed")]
+    Network,
+
+    #[error("anchor height underflow (tip {tip}, offset {offset})")]
+    HeightUnderflow { tip: u32, offset: u32 },
+
+    #[error("lightclient creation failed")]
+    LightClient,
+
+    #[error("wallet creation failed")]
+    WalletNew,
+
+    #[error("seed error")]
+    Seed(#[from] SeedError),
+
+    #[error("ufvk error")]
+    Ufvk(#[from] UfvkError),
+
+    #[error("mnemonic parsing failed")]
+    Mnemonic,
+}
+
+#[derive(Debug, thiserror::Error, uniffi::Error)]
+pub enum ConfigError {
+    #[error("invalid chain hint: {0}")]
+    InvalidChainHint(String),
+
+    #[error("invalid performance level: {0}")]
+    InvalidPerformanceLevel(String),
+
+    #[error("invalid min_confirmations: {0}")]
+    InvalidMinConfirmations(String),
+
+    #[error("loading client config failed")]
+    Load,
+}
+
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct InitResult {
+    pub kind: InitResultKind,
+    pub value: String,
+}
+
+#[derive(Debug, Clone, uniffi::Enum)]
+pub enum InitResultKind {
+    Seed,
+    Ufvk,
 }
 
 pub fn with_panic_guard<T, F>(f: F) -> Result<T, ZingolibError>
@@ -231,24 +294,28 @@ fn construct_uri_load_config(
     chain_hint: String,
     performance_level: String,
     min_confirmations: u32,
-) -> Result<(ZingoConfig, http::Uri), String> {
+) -> Result<(ZingoConfig, http::Uri), ConfigError> {
     // if uri is empty -> Offline Mode.
     let lightwalletd_uri = construct_lightwalletd_uri(Some(uri));
 
     let chaintype = match chain_hint.as_str() {
         "main" => ChainType::Mainnet,
         "test" => ChainType::Testnet,
-        "regtest" => ChainType::Regtest(for_test::all_height_one_nus()),
-        _ => return Err("Error: Not a valid chain hint!".to_string()),
+        "regtest" => ChainType::Regtest(all_height_one_nus()),
+        _ => return Err(ConfigError::InvalidChainHint(chain_hint)),
     };
     let performancetype = match performance_level.as_str() {
         "Maximum" => PerformanceLevel::Maximum,
         "High" => PerformanceLevel::High,
         "Medium" => PerformanceLevel::Medium,
         "Low" => PerformanceLevel::Low,
-        _ => return Err("Error: Not a valid performance level!".to_string()),
+        _ => return Err(ConfigError::InvalidPerformanceLevel(performance_level)),
     };
-    let config = match zingolib::config::load_clientconfig(
+
+    let confirmations = NonZeroU32::try_from(min_confirmations)
+        .map_err(|_| ConfigError::InvalidMinConfirmations(min_confirmations.to_string()))?;
+
+    let config = zingolib::config::load_clientconfig(
         lightwalletd_uri.clone(),
         None,
         chaintype,
@@ -257,16 +324,12 @@ fn construct_uri_load_config(
                 transparent_address_discovery: TransparentAddressDiscovery::minimal(),
                 performance_level: performancetype,
             },
-            min_confirmations: NonZeroU32::try_from(min_confirmations).unwrap(),
+            min_confirmations: confirmations,
         },
         NonZeroU32::try_from(1).expect("hard-coded integer"),
-        "".to_string()
-    ) {
-        Ok(c) => c,
-        Err(e) => {
-            return Err(format!("Error: Config load: {e}"));
-        }
-    };
+        "".to_string(),
+    )
+    .map_err(|_| ConfigError::Load)?;
 
     Ok((config, lightwalletd_uri))
 }
@@ -291,34 +354,38 @@ pub fn init_new(
     chain_hint: String,
     performance_level: String,
     min_confirmations: u32,
-) -> Result<String, ZingolibError> {
-    with_panic_guard(|| {
-        reset_lightclient();
-        let (config, lightwalletd_uri) = match construct_uri_load_config(
-            server_uri,
-            chain_hint,
-            performance_level,
-            min_confirmations,
-        ) {
-            Ok(c) => c,
-            Err(e) => return Ok(format!("Error: {e}")),
-        };
-        let chain_height = match RT.block_on(async move {
+) -> Result<InitResult, InitError> {
+    // with_panic_guard(|| {
+    reset_lightclient();
+    let (config, lightwalletd_uri) =
+        construct_uri_load_config(server_uri, chain_hint, performance_level, min_confirmations)?;
+
+    // Query tip height
+    let tip: u32 = RT
+        .block_on(async move {
             zingolib::grpc_connector::get_latest_block(lightwalletd_uri)
                 .await
-                .map(|block_id| BlockHeight::from_u32(block_id.height as u32))
-        }) {
-            Ok(h) => h,
-            Err(e) => return Ok(format!("Error: {e}")),
-        };
-        let lightclient = match LightClient::new(config, chain_height - 100, false) {
-            Ok(l) => l,
-            Err(e) => return Ok(format!("Error: {e}")),
-        };
-        let _ = store_client(lightclient);
+                .map(|b| b.height as u32)
+        })
+        .map_err(|_| InitError::Network)?;
 
-        get_seed()
+    // Derive anchor height safely
+    let offset = 100u32;
+    let anchor = tip
+        .checked_sub(offset)
+        .ok_or(InitError::HeightUnderflow { tip, offset })?;
+    let anchor = BlockHeight::from_u32(anchor);
+
+    let lightclient =
+        LightClient::new(config, anchor, false).map_err(|_| InitError::LightClient)?;
+    let _ = store_client(lightclient);
+
+    let seed = get_seed()?;
+    Ok(InitResult {
+        kind: InitResultKind::Seed,
+        value: seed,
     })
+    // })?
 }
 
 // TODO: change `seed` to `seed_phrase` or `mnemonic_phrase`
@@ -329,42 +396,36 @@ pub fn init_from_seed(
     chain_hint: String,
     performance_level: String,
     min_confirmations: u32,
-) -> Result<String, ZingolibError> {
-    with_panic_guard(|| {
-        reset_lightclient();
-        let (config, _lightwalletd_uri) = match construct_uri_load_config(
-            server_uri,
-            chain_hint,
-            performance_level,
-            min_confirmations,
-        ) {
-            Ok(c) => c,
-            Err(e) => return Ok(format!("Error: {e}")),
-        };
-        let mnemonic = match Mnemonic::from_phrase(seed) {
-            Ok(m) => m,
-            Err(e) => return Ok(format!("Error: {e}")),
-        };
-        let wallet = match LightWallet::new(
-            config.chain,
-            WalletBase::Mnemonic {
-                mnemonic,
-                no_of_accounts: config.no_of_accounts,
-            },
-            BlockHeight::from_u32(birthday),
-            config.wallet_settings.clone(),
-        ) {
-            Ok(w) => w,
-            Err(e) => return Ok(format!("Error: {e}")),
-        };
-        let lightclient = match LightClient::create_from_wallet(wallet, config, false) {
-            Ok(l) => l,
-            Err(e) => return Ok(format!("Error: {e}")),
-        };
-        let _ = store_client(lightclient);
+) -> Result<InitResult, InitError> {
+    // with_panic_guard(|| {
+    reset_lightclient();
 
-        get_seed()
+    let (config, _lightwalletd_uri) =
+        construct_uri_load_config(server_uri, chain_hint, performance_level, min_confirmations)?;
+
+    let mnemonic = Mnemonic::from_phrase(seed).map_err(|_| InitError::Mnemonic)?;
+
+    let wallet = LightWallet::new(
+        config.chain,
+        WalletBase::Mnemonic {
+            mnemonic,
+            no_of_accounts: config.no_of_accounts,
+        },
+        BlockHeight::from_u32(birthday),
+        config.wallet_settings.clone(),
+    )
+    .map_err(|_| InitError::WalletNew)?;
+
+    let lightclient = LightClient::create_from_wallet(wallet, config, false)
+        .map_err(|_| InitError::LightClient)?;
+    let _ = store_client(lightclient);
+
+    let seed = get_seed()?;
+    Ok(InitResult {
+        kind: InitResultKind::Seed,
+        value: seed,
     })
+    // })
 }
 
 pub fn init_from_ufvk(
@@ -374,86 +435,80 @@ pub fn init_from_ufvk(
     chain_hint: String,
     performance_level: String,
     min_confirmations: u32,
-) -> Result<String, ZingolibError> {
-    with_panic_guard(|| {
-        reset_lightclient();
-        let (config, _lightwalletd_uri) = match construct_uri_load_config(
-            server_uri,
-            chain_hint,
-            performance_level,
-            min_confirmations,
-        ) {
-            Ok(c) => c,
-            Err(e) => return Ok(format!("Error: {e}")),
-        };
-        let wallet = match LightWallet::new(
-            config.chain,
-            WalletBase::Ufvk(ufvk),
-            BlockHeight::from_u32(birthday),
-            config.wallet_settings.clone(),
-        ) {
-            Ok(w) => w,
-            Err(e) => return Ok(format!("Error: {e}")),
-        };
-        let lightclient = match LightClient::create_from_wallet(wallet, config, false) {
-            Ok(l) => l,
-            Err(e) => return Ok(format!("Error: {e}")),
-        };
-        let _ = store_client(lightclient);
+) -> Result<InitResult, InitError> {
+    // with_panic_guard(|| {
+    reset_lightclient();
+    let (config, _lightwalletd_uri) =
+        construct_uri_load_config(server_uri, chain_hint, performance_level, min_confirmations)?;
 
-        get_ufvk()
+    let wallet = LightWallet::new(
+        config.chain,
+        WalletBase::Ufvk(ufvk),
+        BlockHeight::from_u32(birthday),
+        config.wallet_settings.clone(),
+    )
+    .map_err(|_| InitError::WalletNew)?;
+
+    let lightclient = LightClient::create_from_wallet(wallet, config, false)
+        .map_err(|_| InitError::LightClient)?;
+    let _ = store_client(lightclient);
+
+    let seed = get_ufvk()?;
+    Ok(InitResult {
+        kind: InitResultKind::Ufvk,
+        value: seed.ufvk,
     })
+    // })
 }
 
+#[uniffi::export]
 pub fn init_from_b64(
     base64_data: String,
     server_uri: String,
     chain_hint: String,
     performance_level: String,
     min_confirmations: u32,
-) -> Result<String, ZingolibError> {
-    with_panic_guard(|| {
-        reset_lightclient();
-        let (config, _lightwalletd_uri) = match construct_uri_load_config(
-            server_uri,
-            chain_hint,
-            performance_level,
-            min_confirmations,
-        ) {
-            Ok(c) => c,
-            Err(e) => return Ok(format!("Error: {e}")),
-        };
-        let decoded_bytes = match STANDARD.decode(&base64_data) {
-            Ok(b) => b,
-            Err(e) => {
-                return Ok(format!(
-                    "Error: Decoding Base64: {}, Size: {}, Content: {}",
-                    e,
-                    base64_data.len(),
-                    base64_data
-                ));
-            }
-        };
+) -> Result<InitResult, InitError> {
+    // with_panic_guard(|| {
+    reset_lightclient();
+    let (config, _lightwalletd_uri) =
+        construct_uri_load_config(server_uri, chain_hint, performance_level, min_confirmations)?;
 
-        let wallet = match LightWallet::read(&decoded_bytes[..], config.chain) {
-            Ok(w) => w,
-            Err(e) => return Ok(format!("Error: {e}")),
-        };
-        let has_seed = wallet.mnemonic().is_some();
-        let lightclient = match LightClient::create_from_wallet(wallet, config, false) {
-            Ok(l) => l,
-            Err(e) => return Ok(format!("Error: {e}")),
-        };
-        let _ = store_client(lightclient);
+    let decoded_bytes = base64::engine::general_purpose::STANDARD
+        .decode(&base64_data)
+        .map_err(|_| InitError::Base64Decode)?;
 
-        if has_seed { get_seed() } else { get_ufvk() }
-    })
+    let wallet =
+        LightWallet::read(&decoded_bytes[..], config.chain).map_err(|_| InitError::WalletRead)?;
+
+    let has_seed = wallet.mnemonic().is_some();
+
+    let lightclient = LightClient::create_from_wallet(wallet, config, false)
+        .map_err(|_| InitError::LightClient)?;
+
+    let _ = store_client(lightclient);
+
+    if has_seed {
+        Ok(InitResult {
+            kind: InitResultKind::Seed,
+            value: get_seed()?,
+        })
+    } else {
+        Ok(InitResult {
+            kind: InitResultKind::Ufvk,
+            value: get_ufvk()?.to_string(),
+        })
+    }
+    // })
+    // .map(ZingolibError::from)?
 }
 
 pub fn save_to_b64() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         // Return the wallet as a base64 encoded string
-        let mut guard = LIGHTCLIENT.write().map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+        let mut guard = LIGHTCLIENT
+            .write()
+            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             // we need to use STANDARD because swift is expecting the encoded String with padding
             // I tried with STANDARD_NO_PAD and the decoding return `nil`.
@@ -576,6 +631,7 @@ pub fn poll_sync() -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 fn run_sync() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -615,6 +671,7 @@ pub fn pause_sync() -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 fn status_sync() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -665,56 +722,94 @@ pub fn info_server() -> Result<String, ZingolibError> {
     })
 }
 
-// TODO: rename "get_seed_phrase" or "get_mnemonic_phrase"
-// or if other recovery info is being used could rename "get_recovery_info" ?
-pub fn get_seed() -> Result<String, ZingolibError> {
-    with_panic_guard(|| {
-        let mut guard = LIGHTCLIENT
-            .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
-        if let Some(lightclient) = &mut *guard {
-            Ok(RT.block_on(async move {
-                let wallet = lightclient.wallet.read().await;
-                match wallet.recovery_info() {
-                    Some(recovery_info) => serde_json::to_string_pretty(&recovery_info)
-                        .unwrap_or_else(|_| "Error: get seed. failed to serialize".to_string()),
-                    None => {
-                        "Error: get seed. no mnemonic found. wallet loaded from key.".to_string()
-                    }
-                }
-            }))
-        } else {
-            Err(ZingolibError::LightclientNotInitialized)
-        }
-    })
+#[derive(Debug, thiserror::Error, uniffi::Error)]
+pub enum SeedError {
+    #[error("lightclient not initialized")]
+    NotInitialized,
+
+    #[error("failed to lock lightclient")]
+    LockPoisoned,
+
+    #[error("no mnemonic found (wallet loaded from key)")]
+    NoMnemonic,
+
+    #[error("failed to serialize recovery info")]
+    Serialize,
 }
 
-pub fn get_ufvk() -> Result<String, ZingolibError> {
-    with_panic_guard(|| {
-        let mut guard = LIGHTCLIENT
-            .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
-        if let Some(lightclient) = &mut *guard {
-            Ok(RT.block_on(async move {
-                let wallet = lightclient.wallet.read().await;
-                let ufvk: UnifiedFullViewingKey = match wallet
-                    .unified_key_store
-                    .get(&AccountId::ZERO)
-                    .expect("account 0 must always exist")
-                    .try_into()
-                {
-                    Ok(ufvk) => ufvk,
-                    Err(e) => return format!("Error: {e}"),
-                };
-                object! {
-                    "ufvk" => ufvk.encode(&wallet.network),
-                    "birthday" => u32::from(wallet.birthday)
-                }
-                .pretty(2)
-            }))
-        } else {
-            Err(ZingolibError::LightclientNotInitialized)
-        }
+#[derive(Debug, thiserror::Error, uniffi::Error)]
+pub enum UfvkError {
+    #[error("lightclient not initialized")]
+    NotInitialized,
+
+    #[error("failed to lock lightclient")]
+    LockPoisoned,
+
+    #[error("account 0 not found")]
+    NoAccount0,
+
+    #[error("account 0 could not be converted to UnifiedFullViewingKey")]
+    NotUfvk,
+}
+
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct UfvkInfo {
+    pub ufvk: String,
+    pub birthday: u32,
+}
+
+impl ToString for UfvkInfo {
+    fn to_string(&self) -> String {
+        self.ufvk.clone()
+    }
+}
+
+// TODO: rename "get_seed_phrase" or "get_mnemonic_phrase"
+// or if other recovery info is being used could rename "get_recovery_info" ?
+pub fn get_seed() -> Result<String, SeedError> {
+    let wallet_handle = {
+        let mut guard = LIGHTCLIENT.write().map_err(|_| SeedError::LockPoisoned)?;
+        let Some(lightclient) = &mut *guard else {
+            return Err(SeedError::NotInitialized);
+        };
+        // Get a handle we can await on without the LIGHTCLIENT lock
+        lightclient.wallet.clone()
+    };
+
+    let recovery_json = RT.block_on(async move {
+        let wallet = wallet_handle.read().await;
+        let Some(recovery_info) = wallet.recovery_info() else {
+            return Err(SeedError::NoMnemonic);
+        };
+        serde_json::to_string_pretty(&recovery_info).map_err(|_| SeedError::Serialize)
+    })?;
+
+    Ok(recovery_json)
+}
+
+pub fn get_ufvk() -> Result<UfvkInfo, UfvkError> {
+    let wallet_handle = {
+        let mut guard = LIGHTCLIENT.write().map_err(|_| UfvkError::LockPoisoned)?;
+        let Some(lightclient) = &mut *guard else {
+            return Err(UfvkError::NotInitialized);
+        };
+        lightclient.wallet.clone()
+    };
+
+    RT.block_on(async move {
+        let wallet = wallet_handle.read().await;
+
+        // Avoid `expect("account 0 must always exist")`
+        let Some(k) = wallet.unified_key_store.get(&AccountId::ZERO) else {
+            return Err(UfvkError::NoAccount0);
+        };
+
+        let ufvk: UnifiedFullViewingKey = k.try_into().map_err(|_| UfvkError::NotUfvk)?;
+
+        Ok(UfvkInfo {
+            ufvk: ufvk.encode(&wallet.network),
+            birthday: u32::from(wallet.birthday),
+        })
     })
 }
 
