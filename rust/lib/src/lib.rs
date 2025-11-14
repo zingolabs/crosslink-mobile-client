@@ -11,6 +11,7 @@ use log::Level;
 
 use std::any::Any;
 use std::backtrace::Backtrace;
+use std::collections::VecDeque;
 use std::num::NonZeroU32;
 use std::panic::{self, PanicHookInfo};
 use std::str::FromStr;
@@ -53,19 +54,27 @@ use zingolib::wallet::keys::{
 };
 use zingolib::wallet::{LightWallet, WalletBase, WalletSettings};
 
+const MAX_PANIC_HISTORY: usize = 16;
+
+pub trait FromPanic {
+    fn from_panic(msg: String) -> Self;
+}
+
 #[derive(uniffi::Error, Debug, thiserror::Error)]
 pub enum ZingolibError {
     #[error("Error: Lightclient is not initialized")]
     LightclientNotInitialized,
+
     #[error("Error: Lightclient lock poisoned")]
     LightclientLockPoisoned,
-    #[error("Panic")]
-    Panic,
+
+    #[error("panic: {0}")]
+    Panic(String),
 }
 
 impl FromPanic for ZingolibError {
-    fn from_panic(_msg: String) -> Self {
-        ZingolibError::Panic
+    fn from_panic(msg: String) -> Self {
+        ZingolibError::Panic(msg)
     }
 }
 
@@ -104,13 +113,13 @@ pub enum InitError {
     #[error("mnemonic parsing failed")]
     Mnemonic,
 
-    #[error("panic")]
-    Panic,
+    #[error("{0}")]
+    Panic(String),
 }
 
 impl FromPanic for InitError {
-    fn from_panic(_msg: String) -> Self {
-        InitError::Panic
+    fn from_panic(msg: String) -> Self {
+        InitError::Panic(msg)
     }
 }
 
@@ -150,10 +159,6 @@ pub enum InitResultKind {
     Ufvk,
 }
 
-pub trait FromPanic {
-    fn from_panic(msg: String) -> Self;
-}
-
 pub fn with_panic_guard<T, E, F>(f: F) -> Result<T, E>
 where
     F: FnOnce() -> Result<T, E> + std::panic::UnwindSafe,
@@ -168,8 +173,7 @@ where
 
 #[uniffi::export]
 pub fn last_panic_message() -> String {
-    // summarize what you saved in `LAST_PANIC`
-    take_last_panic().msg
+    last_panic().map(|p| p.msg).unwrap_or_default()
 }
 
 #[derive(Clone, Default)]
@@ -181,22 +185,35 @@ struct PanicReport {
     backtrace: Option<String>,
 }
 
-static LAST_PANIC: Lazy<Mutex<PanicReport>> = Lazy::new(|| Mutex::new(PanicReport::default()));
+static LAST_PANICS: Lazy<Mutex<VecDeque<PanicReport>>> =
+    Lazy::new(|| Mutex::new(VecDeque::with_capacity(MAX_PANIC_HISTORY)));
 
-fn set_last_panic(report: PanicReport) {
-    if let Ok(mut r) = LAST_PANIC.lock() {
-        *r = report;
+fn push_panic(report: PanicReport) {
+    if let Ok(mut q) = LAST_PANICS.lock() {
+        if q.len() == MAX_PANIC_HISTORY {
+            q.pop_front();
+        }
+        q.push_back(report);
     }
 }
 
-fn take_last_panic() -> PanicReport {
-    if let Ok(mut r) = LAST_PANIC.lock() {
-        let out = r.clone();
-        *r = PanicReport::default();
-        out
-    } else {
-        PanicReport::default()
-    }
+fn last_panic() -> Option<PanicReport> {
+    LAST_PANICS.lock().ok().and_then(|q| q.back().cloned())
+}
+
+fn recent_panics(limit: usize) -> Vec<PanicReport> {
+    LAST_PANICS
+        .lock()
+        .map(|q| q.iter().rev().take(limit).cloned().collect())
+        .unwrap_or_default()
+}
+
+#[uniffi::export]
+pub fn recent_panic_messages(limit: u32) -> Vec<String> {
+    recent_panics(limit as usize)
+        .into_iter()
+        .map(|r| r.msg)
+        .collect()
 }
 
 static PANIC_HOOK_ONCE: Once = Once::new();
@@ -219,7 +236,7 @@ fn install_panic_hook_once() {
 
             let bt = Backtrace::force_capture().to_string();
 
-            set_last_panic(PanicReport {
+            push_panic(PanicReport {
                 msg: payload,
                 file,
                 line,
@@ -252,8 +269,6 @@ fn clean_backtrace(bt_raw: &str) -> String {
 }
 
 fn format_panic_text(payload: Box<dyn Any + Send>) -> String {
-    let rpt = take_last_panic();
-
     let fallback = if let Some(s) = payload.downcast_ref::<&str>() {
         (*s).to_string()
     } else if let Some(s) = payload.downcast_ref::<String>() {
@@ -262,11 +277,20 @@ fn format_panic_text(payload: Box<dyn Any + Send>) -> String {
         "unknown panic payload".to_string()
     };
 
+    let rpt = last_panic().unwrap_or_else(|| PanicReport {
+        msg: fallback.clone(),
+        file: None,
+        line: None,
+        col: None,
+        backtrace: None,
+    });
+
     let mut out = String::new();
 
     if let (Some(f), Some(l), Some(c)) = (rpt.file.as_ref(), rpt.line, rpt.col) {
         out.push_str(&format!("{f}:{l}:{c}: "));
     }
+
     if !rpt.msg.is_empty() {
         out.push_str(&rpt.msg);
     } else {
@@ -1797,4 +1821,262 @@ pub fn confirm() -> Result<String, ZingolibError> {
             Err(ZingolibError::LightclientNotInitialized)
         }
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::panic;
+
+    fn drain_last_panic() {
+        if let Ok(mut q) = LAST_PANICS.lock() {
+            q.clear();
+        }
+    }
+
+    #[test]
+    fn set_and_take_last_panic_roundtrip() {
+        drain_last_panic();
+
+        let report = PanicReport {
+            msg: "test message".to_string(),
+            file: Some("src/lib.rs".to_string()),
+            line: Some(42),
+            col: Some(7),
+            backtrace: Some("frame1\nframe2".to_string()),
+        };
+
+        push_panic(report.clone());
+
+        let panics = recent_panics(2);
+
+        let first_panic = panics.get(0).unwrap();
+
+        // Second read returns empty
+        let second_panic = panics.get(1);
+        assert!(second_panic.is_none());
+
+        // First read returns what we stored
+        assert_eq!(first_panic.msg, report.msg);
+        assert_eq!(first_panic.file, report.file);
+        assert_eq!(first_panic.line, report.line);
+        assert_eq!(first_panic.col, report.col);
+        assert_eq!(first_panic.backtrace.is_some(), report.backtrace.is_some());
+    }
+
+    #[test]
+    fn clean_backtrace_filters_unknown_and_blank_lines() {
+        let input = "frame1\n<unknown> something\n\n frame2\n";
+        let cleaned = clean_backtrace(input);
+
+        assert_eq!(cleaned, "frame1\n frame2\n");
+        assert!(!cleaned.contains("<unknown>"));
+        assert!(!cleaned.contains("something"));
+    }
+
+    #[test]
+    fn format_panic_text_uses_fallback_when_no_report() {
+        drain_last_panic();
+
+        let payload: Box<dyn Any + Send> = Box::new(String::from("fallback payload"));
+        let text = format_panic_text(payload);
+
+        // With no PanicReport stored, it should fall back to the payload string.
+        assert!(
+            text.contains("fallback payload"),
+            "panic text did not contain fallback payload: {text}"
+        );
+
+        // LAST_PANIC should be empty (it was already empty).
+        let msg = last_panic_message();
+        assert_eq!(msg, "");
+    }
+
+    #[test]
+    fn format_panic_text_prefers_report_over_payload_and_keeps_it() {
+        drain_last_panic();
+
+        let bt = "frame1\n<unknown> ignore me\nframe2\n";
+        let report = PanicReport {
+            msg: "stored panic message".to_string(),
+            file: Some("src/lib.rs".to_string()),
+            line: Some(12),
+            col: Some(34),
+            backtrace: Some(bt.to_string()),
+        };
+        push_panic(report);
+
+        let payload: Box<dyn Any + Send> = Box::new(String::from("payload should be ignored"));
+        let text = format_panic_text(payload);
+
+        assert!(
+            text.contains("stored panic message"),
+            "formatted text did not contain stored panic message: {text}"
+        );
+        assert!(
+            text.contains("src/lib.rs:12:34:"),
+            "formatted text did not contain file/line/col: {text}"
+        );
+
+        assert!(text.contains("frame1"));
+        assert!(text.contains("frame2"));
+        assert!(
+            !text.contains("<unknown>"),
+            "formatted text should have had cleaned backtrace: {text}"
+        );
+
+        assert!(
+            !text.contains("payload should be ignored"),
+            "format_panic_text unexpectedly used fallback payload: {text}"
+        );
+
+        // PanicReport should remain in the history
+        let after = last_panic_message();
+        assert_eq!(
+            after, "stored panic message",
+            "last_panic_message should still return the stored panic, since we keep a history now"
+        );
+    }
+
+    #[test]
+    fn with_panic_guard_propagates_ok_and_does_not_touch_last_panic() {
+        drain_last_panic();
+
+        let result: Result<i32, ZingolibError> = with_panic_guard(|| Ok(123));
+        assert_eq!(result.unwrap(), 123);
+
+        // No panic
+        let msg = last_panic_message();
+        assert_eq!(msg, "");
+    }
+
+    #[test]
+    fn with_panic_guard_propagates_err_without_using_from_panic() {
+        drain_last_panic();
+
+        let result: Result<(), ZingolibError> =
+            with_panic_guard(|| Err(ZingolibError::LightclientNotInitialized));
+
+        match result {
+            Err(ZingolibError::LightclientNotInitialized) => {}
+            other => panic!("Expected LightclientNotInitialized, got {other:?}"),
+        }
+
+        let msg = last_panic_message();
+        assert_eq!(msg, "");
+    }
+
+    #[test]
+    fn with_panic_guard_converts_panic_to_zingoliberror_panic_with_message() {
+        drain_last_panic();
+
+        let result: Result<(), ZingolibError> = with_panic_guard(|| {
+            panic!("zingolib_error test panic");
+        });
+
+        match result {
+            Err(ZingolibError::Panic(msg)) => {
+                assert!(
+                    msg.contains("zingolib_error test panic"),
+                    "panic message did not contain original payload: {msg}"
+                );
+            }
+            other => panic!("Expected ZingolibError::Panic, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn with_panic_guard_converts_panic_to_initerror_panic() {
+        // Make sure we start from a clean slate
+        drain_last_panic();
+
+        let result: Result<(), InitError> = with_panic_guard(|| {
+            panic!("init panic payload");
+        });
+
+        // Must be the [`InitError::Panic`] variant
+        let err = match result {
+            Err(e @ InitError::Panic(_)) => e,
+            other => panic!("expected InitError::Panic, got {other:?}"),
+        };
+
+        // This is the raw payload captured by the panic hook
+        let lp = last_panic_message();
+        assert_eq!(lp, "init panic payload");
+
+        // This is the fully formatted panic text file:line:col + payload + backtrace
+        let formatted = err.to_string();
+
+        // Should contain the raw payload
+        assert!(
+            formatted.contains(&lp),
+            "formatted error does not contain payload: {formatted:?}",
+        );
+
+        // Should contain a backtrace header, proving format_panic_text was used
+        assert!(
+            formatted.contains("Backtrace:"),
+            "formatted error does not contain a backtrace: {formatted:?}",
+        );
+    }
+
+    #[test]
+    fn with_panic_guard_converts_panic_to_configerror_panic() {
+        drain_last_panic();
+
+        let result: Result<(), ConfigError> = with_panic_guard(|| {
+            panic!("config panic payload");
+        });
+
+        assert!(matches!(result, Err(ConfigError::Panic)));
+    }
+
+    #[test]
+    fn with_panic_guard_converts_panic_to_seederror_panic() {
+        drain_last_panic();
+
+        let result: Result<(), SeedError> = with_panic_guard(|| {
+            panic!("seed panic payload");
+        });
+
+        assert!(matches!(result, Err(SeedError::Panic)));
+    }
+
+    #[test]
+    fn with_panic_guard_converts_panic_to_ufvkerror_panic() {
+        drain_last_panic();
+
+        let result: Result<(), UfvkError> = with_panic_guard(|| {
+            panic!("ufvk panic payload");
+        });
+
+        assert!(matches!(result, Err(UfvkError::Panic)));
+    }
+
+    #[test]
+    fn last_panic_message_returns_message_from_raw_panic_when_guard_is_not_used() {
+        drain_last_panic();
+
+        install_panic_hook_once();
+
+        let res = panic::catch_unwind(|| {
+            panic!("raw panic for last_panic_message");
+        });
+        assert!(res.is_err());
+
+        let msg = last_panic_message();
+        assert!(
+            msg.contains("raw panic for last_panic_message"),
+            "last_panic_message did not contain original panic payload: {msg}"
+        );
+    }
+
+    #[test]
+    fn check_b64_reports_true_for_valid_and_false_for_invalid_data() {
+        let encoded = base64::engine::general_purpose::STANDARD.encode(b"hello world");
+        assert_eq!(check_b64(encoded), "true");
+
+        let invalid = "not base64!!";
+        assert_eq!(check_b64(invalid.to_string()), "false");
+    }
 }
