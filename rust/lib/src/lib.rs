@@ -12,7 +12,7 @@ use log::Level;
 use std::any::Any;
 use std::backtrace::Backtrace;
 use std::num::NonZeroU32;
-use std::panic::{self, PanicHookInfo, UnwindSafe};
+use std::panic::{self, PanicHookInfo};
 use std::str::FromStr;
 use std::sync::Mutex;
 use std::sync::Once;
@@ -53,14 +53,20 @@ use zingolib::wallet::keys::{
 };
 use zingolib::wallet::{LightWallet, WalletBase, WalletSettings};
 
-#[derive(uniffi::Enum, Debug, thiserror::Error)]
+#[derive(uniffi::Error, Debug, thiserror::Error)]
 pub enum ZingolibError {
     #[error("Error: Lightclient is not initialized")]
     LightclientNotInitialized,
     #[error("Error: Lightclient lock poisoned")]
     LightclientLockPoisoned,
-    #[error("Error: panic: {0}")]
-    Panic(String),
+    #[error("Panic")]
+    Panic,
+}
+
+impl FromPanic for ZingolibError {
+    fn from_panic(_msg: String) -> Self {
+        ZingolibError::Panic
+    }
 }
 
 #[derive(Debug, thiserror::Error, uniffi::Error)]
@@ -97,6 +103,15 @@ pub enum InitError {
 
     #[error("mnemonic parsing failed")]
     Mnemonic,
+
+    #[error("panic")]
+    Panic,
+}
+
+impl FromPanic for InitError {
+    fn from_panic(_msg: String) -> Self {
+        InitError::Panic
+    }
 }
 
 #[derive(Debug, thiserror::Error, uniffi::Error)]
@@ -112,6 +127,15 @@ pub enum ConfigError {
 
     #[error("loading client config failed")]
     Load,
+
+    #[error("panic")]
+    Panic,
+}
+
+impl FromPanic for ConfigError {
+    fn from_panic(_msg: String) -> Self {
+        ConfigError::Panic
+    }
 }
 
 #[derive(Debug, Clone, uniffi::Record)]
@@ -126,15 +150,26 @@ pub enum InitResultKind {
     Ufvk,
 }
 
-pub fn with_panic_guard<T, F>(f: F) -> Result<T, ZingolibError>
+pub trait FromPanic {
+    fn from_panic(msg: String) -> Self;
+}
+
+pub fn with_panic_guard<T, E, F>(f: F) -> Result<T, E>
 where
-    F: FnOnce() -> Result<T, ZingolibError> + UnwindSafe,
+    F: FnOnce() -> Result<T, E> + std::panic::UnwindSafe,
+    E: FromPanic,
 {
     install_panic_hook_once();
     match panic::catch_unwind(f) {
         Ok(res) => res,
-        Err(payload) => Err(ZingolibError::Panic(format_panic_text(payload))),
+        Err(payload) => Err(E::from_panic(format_panic_text(payload))),
     }
+}
+
+#[uniffi::export]
+pub fn last_panic_message() -> String {
+    // summarize what you saved in `LAST_PANIC`
+    take_last_panic().msg
 }
 
 #[derive(Clone, Default)]
@@ -355,37 +390,41 @@ pub fn init_new(
     performance_level: String,
     min_confirmations: u32,
 ) -> Result<InitResult, InitError> {
-    // with_panic_guard(|| {
-    reset_lightclient();
-    let (config, lightwalletd_uri) =
-        construct_uri_load_config(server_uri, chain_hint, performance_level, min_confirmations)?;
+    with_panic_guard(|| {
+        reset_lightclient();
+        let (config, lightwalletd_uri) = construct_uri_load_config(
+            server_uri,
+            chain_hint,
+            performance_level,
+            min_confirmations,
+        )?;
 
-    // Query tip height
-    let tip: u32 = RT
-        .block_on(async move {
-            zingolib::grpc_connector::get_latest_block(lightwalletd_uri)
-                .await
-                .map(|b| b.height as u32)
+        // Query tip height
+        let tip: u32 = RT
+            .block_on(async move {
+                zingolib::grpc_connector::get_latest_block(lightwalletd_uri)
+                    .await
+                    .map(|b| b.height as u32)
+            })
+            .map_err(|_| InitError::Network)?;
+
+        // Derive anchor height safely
+        let offset = 100u32;
+        let anchor = tip
+            .checked_sub(offset)
+            .ok_or(InitError::HeightUnderflow { tip, offset })?;
+        let anchor = BlockHeight::from_u32(anchor);
+
+        let lightclient =
+            LightClient::new(config, anchor, false).map_err(|_| InitError::LightClient)?;
+        let _ = store_client(lightclient);
+
+        let seed = get_seed()?;
+        Ok(InitResult {
+            kind: InitResultKind::Seed,
+            value: seed,
         })
-        .map_err(|_| InitError::Network)?;
-
-    // Derive anchor height safely
-    let offset = 100u32;
-    let anchor = tip
-        .checked_sub(offset)
-        .ok_or(InitError::HeightUnderflow { tip, offset })?;
-    let anchor = BlockHeight::from_u32(anchor);
-
-    let lightclient =
-        LightClient::new(config, anchor, false).map_err(|_| InitError::LightClient)?;
-    let _ = store_client(lightclient);
-
-    let seed = get_seed()?;
-    Ok(InitResult {
-        kind: InitResultKind::Seed,
-        value: seed,
     })
-    // })?
 }
 
 // TODO: change `seed` to `seed_phrase` or `mnemonic_phrase`
@@ -397,35 +436,39 @@ pub fn init_from_seed(
     performance_level: String,
     min_confirmations: u32,
 ) -> Result<InitResult, InitError> {
-    // with_panic_guard(|| {
-    reset_lightclient();
+    with_panic_guard(|| {
+        reset_lightclient();
 
-    let (config, _lightwalletd_uri) =
-        construct_uri_load_config(server_uri, chain_hint, performance_level, min_confirmations)?;
+        let (config, _lightwalletd_uri) = construct_uri_load_config(
+            server_uri,
+            chain_hint,
+            performance_level,
+            min_confirmations,
+        )?;
 
-    let mnemonic = Mnemonic::from_phrase(seed).map_err(|_| InitError::Mnemonic)?;
+        let mnemonic = Mnemonic::from_phrase(seed).map_err(|_| InitError::Mnemonic)?;
 
-    let wallet = LightWallet::new(
-        config.chain,
-        WalletBase::Mnemonic {
-            mnemonic,
-            no_of_accounts: config.no_of_accounts,
-        },
-        BlockHeight::from_u32(birthday),
-        config.wallet_settings.clone(),
-    )
-    .map_err(|_| InitError::WalletNew)?;
+        let wallet = LightWallet::new(
+            config.chain,
+            WalletBase::Mnemonic {
+                mnemonic,
+                no_of_accounts: config.no_of_accounts,
+            },
+            BlockHeight::from_u32(birthday),
+            config.wallet_settings.clone(),
+        )
+        .map_err(|_| InitError::WalletNew)?;
 
-    let lightclient = LightClient::create_from_wallet(wallet, config, false)
-        .map_err(|_| InitError::LightClient)?;
-    let _ = store_client(lightclient);
+        let lightclient = LightClient::create_from_wallet(wallet, config, false)
+            .map_err(|_| InitError::LightClient)?;
+        let _ = store_client(lightclient);
 
-    let seed = get_seed()?;
-    Ok(InitResult {
-        kind: InitResultKind::Seed,
-        value: seed,
+        let seed = get_seed()?;
+        Ok(InitResult {
+            kind: InitResultKind::Seed,
+            value: seed,
+        })
     })
-    // })
 }
 
 pub fn init_from_ufvk(
@@ -436,29 +479,33 @@ pub fn init_from_ufvk(
     performance_level: String,
     min_confirmations: u32,
 ) -> Result<InitResult, InitError> {
-    // with_panic_guard(|| {
-    reset_lightclient();
-    let (config, _lightwalletd_uri) =
-        construct_uri_load_config(server_uri, chain_hint, performance_level, min_confirmations)?;
+    with_panic_guard(|| {
+        reset_lightclient();
+        let (config, _lightwalletd_uri) = construct_uri_load_config(
+            server_uri,
+            chain_hint,
+            performance_level,
+            min_confirmations,
+        )?;
 
-    let wallet = LightWallet::new(
-        config.chain,
-        WalletBase::Ufvk(ufvk),
-        BlockHeight::from_u32(birthday),
-        config.wallet_settings.clone(),
-    )
-    .map_err(|_| InitError::WalletNew)?;
+        let wallet = LightWallet::new(
+            config.chain,
+            WalletBase::Ufvk(ufvk),
+            BlockHeight::from_u32(birthday),
+            config.wallet_settings.clone(),
+        )
+        .map_err(|_| InitError::WalletNew)?;
 
-    let lightclient = LightClient::create_from_wallet(wallet, config, false)
-        .map_err(|_| InitError::LightClient)?;
-    let _ = store_client(lightclient);
+        let lightclient = LightClient::create_from_wallet(wallet, config, false)
+            .map_err(|_| InitError::LightClient)?;
+        let _ = store_client(lightclient);
 
-    let seed = get_ufvk()?;
-    Ok(InitResult {
-        kind: InitResultKind::Ufvk,
-        value: seed.ufvk,
+        let seed = get_ufvk()?;
+        Ok(InitResult {
+            kind: InitResultKind::Ufvk,
+            value: seed.ufvk,
+        })
     })
-    // })
 }
 
 #[uniffi::export]
@@ -469,38 +516,41 @@ pub fn init_from_b64(
     performance_level: String,
     min_confirmations: u32,
 ) -> Result<InitResult, InitError> {
-    // with_panic_guard(|| {
-    reset_lightclient();
-    let (config, _lightwalletd_uri) =
-        construct_uri_load_config(server_uri, chain_hint, performance_level, min_confirmations)?;
+    with_panic_guard(|| {
+        reset_lightclient();
+        let (config, _lightwalletd_uri) = construct_uri_load_config(
+            server_uri,
+            chain_hint,
+            performance_level,
+            min_confirmations,
+        )?;
 
-    let decoded_bytes = base64::engine::general_purpose::STANDARD
-        .decode(&base64_data)
-        .map_err(|_| InitError::Base64Decode)?;
+        let decoded_bytes = base64::engine::general_purpose::STANDARD
+            .decode(&base64_data)
+            .map_err(|_| InitError::Base64Decode)?;
 
-    let wallet =
-        LightWallet::read(&decoded_bytes[..], config.chain).map_err(|_| InitError::WalletRead)?;
+        let wallet = LightWallet::read(&decoded_bytes[..], config.chain)
+            .map_err(|_| InitError::WalletRead)?;
 
-    let has_seed = wallet.mnemonic().is_some();
+        let has_seed = wallet.mnemonic().is_some();
 
-    let lightclient = LightClient::create_from_wallet(wallet, config, false)
-        .map_err(|_| InitError::LightClient)?;
+        let lightclient = LightClient::create_from_wallet(wallet, config, false)
+            .map_err(|_| InitError::LightClient)?;
 
-    let _ = store_client(lightclient);
+        let _ = store_client(lightclient);
 
-    if has_seed {
-        Ok(InitResult {
-            kind: InitResultKind::Seed,
-            value: get_seed()?,
-        })
-    } else {
-        Ok(InitResult {
-            kind: InitResultKind::Ufvk,
-            value: get_ufvk()?.to_string(),
-        })
-    }
-    // })
-    // .map(ZingolibError::from)?
+        if has_seed {
+            Ok(InitResult {
+                kind: InitResultKind::Seed,
+                value: get_seed()?,
+            })
+        } else {
+            Ok(InitResult {
+                kind: InitResultKind::Ufvk,
+                value: get_ufvk()?.to_string(),
+            })
+        }
+    })
 }
 
 pub fn save_to_b64() -> Result<String, ZingolibError> {
@@ -735,6 +785,15 @@ pub enum SeedError {
 
     #[error("failed to serialize recovery info")]
     Serialize,
+
+    #[error("panic")]
+    Panic,
+}
+
+impl FromPanic for SeedError {
+    fn from_panic(_msg: String) -> Self {
+        SeedError::Panic
+    }
 }
 
 #[derive(Debug, thiserror::Error, uniffi::Error)]
@@ -750,6 +809,15 @@ pub enum UfvkError {
 
     #[error("account 0 could not be converted to UnifiedFullViewingKey")]
     NotUfvk,
+
+    #[error("panic")]
+    Panic,
+}
+
+impl FromPanic for UfvkError {
+    fn from_panic(_msg: String) -> Self {
+        UfvkError::Panic
+    }
 }
 
 #[derive(Debug, Clone, uniffi::Record)]
@@ -767,48 +835,52 @@ impl ToString for UfvkInfo {
 // TODO: rename "get_seed_phrase" or "get_mnemonic_phrase"
 // or if other recovery info is being used could rename "get_recovery_info" ?
 pub fn get_seed() -> Result<String, SeedError> {
-    let wallet_handle = {
-        let mut guard = LIGHTCLIENT.write().map_err(|_| SeedError::LockPoisoned)?;
-        let Some(lightclient) = &mut *guard else {
-            return Err(SeedError::NotInitialized);
+    with_panic_guard(|| {
+        let wallet_handle = {
+            let mut guard = LIGHTCLIENT.write().map_err(|_| SeedError::LockPoisoned)?;
+            let Some(lightclient) = &mut *guard else {
+                return Err(SeedError::NotInitialized);
+            };
+            // Get a handle we can await on without the LIGHTCLIENT lock
+            lightclient.wallet.clone()
         };
-        // Get a handle we can await on without the LIGHTCLIENT lock
-        lightclient.wallet.clone()
-    };
 
-    let recovery_json = RT.block_on(async move {
-        let wallet = wallet_handle.read().await;
-        let Some(recovery_info) = wallet.recovery_info() else {
-            return Err(SeedError::NoMnemonic);
-        };
-        serde_json::to_string_pretty(&recovery_info).map_err(|_| SeedError::Serialize)
-    })?;
+        let recovery_json = RT.block_on(async move {
+            let wallet = wallet_handle.read().await;
+            let Some(recovery_info) = wallet.recovery_info() else {
+                return Err(SeedError::NoMnemonic);
+            };
+            serde_json::to_string_pretty(&recovery_info).map_err(|_| SeedError::Serialize)
+        })?;
 
-    Ok(recovery_json)
+        Ok(recovery_json)
+    })
 }
 
 pub fn get_ufvk() -> Result<UfvkInfo, UfvkError> {
-    let wallet_handle = {
-        let mut guard = LIGHTCLIENT.write().map_err(|_| UfvkError::LockPoisoned)?;
-        let Some(lightclient) = &mut *guard else {
-            return Err(UfvkError::NotInitialized);
-        };
-        lightclient.wallet.clone()
-    };
-
-    RT.block_on(async move {
-        let wallet = wallet_handle.read().await;
-
-        // Avoid `expect("account 0 must always exist")`
-        let Some(k) = wallet.unified_key_store.get(&AccountId::ZERO) else {
-            return Err(UfvkError::NoAccount0);
+    with_panic_guard(|| {
+        let wallet_handle = {
+            let mut guard = LIGHTCLIENT.write().map_err(|_| UfvkError::LockPoisoned)?;
+            let Some(lightclient) = &mut *guard else {
+                return Err(UfvkError::NotInitialized);
+            };
+            lightclient.wallet.clone()
         };
 
-        let ufvk: UnifiedFullViewingKey = k.try_into().map_err(|_| UfvkError::NotUfvk)?;
+        RT.block_on(async move {
+            let wallet = wallet_handle.read().await;
 
-        Ok(UfvkInfo {
-            ufvk: ufvk.encode(&wallet.network),
-            birthday: u32::from(wallet.birthday),
+            // Avoid `expect("account 0 must always exist")`
+            let Some(k) = wallet.unified_key_store.get(&AccountId::ZERO) else {
+                return Err(UfvkError::NoAccount0);
+            };
+
+            let ufvk: UnifiedFullViewingKey = k.try_into().map_err(|_| UfvkError::NotUfvk)?;
+
+            Ok(UfvkInfo {
+                ufvk: ufvk.encode(&wallet.network),
+                birthday: u32::from(wallet.birthday),
+            })
         })
     })
 }
