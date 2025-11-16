@@ -1,5 +1,8 @@
 uniffi::setup_scaffolding!();
 
+pub mod error;
+pub mod panic_handler;
+
 #[macro_use]
 extern crate lazy_static;
 extern crate android_logger;
@@ -9,21 +12,14 @@ use android_logger::{Config, FilterBuilder};
 #[cfg(target_os = "android")]
 use log::Level;
 
-use std::any::Any;
-use std::backtrace::Backtrace;
-use std::collections::VecDeque;
 use std::num::NonZeroU32;
-use std::panic::{self, PanicHookInfo};
 use std::str::FromStr;
-use std::sync::Mutex;
-use std::sync::Once;
 use std::sync::RwLock;
 
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
 use bip0039::Mnemonic;
 use json::object;
-use once_cell::sync::Lazy;
 use rustls::crypto::{CryptoProvider, ring::default_provider};
 
 use zcash_address::unified::{Container, Encoding, Ufvk};
@@ -54,98 +50,8 @@ use zingolib::wallet::keys::{
 };
 use zingolib::wallet::{LightWallet, WalletBase, WalletSettings};
 
-const MAX_PANIC_HISTORY: usize = 16;
-
-pub trait FromPanic {
-    fn from_panic(msg: String) -> Self;
-}
-
-#[derive(uniffi::Error, Debug, thiserror::Error)]
-pub enum ZingolibError {
-    #[error("Error: Lightclient is not initialized")]
-    LightclientNotInitialized,
-
-    #[error("Error: Lightclient lock poisoned")]
-    LightclientLockPoisoned,
-
-    #[error("panic: {0}")]
-    Panic(String),
-}
-
-impl FromPanic for ZingolibError {
-    fn from_panic(msg: String) -> Self {
-        ZingolibError::Panic(msg)
-    }
-}
-
-#[derive(Debug, thiserror::Error, uniffi::Error)]
-pub enum InitError {
-    #[error("invalid input: {0}")]
-    InvalidInput(String),
-
-    #[error("base64 decode failed")]
-    Base64Decode,
-
-    #[error("config error")]
-    Config(#[from] ConfigError),
-
-    #[error("wallet read failed")]
-    WalletRead,
-
-    #[error("lightwalletd query failed")]
-    Network,
-
-    #[error("anchor height underflow (tip {tip}, offset {offset})")]
-    HeightUnderflow { tip: u32, offset: u32 },
-
-    #[error("lightclient creation failed")]
-    LightClient,
-
-    #[error("wallet creation failed")]
-    WalletNew,
-
-    #[error("seed error")]
-    Seed(#[from] SeedError),
-
-    #[error("ufvk error")]
-    Ufvk(#[from] UfvkError),
-
-    #[error("mnemonic parsing failed")]
-    Mnemonic,
-
-    #[error("{0}")]
-    Panic(String),
-}
-
-impl FromPanic for InitError {
-    fn from_panic(msg: String) -> Self {
-        InitError::Panic(msg)
-    }
-}
-
-#[derive(Debug, thiserror::Error, uniffi::Error)]
-pub enum ConfigError {
-    #[error("invalid chain hint: {0}")]
-    InvalidChainHint(String),
-
-    #[error("invalid performance level: {0}")]
-    InvalidPerformanceLevel(String),
-
-    #[error("invalid min_confirmations: {0}")]
-    InvalidMinConfirmations(String),
-
-    #[error("loading client config failed")]
-    Load,
-
-    #[error("panic")]
-    Panic,
-}
-
-impl FromPanic for ConfigError {
-    fn from_panic(_msg: String) -> Self {
-        ConfigError::Panic
-    }
-}
+use crate::error::{ConfigError, InitError, SeedError, UfvkError, ZingolibError};
+use crate::panic_handler::with_panic_guard;
 
 #[derive(Debug, Clone, uniffi::Record)]
 pub struct InitResult {
@@ -157,155 +63,6 @@ pub struct InitResult {
 pub enum InitResultKind {
     Seed,
     Ufvk,
-}
-
-pub fn with_panic_guard<T, E, F>(f: F) -> Result<T, E>
-where
-    F: FnOnce() -> Result<T, E> + std::panic::UnwindSafe,
-    E: FromPanic,
-{
-    install_panic_hook_once();
-    match panic::catch_unwind(f) {
-        Ok(res) => res,
-        Err(payload) => Err(E::from_panic(format_panic_text(payload))),
-    }
-}
-
-#[uniffi::export]
-pub fn last_panic_message() -> String {
-    last_panic().map(|p| p.msg).unwrap_or_default()
-}
-
-#[derive(Clone, Default)]
-struct PanicReport {
-    msg: String,
-    file: Option<String>,
-    line: Option<u32>,
-    col: Option<u32>,
-    backtrace: Option<String>,
-}
-
-static LAST_PANICS: Lazy<Mutex<VecDeque<PanicReport>>> =
-    Lazy::new(|| Mutex::new(VecDeque::with_capacity(MAX_PANIC_HISTORY)));
-
-fn push_panic(report: PanicReport) {
-    if let Ok(mut q) = LAST_PANICS.lock() {
-        if q.len() == MAX_PANIC_HISTORY {
-            q.pop_front();
-        }
-        q.push_back(report);
-    }
-}
-
-fn last_panic() -> Option<PanicReport> {
-    LAST_PANICS.lock().ok().and_then(|q| q.back().cloned())
-}
-
-fn recent_panics(limit: usize) -> Vec<PanicReport> {
-    LAST_PANICS
-        .lock()
-        .map(|q| q.iter().rev().take(limit).cloned().collect())
-        .unwrap_or_default()
-}
-
-#[uniffi::export]
-pub fn recent_panic_messages(limit: u32) -> Vec<String> {
-    recent_panics(limit as usize)
-        .into_iter()
-        .map(|r| r.msg)
-        .collect()
-}
-
-static PANIC_HOOK_ONCE: Once = Once::new();
-
-fn install_panic_hook_once() {
-    PANIC_HOOK_ONCE.call_once(|| {
-        panic::set_hook(Box::new(|info: &PanicHookInfo<'_>| {
-            let payload = if let Some(s) = info.payload().downcast_ref::<&str>() {
-                (*s).to_string()
-            } else if let Some(s) = info.payload().downcast_ref::<String>() {
-                s.clone()
-            } else {
-                info.to_string()
-            };
-
-            let (file, line, col) = info
-                .location()
-                .map(|l| (Some(l.file().to_string()), Some(l.line()), Some(l.column())))
-                .unwrap_or((None, None, None));
-
-            let bt = Backtrace::force_capture().to_string();
-
-            push_panic(PanicReport {
-                msg: payload,
-                file,
-                line,
-                col,
-                backtrace: Some(bt),
-            });
-        }));
-    });
-}
-
-fn clean_backtrace(bt_raw: &str) -> String {
-    const DROP: &[&str] = &["<unknown>"];
-
-    let mut out = String::new();
-
-    for line in bt_raw.lines() {
-        let l = line.trim();
-        if l.is_empty() {
-            continue;
-        }
-        if DROP.iter().any(|d| l.contains(d)) {
-            continue;
-        }
-
-        out.push_str(line);
-        out.push('\n');
-    }
-
-    out
-}
-
-fn format_panic_text(payload: Box<dyn Any + Send>) -> String {
-    let fallback = if let Some(s) = payload.downcast_ref::<&str>() {
-        (*s).to_string()
-    } else if let Some(s) = payload.downcast_ref::<String>() {
-        s.clone()
-    } else {
-        "unknown panic payload".to_string()
-    };
-
-    let rpt = last_panic().unwrap_or_else(|| PanicReport {
-        msg: fallback.clone(),
-        file: None,
-        line: None,
-        col: None,
-        backtrace: None,
-    });
-
-    let mut out = String::new();
-
-    if let (Some(f), Some(l), Some(c)) = (rpt.file.as_ref(), rpt.line, rpt.col) {
-        out.push_str(&format!("{f}:{l}:{c}: "));
-    }
-
-    if !rpt.msg.is_empty() {
-        out.push_str(&rpt.msg);
-    } else {
-        out.push_str(&fallback);
-    }
-
-    if let Some(bt) = rpt.backtrace {
-        let cleaned = clean_backtrace(&bt);
-        if !cleaned.is_empty() {
-            out.push_str("\nBacktrace:\n");
-            out.push_str(&cleaned);
-        }
-    }
-
-    out
 }
 
 // We'll use a RwLock to store a global lightclient instance,
@@ -706,7 +463,7 @@ pub fn poll_sync() -> Result<String, ZingolibError> {
 }
 
 #[uniffi::export]
-fn run_sync() -> Result<String, ZingolibError> {
+pub fn run_sync() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
@@ -746,7 +503,7 @@ pub fn pause_sync() -> Result<String, ZingolibError> {
 }
 
 #[uniffi::export]
-fn status_sync() -> Result<String, ZingolibError> {
+pub fn status_sync() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
@@ -794,54 +551,6 @@ pub fn info_server() -> Result<String, ZingolibError> {
             Err(ZingolibError::LightclientNotInitialized)
         }
     })
-}
-
-#[derive(Debug, thiserror::Error, uniffi::Error)]
-pub enum SeedError {
-    #[error("lightclient not initialized")]
-    NotInitialized,
-
-    #[error("failed to lock lightclient")]
-    LockPoisoned,
-
-    #[error("no mnemonic found (wallet loaded from key)")]
-    NoMnemonic,
-
-    #[error("failed to serialize recovery info")]
-    Serialize,
-
-    #[error("panic")]
-    Panic,
-}
-
-impl FromPanic for SeedError {
-    fn from_panic(_msg: String) -> Self {
-        SeedError::Panic
-    }
-}
-
-#[derive(Debug, thiserror::Error, uniffi::Error)]
-pub enum UfvkError {
-    #[error("lightclient not initialized")]
-    NotInitialized,
-
-    #[error("failed to lock lightclient")]
-    LockPoisoned,
-
-    #[error("account 0 not found")]
-    NoAccount0,
-
-    #[error("account 0 could not be converted to UnifiedFullViewingKey")]
-    NotUfvk,
-
-    #[error("panic")]
-    Panic,
-}
-
-impl FromPanic for UfvkError {
-    fn from_panic(_msg: String) -> Self {
-        UfvkError::Panic
-    }
 }
 
 #[derive(Debug, Clone, uniffi::Record)]
@@ -1825,6 +1534,12 @@ pub fn confirm() -> Result<String, ZingolibError> {
 
 #[cfg(test)]
 mod tests {
+    use crate::panic_handler::{
+        LAST_PANICS, PanicReport, clean_backtrace, format_panic_text, install_panic_hook_once,
+        last_panic_message, push_panic, recent_panics,
+    };
+    use std::any::Any;
+
     use super::*;
     use std::panic;
 
