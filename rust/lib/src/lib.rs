@@ -8,11 +8,6 @@ pub mod panic_handler;
 extern crate lazy_static;
 extern crate android_logger;
 
-#[cfg(target_os = "android")]
-use android_logger::{Config, FilterBuilder};
-#[cfg(target_os = "android")]
-use log::Level;
-
 #[cfg(test)]
 mod tests {
     use base64::Engine;

@@ -1,5 +1,10 @@
 use std::num::NonZeroU32;
 
+#[cfg(target_os = "android")]
+use android_logger::{Config, FilterBuilder};
+#[cfg(target_os = "android")]
+use log::Level;
+
 use pepper_sync::config::PerformanceLevel;
 use zingo_common_components::protocol::activation_heights::for_test::all_height_one_nus;
 use zingolib::{
