@@ -95,6 +95,7 @@ pub(crate) fn construct_uri_load_config(
     Ok((config, lightwalletd_uri))
 }
 
+#[uniffi::export]
 pub fn init_logging() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         // this is only for Android

@@ -59,6 +59,7 @@ lazy_static! {
     pub static ref RT: Runtime = tokio::runtime::Runtime::new().unwrap();
 }
 
+#[uniffi::export]
 pub fn init_new(
     server_uri: String,
     chain_hint: String,
@@ -103,6 +104,7 @@ pub fn init_new(
 }
 
 // TODO: change `seed` to `seed_phrase` or `mnemonic_phrase`
+#[uniffi::export]
 pub fn init_from_seed(
     seed: String,
     birthday: u32,
@@ -146,6 +148,7 @@ pub fn init_from_seed(
     })
 }
 
+#[uniffi::export]
 pub fn init_from_ufvk(
     ufvk: String,
     birthday: u32,
@@ -228,6 +231,7 @@ pub fn init_from_b64(
     })
 }
 
+#[uniffi::export]
 pub fn save_to_b64() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         // Return the wallet as a base64 encoded string
@@ -252,6 +256,7 @@ pub fn save_to_b64() -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn check_b64(base64_data: String) -> String {
     match STANDARD.decode(&base64_data) {
         Ok(_) => "true".to_string(),
@@ -259,14 +264,17 @@ pub fn check_b64(base64_data: String) -> String {
     }
 }
 
+#[uniffi::export]
 pub fn get_developer_donation_address() -> Result<String, ZingolibError> {
     with_panic_guard(|| Ok(zingolib::config::DEVELOPER_DONATION_ADDRESS.to_string()))
 }
 
+#[uniffi::export]
 pub fn get_zennies_for_zingo_donation_address() -> Result<String, ZingolibError> {
     with_panic_guard(|| Ok(zingolib::config::ZENNIES_FOR_ZINGO_DONATION_ADDRESS.to_string()))
 }
 
+#[uniffi::export]
 pub fn set_crypto_default_provider_to_ring() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         Ok(CryptoProvider::get_default().map_or_else(
@@ -279,6 +287,7 @@ pub fn set_crypto_default_provider_to_ring() -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn get_latest_block_server(server_uri: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let lightwalletd_uri: http::Uri = match server_uri.parse() {
@@ -298,6 +307,7 @@ pub fn get_latest_block_server(server_uri: String) -> Result<String, ZingolibErr
     })
 }
 
+#[uniffi::export]
 pub fn get_latest_block_wallet() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -314,6 +324,7 @@ pub fn get_latest_block_wallet() -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn get_value_transfers() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -333,6 +344,7 @@ pub fn get_value_transfers() -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn poll_sync() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -380,6 +392,7 @@ pub fn run_sync() -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn pause_sync() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -416,6 +429,7 @@ pub fn status_sync() -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn run_rescan() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -434,6 +448,7 @@ pub fn run_rescan() -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn info_server() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -461,6 +476,7 @@ impl ToString for UfvkInfo {
 
 // TODO: rename "get_seed_phrase" or "get_mnemonic_phrase"
 // or if other recovery info is being used could rename "get_recovery_info" ?
+#[uniffi::export]
 pub fn get_seed() -> Result<String, SeedError> {
     with_panic_guard(|| {
         let wallet_handle = {
@@ -484,6 +500,7 @@ pub fn get_seed() -> Result<String, SeedError> {
     })
 }
 
+#[uniffi::export]
 pub fn get_ufvk() -> Result<UfvkInfo, UfvkError> {
     with_panic_guard(|| {
         let wallet_handle = {
@@ -512,6 +529,7 @@ pub fn get_ufvk() -> Result<UfvkInfo, UfvkError> {
     })
 }
 
+#[uniffi::export]
 pub fn change_server(server_uri: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -536,6 +554,7 @@ pub fn change_server(server_uri: String) -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn wallet_kind() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -587,6 +606,7 @@ pub fn wallet_kind() -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn parse_address(address: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         if address.is_empty() {
@@ -671,6 +691,7 @@ pub fn parse_address(address: String) -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn parse_ufvk(ufvk: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         if ufvk.is_empty() {
@@ -721,10 +742,12 @@ pub fn parse_ufvk(ufvk: String) -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn get_version() -> Result<String, ZingolibError> {
     with_panic_guard(|| Ok(zingolib::git_description().to_string()))
 }
 
+#[uniffi::export]
 pub fn get_messages(address: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -746,6 +769,7 @@ pub fn get_messages(address: String) -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn get_balance() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -764,6 +788,7 @@ pub fn get_balance() -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn get_total_memobytes_to_address() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -782,6 +807,7 @@ pub fn get_total_memobytes_to_address() -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn get_total_value_to_address() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -800,6 +826,7 @@ pub fn get_total_value_to_address() -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn get_total_spends_to_address() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -818,6 +845,7 @@ pub fn get_total_spends_to_address() -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn zec_price(tor: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -853,6 +881,7 @@ pub fn zec_price(tor: String) -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn resend_transaction(txid: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -875,6 +904,7 @@ pub fn resend_transaction(txid: String) -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn remove_transaction(txid: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -899,6 +929,7 @@ pub fn remove_transaction(txid: String) -> Result<String, ZingolibError> {
 }
 
 // we don't use this anymore...
+#[uniffi::export]
 pub fn get_spendable_balance_with_address(
     address: String,
     zennies: String,
@@ -929,6 +960,7 @@ pub fn get_spendable_balance_with_address(
     })
 }
 
+#[uniffi::export]
 pub fn get_spendable_balance_total() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -953,14 +985,17 @@ pub fn get_spendable_balance_total() -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn set_option_wallet() -> Result<String, ZingolibError> {
     with_panic_guard(|| Ok("Error: unimplemented".to_string()))
 }
 
+#[uniffi::export]
 pub fn get_option_wallet() -> Result<String, ZingolibError> {
     with_panic_guard(|| Ok("Error: unimplemented".to_string()))
 }
 
+#[uniffi::export]
 pub fn create_tor_client(data_dir: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -984,6 +1019,7 @@ pub fn create_tor_client(data_dir: String) -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn remove_tor_client() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -1003,6 +1039,7 @@ pub fn remove_tor_client() -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn get_unified_addresses() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -1016,6 +1053,7 @@ pub fn get_unified_addresses() -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn get_transparent_addresses() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -1033,6 +1071,7 @@ pub fn get_transparent_addresses() -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn create_new_unified_address(receivers: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -1065,6 +1104,7 @@ pub fn create_new_unified_address(receivers: String) -> Result<String, ZingolibE
     })
 }
 
+#[uniffi::export]
 pub fn create_new_transparent_address() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -1092,6 +1132,7 @@ pub fn create_new_transparent_address() -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn check_my_address(address: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -1167,6 +1208,7 @@ pub fn check_my_address(address: String) -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn get_wallet_save_required() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -1183,6 +1225,7 @@ pub fn get_wallet_save_required() -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn set_config_wallet_to_test() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -1202,6 +1245,7 @@ pub fn set_config_wallet_to_test() -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn set_config_wallet_to_prod(
     performance_level: String,
     min_confirmations: u32,
@@ -1232,6 +1276,7 @@ pub fn set_config_wallet_to_prod(
     })
 }
 
+#[uniffi::export]
 pub fn get_config_wallet_performance() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -1254,6 +1299,7 @@ pub fn get_config_wallet_performance() -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn get_wallet_version() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -1293,6 +1339,7 @@ fn interpret_memo_string(memo_str: String) -> Result<MemoBytes, String> {
         .map_err(|_| format!("Error: creating output. Memo '{:?}' is too long", memo_str))
 }
 
+#[uniffi::export]
 pub fn send(send_json: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -1364,6 +1411,7 @@ pub fn send(send_json: String) -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn shield() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
@@ -1403,6 +1451,7 @@ pub fn shield() -> Result<String, ZingolibError> {
     })
 }
 
+#[uniffi::export]
 pub fn confirm() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
