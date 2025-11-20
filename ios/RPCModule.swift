@@ -192,33 +192,33 @@ class RPCModule: NSObject {
 
   func saveWalletInternal() throws {
     do {
-      let walletEncodedString = try saveToB64()
-      if !walletEncodedString.lowercased().hasPrefix(Constants.ErrorPrefix.rawValue) {
+        guard let walletEncodedString = try saveToB64() else {
+          NSLog("[Native] No need to save the wallet.")
+          return
+        }
+
+        // Optional: sanity check base64 (Rust should already guarantee this)
+        let isValidB64 = checkB64(base64Data: walletEncodedString)
+        guard isValidB64 else {
+          let err = "Error: [Native] Couldn't save the wallet. The encoded content is incorrect."
+          NSLog(err)
+          throw FileError.saveFileError(err)
+        }
+
+        // Approximate decoded size: 3/4 of encoded length
         let size = (walletEncodedString.count * 3) / 4
         NSLog("[Native] file size: \(size) bytes")
+
         if size > 0 {
-          // check if the content is correct. Stored Encoded.
-          let correct = checkB64(base64Data: walletEncodedString)
-          if correct == "true" {
-            try self.saveWalletFile(walletEncodedString)
-          } else {
-            let err = "Error: [Native] Couldn't save the wallet. The Encoded content is incorrect: \(walletEncodedString)"
-            NSLog(err)
-            throw FileError.saveFileError(err)
-          }
+          try self.saveWalletFile(walletEncodedString)
         } else {
-          NSLog("[Native] No need to save the wallet.")
+          NSLog("[Native] No need to save the wallet (empty buffer).")
         }
-      } else {
-        let err = "Error: [Native] Couldn't save the wallet. \(walletEncodedString)"
+      } catch {
+        let err = "Error: [Native] Couldn't save the wallet. \(error)"
         NSLog(err)
         throw FileError.saveFileError(err)
       }
-    } catch {
-      let err = "Error: [Native] Couldn't save the wallet. \(error.localizedDescription)"
-      NSLog(err)
-      throw FileError.saveFileError(err)
-    }
   }
 
   func saveWalletBackupInternal() throws {
@@ -386,7 +386,7 @@ class RPCModule: NSObject {
       let walletEncodedData = try self.readWalletUtf8String()
       // check if the content is correct. Stored Encoded.
       let correct = checkB64(base64Data: backupEncodedData)
-      if correct == "true" {
+      if correct {
         try self.saveWalletFile(backupEncodedData)
         try self.saveWalletBackupFile(walletEncodedData)
         DispatchQueue.main.async {
@@ -468,7 +468,7 @@ class RPCModule: NSObject {
     if let serveruri = dict["serveruri"] as? String,
        let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
       do {
-        let resp = try getLatestBlockServer(serverUri: serveruri)
+        let resp = try getLatestBlockHeightServer(serverUri: serveruri)
         let respStr = String(resp)
         DispatchQueue.main.async {
           resolve(respStr)
@@ -504,10 +504,9 @@ class RPCModule: NSObject {
   func fnGetLatestBlockWalletInfo(_ dict: [AnyHashable: Any]) {
     if let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
         do {
-          let resp = try getLatestBlockWallet()
-          let respStr = String(resp)
+          let latestBlock = try getLatestBlockWallet()
           DispatchQueue.main.async {
-            resolve(respStr)
+            resolve(latestBlock)
           }
         } catch {
           let err = "Error: [Native] Get wallet latest block. \(error.localizedDescription)"
@@ -598,9 +597,8 @@ class RPCModule: NSObject {
       if let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
           do {
             let resp = try getValueTransfers()
-            let respStr = String(resp)
             DispatchQueue.main.async {
-              resolve(respStr)
+              resolve(resp)
             }
           } catch {
             let err = "Error: [Native] Get value transfers. \(error.localizedDescription)"
@@ -626,24 +624,31 @@ class RPCModule: NSObject {
   }
 
   func fnSetCryptoDefaultProvider(_ dict: [AnyHashable: Any]) {
-      if let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
-        do {
-          let resp = try setCryptoDefaultProviderToRing()
-          let respStr = String(resp)
-          DispatchQueue.main.async {
-            resolve(respStr)
-          }
-        } catch {
-          let err = "Error: [Native] Setting the crypto provider to ring by default. \(error.localizedDescription)"
-          NSLog(err)
-          DispatchQueue.main.async {
-            resolve(err)
-          }
-        }
-      } else {
-          let err = "Error: [Native] Setting the crypto provider to ring by default. Command arguments problem."
-          NSLog(err)
+    guard
+      let resolve = dict["resolve"] as? RCTPromiseResolveBlock,
+      let reject = dict["reject"] as? RCTPromiseRejectBlock
+    else {
+      let err = "Error: [Native] Setting the crypto provider to ring by default. Command arguments problem."
+      NSLog(err)
+      return
+    }
+    
+    do {
+      try setCryptoDefaultProviderToRing()
+      
+      DispatchQueue.main.async {
+        resolve(NSNull())
       }
+    } catch {
+      let nsError = error as NSError
+      let errMsg = "Error: [Native] Setting the crypto provider to ring by default. \(error.localizedDescription)"
+      NSLog(errMsg)
+      
+      // Use the reject channel for errors
+      DispatchQueue.main.async {
+        reject("SET_CRYPTO_DEFAULT_PROVIDER_FAILED", errMsg, nsError)
+      }
+    }
   }
 
   @objc(setCryptoDefaultProvider:reject:)
@@ -911,30 +916,33 @@ class RPCModule: NSObject {
   }
 
   func fnChangeServerProcess(_ dict: [AnyHashable: Any]) {
-      if let serveruri = dict["serveruri"] as? String,
-          let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
-        do {
-          let resp = try changeServer(serverUri: serveruri)
-          let respStr = String(resp)
-          DispatchQueue.main.async {
-            resolve(respStr)
-          }
-        } catch {
-          let err = "Error: [Native] change server. \(error.localizedDescription)"
-          NSLog(err)
-          DispatchQueue.main.async {
-            resolve(err)
-          }
-        }
-      } else {
-          let err = "Error: [Native] change server. Command arguments problem."
-          NSLog(err)
-          if let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
-            DispatchQueue.main.async {
-              resolve(err)
-            }
-          }
+    guard
+      let serveruri = dict["serveruri"] as? String,
+      let resolve = dict["resolve"] as? RCTPromiseResolveBlock
+    else {
+      let err = "Error: [Native] change server. Command arguments problem."
+      NSLog(err)
+      if let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
+        resolve(err)
       }
+      return
+    }
+
+    do {
+      // New Rust API: returns (), just throws on error
+      try changeServer(serverUri: serveruri)
+
+      DispatchQueue.main.async {
+        // Pick whatever you want here: "true", "ok", "server set", etc.
+        resolve("server set")
+      }
+    } catch {
+      let err = "Error: [Native] change server. \(error.localizedDescription)"
+      NSLog(err)
+      DispatchQueue.main.async {
+        resolve(err)
+      }
+    }
   }
 
   @objc(changeServerProcess:resolve:reject:)
@@ -946,26 +954,50 @@ class RPCModule: NSObject {
         }
       }
   }
-
+  
   func fnWalletKindInfo(_ dict: [AnyHashable: Any]) {
-      if let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
-        do {
-          let resp = try walletKind()
-          let respStr = String(resp)
-          DispatchQueue.main.async {
-            resolve(respStr)
-          }
-        } catch {
-          let err = "Error: [Native] wallet kind. \(error.localizedDescription)"
-          NSLog(err)
-          DispatchQueue.main.async {
-            resolve(err)
-          }
-        }
-      } else {
-          let err = "Error: [Native] wallet kind. Command arguments problem."
-          NSLog(err)
+    guard let resolve = dict["resolve"] as? RCTPromiseResolveBlock else {
+      let err = "Error: [Native] wallet kind. Command arguments problem."
+      NSLog(err)
+      return
+    }
+    
+    do {
+      let info = try walletKind()
+      
+      let kindString: String
+      switch info.kind {
+      case .seedOrMnemonic:
+        kindString = "seed_or_mnemonic"
+      case .unifiedSpendingKey:
+        kindString = "unified_spending_key"
+      case .unifiedFullViewingKey:
+        kindString = "unified_full_viewing_key"
+      case .noKeys:
+        kindString = "no_keys"
+      @unknown default:
+        kindString = "unknown"
       }
+      
+      let result: [String: Any] = [
+        "kind": kindString,
+        "pools": [
+          "transparent": info.pools.transparent,
+          "sapling": info.pools.sapling,
+          "orchard": info.pools.orchard,
+        ]
+      ]
+      
+      DispatchQueue.main.async {
+        resolve(result)
+      }
+    } catch {
+      let err = "Error: [Native] wallet kind. \(error.localizedDescription)"
+      NSLog(err)
+      DispatchQueue.main.async {
+        resolve(err)
+      }
+    }
   }
 
   @objc(walletKindInfo:reject:)

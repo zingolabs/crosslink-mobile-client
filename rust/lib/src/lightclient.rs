@@ -23,8 +23,9 @@ use zingolib::utils::conversion::{address_from_str, txid_from_hex_encoded_str};
 use zingolib::wallet::keys::WalletAddressRef;
 use zingolib::wallet::keys::unified::{ReceiverSelection, UnifiedKeyStore};
 
-use crate::error::{SeedError, UfvkError, ZingolibError};
+use crate::error::{LightClientError, SeedError, UfvkError, ZingolibError};
 use crate::lightclient::util::{construct_uri_load_config, reset_lightclient, store_client};
+use crate::types::{ValueTransferInfo, WalletHeight, WalletKind, WalletKindInfo, WalletPools};
 use crate::{error::InitError, panic_handler::with_panic_guard};
 use base64::engine::general_purpose::STANDARD;
 use pepper_sync::config::PerformanceLevel;
@@ -232,36 +233,39 @@ pub fn init_from_b64(
 }
 
 #[uniffi::export]
-pub fn save_to_b64() -> Result<String, ZingolibError> {
+pub fn save_to_b64() -> Result<Option<String>, LightClientError> {
     with_panic_guard(|| {
-        // Return the wallet as a base64 encoded string
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
-        if let Some(lightclient) = &mut *guard {
-            // we need to use STANDARD because swift is expecting the encoded String with padding
-            // I tried with STANDARD_NO_PAD and the decoding return `nil`.
-            Ok(RT.block_on(async move {
-                let mut wallet = lightclient.wallet.write().await;
-                match wallet.save() {
-                    Ok(Some(wallet_bytes)) => STANDARD.encode(wallet_bytes),
-                    // TODO: check this is better than a custom error when save is not required (empty buffer)
-                    Ok(None) => "".to_string(),
-                    Err(e) => format!("Error: {e}"),
+            .map_err(|_| LightClientError::LockPoisoned)?;
+
+        let Some(lightclient) = &mut *guard else {
+            return Err(LightClientError::NotInitialized);
+        };
+
+        RT.block_on(async move {
+            let mut wallet = lightclient.wallet.write().await;
+
+            match wallet.save() {
+                Ok(Some(wallet_bytes)) => Ok(Some(STANDARD.encode(wallet_bytes))),
+                Ok(None) => Ok(None),
+                Err(e) => {
+                    // If you already have a suitable variant, use that instead.
+                    // Example if you add one:
+                    // Err(ZingolibError::WalletSave(e.to_string()))
+                    Err(LightClientError::SaveError)
                 }
-            }))
-        } else {
-            Err(ZingolibError::LightclientNotInitialized)
-        }
+            }
+        })
     })
 }
 
+/// Checks if a base64 encoded string is valid
+///
+/// FIXME: This should be removed in favor of byte streaming into a buffer
 #[uniffi::export]
-pub fn check_b64(base64_data: String) -> String {
-    match STANDARD.decode(&base64_data) {
-        Ok(_) => "true".to_string(),
-        Err(_) => "false".to_string(),
-    }
+pub fn check_b64(base64_data: String) -> bool {
+    STANDARD.decode(&base64_data).is_ok()
 }
 
 #[uniffi::export]
@@ -275,72 +279,84 @@ pub fn get_zennies_for_zingo_donation_address() -> Result<String, ZingolibError>
 }
 
 #[uniffi::export]
-pub fn set_crypto_default_provider_to_ring() -> Result<String, ZingolibError> {
+pub fn set_crypto_default_provider_to_ring() -> Result<(), ZingolibError> {
     with_panic_guard(|| {
-        Ok(CryptoProvider::get_default().map_or_else(
-            || match default_provider().install_default() {
-                Ok(_) => "true".to_string(),
-                Err(_) => "Error: Failed to install crypto provider".to_string(),
-            },
-            |_| "true".to_string(),
-        ))
+        if CryptoProvider::get_default().is_some() {
+            Ok(())
+        } else {
+            default_provider()
+                .install_default()
+                .map_err(|_| ZingolibError::CryptoProviderInstall)
+        }
     })
 }
 
 #[uniffi::export]
-pub fn get_latest_block_server(server_uri: String) -> Result<String, ZingolibError> {
+pub fn get_latest_block_height_server(server_uri: String) -> Result<u32, ZingolibError> {
     with_panic_guard(|| {
-        let lightwalletd_uri: http::Uri = match server_uri.parse() {
-            Ok(uri) => uri,
-            Err(e) => {
-                return Ok(format!("Error: failed to parse uri. {e}"));
-            }
+        let lightwalletd_uri: http::Uri = server_uri
+            .parse()
+            .map_err(|_| ZingolibError::InvalidServerUri(server_uri.clone()))?;
+
+        let block_id = RT
+            .block_on(
+                async move { zingolib::grpc_connector::get_latest_block(lightwalletd_uri).await },
+            )
+            .map_err(|e| ZingolibError::Lightwalletd(e.to_string()))?;
+
+        Ok(block_id.height as u32)
+    })
+}
+
+#[uniffi::export]
+pub fn get_latest_block_wallet() -> Result<Option<WalletHeight>, ZingolibError> {
+    with_panic_guard(|| {
+        let mut guard = LIGHTCLIENT
+            .write()
+            .map_err(|_| LightClientError::LockPoisoned)?;
+
+        let Some(lightclient) = &mut *guard else {
+            return Err(LightClientError::NotInitialized.into());
         };
-        Ok(
-            match RT.block_on(async move {
-                zingolib::grpc_connector::get_latest_block(lightwalletd_uri).await
-            }) {
-                Ok(block_id) => block_id.height.to_string(),
-                Err(e) => format!("Error: {e}"),
-            },
-        )
+        let height: Option<WalletHeight> = RT.block_on(async move {
+            let wallet = lightclient.wallet.read().await;
+            wallet
+                .sync_state
+                .wallet_height()
+                .map(|height| WalletHeight {
+                    height: height.into(),
+                })
+        });
+
+        Ok(height)
     })
 }
 
 #[uniffi::export]
-pub fn get_latest_block_wallet() -> Result<String, ZingolibError> {
+pub fn get_value_transfers() -> Result<Vec<ValueTransferInfo>, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
-        if let Some(lightclient) = &mut *guard {
-            Ok(RT.block_on(async move {
-                let wallet = lightclient.wallet.write().await;
-                object! { "height" => json::JsonValue::from(wallet.sync_state.wallet_height().map(u32::from).unwrap_or(0))}.pretty(2)
-            }))
-        } else {
-            Err(ZingolibError::LightclientNotInitialized)
-        }
-    })
-}
+            .map_err(|_| LightClientError::LockPoisoned)?;
 
-#[uniffi::export]
-pub fn get_value_transfers() -> Result<String, ZingolibError> {
-    with_panic_guard(|| {
-        let mut guard = LIGHTCLIENT
-            .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
-        if let Some(lightclient) = &mut *guard {
-            Ok(RT.block_on(async move {
+        let Some(lightclient) = &mut *guard else {
+            return Err(LightClientError::NotInitialized.into());
+        };
+
+        let transfers = RT
+            .block_on(async move {
                 let wallet = lightclient.wallet.read().await;
-                match wallet.value_transfers(true).await {
-                    Ok(value_transfers) => json::JsonValue::from(value_transfers).pretty(2),
-                    Err(e) => format!("Error: {e}"),
-                }
-            }))
-        } else {
-            Err(ZingolibError::LightclientNotInitialized)
-        }
+                wallet.value_transfers(true).await
+            })
+            .map_err(|e| LightClientError::ValueTransfers(e.to_string()))?;
+
+        // ValueTransfers already implements IntoIterator for &ValueTransfers
+        let vts: Vec<ValueTransferInfo> = (&transfers)
+            .into_iter()
+            .map(ValueTransferInfo::from)
+            .collect();
+
+        Ok(vts)
     })
 }
 
@@ -349,9 +365,10 @@ pub fn poll_sync() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
+
         if let Some(lightclient) = &mut *guard {
-            Ok(match lightclient.poll_sync() {
+            let resp = match lightclient.poll_sync() {
                 PollReport::NoHandle => "Sync task has not been launched.".to_string(),
                 PollReport::NotReady => "Sync task is not complete.".to_string(),
                 PollReport::Ready(result) => match result {
@@ -361,9 +378,11 @@ pub fn poll_sync() -> Result<String, ZingolibError> {
                     }
                     Err(e) => format!("Error: {e}"),
                 },
-            })
+            };
+
+            Ok(resp)
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -373,21 +392,25 @@ pub fn run_sync() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
+
         if let Some(lightclient) = &mut *guard {
             if lightclient.sync_mode() == SyncMode::Paused {
+                // same semantics as before: this is assumed infallible and will panic if violated
                 lightclient.resume_sync().expect("sync should be paused");
                 Ok("Resuming sync task...".to_string())
             } else {
-                Ok(RT.block_on(async {
+                let msg = RT.block_on(async {
                     match lightclient.sync().await {
                         Ok(_) => "Launching sync task...".to_string(),
                         Err(e) => format!("Error: {e}"),
                     }
-                }))
+                });
+
+                Ok(msg)
             }
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -397,14 +420,17 @@ pub fn pause_sync() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
+
         if let Some(lightclient) = &mut *guard {
-            Ok(match lightclient.pause_sync() {
+            let msg = match lightclient.pause_sync() {
                 Ok(_) => "Pausing sync task...".to_string(),
                 Err(e) => format!("Error: {e}"),
-            })
+            };
+
+            Ok(msg)
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -414,17 +440,20 @@ pub fn status_sync() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
+
         if let Some(lightclient) = &mut *guard {
-            Ok(RT.block_on(async {
+            let json = RT.block_on(async {
                 let wallet = lightclient.wallet.read().await;
                 match pepper_sync::sync_status(&*wallet).await {
                     Ok(status) => json::JsonValue::from(status).pretty(2),
                     Err(e) => format!("Error: {e}"),
                 }
-            }))
+            });
+
+            Ok(json)
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -434,16 +463,19 @@ pub fn run_rescan() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
+
         if let Some(lightclient) = &mut *guard {
-            Ok(RT.block_on(async move {
+            let msg = RT.block_on(async move {
                 match lightclient.rescan().await {
                     Ok(_) => "Launching rescan...".to_string(),
                     Err(e) => format!("Error: {e}"),
                 }
-            }))
+            });
+
+            Ok(msg)
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -453,11 +485,13 @@ pub fn info_server() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
+
         if let Some(lightclient) = &mut *guard {
-            Ok(RT.block_on(async move { lightclient.do_info().await }))
+            let json = RT.block_on(async move { lightclient.do_info().await });
+            Ok(json)
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -474,7 +508,7 @@ impl ToString for UfvkInfo {
     }
 }
 
-// TODO: rename "get_seed_phrase" or "get_mnemonic_phrase"
+// TODO: rename to "get_seed_phrase" or "get_mnemonic_phrase"
 // or if other recovery info is being used could rename "get_recovery_info" ?
 #[uniffi::export]
 pub fn get_seed() -> Result<String, SeedError> {
@@ -530,79 +564,91 @@ pub fn get_ufvk() -> Result<UfvkInfo, UfvkError> {
 }
 
 #[uniffi::export]
-pub fn change_server(server_uri: String) -> Result<String, ZingolibError> {
+pub fn change_server(server_uri: String) -> Result<(), ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
-        if let Some(lightclient) = &mut *guard {
-            if server_uri.is_empty() {
-                lightclient.set_server(http::Uri::default());
-                Ok("server set (default)".to_string())
-            } else {
-                match http::Uri::from_str(&server_uri) {
-                    Ok(uri) => {
-                        lightclient.set_server(uri);
-                        Ok("server set".to_string())
-                    }
-                    Err(_) => Ok("Error: invalid server uri".to_string()),
-                }
-            }
-        } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            .map_err(|_| LightClientError::LockPoisoned)?;
+
+        let Some(lightclient) = &mut *guard else {
+            return Err(LightClientError::NotInitialized.into());
+        };
+
+        let trimmed = server_uri.trim();
+
+        // Empty string -> reset to default URI
+        if trimmed.is_empty() {
+            lightclient.set_server(http::Uri::default());
+            return Ok(());
         }
+
+        // Non-empty -> must parse as a valid URI
+        let uri = http::Uri::from_str(trimmed)
+            .map_err(|_| ZingolibError::InvalidServerUri(server_uri.clone()))?;
+
+        lightclient.set_server(uri);
+        Ok(())
     })
 }
 
 #[uniffi::export]
-pub fn wallet_kind() -> Result<String, ZingolibError> {
+pub fn wallet_kind() -> Result<WalletKindInfo, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
-        if let Some(lightclient) = &mut *guard {
-            Ok(RT.block_on(async move {
-                let wallet = lightclient.wallet.read().await;
-                if wallet.mnemonic().is_some() {
-                    object! {"kind" => "Loaded from seed or mnemonic phrase)",
-                            "transparent" => true,
-                            "sapling" => true,
-                            "orchard" => true,
-                    }
-                    .pretty(2)
-                } else {
-                    match wallet
-                        .unified_key_store
-                        .get(&AccountId::ZERO)
-                        .expect("account 0 must always exist")
-                    {
-                        UnifiedKeyStore::Spend(_) => object! {
-                            "kind" => "Loaded from unified spending key",
-                            "transparent" => true,
-                            "sapling" => true,
-                            "orchard" => true,
-                        }
-                        .pretty(2),
-                        UnifiedKeyStore::View(ufvk) => object! {
-                            "kind" => "Loaded from unified full viewing key",
-                            "transparent" => ufvk.transparent().is_some(),
-                            "sapling" => ufvk.sapling().is_some(),
-                            "orchard" => ufvk.orchard().is_some(),
-                        }
-                        .pretty(2),
-                        UnifiedKeyStore::Empty => object! {
-                            "kind" => "No keys found",
-                            "transparent" => false,
-                            "sapling" => false,
-                            "orchard" => false,
-                        }
-                        .pretty(2),
-                    }
-                }
-            }))
-        } else {
-            Err(ZingolibError::LightclientNotInitialized)
-        }
+            .map_err(|_| LightClientError::LockPoisoned)?;
+
+        let Some(lightclient) = &mut *guard else {
+            return Err(LightClientError::NotInitialized.into());
+        };
+
+        let info = RT.block_on(async move {
+            let wallet = lightclient.wallet.read().await;
+
+            // All pools can be derived
+            if wallet.mnemonic().is_some() {
+                return WalletKindInfo {
+                    kind: WalletKind::SeedOrMnemonic,
+                    pools: WalletPools {
+                        transparent: true,
+                        sapling: true,
+                        orchard: true,
+                    },
+                };
+            }
+
+            // Inspect the unified key store
+            match wallet.unified_key_store.get(&AccountId::ZERO) {
+                Some(UnifiedKeyStore::Spend(_)) => WalletKindInfo {
+                    kind: WalletKind::UnifiedSpendingKey,
+                    pools: WalletPools {
+                        transparent: true,
+                        sapling: true,
+                        orchard: true,
+                    },
+                },
+
+                Some(UnifiedKeyStore::View(ufvk)) => WalletKindInfo {
+                    kind: WalletKind::UnifiedFullViewingKey,
+                    pools: WalletPools {
+                        transparent: ufvk.transparent().is_some(),
+                        sapling: ufvk.sapling().is_some(),
+                        orchard: ufvk.orchard().is_some(),
+                    },
+                },
+
+                Some(UnifiedKeyStore::Empty) | None => WalletKindInfo {
+                    kind: WalletKind::NoKeys,
+                    pools: WalletPools {
+                        transparent: false,
+                        sapling: false,
+                        orchard: false,
+                    },
+                },
+            }
+        });
+
+        Ok(info)
     })
 }
 
@@ -752,7 +798,7 @@ pub fn get_messages(address: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             Ok(RT.block_on(async move {
                 match lightclient
@@ -764,7 +810,7 @@ pub fn get_messages(address: String) -> Result<String, ZingolibError> {
                 }
             }))
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -774,7 +820,7 @@ pub fn get_balance() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             Ok(RT.block_on(async move {
                 match lightclient.account_balance(AccountId::ZERO).await {
@@ -783,7 +829,7 @@ pub fn get_balance() -> Result<String, ZingolibError> {
                 }
             }))
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -793,7 +839,7 @@ pub fn get_total_memobytes_to_address() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             Ok(RT.block_on(async move {
                 match lightclient.do_total_memobytes_to_address().await {
@@ -802,7 +848,7 @@ pub fn get_total_memobytes_to_address() -> Result<String, ZingolibError> {
                 }
             }))
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -812,7 +858,7 @@ pub fn get_total_value_to_address() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             Ok(RT.block_on(async move {
                 match lightclient.do_total_value_to_address().await {
@@ -821,7 +867,7 @@ pub fn get_total_value_to_address() -> Result<String, ZingolibError> {
                 }
             }))
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -831,7 +877,7 @@ pub fn get_total_spends_to_address() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             Ok(RT.block_on(async move {
                 match lightclient.do_total_spends_to_address().await {
@@ -840,7 +886,7 @@ pub fn get_total_spends_to_address() -> Result<String, ZingolibError> {
                 }
             }))
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -850,7 +896,7 @@ pub fn zec_price(tor: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             Ok(RT.block_on(async move {
                 let Ok(tor_bool) = tor.parse() else {
@@ -876,7 +922,7 @@ pub fn zec_price(tor: String) -> Result<String, ZingolibError> {
                 }
             }))
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -886,7 +932,7 @@ pub fn resend_transaction(txid: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             let txid = match txid_from_hex_encoded_str(&txid) {
                 Ok(txid) => txid,
@@ -899,7 +945,7 @@ pub fn resend_transaction(txid: String) -> Result<String, ZingolibError> {
                 }
             }))
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -909,7 +955,7 @@ pub fn remove_transaction(txid: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             let txid = match txid_from_hex_encoded_str(&txid) {
                 Ok(txid) => txid,
@@ -923,7 +969,7 @@ pub fn remove_transaction(txid: String) -> Result<String, ZingolibError> {
                 }
             }))
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -937,7 +983,7 @@ pub fn get_spendable_balance_with_address(
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             let Ok(address) = address_from_str(&address) else {
                 return Ok("Error: unknown address format".to_string());
@@ -955,7 +1001,7 @@ pub fn get_spendable_balance_with_address(
                 }
             }))
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -965,7 +1011,7 @@ pub fn get_spendable_balance_total() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             Ok(RT.block_on(async move {
                 let wallet = lightclient.wallet.write().await;
@@ -980,7 +1026,7 @@ pub fn get_spendable_balance_total() -> Result<String, ZingolibError> {
                 .pretty(2)
             }))
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -1000,7 +1046,7 @@ pub fn create_tor_client(data_dir: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             if lightclient.tor_client().is_some() {
                 return Ok("Tor client already exists.".to_string());
@@ -1014,7 +1060,7 @@ pub fn create_tor_client(data_dir: String) -> Result<String, ZingolibError> {
                 },
             )
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -1024,7 +1070,7 @@ pub fn remove_tor_client() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             if lightclient.tor_client().is_none() {
                 return Ok("Tor client is not active.".to_string());
@@ -1034,7 +1080,7 @@ pub fn remove_tor_client() -> Result<String, ZingolibError> {
             });
             Ok("Successfully removed tor client.".to_string())
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -1044,11 +1090,11 @@ pub fn get_unified_addresses() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             Ok(RT.block_on(async move { lightclient.unified_addresses_json().await.pretty(2) }))
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -1058,7 +1104,7 @@ pub fn get_transparent_addresses() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             Ok(
                 RT.block_on(
@@ -1066,7 +1112,7 @@ pub fn get_transparent_addresses() -> Result<String, ZingolibError> {
                 ),
             )
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -1076,7 +1122,7 @@ pub fn create_new_unified_address(receivers: String) -> Result<String, ZingolibE
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             Ok(RT.block_on(async move {
                 let mut wallet = lightclient.wallet.write().await;
@@ -1099,7 +1145,7 @@ pub fn create_new_unified_address(receivers: String) -> Result<String, ZingolibE
                 }
             }))
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -1109,7 +1155,7 @@ pub fn create_new_transparent_address() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             Ok(RT.block_on(async move {
                 let mut wallet = lightclient.wallet.write().await;
@@ -1127,7 +1173,7 @@ pub fn create_new_transparent_address() -> Result<String, ZingolibError> {
                 }
             }))
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -1137,7 +1183,7 @@ pub fn check_my_address(address: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             Ok(RT.block_on(async move {
                 let wallet = lightclient.wallet.read().await;
@@ -1203,7 +1249,7 @@ pub fn check_my_address(address: String) -> Result<String, ZingolibError> {
                 }
             }))
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -1213,14 +1259,14 @@ pub fn get_wallet_save_required() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             Ok(RT.block_on(async move {
                 let wallet = lightclient.wallet.read().await;
                 object! { "save_required" => wallet.save_required }.pretty(2)
             }))
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -1230,7 +1276,7 @@ pub fn set_config_wallet_to_test() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             Ok(RT.block_on(async move {
                 let mut wallet = lightclient.wallet.write().await;
@@ -1240,7 +1286,7 @@ pub fn set_config_wallet_to_test() -> Result<String, ZingolibError> {
                 "Successfully set config wallet to test. (1 - Medium)".to_string()
             }))
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -1253,7 +1299,7 @@ pub fn set_config_wallet_to_prod(
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             Ok(RT.block_on(async move {
                 let performancetype = match performance_level.as_str() {
@@ -1271,7 +1317,7 @@ pub fn set_config_wallet_to_prod(
                 "Successfully set config wallet to prod.".to_string()
             }))
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -1281,7 +1327,7 @@ pub fn get_config_wallet_performance() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             Ok(RT.block_on(async move {
                 let wallet = lightclient.wallet.read().await;
@@ -1294,7 +1340,7 @@ pub fn get_config_wallet_performance() -> Result<String, ZingolibError> {
                 object! { "performance_level" => performance_level }.pretty(2)
             }))
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -1304,7 +1350,7 @@ pub fn get_wallet_version() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             Ok(RT.block_on(async move {
                 let wallet = lightclient.wallet.read().await;
@@ -1317,7 +1363,7 @@ pub fn get_wallet_version() -> Result<String, ZingolibError> {
                 .pretty(2)
             }))
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -1344,7 +1390,7 @@ pub fn send(send_json: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             Ok(RT.block_on(async move {
                 let json_args = match json::parse(&send_json) {
@@ -1406,7 +1452,7 @@ pub fn send(send_json: String) -> Result<String, ZingolibError> {
                 .pretty(2)
             }))
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -1416,7 +1462,7 @@ pub fn shield() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             Ok(RT.block_on(async move {
                 match lightclient.propose_shield(AccountId::ZERO).await {
@@ -1446,7 +1492,7 @@ pub fn shield() -> Result<String, ZingolibError> {
                 .pretty(2)
             }))
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }
@@ -1456,7 +1502,7 @@ pub fn confirm() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let mut guard = LIGHTCLIENT
             .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
+            .map_err(|_| LightClientError::LockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             Ok(RT.block_on(async move {
                 match lightclient
@@ -1472,7 +1518,7 @@ pub fn confirm() -> Result<String, ZingolibError> {
                 .pretty(2)
             }))
         } else {
-            Err(ZingolibError::LightclientNotInitialized)
+            Err(LightClientError::NotInitialized.into())
         }
     })
 }

@@ -2,11 +2,17 @@ use crate::panic_handler::FromPanic;
 
 #[derive(uniffi::Error, Debug, thiserror::Error)]
 pub enum ZingolibError {
-    #[error("Error: Lightclient is not initialized")]
-    LightclientNotInitialized,
+    #[error("lightclient error")]
+    Lightclient(#[from] LightClientError),
 
-    #[error("Error: Lightclient lock poisoned")]
-    LightclientLockPoisoned,
+    #[error("failed to install default crypto provider")]
+    CryptoProviderInstall,
+
+    #[error("invalid server uri: {0}")]
+    InvalidServerUri(String),
+
+    #[error("lightwalletd query failed: {0}")]
+    Lightwalletd(String),
 
     #[error("panic: {0}")]
     Panic(String),
@@ -15,6 +21,30 @@ pub enum ZingolibError {
 impl FromPanic for ZingolibError {
     fn from_panic(msg: String) -> Self {
         ZingolibError::Panic(msg)
+    }
+}
+
+#[derive(uniffi::Error, Debug, thiserror::Error)]
+pub enum LightClientError {
+    #[error("lightclient not initialized")]
+    NotInitialized,
+
+    #[error("lightclient lock poisoned")]
+    LockPoisoned,
+
+    #[error("lightclient save failed")]
+    SaveError,
+
+    #[error("value_transfers query failed: {0}")]
+    ValueTransfers(String),
+
+    #[error("panic: {0}")]
+    Panic(String),
+}
+
+impl FromPanic for LightClientError {
+    fn from_panic(msg: String) -> Self {
+        LightClientError::Panic(msg)
     }
 }
 

@@ -95,8 +95,14 @@ pub(crate) fn construct_uri_load_config(
     Ok((config, lightwalletd_uri))
 }
 
+/// Initialize logging for mobile clients.
+///
+/// - On Android: installs an `android_logger` logger (idempotent).
+/// - On other platforms: this is a no-op.
+///
+/// Safe to call multiple times.
 #[uniffi::export]
-pub fn init_logging() -> Result<String, ZingolibError> {
+pub fn init_logging() -> Result<(), ZingolibError> {
     with_panic_guard(|| {
         // this is only for Android
         #[cfg(target_os = "android")]
@@ -107,6 +113,6 @@ pub fn init_logging() -> Result<String, ZingolibError> {
                     .build(),
             ),
         );
-        Ok("OK".to_string())
+        Ok(())
     })
 }

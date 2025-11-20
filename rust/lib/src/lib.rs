@@ -1,8 +1,11 @@
 uniffi::setup_scaffolding!();
 
+#[warn(unused)]
+#[warn(missing_docs)]
 pub mod error;
 pub mod lightclient;
 pub mod panic_handler;
+pub mod types;
 
 #[macro_use]
 extern crate lazy_static;
@@ -12,7 +15,9 @@ extern crate android_logger;
 mod tests {
     use base64::Engine;
 
-    use crate::error::{ConfigError, InitError, SeedError, UfvkError, ZingolibError};
+    use crate::error::{
+        ConfigError, InitError, LightClientError, SeedError, UfvkError, ZingolibError,
+    };
     use crate::panic_handler::with_panic_guard;
 
     use crate::{
@@ -153,10 +158,10 @@ mod tests {
         drain_last_panic();
 
         let result: Result<(), ZingolibError> =
-            with_panic_guard(|| Err(ZingolibError::LightclientNotInitialized));
+            with_panic_guard(|| Err(ZingolibError::Lightclient(LightClientError::NotInitialized)));
 
         match result {
-            Err(ZingolibError::LightclientNotInitialized) => {}
+            Err(ZingolibError::Lightclient(LightClientError::NotInitialized)) => {}
             other => panic!("Expected LightclientNotInitialized, got {other:?}"),
         }
 
@@ -272,9 +277,9 @@ mod tests {
     #[test]
     fn check_b64_reports_true_for_valid_and_false_for_invalid_data() {
         let encoded = base64::engine::general_purpose::STANDARD.encode(b"hello world");
-        assert_eq!(check_b64(encoded), "true");
+        assert_eq!(check_b64(encoded), true);
 
         let invalid = "not base64!!";
-        assert_eq!(check_b64(invalid.to_string()), "false");
+        assert_eq!(check_b64(invalid.to_string()), false);
     }
 }
