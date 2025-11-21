@@ -1,3 +1,5 @@
+//! Error types for Zingolib bindings
+
 use crate::panic_handler::FromPanic;
 
 #[derive(uniffi::Error, Debug, thiserror::Error)]
