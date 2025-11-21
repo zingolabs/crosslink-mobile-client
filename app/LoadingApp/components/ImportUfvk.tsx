@@ -22,7 +22,12 @@ import { ThemeType } from '../../types';
 import { ContextAppLoading } from '../../context';
 import Header from '../../../components/Header';
 import RPCModule from '../../RPCModule';
-import { ButtonTypeEnum, GlobalConst, ScreenEnum, SelectServerEnum } from '../../AppState';
+import {
+  ButtonTypeEnum,
+  GlobalConst,
+  ScreenEnum,
+  SelectServerEnum,
+} from '../../AppState';
 import Snackbars from '../../../components/Components/Snackbars';
 import { ToastProvider } from 'react-native-toastier';
 
@@ -30,10 +35,22 @@ type ImportUfvkProps = {
   onClickCancel: () => void;
   onClickOK: (keyText: string, birthday: number) => void;
 };
-const ImportUfvk: React.FunctionComponent<ImportUfvkProps> = ({ onClickCancel, onClickOK }) => {
+const ImportUfvk: React.FunctionComponent<ImportUfvkProps> = ({
+  onClickCancel,
+  onClickOK,
+}) => {
   const context = useContext(ContextAppLoading);
-  const { translate, netInfo, lightWalletserver, mode, addLastSnackbar, selectLightWalletServer, snackbars, removeFirstSnackbar } = context;
-  const { colors } = useTheme()  as ThemeType;
+  const {
+    translate,
+    netInfo,
+    lightWalletserver,
+    mode,
+    addLastSnackbar,
+    selectLightWalletServer,
+    snackbars,
+    removeFirstSnackbar,
+  } = context;
+  const { colors } = useTheme() as ThemeType;
   const screenName = ScreenEnum.ImportUfvk;
 
   const [seedufvkText, setSeedufvkText] = useState<string>('');
@@ -42,17 +59,36 @@ const ImportUfvk: React.FunctionComponent<ImportUfvkProps> = ({ onClickCancel, o
   const [latestBlock, setLatestBlock] = useState<number>(0);
 
   useEffect(() => {
-    if (!netInfo.isConnected || selectLightWalletServer !== SelectServerEnum.offline) {
-      (async () => {
-        const resp: string = await RPCModule.getLatestBlockServerInfo(lightWalletserver.uri);
-        //console.log(resp);
-        if (resp && !resp.toLowerCase().startsWith(GlobalConst.error)) {
-          setLatestBlock(Number(resp));
-        } else {
-          //console.log('error latest block', resp);
-        }
-      })();
+    if (
+      !netInfo.isConnected ||
+      selectLightWalletServer === SelectServerEnum.offline
+    ) {
+      return;
     }
+
+    let cancelled = false;
+
+    const fetchLatestBlock = async () => {
+      try {
+        const height = await RPCModule.getLatestBlockServerInfo(
+          lightWalletserver.uri,
+        );
+
+        if (!cancelled) {
+          setLatestBlock(height);
+        }
+      } catch {
+        if (!cancelled) {
+          // TODO: What should we do here?
+        }
+      }
+    };
+
+    fetchLatestBlock();
+
+    return () => {
+      cancelled = true;
+    };
   }, [lightWalletserver, selectLightWalletServer, netInfo.isConnected]);
 
   useEffect(() => {
@@ -62,13 +98,20 @@ const ImportUfvk: React.FunctionComponent<ImportUfvkProps> = ({ onClickCancel, o
         seedufvkText.toLowerCase().startsWith(GlobalConst.utestview)
       ) {
         // if it is a ufvk
-        const seedufvkTextArray: string[] = seedufvkText.replaceAll('\n', ' ').trim().replaceAll('  ', ' ').split(' ');
+        const seedufvkTextArray: string[] = seedufvkText
+          .replaceAll('\n', ' ')
+          .trim()
+          .replaceAll('  ', ' ')
+          .split(' ');
         //console.log(seedufvkTextArray);
         // if the ufvk have 2 -> means it is a copy/paste from the stored ufvk in the device.
         if (seedufvkTextArray.length === 2) {
           // if the last word is a number -> move it to the birthday field
-          const lastWord: string = seedufvkTextArray[seedufvkTextArray.length - 1];
-          const possibleBirthday: number | null = isNaN(Number(lastWord)) ? null : Number(lastWord);
+          const lastWord: string =
+            seedufvkTextArray[seedufvkTextArray.length - 1];
+          const possibleBirthday: number | null = isNaN(Number(lastWord))
+            ? null
+            : Number(lastWord);
           if (possibleBirthday && !birthday) {
             setBirthday(possibleBirthday.toString());
             setSeedufvkText(seedufvkTextArray.slice(0, 1).join(' '));
@@ -76,13 +119,20 @@ const ImportUfvk: React.FunctionComponent<ImportUfvkProps> = ({ onClickCancel, o
         }
       } else {
         // if it is a seed
-        const seedufvkTextArray: string[] = seedufvkText.replaceAll('\n', ' ').trim().replaceAll('  ', ' ').split(' ');
+        const seedufvkTextArray: string[] = seedufvkText
+          .replaceAll('\n', ' ')
+          .trim()
+          .replaceAll('  ', ' ')
+          .split(' ');
         //console.log(seedufvkTextArray);
         // if the seed have 25 -> means it is a copy/paste from the stored seed in the device.
         if (seedufvkTextArray.length === 25) {
           // if the last word is a number -> move it to the birthday field
-          const lastWord: string = seedufvkTextArray[seedufvkTextArray.length - 1];
-          const possibleBirthday: number | null = isNaN(Number(lastWord)) ? null : Number(lastWord);
+          const lastWord: string =
+            seedufvkTextArray[seedufvkTextArray.length - 1];
+          const possibleBirthday: number | null = isNaN(Number(lastWord))
+            ? null
+            : Number(lastWord);
           if (possibleBirthday && !birthday) {
             setBirthday(possibleBirthday.toString());
             setSeedufvkText(seedufvkTextArray.slice(0, 24).join(' '));
@@ -95,8 +145,14 @@ const ImportUfvk: React.FunctionComponent<ImportUfvkProps> = ({ onClickCancel, o
   }, [seedufvkText]);
 
   const okButton = async () => {
-    if (!netInfo.isConnected || selectLightWalletServer === SelectServerEnum.offline) {
-      addLastSnackbar({ message: translate('loadedapp.connection-error') as string, screenName: [screenName] });
+    if (
+      !netInfo.isConnected ||
+      selectLightWalletServer === SelectServerEnum.offline
+    ) {
+      addLastSnackbar({
+        message: translate('loadedapp.connection-error') as string,
+        screenName: [screenName],
+      });
       return;
     }
     onClickOK(seedufvkText.trimEnd().trimStart(), Number(birthday));
@@ -109,7 +165,7 @@ const ImportUfvk: React.FunctionComponent<ImportUfvkProps> = ({ onClickCancel, o
     //    setSeedufvkText(a);
     //  });
     //} else {
-      setQrcodeModalVisible(true);
+    setQrcodeModalVisible(true);
     //}
   };
 
@@ -122,8 +178,12 @@ const ImportUfvk: React.FunctionComponent<ImportUfvkProps> = ({ onClickCancel, o
       />
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === GlobalConst.platformOSios ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === GlobalConst.platformOSios ? 10 : 0}
+        behavior={
+          Platform.OS === GlobalConst.platformOSios ? 'padding' : 'height'
+        }
+        keyboardVerticalOffset={
+          Platform.OS === GlobalConst.platformOSios ? 10 : 0
+        }
         style={{
           flex: 1,
           backgroundColor: colors.background,
@@ -133,13 +193,18 @@ const ImportUfvk: React.FunctionComponent<ImportUfvkProps> = ({ onClickCancel, o
           style={{
             flex: 1,
             backgroundColor: colors.background,
-          }}>
+          }}
+        >
           <Modal
             animationType="slide"
             transparent={false}
             visible={qrcodeModalVisible}
-            onRequestClose={() => setQrcodeModalVisible(false)}>
-            <ScannerUfvk setUfvkText={setSeedufvkText} closeModal={() => setQrcodeModalVisible(false)} />
+            onRequestClose={() => setQrcodeModalVisible(false)}
+          >
+            <ScannerUfvk
+              setUfvkText={setSeedufvkText}
+              closeModal={() => setQrcodeModalVisible(false)}
+            />
           </Modal>
           <Header
             title={translate('import.title') as string}
@@ -161,8 +226,11 @@ const ImportUfvk: React.FunctionComponent<ImportUfvkProps> = ({ onClickCancel, o
               flexDirection: 'column',
               alignItems: 'stretch',
               justifyContent: 'flex-start',
-            }}>
-            <FadeText style={{ marginTop: 0, padding: 20, textAlign: 'center' }}>
+            }}
+          >
+            <FadeText
+              style={{ marginTop: 0, padding: 20, textAlign: 'center' }}
+            >
               {translate('import.key-label') as string}
             </FadeText>
             <View
@@ -175,7 +243,8 @@ const ImportUfvk: React.FunctionComponent<ImportUfvkProps> = ({ onClickCancel, o
                 maxHeight: '40%',
                 flexDirection: 'row',
                 justifyContent: 'space-between',
-              }}>
+              }}
+            >
               <View
                 accessible={true}
                 accessibilityLabel={translate('seed.seed-acc') as string}
@@ -187,7 +256,8 @@ const ImportUfvk: React.FunctionComponent<ImportUfvkProps> = ({ onClickCancel, o
                   width: 'auto',
                   flex: 1,
                   justifyContent: 'center',
-                }}>
+                }}
+              >
                 <TextInput
                   testID="import.seedufvkinput"
                   multiline
@@ -208,15 +278,26 @@ const ImportUfvk: React.FunctionComponent<ImportUfvkProps> = ({ onClickCancel, o
                 <TouchableOpacity
                   onPress={() => {
                     setSeedufvkText('');
-                  }}>
-                  <FontAwesomeIcon style={{ margin: 0 }} size={25} icon={faXmark} color={colors.primaryDisabled} />
+                  }}
+                >
+                  <FontAwesomeIcon
+                    style={{ margin: 0 }}
+                    size={25}
+                    icon={faXmark}
+                    color={colors.primaryDisabled}
+                  />
                 </TouchableOpacity>
               )}
               <TouchableOpacity
                 onPress={() => {
                   showQrcodeModalVisible();
-                }}>
-                <FontAwesomeIcon size={35} icon={faQrcode} color={colors.border} />
+                }}
+              >
+                <FontAwesomeIcon
+                  size={35}
+                  icon={faQrcode}
+                  color={colors.border}
+                />
               </TouchableOpacity>
             </View>
 
@@ -224,7 +305,10 @@ const ImportUfvk: React.FunctionComponent<ImportUfvkProps> = ({ onClickCancel, o
               <FadeText>{translate('import.birthday') as string}</FadeText>
               {selectLightWalletServer !== SelectServerEnum.offline && (
                 <FadeText style={{ textAlign: 'center' }}>
-                  {translate('seed.birthday-no-readonly') + ' (1, ' + (latestBlock ? latestBlock.toString() : '--') + ')'}
+                  {translate('seed.birthday-no-readonly') +
+                    ' (1, ' +
+                    (latestBlock ? latestBlock.toString() : '--') +
+                    ')'}
                 </FadeText>
               )}
               <View
@@ -240,7 +324,8 @@ const ImportUfvk: React.FunctionComponent<ImportUfvkProps> = ({ onClickCancel, o
                   maxHeight: 48,
                   minWidth: '20%',
                   minHeight: 48,
-                }}>
+                }}
+              >
                 <TextInput
                   testID="import.birthdayinput"
                   placeholder={'#'}
@@ -260,19 +345,32 @@ const ImportUfvk: React.FunctionComponent<ImportUfvkProps> = ({ onClickCancel, o
                       setBirthday('');
                     } else if (
                       Number(text) <= 0 ||
-                      (Number(text) > latestBlock && selectLightWalletServer !== SelectServerEnum.offline)
+                      (Number(text) > latestBlock &&
+                        selectLightWalletServer !== SelectServerEnum.offline)
                     ) {
                       setBirthday('');
                     } else {
-                      setBirthday(Number(text.replace('.', '').replace(',', '')).toFixed(0));
+                      setBirthday(
+                        Number(text.replace('.', '').replace(',', '')).toFixed(
+                          0,
+                        ),
+                      );
                     }
                   }}
-                  editable={latestBlock ? true : selectLightWalletServer !== SelectServerEnum.offline ? false : true}
+                  editable={
+                    latestBlock
+                      ? true
+                      : selectLightWalletServer !== SelectServerEnum.offline
+                        ? false
+                        : true
+                  }
                   keyboardType="numeric"
                 />
               </View>
 
-              <RegText style={{ margin: 20, marginBottom: 30 }}>{translate('import.text') as string}</RegText>
+              <RegText style={{ margin: 20, marginBottom: 30 }}>
+                {translate('import.text') as string}
+              </RegText>
             </View>
           </ScrollView>
           <View
@@ -282,7 +380,8 @@ const ImportUfvk: React.FunctionComponent<ImportUfvkProps> = ({ onClickCancel, o
               justifyContent: 'center',
               alignItems: 'center',
               marginVertical: 5,
-            }}>
+            }}
+          >
             <Button
               testID="import.button.ok"
               type={ButtonTypeEnum.Primary}

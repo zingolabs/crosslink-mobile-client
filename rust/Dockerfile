@@ -27,9 +27,11 @@ RUN rustup default nightly
 RUN rustup target add aarch64-apple-ios x86_64-apple-ios \
     aarch64-linux-android armv7-linux-androideabi \
     i686-linux-android x86_64-linux-android
-    
+
+RUN cargo build --release
+
 RUN cargo run --release --features uniffi/cli --bin uniffi-bindgen -- \
-    generate ./src/zingo.udl --language kotlin --out-dir ./src
+    generate --library ../target/release/libzingo.so --language kotlin --out-dir ./src
 
 RUN cargo install --version 4.0.1 cargo-ndk
 RUN cargo install sccache

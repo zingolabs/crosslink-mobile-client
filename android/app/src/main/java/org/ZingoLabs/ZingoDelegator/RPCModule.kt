@@ -65,38 +65,39 @@ class RPCModule internal constructor(private val reactContext: ReactApplicationC
     }
 
     fun saveWalletFile(): Boolean {
-        try {
+        return try {
             uniffi.zingo.initLogging()
 
-            // Get the encoded wallet file
-            val b64encoded: String = uniffi.zingo.saveToB64()
-            if (b64encoded.lowercase().startsWith(ErrorPrefix.value)) {
-                // with error don't save the file. Obviously.
-                Log.e("MAIN", "Error: [Native] Couldn't save the wallet. $b64encoded")
-                return false
-            }
-            // Log.i("MAIN", b64encoded)
+            val b64encoded = uniffi.zingo.saveToB64()
 
-            val correct = uniffi.zingo.checkB64(b64encoded)
-            if (correct == "false") {
-                Log.e("MAIN", "Error: [Native] Couldn't save the wallet. The Encoded content is incorrect: $b64encoded")
-                return false
+            // No data to save
+            if (b64encoded.isNullOrEmpty()) {
+                Log.i("MAIN", "[Native] No need to save the wallet.")
+                return true
             }
 
-            // check if the content is correct. Stored Decoded.
+            val correct: Boolean = uniffi.zingo.checkB64(b64encoded)
+            if (!correct) {
+                Log.e(
+                    "MAIN",
+                    "Error: [Native] Couldn't save the wallet. The encoded content is incorrect."
+                )
+                return false
+            }
+
             val fileBytes = Base64.decode(b64encoded, Base64.NO_WRAP)
             Log.i("MAIN", "[Native] file size: ${fileBytes.size} bytes")
 
-            if (fileBytes.size > 0) {
+            if (fileBytes.isNotEmpty()) {
                 writeFile(WalletFileName.value, fileBytes)
-                return true
             } else {
-                Log.e("MAIN", "[Native] No need to save the wallet.")
-                return true
+                Log.i("MAIN", "[Native] No need to save the wallet (empty file).")
             }
+
+            true
         } catch (e: Exception) {
-            Log.e("MAIN", "Error: [Native] Unexpected error. Couldn't save the wallet. $e")
-            return false
+            Log.e("MAIN", "Error: [Native] Unexpected error. Couldn't save the wallet.", e)
+            false
         }
     }
 
@@ -140,19 +141,26 @@ class RPCModule internal constructor(private val reactContext: ReactApplicationC
     }
 
     @ReactMethod
-    fun createNewWallet(serveruri: String, chainhint: String, performancelevel: String, minconfirmations: String, promise: Promise) {
+    fun createNewWallet(
+        serveruri: String,
+        chainhint: String,
+        performancelevel: String,
+        minconfirmations: String,
+        promise: Promise,
+    ) {
         try {
             uniffi.zingo.initLogging()
 
-            // Create a seed
-            val resp = uniffi.zingo.initNew(serveruri, chainhint, performancelevel, minconfirmations.toUInt())
-            // Log.i("MAIN-Seed", resp)
+            val result = uniffi.zingo.initNew(
+                serveruri,
+                chainhint,
+                performancelevel,
+                minconfirmations.toUInt()
+            )
 
-            if (!resp.lowercase().startsWith(ErrorPrefix.value)) {
-                saveWalletFile()
-            }
+            val value = result.value
 
-            promise.resolve(resp)
+            promise.resolve(value)
         } catch (e: Exception) {
             val errorMessage = "Error: [Native] create new wallet: ${e.localizedMessage}"
             Log.e("MAIN", errorMessage, e)
@@ -161,18 +169,29 @@ class RPCModule internal constructor(private val reactContext: ReactApplicationC
     }
 
     @ReactMethod
-    fun restoreWalletFromSeed(seed: String, birthday: String, serveruri: String, chainhint: String, performancelevel: String, minconfirmations: String, promise: Promise) {
+    fun restoreWalletFromSeed(
+        seed: String,
+        birthday: String,
+        serveruri: String,
+        chainhint: String,
+        performancelevel: String,
+        minconfirmations: String,
+        promise: Promise,
+    ) {
         try {
             uniffi.zingo.initLogging()
 
-            val resp = uniffi.zingo.initFromSeed(seed, birthday.toUInt(), serveruri, chainhint, performancelevel, minconfirmations.toUInt())
-            // Log.i("MAIN", resp)
+            val result = uniffi.zingo.initFromSeed(
+                seed,
+                birthday.toUInt(),
+                serveruri,
+                chainhint,
+                performancelevel,
+                minconfirmations.toUInt()
+            )
+            val value = result.value
 
-            if (!resp.lowercase().startsWith(ErrorPrefix.value)) {
-                saveWalletFile()
-            }
-
-            promise.resolve(resp)
+            promise.resolve(value)
         } catch (e: Exception) {
             val errorMessage = "Error: [Native] restore wallet from seed: ${e.localizedMessage}"
             Log.e("MAIN", errorMessage, e)
@@ -181,31 +200,48 @@ class RPCModule internal constructor(private val reactContext: ReactApplicationC
     }
 
     @ReactMethod
-    fun restoreWalletFromUfvk(ufvk: String, birthday: String, serveruri: String, chainhint: String, performancelevel: String, minconfirmations: String, promise: Promise) {
+    fun restoreWalletFromUfvk(
+        ufvk: String,
+        birthday: String,
+        serveruri: String,
+        chainhint: String,
+        performancelevel: String,
+        minconfirmations: String,
+        promise: Promise,
+    ) {
         try {
             uniffi.zingo.initLogging()
 
-            val resp = uniffi.zingo.initFromUfvk(ufvk, birthday.toUInt(), serveruri, chainhint, performancelevel, minconfirmations.toUInt())
-            // Log.i("MAIN", resp)
+            val result = uniffi.zingo.initFromUfvk(
+                ufvk,
+                birthday.toUInt(),
+                serveruri,
+                chainhint,
+                performancelevel,
+                minconfirmations.toUInt()
+            )
+            val value = result.value
 
-            if (!resp.lowercase().startsWith(ErrorPrefix.value)) {
-                saveWalletFile()
-            }
-
-            promise.resolve(resp)
+            promise.resolve(value)
         } catch (e: Exception) {
             val errorMessage = "Error: [Native] restore wallet from ufvk: ${e.localizedMessage}"
             Log.e("MAIN", errorMessage, e)
             promise.resolve(errorMessage)
         }
-}
+    }
 
     @ReactMethod
     fun loadExistingWallet(serveruri: String, chainhint: String, performancelevel: String, minconfirmations: String, promise: Promise) {
         promise.resolve(loadExistingWalletNative(serveruri, chainhint, performancelevel, minconfirmations))
     }
 
-    fun loadExistingWalletNative(serveruri: String, chainhint: String, performancelevel: String, minconfirmations: String): String {
+    // TODO: https://github.com/zingolabs/crosslink-mobile-client/issues/8
+    fun loadExistingWalletNative(
+        serveruri: String,
+        chainhint: String,
+        performancelevel: String,
+        minconfirmations: String
+    ): String {
         try {
             // Read the file
             val fileBytes = readFile(WalletFileName.value)
@@ -367,15 +403,24 @@ class RPCModule internal constructor(private val reactContext: ReactApplicationC
 
             Log.i("MAIN", "file size: $middle8w")
 
-            val resp = uniffi.zingo.initFromB64(fileb64.toString(), serveruri, chainhint, performancelevel, minconfirmations.toUInt())
+            val result = uniffi.zingo.initFromB64(
+                fileb64.toString(),
+                serveruri,
+                chainhint,
+                performancelevel,
+                minconfirmations.toUInt()
+            )
 
-            return resp
+            // UniFFI now returns InitResult; JS expects a String here,
+            // so we keep returning the underlying value.
+            return result.value
         } catch (e: Exception) {
             val errorMessage = "Error: [Native] load existing wallet: ${e.localizedMessage}"
             Log.e("MAIN", errorMessage, e)
             return errorMessage
         }
     }
+
 
     @ReactMethod
     fun restoreExistingWalletBackup(promise: Promise) {
@@ -504,7 +549,7 @@ class RPCModule internal constructor(private val reactContext: ReactApplicationC
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 uniffi.zingo.initLogging()
-                val resp = uniffi.zingo.getLatestBlockServer(serveruri)
+                val resp = uniffi.zingo.getLatestBlockHeightServer(serveruri)
 
                 withContext(Dispatchers.Main) {
                     promise.resolve(resp)
