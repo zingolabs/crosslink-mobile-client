@@ -9,7 +9,6 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { lifehashDataUrlFromStringSync } from '../../../app/utils/lifehash';
 import Utils from '../../../app/utils';
 
 type FinalizerCardProps = {

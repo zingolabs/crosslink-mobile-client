@@ -15,6 +15,7 @@ import {
   SnackbarType,
 } from '../AppState';
 import { RPCPerformanceLevelEnum } from '../rpc/enums/RPCPerformanceLevelEnum';
+import { Indexer } from '../utils/Utils';
 
 export const defaultAppContextLoading: AppContextLoading = {
   netInfo: {} as NetInfoType,
@@ -52,6 +53,7 @@ export const defaultAppContextLoading: AppContextLoading = {
   zingolibVersion: '',
   performanceLevel: RPCPerformanceLevelEnum.Medium,
   setPrivacyOption: async () => {},
+  indexerList: [] as Indexer[],
 };
 
 export const ContextAppLoading = React.createContext(defaultAppContextLoading);

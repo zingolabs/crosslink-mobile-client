@@ -80,7 +80,7 @@ import { AppStackParamList } from '../types';
 import ScheduledActionsFileImpl from '../../components/ScheduledActions/ScheduledActionsFileImpl';
 import { getIndexerList, IndexerList } from '../utils/Utils';
 import SelectNetworkNavigator from './components/SelectNetworkNavigator';
-import ConnectIndexer from './components/ConnectIndexer';
+import { ChangeIndexer } from './components/ChangeIndexer';
 
 const en = require('../translations/en.json');
 const es = require('../translations/es.json');
@@ -1600,6 +1600,7 @@ export class LoadingAppClass extends Component<
       rescanMenu: this.state.rescanMenu,
       recoveryWalletInfoOnDevice: this.state.recoveryWalletInfoOnDevice,
       performanceLevel: this.state.performanceLevel,
+      indexerList: this.state.indexerList,
     };
 
     return (
@@ -1636,12 +1637,21 @@ export class LoadingAppClass extends Component<
             />
           )}
           {screen === 0.55 && (
-            <ConnectIndexer
+            <ChangeIndexer
               actionButtonsDisabled={actionButtonsDisabled}
               setIndexerServer={this.setIndexerServer}
               checkIndexerServer={this.checkIndexerServer}
               closeServers={this.closeServers}
-              fromSettings={true}
+              chainName={this.state.indexerServer.chainName}
+              onBack={() =>
+                this.navigateToLoadedApp(
+                  true,
+                  true,
+                  true,
+                  true,
+                  LaunchingModeEnum.opening,
+                )
+              }
             />
           )}
           {screen === 1 && (
