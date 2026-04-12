@@ -469,6 +469,9 @@ const ConnectIndexer: React.FC<Props> = ({
         >
           {connected ? (
             <LiquidPrimaryButton
+              style={{
+                width: '100%',
+              }}
               title="Continue"
               onPress={() => {
                 setIndexerServer(
@@ -484,6 +487,9 @@ const ConnectIndexer: React.FC<Props> = ({
             />
           ) : (
             <LiquidPrimaryButton
+              style={{
+                width: '100%',
+              }}
               title={connected === null ? 'Test Connection' : 'Retry'}
               disabled={
                 actionButtonsDisabled ||

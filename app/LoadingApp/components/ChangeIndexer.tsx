@@ -27,14 +27,21 @@ import LiquidPrimaryButton from '../../../components/Components/LiquidButton/Liq
 import { HeaderTitle } from '../../../components/Header';
 
 function parseUri(uri?: string) {
-  if (!uri) return { base: '', port: '' };
+  if (!uri) {
+    return { base: '', port: '' };
+  }
 
   try {
-    const url = new URL(uri);
+    const normalized = /^https?:\/\//i.test(uri) ? uri : `http://${uri}`;
+    const url = new URL(normalized);
+
+    if (!url.hostname) {
+      return { base: '', port: '' };
+    }
 
     return {
       base: `${url.protocol}//${url.hostname}`,
-      port: url.port,
+      port: url.port || '',
     };
   } catch {
     return { base: '', port: '' };
@@ -85,8 +92,12 @@ export function ChangeIndexer({
   const { base, port } = parseUri(indexerServerContext.uri);
 
   const initialUri = useMemo(() => {
-    if (custom) return base;
-    return '';
+    if (!custom || !base || !base.includes('://')) {
+      return '';
+    }
+
+    const [, host] = base.split('://');
+    return host ? base : '';
   }, [custom, base]);
 
   const initialPort = useMemo(() => {
@@ -98,7 +109,7 @@ export function ChangeIndexer({
     useState<string>(initialUri);
   const [indexerServerPortLocal, setIndexerServerPortLocal] =
     useState<string>(initialPort);
-  const [indexerServerChainNameLocal] = useState<ChainNameEnum>(chainName);
+  const indexerServerChainNameLocal = chainName;
 
   useEffect(() => {
     const s1 = Keyboard.addListener('keyboardDidShow', () => setKbOpen(true));
@@ -413,11 +424,13 @@ export function ChangeIndexer({
             justifyContent: 'center',
             paddingTop: 10,
             paddingBottom: 20,
-            paddingHorizontal: 20,
           }}
         >
           {connected ? (
             <LiquidPrimaryButton
+              style={{
+                width: '100%',
+              }}
               title="Continue"
               onPress={() => {
                 setIndexerServer(
@@ -433,6 +446,9 @@ export function ChangeIndexer({
             />
           ) : (
             <LiquidPrimaryButton
+              style={{
+                width: '100%',
+              }}
               title={connected === null ? 'Test Connection' : 'Retry'}
               disabled={
                 actionButtonsDisabled ||
