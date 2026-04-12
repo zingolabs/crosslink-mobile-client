@@ -13,9 +13,9 @@ import LiquidPrimaryButton from '../../../components/Components/LiquidButton/Liq
 import { faCheck, faX } from '@fortawesome/free-solid-svg-icons';
 import { Indexer, IndexerList } from '../../utils/Utils';
 
-const IOS_LIST_SEPARATOR = 'rgba(60,60,67,0.36)';
+const IOS_LIST_SEPARATOR = '#3C3C3D';
 const IOS_GROUP_BG = '#1C1C1E';
-const IOS_ROW_BG = '#2C2C2E';
+const IOS_ROW_BG = '#222223';
 
 export type ServerOption = {
   id: string;
@@ -129,7 +129,7 @@ export const ServerListScreen: React.FC<ServerListScreenProps> = ({
       <View
         style={{
           marginHorizontal: 16,
-          borderRadius: 14,
+          borderRadius: 26,
           overflow: 'hidden',
           backgroundColor: IOS_GROUP_BG,
         }}
@@ -270,9 +270,9 @@ export const ServerListScreen: React.FC<ServerListScreenProps> = ({
 const Separator = () => (
   <View
     style={{
+      width: '100%',
       height: 1,
       backgroundColor: IOS_LIST_SEPARATOR,
-      marginLeft: 16,
     }}
   />
 );

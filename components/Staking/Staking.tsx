@@ -58,7 +58,7 @@ import Button from '../Components/Button';
 import { formatSeconds } from '../../app/utils/Utils';
 import { MainTabParamList } from '../../app/types/NavigationTypes';
 
-type DataType = {
+export type DataType = {
   svg: {
     data: string;
   };
@@ -216,7 +216,7 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
         key={`tag-${index}`}
         onPress={() => {
           navigation.navigate(RouteEnum.FinalizerDetail, {
-            finalizer: item.finalizer,
+            finalizer: item,
           });
         }}
       >
@@ -477,6 +477,7 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
                   style={{
                     color: colors.placeholder,
                     fontSize: 14,
+                    marginTop: 10,
                   }}
                 >
                   There are no scheduled actions yet.
@@ -500,9 +501,10 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
                   style={{
                     color: colors.placeholder,
                     fontSize: 14,
+                    marginTop: 10,
                   }}
                 >
-                  There are no active stake yet.
+                  There are no active staking positions yet.
                 </Text>
               </View>
             )}
@@ -523,6 +525,7 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
                   style={{
                     color: colors.placeholder,
                     fontSize: 14,
+                    marginTop: 10,
                   }}
                 >
                   There are no active finalizers yet.

@@ -57,7 +57,7 @@ export function FinalizerCard({
     <View style={[styles.container, containerStyle]}>
       <View style={[styles.headerRow, headerRowStyle]}>
         <Image
-          source={{ uri: lifehashDataUrlFromStringSync(lifehash) }}
+          source={{ uri: lifehash }}
           style={[styles.avatar, avatarStyle]}
           resizeMode="cover"
         />

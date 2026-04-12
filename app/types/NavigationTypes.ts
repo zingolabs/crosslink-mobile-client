@@ -12,6 +12,7 @@ import {
   ValueTransferType,
 } from '../AppState';
 import { RPCParseAddressType } from '../rpc/types/RPCParseAddressType';
+import { DataType } from '../../components/Staking/Staking';
 
 export type LoadedAppRouteParams =
   | LoadedAppNavigationState
@@ -137,7 +138,7 @@ export type FinalizersNavigationState = {
 };
 
 export type FinalizerDetailNavigationState = {
-  finalizer: string;
+  finalizer: DataType;
 };
 
 export type StakeNavigationState = {};
