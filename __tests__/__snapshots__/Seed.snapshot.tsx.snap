@@ -663,6 +663,20 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
             </Text>
           </View>
         </View>
+        <Text
+          style={
+            {
+              "color": "#c3c3c3",
+              "flexGrow": 1,
+              "flexShrink": 1,
+              "fontSize": 20,
+              "marginTop": 10,
+              "opacity": 0.65,
+            }
+          }
+        >
+          ... extracting UFVK...
+        </Text>
       </View>
     </View>
   </RCTScrollView>
@@ -1332,6 +1346,20 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
             </Text>
           </View>
         </View>
+        <Text
+          style={
+            {
+              "color": "#c3c3c3",
+              "flexGrow": 1,
+              "flexShrink": 1,
+              "fontSize": 20,
+              "marginTop": 10,
+              "opacity": 0.65,
+            }
+          }
+        >
+          ... extracting UFVK...
+        </Text>
       </View>
     </View>
   </RCTScrollView>
@@ -2747,6 +2775,20 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
             </Text>
           </View>
         </View>
+        <Text
+          style={
+            {
+              "color": "#c3c3c3",
+              "flexGrow": 1,
+              "flexShrink": 1,
+              "fontSize": 20,
+              "marginTop": 10,
+              "opacity": 0.65,
+            }
+          }
+        >
+          ... extracting UFVK...
+        </Text>
       </View>
     </View>
   </RCTScrollView>
@@ -3416,6 +3458,20 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
             </Text>
           </View>
         </View>
+        <Text
+          style={
+            {
+              "color": "#c3c3c3",
+              "flexGrow": 1,
+              "flexShrink": 1,
+              "fontSize": 20,
+              "marginTop": 10,
+              "opacity": 0.65,
+            }
+          }
+        >
+          ... extracting UFVK...
+        </Text>
       </View>
     </View>
   </RCTScrollView>
