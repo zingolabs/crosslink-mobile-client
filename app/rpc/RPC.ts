@@ -71,6 +71,7 @@ export default class RPC {
   lastServerBlockHeight: number;
   walletBirthday: number;
   walletSeed: string;
+  UFVK: string;
 
   fetchWalletHeightLock: boolean;
   fetchWalletBirthdaySeedUfvkLock: boolean;
@@ -143,6 +144,7 @@ export default class RPC {
     this.lastServerBlockHeight = 0;
     this.walletBirthday = 0;
     this.walletSeed = '';
+    this.UFVK = '';
 
     this.fetchWalletHeightLock = false;
     this.fetchWalletBirthdaySeedUfvkLock = false;
@@ -1414,6 +1416,7 @@ export default class RPC {
       if (wallet) {
         this.walletBirthday = wallet.birthday;
         this.walletSeed = wallet.seed || '';
+        this.UFVK = wallet.ufvk || '';
         this.fnSetWallet(wallet);
       }
       this.fetchWalletBirthdaySeedUfvkLock = false;

@@ -10,15 +10,15 @@ nursery = { level = "deny", priority = -1 }
 
 [workspace.dependencies]
 
-zingo_common_components = { git = "https://github.com/zingolabs/zingolib-crosslink", rev = "740a0672402d566ba43fae2333ab3b1434ddd7ce" }
-zingo-netutils = { git = "https://github.com/zingolabs/zingolib-crosslink", rev = "740a0672402d566ba43fae2333ab3b1434ddd7ce" }
+zingo_common_components = { git = "https://github.com/zingolabs/zingolib-crosslink", rev = "b118e682bcf9a14fda4b3482978d4e3fca9c5f05" }
+zingo-netutils = { git = "https://github.com/zingolabs/zingolib-crosslink", rev = "b118e682bcf9a14fda4b3482978d4e3fca9c5f05" }
 
-zingolib = { git = "https://github.com/zingolabs/zingolib-crosslink", rev = "740a0672402d566ba43fae2333ab3b1434ddd7ce", default-features = true, features = [
+zingolib = { git = "https://github.com/zingolabs/zingolib-crosslink", rev = "b118e682bcf9a14fda4b3482978d4e3fca9c5f05", default-features = true, features = [
     "testutils",
 ] }
-pepper-sync = { git = "https://github.com/zingolabs/zingolib-crosslink", rev = "740a0672402d566ba43fae2333ab3b1434ddd7ce" }
+pepper-sync = { git = "https://github.com/zingolabs/zingolib-crosslink", rev = "b118e682bcf9a14fda4b3482978d4e3fca9c5f05" }
 
-zingolib_testutils = { git = "https://github.com/zingolabs/zingolib-crosslink", rev = "740a0672402d566ba43fae2333ab3b1434ddd7ce", features = [
+zingolib_testutils = { git = "https://github.com/zingolabs/zingolib-crosslink", rev = "b118e682bcf9a14fda4b3482978d4e3fca9c5f05", features = [
     "test_lwd_zcashd",
 ] }
 regchest_utils = { git = "https://github.com/zingolabs/zingo-regchest", branch = "dev" }

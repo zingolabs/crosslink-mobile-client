@@ -1810,10 +1810,8 @@ pub fn withdraw_stake(withdraw_stake_json: String) -> Result<String, ZingolibErr
                     }
                 };
                 match res {
-                    Some(txid) => object! { "txid" => txid.to_string() }.pretty(2),
-                    None => {
-                        object! { "error" => "withdraw failed (builder returned None)" }.pretty(2)
-                    }
+                    Ok(txid) => object! { "txid" => txid.to_string() }.pretty(2),
+                    Err(e) => object! { "error" => e.to_string() }.pretty(2),
                 }
             }))
         } else {

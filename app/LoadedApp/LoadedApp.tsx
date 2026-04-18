@@ -501,6 +501,7 @@ export class LoadedAppClass extends Component<
       messagesTotal: null,
       sendPageState: new SendPageStateClass(new ToAddrClass(0)),
       setSendPageState: this.setSendPageState,
+      getUfvk: this.getUfvk,
       info: {} as InfoType,
       syncingStatus: {} as RPCSyncStatusType,
       wallet: {} as WalletType,
@@ -1852,6 +1853,11 @@ export class LoadedAppClass extends Component<
     });
   };
 
+  getUfvk = async (): Promise<string> => {
+    let wallet = await RPC.rpcFetchWallet(true);
+    return wallet.ufvk || '';
+  };
+
   setRecoveryWalletInfoOnDeviceOption = async (
     value: boolean,
   ): Promise<void> => {
@@ -2170,6 +2176,7 @@ export class LoadedAppClass extends Component<
       blocksTotalStakingDay: this.state.blocksTotalStakingDay,
       scheduledActions: this.state.scheduledActions,
       setScheduledActions: this.state.setScheduledActions,
+      getUfvk: this.getUfvk,
 
       // context settings
       indexerServer: this.state.indexerServer,
