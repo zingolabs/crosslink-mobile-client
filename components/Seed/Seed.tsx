@@ -411,7 +411,7 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
               </TouchableOpacity>
             </View>
           )}
-          {!!ufvk && (
+          {!!ufvk ? (
             <View
               style={{
                 flexDirection: 'row',
@@ -457,6 +457,17 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                 </RegText>
               </TouchableOpacity>
             </View>
+          ) : (
+            <FadeText
+              style={{
+                flexGrow: 1,
+                flexShrink: 1,
+                fontSize: 20,
+                marginTop: 10,
+              }}
+            >
+              ... extracting UFVK...
+            </FadeText>
           )}
         </View>
       </ScrollView>
