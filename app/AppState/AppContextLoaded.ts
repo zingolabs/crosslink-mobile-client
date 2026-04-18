@@ -51,6 +51,8 @@ export default interface AppContextLoaded {
   sendPageState: SendPageStateClass;
   setSendPageState: (s: SendPageStateClass) => void;
 
+  getUfvk: () => Promise<string>;
+
   // getinfo and getblockchaininfo result
   info: InfoType;
 

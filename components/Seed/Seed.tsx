@@ -41,6 +41,7 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
     addLastSnackbar,
     snackbars,
     removeFirstSnackbar,
+    getUfvk,
   } = context;
   const { colors } = useTheme() as ThemeType;
   // when this screen is open from LoadingApp (new wallet)
@@ -60,6 +61,22 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
 
   const seedPhrase = wallet.seed || '';
   const birthdayNumber = (wallet.birthday && wallet.birthday.toString()) || '';
+
+  const [ufvk, setUfvk] = useState<string>('');
+
+  useEffect(() => {
+    const loadUfvk = async () => {
+      try {
+        const value = await getUfvk();
+        setUfvk(value || '');
+      } catch (e) {
+        console.error('Failed to load ufvk', e);
+        setUfvk('');
+      }
+    };
+
+    loadUfvk();
+  }, [getUfvk]);
 
   useEffect(() => {
     const seedTextArray: string[] = seedPhrase.split(' ');
@@ -393,6 +410,64 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                 </RegText>
               </TouchableOpacity>
             </View>
+          )}
+          {!!ufvk ? (
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'flex-start',
+                borderColor: colors.border,
+                borderWidth: 1,
+                borderRadius: 25,
+                marginTop: 10,
+                marginBottom: 10,
+                backgroundColor: colors.secondary,
+                width: '100%',
+                minWidth: '50%',
+                minHeight: 48,
+                alignItems: 'center',
+                paddingHorizontal: 25,
+                paddingVertical: 15,
+              }}
+            >
+              <FadeText
+                style={{
+                  flexGrow: 1,
+                  flexShrink: 1,
+                  fontSize: 20,
+                }}
+              >
+                UFVK
+              </FadeText>
+
+              <TouchableOpacity
+                onPress={() => {
+                  Clipboard.setString(ufvk);
+                  if (addLastSnackbar) {
+                    addLastSnackbar({
+                      message: 'UFVK copied',
+                      duration: SnackbarDurationEnum.short,
+                      screenName: [screenName],
+                    });
+                  }
+                }}
+              >
+                <RegText color={colors.text} style={{ textAlign: 'center' }}>
+                  {Utils.trimToSmall(ufvk, 12)}
+                </RegText>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <FadeText
+              style={{
+                flexGrow: 1,
+                flexShrink: 1,
+                fontSize: 20,
+                marginTop: 10,
+              }}
+            >
+              ... extracting UFVK...
+            </FadeText>
           )}
         </View>
       </ScrollView>

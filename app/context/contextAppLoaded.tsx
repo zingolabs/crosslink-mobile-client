@@ -88,6 +88,7 @@ export const defaultAppContextLoaded: AppContextLoaded = {
   blocksTotalStakingDay: 0,
   scheduledActions: {} as ScheduledActionType[],
   setScheduledActions: () => {},
+  getUfvk: async () => '',
 };
 
 export const ContextAppLoaded = React.createContext(defaultAppContextLoaded);
