@@ -32,6 +32,7 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "start:storybook": "STORYBOOK_ENABLED=true react-native start",
+    "start:scan": "REACT_SCAN=true react-native start --reset-cache",
     "storybook:ios": "STORYBOOK_ENABLED=true react-native run-ios --no-packager"
   },
   "dependencies": {
@@ -127,6 +128,7 @@
     "prettier": "^3.6.2",
     "react-native-svg-transformer": "^1.5.2",
     "react-native-web": "^0.21.2",
+    "react-scan": "0.0.36-native",
     "react-test-renderer": "19.1.0",
     "rimraf": "^6.0.1",
     "storybook": "^10.6.0",
