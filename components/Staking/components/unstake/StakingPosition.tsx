@@ -3,11 +3,10 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { CurrencyNameEnum, WalletBondsType } from '../../../../app/AppState';
 import { WalletBondsStatusEnum } from '../../../../app/AppState/enums/WalletBondsStatusEnum';
 import { RefreshCcw } from 'lucide-react-native';
-import { useTheme } from '@react-navigation/native';
 import ZecAmount from '../../../Components/ZecAmount';
-import { ThemeType } from '../../../../app/types';
 import { useContext } from 'react';
 import { ContextAppLoaded } from '../../../../app/context';
+import { useTheme } from '../../../../app/theme';
 
 type StakingPositionProps = {
   item: WalletBondsType;
@@ -15,7 +14,7 @@ type StakingPositionProps = {
 };
 
 export function StakingPosition({ item, selected }: StakingPositionProps) {
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const context = useContext(ContextAppLoaded);
   const { valueTransfers } = context;
 
@@ -33,8 +32,8 @@ export function StakingPosition({ item, selected }: StakingPositionProps) {
       style={[
         styles.txRow,
         {
-          borderColor: selected ? colors.primary : colors.border,
-          backgroundColor: selected ? colors.secondary : colors.background,
+          borderColor: selected ? colors.borderAccent : colors.borderFaint,
+          backgroundColor: selected ? colors.bgSurface : colors.bgCanvas,
         },
       ]}
     >
@@ -45,7 +44,7 @@ export function StakingPosition({ item, selected }: StakingPositionProps) {
           )}
           <Text
             style={{
-              color: colors.text,
+              color: colors.fgDefault,
               fontSize: 13,
               fontWeight: '500',
             }}
@@ -58,7 +57,7 @@ export function StakingPosition({ item, selected }: StakingPositionProps) {
         </View>
         <Text
           style={{
-            color: colors.placeholder,
+            color: colors.fgSubtle,
             fontSize: 11,
             marginTop: 2,
           }}
@@ -73,7 +72,7 @@ export function StakingPosition({ item, selected }: StakingPositionProps) {
         }}
         size={14}
         currencyName={CurrencyNameEnum.cTAZ}
-        color={colors.text}
+        color={colors.fgDefault}
         amtZec={item.amount}
         privacy={false}
       />

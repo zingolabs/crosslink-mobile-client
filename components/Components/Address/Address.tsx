@@ -1,7 +1,7 @@
-/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import { TextStyle } from 'react-native';
 import Button from '../Button';
+import { mono } from '../../../app/theme';
 
 type AddressProps = {
   address: string;
@@ -30,11 +30,7 @@ const Address: React.FunctionComponent<AddressProps> = ({
       fullWidth={false}
       onPress={onPress ? onPress : () => console.log('onPress')}
       title={shortAddress}
-      textStyle={{
-        ...style,
-        fontSize: 16,
-        fontFamily: 'monospace',
-      }}
+      textStyle={[mono, style]}
     />
   );
 };

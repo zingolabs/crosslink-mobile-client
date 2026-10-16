@@ -8,7 +8,6 @@ import {
   Dimensions,
 } from 'react-native';
 
-import { useTheme } from '@react-navigation/native';
 import { PieChart, pieDataItem } from 'react-native-gifted-charts';
 import { Text as SvgText } from 'react-native-svg';
 import { faQrcode } from '@fortawesome/free-solid-svg-icons';
@@ -17,7 +16,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 
 import RegText from '../Components/RegText';
 import ZecAmount from '../Components/ZecAmount';
-import { AppDrawerParamList, ThemeType } from '../../app/types';
+import { AppDrawerParamList } from '../../app/types';
 import { ContextAppLoaded } from '../../app/context';
 import Utils from '../../app/utils';
 import FadeText from '../Components/FadeText';
@@ -32,6 +31,7 @@ import {
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { DrawerScreenProps } from '@react-navigation/drawer';
+import { useTheme } from '../../app/theme';
 
 type DataType = {
   svg: {
@@ -66,7 +66,7 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
     removeFirstSnackbar,
     setPrivacyOption,
   } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.Insight;
 
@@ -131,12 +131,12 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
             address: item.address,
             tag: item.tag,
             svg: {
-              fill: item.address === 'fee' ? colors.zingo : randomColors[index],
+              fill: item.address === 'fee' ? colors.fgMuted : randomColors[index],
             },
-            color: item.address === 'fee' ? colors.zingo : randomColors[index],
+            color: item.address === 'fee' ? colors.fgMuted : randomColors[index],
             labelLineConfig: {
               color:
-                item.address === 'fee' ? colors.zingo : randomColors[index],
+                item.address === 'fee' ? colors.fgMuted : randomColors[index],
             },
             key: `pie-${index}`,
           };
@@ -146,7 +146,7 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
       setExpandAddress(newExpandAddress);
       setLoading(false);
     })();
-  }, [colors.zingo, tab]);
+  }, [colors.fgMuted, tab]);
 
   const selectExpandAddress = (index: number) => {
     let newExpandAddress = Array(expandAddress.length).fill(false);
@@ -302,7 +302,7 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
       <View
         style={{
           flex: 1,
-          backgroundColor: colors.background,
+          backgroundColor: colors.bgCanvas,
         }}
       >
         <Header
@@ -328,7 +328,7 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
               style={{
                 width: (dimensions.width - 20) / 3,
                 alignItems: 'center',
-                borderBottomColor: colors.primary,
+                borderBottomColor: colors.borderAccent,
                 borderBottomWidth: tab === 'sent' ? 2 : 0,
                 paddingBottom: 10,
               }}
@@ -337,7 +337,7 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
                 style={{
                   fontWeight: tab === 'sent' ? 'bold' : 'normal',
                   fontSize: tab === 'sent' ? 15 : 14,
-                  color: colors.text,
+                  color: colors.fgDefault,
                 }}
               >
                 {translate('insight.sent') as string}
@@ -345,7 +345,7 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
               <RegText
                 style={{
                   fontSize: 11,
-                  color: tab === 'sent' ? colors.primary : colors.text,
+                  color: tab === 'sent' ? colors.fgAccent : colors.fgDefault,
                 }}
               >
                 ({translate('insight.sent-text') as string})
@@ -357,7 +357,7 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
               style={{
                 width: (dimensions.width - 20) / 3,
                 alignItems: 'center',
-                borderBottomColor: colors.primary,
+                borderBottomColor: colors.borderAccent,
                 borderBottomWidth: tab === 'sends' ? 2 : 0,
                 paddingBottom: 10,
               }}
@@ -366,7 +366,7 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
                 style={{
                   fontWeight: tab === 'sends' ? 'bold' : 'normal',
                   fontSize: tab === 'sends' ? 15 : 14,
-                  color: colors.text,
+                  color: colors.fgDefault,
                 }}
               >
                 {translate('insight.sends') as string}
@@ -374,7 +374,7 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
               <RegText
                 style={{
                   fontSize: 11,
-                  color: tab === 'sends' ? colors.primary : colors.text,
+                  color: tab === 'sends' ? colors.fgAccent : colors.fgDefault,
                 }}
               >
                 ({translate('insight.sends-text') as string})
@@ -386,7 +386,7 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
               style={{
                 width: (dimensions.width - 20) / 3,
                 alignItems: 'center',
-                borderBottomColor: colors.primary,
+                borderBottomColor: colors.borderAccent,
                 borderBottomWidth: tab === 'memobytes' ? 2 : 0,
                 paddingBottom: 10,
               }}
@@ -395,7 +395,7 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
                 style={{
                   fontWeight: tab === 'memobytes' ? 'bold' : 'normal',
                   fontSize: tab === 'memobytes' ? 15 : 14,
-                  color: colors.text,
+                  color: colors.fgDefault,
                 }}
               >
                 {translate('insight.memobytes') as string}
@@ -403,7 +403,7 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
               <RegText
                 style={{
                   fontSize: 11,
-                  color: tab === 'memobytes' ? colors.primary : colors.text,
+                  color: tab === 'memobytes' ? colors.fgAccent : colors.fgDefault,
                 }}
               >
                 ({translate('insight.memobytes-text') as string})
@@ -429,7 +429,7 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
             {loading ? (
               <ActivityIndicator
                 size="large"
-                color={colors.primary}
+                color={colors.fgAccent}
                 style={{ marginTop: 100 }}
               />
             ) : (
@@ -449,14 +449,14 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
                     }}
                     strokeWidth={4}
                     donut={true}
-                    innerCircleColor={colors.background}
+                    innerCircleColor={colors.bgCanvas}
                     innerCircleBorderWidth={0}
-                    innerCircleBorderColor={colors.background}
-                    strokeColor={colors.background}
+                    innerCircleBorderColor={colors.bgCanvas}
+                    strokeColor={colors.bgCanvas}
                     showValuesAsTooltipText={true}
                     showText
                     externalLabelComponent={renderExternalLabel}
-                    textBackgroundColor={colors.background}
+                    textBackgroundColor={colors.bgCanvas}
                     data={pieAmounts}
                     innerRadius={dimensions.width * 0.09}
                   />
@@ -481,7 +481,7 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
                       return line(item, index);
                     })}
                   <View
-                    style={{ height: 1, backgroundColor: colors.primary }}
+                    style={{ height: 1, backgroundColor: colors.bgAccent }}
                   />
                   {pieAmounts
                     .filter(item => item.address !== 'fee')

@@ -5,6 +5,11 @@ export enum RouteEnum {
   LoadedApp = 'LoadedApp',
 
   Servers = 'Servers',
+  StartMenu = 'StartMenu',
+  ChooseIndexer = 'ChooseIndexer',
+  ListedIndexers = 'ListedIndexers',
+  CustomIndexer = 'CustomIndexer',
+  Import = 'Import',
 
   MainTabs = 'MainTabs',
 

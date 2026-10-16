@@ -11,7 +11,7 @@ import {
 import Clipboard from '@react-native-clipboard/clipboard';
 import moment from 'moment';
 
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
 import {
   SnackbarDurationEnum,
@@ -25,7 +25,7 @@ import Utils from '../../../app/utils';
 import RegText from '../../Components/RegText';
 import ZecAmount from '../../Components/ZecAmount';
 import FadeText from '../../Components/FadeText';
-import { AppDrawerParamList, ThemeType } from '../../../app/types';
+import { AppDrawerParamList } from '../../../app/types';
 import { ContextAppLoaded } from '../../../app/context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import Stake from '../../../assets/icons/stake-white.svg';
@@ -41,6 +41,7 @@ import { ToastProvider, useToast } from 'react-native-toastier';
 import { DrawerScreenProps } from '@react-navigation/drawer';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../../Header';
+import { useTheme } from '../../../app/theme';
 
 type ValueTransferDetailProps = DrawerScreenProps<
   AppDrawerParamList,
@@ -61,7 +62,7 @@ const ValueTransferDetail: React.FunctionComponent<
     snackbars,
     removeFirstSnackbar,
   } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.ValueTransferDetail;
 
@@ -82,7 +83,7 @@ const ValueTransferDetail: React.FunctionComponent<
 
   const memo = valueTransfer.memos;
 
-  const iconColor = Utils.valueTransferKindColor(colors.text, valueTransfer);
+  const iconColor = Utils.valueTransferKindColor(colors.fgDefault, valueTransfer);
 
   const icon =
     valueTransfer.kind === ValueTransferKindEnum.Received ||
@@ -140,7 +141,7 @@ const ValueTransferDetail: React.FunctionComponent<
       <KeyboardAvoidingView
         style={{
           flex: 1,
-          backgroundColor: colors.background,
+          backgroundColor: colors.bgCanvas,
         }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
@@ -171,14 +172,14 @@ const ValueTransferDetail: React.FunctionComponent<
               margin: 15,
               padding: 10,
               borderRadius: 30,
-              backgroundColor: colors.secondary,
+              backgroundColor: colors.bgSurface,
               paddingBottom: 40,
             }}
           >
             <View
               style={{
                 padding: 15,
-                backgroundColor: colors.background,
+                backgroundColor: colors.bgCanvas,
                 borderRadius: 50,
                 marginTop: -60,
               }}
@@ -187,7 +188,7 @@ const ValueTransferDetail: React.FunctionComponent<
                 style={{
                   padding: 20,
                   backgroundColor: Utils.valueTransferKindColor(
-                    colors.secondary,
+                    colors.bgSurface,
                     valueTransfer,
                   ),
                   borderRadius: 50,
@@ -272,7 +273,7 @@ const ValueTransferDetail: React.FunctionComponent<
                     RPCValueTransferStatusEnum.failed) && (
                   <FadeText
                     style={{
-                      color: colors.text,
+                      color: colors.fgDefault,
                       fontSize: 12,
                       opacity: 1,
                       fontWeight: '700',
@@ -291,7 +292,7 @@ const ValueTransferDetail: React.FunctionComponent<
                     GlobalConst.minConfirmations && (
                     <FadeText
                       style={{
-                        color: colors.text,
+                        color: colors.fgDefault,
                         fontSize: 12,
                         opacity: 1,
                         fontWeight: '700',
@@ -319,7 +320,7 @@ const ValueTransferDetail: React.FunctionComponent<
               margin: 15,
               padding: 10,
               borderRadius: 30,
-              backgroundColor: colors.secondary,
+              backgroundColor: colors.bgSurface,
             }}
           >
             {(valueTransfer.kind === ValueTransferKindEnum.CreateBond ||
@@ -332,7 +333,7 @@ const ValueTransferDetail: React.FunctionComponent<
                   alignItems: 'center',
                   padding: 10,
                   width: '100%',
-                  borderBottomColor: colors.zingo,
+                  borderBottomColor: colors.borderMuted,
                   borderBottomWidth: 1,
                 }}
               >
@@ -368,7 +369,7 @@ const ValueTransferDetail: React.FunctionComponent<
                 alignItems: 'center',
                 padding: 10,
                 width: '100%',
-                borderBottomColor: colors.zingo,
+                borderBottomColor: colors.borderMuted,
                 borderBottomWidth: 1,
               }}
             >
@@ -383,7 +384,7 @@ const ValueTransferDetail: React.FunctionComponent<
                 alignItems: 'center',
                 padding: 10,
                 width: '100%',
-                borderBottomColor: colors.zingo,
+                borderBottomColor: colors.borderMuted,
                 borderBottomWidth: 1,
               }}
             >
@@ -405,7 +406,7 @@ const ValueTransferDetail: React.FunctionComponent<
                   alignItems: 'flex-start',
                   padding: 10,
                   width: '100%',
-                  borderBottomColor: colors.zingo,
+                  borderBottomColor: colors.borderMuted,
                   borderBottomWidth: 1,
                 }}
               >
@@ -439,7 +440,7 @@ const ValueTransferDetail: React.FunctionComponent<
                 alignItems: 'flex-start',
                 padding: 10,
                 width: '100%',
-                borderBottomColor: colors.zingo,
+                borderBottomColor: colors.borderMuted,
                 borderBottomWidth: 1,
               }}
             >
@@ -470,7 +471,7 @@ const ValueTransferDetail: React.FunctionComponent<
                 alignItems: 'center',
                 padding: 10,
                 width: '100%',
-                borderBottomColor: colors.zingo,
+                borderBottomColor: colors.borderMuted,
                 borderBottomWidth: 1,
               }}
             >
@@ -491,7 +492,7 @@ const ValueTransferDetail: React.FunctionComponent<
                 alignItems: 'center',
                 padding: 10,
                 width: '100%',
-                borderBottomColor: colors.zingo,
+                borderBottomColor: colors.borderMuted,
                 borderBottomWidth: 1,
               }}
             >
@@ -507,7 +508,7 @@ const ValueTransferDetail: React.FunctionComponent<
                   alignItems: 'center',
                   padding: 10,
                   width: '100%',
-                  borderBottomColor: colors.zingo,
+                  borderBottomColor: colors.borderMuted,
                   borderBottomWidth: 1,
                 }}
               >

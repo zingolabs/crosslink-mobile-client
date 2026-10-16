@@ -4,9 +4,7 @@ import { View, Text, Dimensions } from 'react-native';
 
 import RegText from '../../../components/Components/RegText';
 
-import { useTheme } from '@react-navigation/native';
 import { ContextAppLoaded } from '../../../app/context';
-import { ThemeType } from '../../../app/types';
 import simpleBiometrics from '../../../app/simpleBiometrics';
 import {
   MenuItemEnum,
@@ -14,6 +12,7 @@ import {
   SelectServerEnum,
 } from '../../../app/AppState';
 import { DrawerContentScrollView } from '@react-navigation/drawer';
+import { useTheme } from '../../../app/theme';
 
 type MenuProps = {
   onItemSelected: (item: MenuItemEnum) => void;
@@ -37,7 +36,7 @@ const Menu: React.FunctionComponent<MenuProps> = ({
     selectIndexerServer,
     netInfo,
   } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
 
   const dimensions = {
     width: Dimensions.get('window').width,
@@ -87,23 +86,23 @@ const Menu: React.FunctionComponent<MenuProps> = ({
     <View
       style={{
         flex: 1,
-        backgroundColor: colors.sideMenuBackground,
+        backgroundColor: colors.bgChrome,
         alignItems: 'stretch',
       }}
     >
       <DrawerContentScrollView
         scrollsToTop={false}
         style={{
-          backgroundColor: colors.sideMenuBackground,
+          backgroundColor: colors.bgChrome,
         }}
       >
         <RegText
-          color={colors.money}
+          color={colors.fgMuted}
           style={{ marginVertical: 10, marginLeft: 30 }}
         >
           {translate('loadedapp.options') as string}
         </RegText>
-        <View style={{ height: 1, backgroundColor: colors.primary }} />
+        <View style={{ height: 1, backgroundColor: colors.bgAccent }} />
 
         <View style={{ display: 'flex', marginLeft: 20 }}>
           <RegText
@@ -120,15 +119,15 @@ const Menu: React.FunctionComponent<MenuProps> = ({
           >
             {translate('loadedapp.settings') as string}
           </RegText>
-          selectIndexerServer !== SelectServerEnum.offline && (
-          <RegText
-            testID="menu.info"
-            onPress={() => onItemSelectedWrapper(MenuItemEnum.Info)}
-            style={item}
-          >
-            {translate('loadedapp.info') as string}
-          </RegText>
-          )
+          {selectIndexerServer !== SelectServerEnum.offline && (
+            <RegText
+              testID="menu.info"
+              onPress={() => onItemSelectedWrapper(MenuItemEnum.Info)}
+              style={item}
+            >
+              {translate('loadedapp.info') as string}
+            </RegText>
+          )}
           {!(valueTransfersTotal !== null && valueTransfersTotal === 0) &&
             false && (
               <RegText
@@ -203,11 +202,11 @@ const Menu: React.FunctionComponent<MenuProps> = ({
           position: 'absolute',
           bottom: 5,
           flexDirection: 'row',
-          backgroundColor: colors.sideMenuBackground,
+          backgroundColor: colors.bgChrome,
         }}
       >
-        <Text style={{ fontSize: 8, color: colors.border }}>Version : </Text>
-        <Text style={{ fontSize: 8, color: colors.primaryDisabled }}>
+        <Text style={{ fontSize: 8, color: colors.fgFaint }}>Version : </Text>
+        <Text style={{ fontSize: 8, color: colors.fgAccentDisabled }}>
           {translate('version') as string}
         </Text>
       </View>

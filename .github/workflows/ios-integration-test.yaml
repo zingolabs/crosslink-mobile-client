@@ -47,13 +47,11 @@ jobs:
       - name: Native rust cache
         uses: actions/cache/restore@v4
         with:
-          path: rust/lib/Generated
+          path: |
+            ios/Zingolib.xcframework
+            ios/zingo.swift
           key: native-ios-uniffi-universal-${{ env.CACHE-KEY }}
           fail-on-cache-miss: true
-
-      - name: Copy libs to ios folder
-        working-directory: rust/lib/Generated
-        run: cp ./*.* ../../../ios
 
       - name: Install nvm with node 20.9.0
         run: |

@@ -8,12 +8,12 @@ import {
   Platform,
 } from 'react-native';
 
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import Clipboard from '@react-native-clipboard/clipboard';
 
 import RegText from '../Components/RegText';
 import FadeText from '../Components/FadeText';
-import { AppDrawerParamList, ThemeType } from '../../app/types';
+import { AppDrawerParamList } from '../../app/types';
 import { ContextAppLoaded } from '../../app/context';
 import {
   SnackbarDurationEnum,
@@ -28,6 +28,7 @@ import { DrawerScreenProps } from '@react-navigation/drawer';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../Header';
 import { BlurView } from '@react-native-community/blur';
+import { useTheme } from '../../app/theme';
 
 type SeedProps = DrawerScreenProps<AppDrawerParamList, RouteEnum.Seed>;
 
@@ -43,7 +44,7 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
     removeFirstSnackbar,
     getUfvk,
   } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   // when this screen is open from LoadingApp (new wallet)
   // is using the standard modal from react-native
   const { clear } = useToast();
@@ -188,10 +189,10 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                         style={{
                           flexDirection: 'row',
                           justifyContent: 'flex-start',
-                          borderColor: colors.border,
+                          borderColor: colors.borderFaint,
                           borderWidth: 1,
                           borderRadius: 25,
-                          backgroundColor: colors.secondary,
+                          backgroundColor: colors.bgSurface,
                           width: '30%',
                           minWidth: '30%',
                           alignItems: 'center',
@@ -208,7 +209,7 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                           style={{
                             flexGrow: 1,
                             flexShrink: 1,
-                            color: colors.text,
+                            color: colors.fgDefault,
                             fontWeight: '400',
                             fontSize: 15,
                             lineHeight: 15,
@@ -273,7 +274,7 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                   <TouchableOpacity
                     onPress={() => setSeedBlurred(false)}
                     style={{
-                      backgroundColor: colors.primary,
+                      backgroundColor: colors.bgAccent,
                       borderRadius: 20,
                       paddingHorizontal: 18,
                       paddingVertical: 10,
@@ -322,8 +323,8 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                   justifyContent: 'center',
                   alignItems: 'center',
                   borderRadius: 16,
-                  backgroundColor: colors.secondary,
-                  borderColor: colors.border,
+                  backgroundColor: colors.bgSurface,
+                  borderColor: colors.borderFaint,
                   borderWidth: 1,
                   paddingVertical: 10,
                   paddingHorizontal: 20,
@@ -332,7 +333,7 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
               >
                 <RegText
                   style={{
-                    color: colors.text,
+                    color: colors.fgDefault,
                     fontSize: 16,
                     fontWeight: 600,
                   }}
@@ -358,12 +359,12 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
               style={{
                 flexDirection: 'row',
                 justifyContent: 'flex-start',
-                borderColor: colors.border,
+                borderColor: colors.borderFaint,
                 borderWidth: 1,
                 borderRadius: 25,
                 marginTop: 10,
                 marginBottom: 10,
-                backgroundColor: colors.secondary,
+                backgroundColor: colors.bgSurface,
                 width: '100%',
                 minWidth: '50%',
                 minHeight: 48,
@@ -403,7 +404,7 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                   }
                 }}
               >
-                <RegText color={colors.text} style={{ textAlign: 'center' }}>
+                <RegText color={colors.fgDefault} style={{ textAlign: 'center' }}>
                   {!expandBirthday
                     ? Utils.trimToSmall(birthdayNumber, 1)
                     : birthdayNumber}
@@ -411,17 +412,17 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
               </TouchableOpacity>
             </View>
           )}
-          {!!ufvk ? (
+          {ufvk ? (
             <View
               style={{
                 flexDirection: 'row',
                 justifyContent: 'flex-start',
-                borderColor: colors.border,
+                borderColor: colors.borderFaint,
                 borderWidth: 1,
                 borderRadius: 25,
                 marginTop: 10,
                 marginBottom: 10,
-                backgroundColor: colors.secondary,
+                backgroundColor: colors.bgSurface,
                 width: '100%',
                 minWidth: '50%',
                 minHeight: 48,
@@ -452,7 +453,7 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                   }
                 }}
               >
-                <RegText color={colors.text} style={{ textAlign: 'center' }}>
+                <RegText color={colors.fgDefault} style={{ textAlign: 'center' }}>
                   {Utils.trimToSmall(ufvk, 12)}
                 </RegText>
               </TouchableOpacity>

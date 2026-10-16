@@ -13,8 +13,7 @@ import {
   NativeSyntheticEvent,
 } from 'react-native';
 
-import { useTheme } from '@react-navigation/native';
-import { AppDrawerParamList, ThemeType } from '../../app/types';
+import { AppDrawerParamList } from '../../app/types';
 import { ContextAppLoaded } from '../../app/context';
 import { Header } from '../Header';
 import { GlobalConst, RouteEnum, ScreenEnum } from '../../app/AppState';
@@ -25,6 +24,7 @@ import { ToastProvider, useToast } from 'react-native-toastier';
 import { DrawerScreenProps } from '@react-navigation/drawer';
 import { XIcon } from '../Components/Icons/XIcon';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
+import { useTheme } from '../../app/theme';
 
 type MemoProps = DrawerScreenProps<AppDrawerParamList, RouteEnum.Memo>;
 
@@ -36,7 +36,7 @@ const Memo: React.FunctionComponent<MemoProps> = ({ navigation, route }) => {
   const context = useContext(ContextAppLoaded);
   const { translate, defaultUnifiedAddress, snackbars, removeFirstSnackbar } =
     context;
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.Memo;
 
@@ -100,13 +100,13 @@ const Memo: React.FunctionComponent<MemoProps> = ({ navigation, route }) => {
         }
         style={{
           flex: 1,
-          backgroundColor: colors.background,
+          backgroundColor: colors.bgCanvas,
         }}
       >
         <View
           style={{
             flex: 1,
-            backgroundColor: colors.background,
+            backgroundColor: colors.bgCanvas,
           }}
         >
           <Header
@@ -144,7 +144,7 @@ const Memo: React.FunctionComponent<MemoProps> = ({ navigation, route }) => {
                 flexGrow: 1,
                 borderWidth: 1,
                 borderRadius: 5,
-                borderColor: colors.text,
+                borderColor: colors.fgDefault,
                 minWidth: 48,
                 minHeight: 48,
                 maxHeight: dimensions.height * 0.4,
@@ -156,7 +156,7 @@ const Memo: React.FunctionComponent<MemoProps> = ({ navigation, route }) => {
                 multiline
                 style={{
                   flex: 1,
-                  color: colors.text,
+                  color: colors.fgDefault,
                   fontWeight: '600',
                   fontSize: 14,
                   minWidth: 48,
@@ -172,13 +172,13 @@ const Memo: React.FunctionComponent<MemoProps> = ({ navigation, route }) => {
                 ) => setMemo(e.nativeEvent.text)}
                 maxLength={GlobalConst.memoMaxLength}
               />
-              {memo && (
+              {!!memo && (
                 <TouchableOpacity
                   onPress={() => {
                     setMemo('');
                   }}
                 >
-                  <XIcon color={colors.background} width={20} height={20} />
+                  <XIcon color={colors.bgCanvas} width={20} height={20} />
                 </TouchableOpacity>
               )}
             </View>
@@ -200,7 +200,7 @@ const Memo: React.FunctionComponent<MemoProps> = ({ navigation, route }) => {
                       defaultUnifiedAddress,
                     ) > GlobalConst.memoMaxLength
                       ? 'red'
-                      : colors.text,
+                      : colors.fgDefault,
                 }}
               >{`${Utils.countMemoBytes(memo, includeUAMessage, defaultUnifiedAddress)} `}</FadeText>
               <FadeText style={{ marginTop: 0 }}>

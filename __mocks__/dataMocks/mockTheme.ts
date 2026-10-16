@@ -1,37 +1,46 @@
-import { DefaultTheme } from '@react-navigation/native';
-import { ThemeType } from '../../app/types';
+import type { AppTheme, ThemeColors } from '../../app/theme';
 
-export const mockTheme: ThemeType = {
-  ...DefaultTheme,
-  dark: true,
-  colors: {
-    background: '#011401', //'#010101',
-    card: '#011401', //'#401717',
-    border: '#ffffff',
-    primary: '#18bd18', //'#df4100',
-    primaryDisabled: '#5a8c5a', //'rgba(90, 140, 90, 1)',
-    secondaryDisabled: '#233623',
-    text: '#c3c3c3',
-    zingo: '#888888',
-    placeholder: '#888888',
-    money: '#ffffff',
-    syncing: '#ebff5a',
-    notification: '',
-    sideMenuBackground: '#040C17',
-    warning: {
-      background: '#262527',
-      border: '#65491C',
-      primary: '#F99D00',
-      primaryDark: '#DD7500',
-      title: '#E1AA1B',
-      text: '#FEE587',
-    },
-    danger: {
-      primary: '#dc2626',
-      background: '#240E0C',
-      border: '#572317',
-      text: '#FFB972',
-    },
-    modal: '#1e293b',
-  },
+// These values predate the token layer and differ from the real palette on
+// purpose: the snapshot suites are baselined on them.
+const colors: ThemeColors = {
+  bgCanvas: '#011401',
+  bgSurface: '#222223',
+  bgChrome: '#040C17',
+
+  fgDefault: '#c3c3c3',
+
+  fgMuted: '#888888',
+  borderMuted: '#888888',
+  bgMuted: '#888888',
+
+  fgSubtle: '#888888',
+  borderSubtle: '#888888',
+
+  fgFaint: '#ffffff',
+  borderFaint: '#ffffff',
+  bgFaint: '#ffffff',
+
+  fgAccent: '#18bd18',
+  borderAccent: '#18bd18',
+  bgAccent: '#18bd18',
+  bgAccentTint: '#18bd1826',
+  fgAccentDisabled: '#5a8c5a',
+  borderAccentDisabled: '#5a8c5a',
+
+  fgSuccess: '#30D158',
+
+  fgSyncing: '#ebff5a',
+  bgSyncing: '#ebff5a',
+
+  fgWarning: '#F99D00',
+  fgWarningEmphasis: '#E1AA1B',
+  fgWarningMuted: '#FEE587',
+  borderWarning: '#65491C',
+  bgWarning: '#262527',
+
+  fgDanger: '#dc2626',
+  borderDanger: '#dc2626',
+  bgDanger: '#dc2626',
 };
+
+export const mockTheme: AppTheme = { colors };

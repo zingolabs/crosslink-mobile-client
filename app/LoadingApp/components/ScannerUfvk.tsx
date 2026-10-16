@@ -4,12 +4,11 @@ import { ContextAppLoading } from '../../context';
 import Scanner from '../../../components/Scanner';
 import { Header } from '../../../components/Header';
 
-import { useTheme } from '@react-navigation/native';
-import { ThemeType } from '../../types';
 import { View } from 'react-native';
 import Snackbars from '../../../components/Components/Snackbars';
 import { ToastProvider } from 'react-native-toastier';
 import { ScreenEnum } from '../../AppState';
+import { useTheme } from '../../theme';
 
 type ScannerUfvkProps = {
   setUfvkText: (k: string) => void;
@@ -21,7 +20,7 @@ const ScannerUfvk: React.FunctionComponent<ScannerUfvkProps> = ({
 }) => {
   const context = useContext(ContextAppLoading);
   const { translate, snackbars, removeFirstSnackbar } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const screenName = ScreenEnum.ScannerUfvk;
 
   const onRead = async (scandata: string) => {
@@ -42,7 +41,7 @@ const ScannerUfvk: React.FunctionComponent<ScannerUfvkProps> = ({
       <View
         style={{
           flex: 1,
-          backgroundColor: colors.background,
+          backgroundColor: colors.bgCanvas,
         }}
       >
         <Header

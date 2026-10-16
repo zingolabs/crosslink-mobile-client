@@ -16,11 +16,10 @@ import {
   Alert,
   TouchableWithoutFeedback,
 } from 'react-native';
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCheckCircle, faCircle } from '@fortawesome/free-solid-svg-icons';
-import { ThemeType } from '../../../app/types';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
 import { DrawerScreenProps } from '@react-navigation/drawer';
 import { AppDrawerParamList } from '../../../app/types';
@@ -39,6 +38,7 @@ import { HeaderTitle } from '../../Header';
 import ChevronDown from '../../../assets/icons/chevron-down.svg';
 import RegText from '../../Components/RegText';
 import StakingDayBubble from '../StakingDayBubble';
+import { useTheme } from '../../../app/theme';
 
 const PRESET_AMOUNTS = [0.01, 0.1, 1, 10];
 
@@ -51,7 +51,7 @@ type AddStakeScreenProps = DrawerScreenProps<
 
 const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
   const navigation: any = useNavigation();
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const {
     totalBalance,
@@ -189,7 +189,7 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
       <KeyboardAvoidingView
         style={{
           flex: 1,
-          backgroundColor: colors.background,
+          backgroundColor: colors.bgCanvas,
         }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={
@@ -210,7 +210,7 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
           style={{
             fontSize: 16,
             fontWeight: '600',
-            color: colors.text,
+            color: colors.fgDefault,
             marginBottom: 8,
             marginTop: 15,
             marginHorizontal: 20,
@@ -226,11 +226,11 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
             alignItems: 'center',
             borderRadius: 20,
             marginBottom: 10,
-            backgroundColor: colors.secondary,
+            backgroundColor: colors.bgSurface,
             padding: 16,
             marginHorizontal: 10,
             borderWidth: 0.5,
-            borderColor: colors.text,
+            borderColor: colors.fgDefault,
           }}
         >
           <View
@@ -262,12 +262,12 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
                   style={{
                     flexGrow: 1,
                     flexShrink: 1,
-                    color: colors.text,
+                    color: colors.fgDefault,
                     fontSize: 17,
                     fontWeight: '400',
                   }}
                   placeholder="Tap here for finalizer address"
-                  placeholderTextColor={colors.placeholder}
+                  placeholderTextColor={colors.fgSubtle}
                   value={finalizerText}
                   editable={true}
                   onChangeText={setFinalizerText}
@@ -284,7 +284,7 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
                       style={{
                         justifyContent: 'center',
                         alignItems: 'center',
-                        backgroundColor: colors.zingo,
+                        backgroundColor: colors.bgMuted,
                         borderRadius: 11,
                         height: 22,
                         width: 22,
@@ -292,7 +292,7 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
                       }}
                     >
                       <RegText
-                        style={{ color: colors.background, marginTop: -3 }}
+                        style={{ color: colors.bgCanvas, marginTop: -3 }}
                       >
                         x
                       </RegText>
@@ -321,7 +321,7 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
             width={30}
             height={30}
             style={{ marginLeft: 5 }}
-            color={colors.text}
+            color={colors.fgDefault}
           />
         </View>
 
@@ -341,7 +341,7 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
                 }}
                 size={36}
                 currencyName={info.currencyName}
-                color={hasSelection ? colors.text : colors.placeholder}
+                color={hasSelection ? colors.fgDefault : colors.fgSubtle}
                 amtZec={selectedAmount ?? 0}
                 privacy={privacy}
               />
@@ -358,7 +358,7 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
                       styles.pill,
                       isSelected && {
                         backgroundColor: '#1A1A1A',
-                        borderColor: colors.primary,
+                        borderColor: colors.borderAccent,
                       },
                     ]}
                     onPress={() => setSelectedAmount(value)}
@@ -366,7 +366,7 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
                     <Text
                       style={[
                         styles.pillAmount,
-                        { color: isSelected ? colors.primary : colors.text },
+                        { color: isSelected ? colors.fgAccent : colors.fgDefault },
                       ]}
                     >
                       +{value}
@@ -376,8 +376,8 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
                         styles.pillLabel,
                         {
                           color: isSelected
-                            ? colors.primary
-                            : colors.placeholder,
+                            ? colors.fgAccent
+                            : colors.fgSubtle,
                         },
                       ]}
                     >
@@ -447,18 +447,18 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
               style={[
                 styles.modalCard,
                 {
-                  backgroundColor: colors.background,
-                  borderColor: colors.border,
+                  backgroundColor: colors.bgCanvas,
+                  borderColor: colors.borderFaint,
                 },
               ]}
             >
               {modalState === 'sending' && (
                 <>
-                  <ActivityIndicator size="large" color={colors.text} />
+                  <ActivityIndicator size="large" color={colors.fgDefault} />
                   <Text
                     style={{
                       marginTop: 16,
-                      color: colors.text,
+                      color: colors.fgDefault,
                       fontSize: 16,
                       textAlign: 'center',
                     }}
@@ -473,12 +473,12 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
                   <FontAwesomeIcon
                     icon={faCheckCircle}
                     size={40}
-                    color={colors.primary}
+                    color={colors.fgAccent}
                   />
                   <Text
                     style={{
                       marginTop: 16,
-                      color: colors.text,
+                      color: colors.fgDefault,
                       fontSize: 18,
                       fontWeight: '600',
                       textAlign: 'center',

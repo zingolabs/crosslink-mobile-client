@@ -8,7 +8,6 @@ import {
   Dimensions,
 } from 'react-native';
 
-import { useTheme } from '@react-navigation/native';
 import { PieChart, pieDataItem } from 'react-native-gifted-charts';
 import { Text as SvgText } from 'react-native-svg';
 import { faCircle } from '@fortawesome/free-solid-svg-icons';
@@ -17,7 +16,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 
 import RegText from '../Components/RegText';
 import ZecAmount from '../Components/ZecAmount';
-import { AppDrawerParamList, ThemeType } from '../../app/types';
+import { AppDrawerParamList } from '../../app/types';
 import { ContextAppLoaded } from '../../app/context';
 import Utils from '../../app/utils';
 import FadeText from '../Components/FadeText';
@@ -33,6 +32,7 @@ import {
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { DrawerScreenProps } from '@react-navigation/drawer';
+import { useTheme } from '../../app/theme';
 
 type DataType = {
   svg: {
@@ -73,7 +73,7 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
     staked,
     globalStaked,
   } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.Insight;
 
@@ -131,7 +131,7 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
       setLoading(false);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [colors.zingo, globalStaked, staked, tab]);
+  }, [colors.fgMuted, globalStaked, staked, tab]);
 
   const selectExpandAddress = (index: number) => {
     let newExpandAddress = Array(expandAddress.length).fill(false);
@@ -382,7 +382,7 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
       <View
         style={{
           flex: 1,
-          backgroundColor: colors.background,
+          backgroundColor: colors.bgCanvas,
         }}
       >
         <HeaderTitle
@@ -430,7 +430,7 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
                 style={{
                   fontWeight: tab === 'my' ? 'bold' : 'normal',
                   fontSize: 15,
-                  color: colors.text,
+                  color: colors.fgDefault,
                 }}
               >
                 {'My Staking'}
@@ -460,7 +460,7 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
                 style={{
                   fontWeight: tab === 'network' ? 'bold' : 'normal',
                   fontSize: 15,
-                  color: colors.text,
+                  color: colors.fgDefault,
                 }}
               >
                 {'Global Network'}
@@ -490,7 +490,7 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
             {loading ? (
               <ActivityIndicator
                 size="large"
-                color={colors.primary}
+                color={colors.fgAccent}
                 style={{ marginTop: 100 }}
               />
             ) : (
@@ -505,14 +505,14 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
                       }}
                       strokeWidth={4}
                       donut={true}
-                      innerCircleColor={colors.background}
+                      innerCircleColor={colors.bgCanvas}
                       innerCircleBorderWidth={0}
-                      innerCircleBorderColor={colors.background}
-                      strokeColor={colors.background}
+                      innerCircleBorderColor={colors.bgCanvas}
+                      strokeColor={colors.bgCanvas}
                       showValuesAsTooltipText={true}
                       showText
                       externalLabelComponent={renderExternalLabel}
-                      textBackgroundColor={colors.background}
+                      textBackgroundColor={colors.bgCanvas}
                       data={pieAmounts}
                       innerRadius={dimensions.width * 0.14}
                     />

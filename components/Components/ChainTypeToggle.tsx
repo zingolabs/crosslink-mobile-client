@@ -1,12 +1,11 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
-import { useTheme } from '@react-navigation/native';
 
-import { ThemeType } from '../../app/types';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCashRegister } from '@fortawesome/free-solid-svg-icons';
 import { ChainNameEnum, TranslateType } from '../../app/AppState';
+import { useTheme } from '../../app/theme';
 
 type ChainTypeToggleProps = {
   customServerChainName: string;
@@ -21,7 +20,7 @@ const ChainTypeToggle: React.FunctionComponent<ChainTypeToggleProps> = ({
   translate,
   disabled,
 }) => {
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
 
   return (
     <View
@@ -55,8 +54,8 @@ const ChainTypeToggle: React.FunctionComponent<ChainTypeToggleProps> = ({
                   customServerChainName === ChainNameEnum.mainChainName ? 2 : 1,
                 borderColor:
                   customServerChainName === ChainNameEnum.mainChainName
-                    ? colors.primary
-                    : colors.primaryDisabled,
+                    ? colors.borderAccent
+                    : colors.borderAccentDisabled,
                 borderRadius: 5,
                 paddingHorizontal: 5,
               }}
@@ -64,7 +63,7 @@ const ChainTypeToggle: React.FunctionComponent<ChainTypeToggleProps> = ({
               <Text
                 style={{
                   fontSize: 13,
-                  color: colors.text,
+                  color: colors.fgDefault,
                   marginRight: 5,
                 }}
               >
@@ -74,7 +73,7 @@ const ChainTypeToggle: React.FunctionComponent<ChainTypeToggleProps> = ({
                 <FontAwesomeIcon
                   icon={faCashRegister}
                   size={14}
-                  color={colors.primary}
+                  color={colors.fgAccent}
                 />
               )}
             </View>
@@ -104,8 +103,8 @@ const ChainTypeToggle: React.FunctionComponent<ChainTypeToggleProps> = ({
                 customServerChainName === ChainNameEnum.testChainName ? 2 : 1,
               borderColor:
                 customServerChainName === ChainNameEnum.testChainName
-                  ? colors.primary
-                  : colors.primaryDisabled,
+                  ? colors.borderAccent
+                  : colors.borderAccentDisabled,
               borderRadius: 5,
               paddingHorizontal: 5,
             }}
@@ -113,7 +112,7 @@ const ChainTypeToggle: React.FunctionComponent<ChainTypeToggleProps> = ({
             <Text
               style={{
                 fontSize: 13,
-                color: colors.text,
+                color: colors.fgDefault,
                 marginRight: 5,
               }}
             >
@@ -123,7 +122,7 @@ const ChainTypeToggle: React.FunctionComponent<ChainTypeToggleProps> = ({
               <FontAwesomeIcon
                 icon={faCashRegister}
                 size={14}
-                color={colors.primary}
+                color={colors.fgAccent}
               />
             )}
           </View>
@@ -154,8 +153,8 @@ const ChainTypeToggle: React.FunctionComponent<ChainTypeToggleProps> = ({
                   : 1,
               borderColor:
                 customServerChainName === ChainNameEnum.regtestChainName
-                  ? colors.primary
-                  : colors.primaryDisabled,
+                  ? colors.borderAccent
+                  : colors.borderAccentDisabled,
               borderRadius: 5,
               paddingHorizontal: 5,
             }}
@@ -163,7 +162,7 @@ const ChainTypeToggle: React.FunctionComponent<ChainTypeToggleProps> = ({
             <Text
               style={{
                 fontSize: 13,
-                color: colors.text,
+                color: colors.fgDefault,
                 marginRight: 5,
               }}
             >
@@ -173,7 +172,7 @@ const ChainTypeToggle: React.FunctionComponent<ChainTypeToggleProps> = ({
               <FontAwesomeIcon
                 icon={faCashRegister}
                 size={14}
-                color={colors.primary}
+                color={colors.fgAccent}
               />
             )}
           </View>

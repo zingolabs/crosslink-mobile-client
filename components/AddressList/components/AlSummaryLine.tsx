@@ -1,7 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { useContext } from 'react';
 import { View, TouchableOpacity } from 'react-native';
-import { useTheme } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import {
   faQrcode,
@@ -19,8 +18,8 @@ import {
   ScreenEnum,
 } from '../../../app/AppState';
 import Utils from '../../../app/utils';
-import { ThemeType } from '../../../app/types';
 import { ContextAppLoaded } from '../../../app/context';
+import { useTheme } from '../../../app/theme';
 
 type AlSummaryLineProps = {
   index: number;
@@ -38,7 +37,7 @@ const AlSummaryLine: React.FunctionComponent<AlSummaryLineProps> = ({
 }) => {
   const context = useContext(ContextAppLoaded);
   const { translate, addLastSnackbar } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
 
   const displayAddress: string = item.address
     ? Utils.trimToSmall(item.address, 7)
@@ -69,7 +68,7 @@ const AlSummaryLine: React.FunctionComponent<AlSummaryLineProps> = ({
           marginTop: 15,
           paddingBottom: 15,
           borderBottomWidth: 1,
-          borderBottomColor: colors.border,
+          borderBottomColor: colors.borderFaint,
           opacity: 1,
         }}
       >
@@ -86,7 +85,7 @@ const AlSummaryLine: React.FunctionComponent<AlSummaryLineProps> = ({
                 style={{ marginHorizontal: 10 }}
                 size={24}
                 icon={faTags}
-                color={colors.text}
+                color={colors.fgDefault}
               />
             </View>
             <View style={{ flexDirection: 'row' }}>
@@ -94,7 +93,7 @@ const AlSummaryLine: React.FunctionComponent<AlSummaryLineProps> = ({
                 style={{ marginHorizontal: 10 }}
                 size={24}
                 icon={faWallet}
-                color={colors.text}
+                color={colors.fgDefault}
               />
               <FadeText
                 style={{
@@ -122,7 +121,7 @@ const AlSummaryLine: React.FunctionComponent<AlSummaryLineProps> = ({
               style={{ opacity: 0.8 }}
               size={25}
               icon={faCopy}
-              color={colors.money}
+              color={colors.fgMuted}
             />
           </TouchableOpacity>
         </View>
@@ -135,7 +134,7 @@ const AlSummaryLine: React.FunctionComponent<AlSummaryLineProps> = ({
               doQr();
             }}
           >
-            <FontAwesomeIcon size={30} icon={faQrcode} color={colors.text} />
+            <FontAwesomeIcon size={30} icon={faQrcode} color={colors.fgDefault} />
           </TouchableOpacity>
         </View>
       </View>

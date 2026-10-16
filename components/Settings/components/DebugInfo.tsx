@@ -2,9 +2,7 @@
 import React, { useContext } from 'react';
 import { View, ScrollView } from 'react-native';
 
-import { useTheme } from '@react-navigation/native';
-
-import { AppDrawerParamList, ThemeType } from '../../../app/types';
+import { AppDrawerParamList } from '../../../app/types';
 import { ContextAppLoaded } from '../../../app/context';
 import Snackbars from '../../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
@@ -16,6 +14,7 @@ import { createAlert } from '../../../app/createAlert';
 import { sendEmail } from '../../../app/sendEmail';
 import { HeaderTitle } from '../../Header';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
+import { useTheme } from '../../../app/theme';
 
 type DebugInfoProps = DrawerScreenProps<
   AppDrawerParamList,
@@ -33,7 +32,7 @@ const DebugInfo: React.FunctionComponent<DebugInfoProps> = ({ navigation }) => {
     translate,
     zingolibVersion,
   } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.DebugInfo;
 
@@ -89,7 +88,7 @@ const DebugInfo: React.FunctionComponent<DebugInfoProps> = ({ navigation }) => {
           <View
             style={{
               borderRadius: 26,
-              backgroundColor: colors.secondary,
+              backgroundColor: colors.bgSurface,
               width: '100%',
               marginTop: 20,
               paddingVertical: 10,

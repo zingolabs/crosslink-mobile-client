@@ -7,7 +7,7 @@ import {
   faFaucet,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import {
@@ -19,7 +19,6 @@ import {
   ScreenEnum,
 } from '../../app/AppState';
 import { ContextAppLoaded } from '../../app/context';
-import { ThemeType } from '../../app/types';
 import ZecAmount from '../Components/ZecAmount';
 import { NetInfoStateType } from '@react-native-community/netinfo/src/index';
 import { Animated } from 'react-native';
@@ -28,6 +27,7 @@ import simpleBiometrics from '../../app/simpleBiometrics';
 import { RPCSyncStatusType } from '../../app/rpc/types/RPCSyncStatusType';
 import { isEqual } from 'lodash';
 import SettingsIcon from '../../assets/icons/settings.svg';
+import { useTheme } from '../../app/theme';
 
 type HeaderProps = {
   // general
@@ -93,7 +93,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
     privacy = context.privacy;
   }
 
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
 
   const opacityValue = useRef(new Animated.Value(1)).current;
   const animationRef = useRef<Animated.CompositeAnimation | null>(null);
@@ -185,7 +185,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
             display: 'flex',
             alignItems: 'center',
             paddingBottom: 0,
-            backgroundColor: colors.background,
+            backgroundColor: colors.bgCanvas,
             paddingTop: 10,
             minHeight: !noDrawMenu ? 60 : 25,
           }}
@@ -201,7 +201,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
             >
               <ZecAmount
                 currencyName={info.currencyName}
-                color={colors.text}
+                color={colors.fgDefault}
                 size={36}
                 amtZec={
                   totalBalance
@@ -233,7 +233,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
                     height: 5,
                     width: '100%',
                     borderRadius: 3,
-                    backgroundColor: colors.secondary,
+                    backgroundColor: colors.bgSurface,
                   }}
                 />
                 <View
@@ -253,7 +253,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
                   height: 5,
                   width: '100%',
                   borderRadius: 3,
-                  backgroundColor: colors.syncing,
+                  backgroundColor: colors.bgSyncing,
                 }}
               />
             )}
@@ -428,7 +428,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
                   marginHorizontal: 2.5,
                   paddingHorizontal: 5,
                   paddingVertical: 1,
-                  borderColor: colors.zingo,
+                  borderColor: colors.borderMuted,
                   borderWidth: 1,
                   borderRadius: 10,
                   minWidth: 25,
@@ -479,7 +479,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
                 <View
                   style={{
                     borderRadius: 35,
-                    backgroundColor: colors.secondary,
+                    backgroundColor: colors.bgSurface,
                     padding: 20,
                     margin: 10,
                   }}
@@ -487,7 +487,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
                   <FontAwesomeIcon
                     size={30}
                     icon={faArrowUp}
-                    color={colors.text}
+                    color={colors.fgDefault}
                     style={{ transform: [{ rotate: '45deg' }] }}
                   />
                 </View>
@@ -512,7 +512,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
                 <View
                   style={{
                     borderRadius: 35,
-                    backgroundColor: colors.secondary,
+                    backgroundColor: colors.bgSurface,
                     padding: 20,
                     margin: 10,
                   }}
@@ -520,7 +520,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
                   <FontAwesomeIcon
                     size={30}
                     icon={faArrowDown}
-                    color={colors.text}
+                    color={colors.fgDefault}
                     style={{ transform: [{ rotate: '45deg' }] }}
                   />
                 </View>
@@ -545,7 +545,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
                 <View
                   style={{
                     borderRadius: 35,
-                    backgroundColor: colors.secondary,
+                    backgroundColor: colors.bgSurface,
                     padding: 20,
                     margin: 10,
                   }}
@@ -553,7 +553,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
                   <FontAwesomeIcon
                     size={30}
                     icon={faFaucet}
-                    color={colors.text}
+                    color={colors.fgDefault}
                   />
                 </View>
                 <FadeText>Faucet</FadeText>
@@ -582,7 +582,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
                   <FontAwesomeIcon
                     icon={faBars}
                     size={40}
-                    color={colors.background}
+                    color={colors.bgCanvas}
                   />
                 </TouchableOpacity>
               )}
@@ -626,7 +626,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
               }
             }}
           >
-            <SettingsIcon width={35} height={35} color={colors.border} />
+            <SettingsIcon width={35} height={35} color={colors.fgFaint} />
           </TouchableOpacity>
         </View>
       </View>

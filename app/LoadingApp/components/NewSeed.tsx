@@ -2,12 +2,10 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { View, ScrollView, TouchableOpacity, Text } from 'react-native';
 
-import { useTheme } from '@react-navigation/native';
 import Clipboard from '@react-native-clipboard/clipboard';
 
 import RegText from '../../../components/Components/RegText';
 import FadeText from '../../../components/Components/FadeText';
-import { ThemeType } from '../../types';
 import { ContextAppLoading } from '../../context';
 import { SnackbarDurationEnum, ScreenEnum } from '../../AppState';
 import { Header } from '../../../components/Header';
@@ -15,6 +13,7 @@ import Utils from '../../utils';
 import Snackbars from '../../../components/Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import LiquidPrimaryButton from '../../../components/Components/LiquidButton/LiquidPrimaryButton';
+import { useTheme } from '../../theme';
 
 type TextsType = {
   new: string[];
@@ -40,7 +39,7 @@ const NewSeed: React.FunctionComponent<NewSeedProps> = ({ onClickOK }) => {
     removeFirstSnackbar,
     setPrivacyOption,
   } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.Seed;
 
@@ -102,7 +101,7 @@ const NewSeed: React.FunctionComponent<NewSeedProps> = ({ onClickOK }) => {
       <View
         style={{
           flex: 1,
-          backgroundColor: colors.background,
+          backgroundColor: colors.bgCanvas,
         }}
       >
         <Header
@@ -144,7 +143,7 @@ const NewSeed: React.FunctionComponent<NewSeedProps> = ({ onClickOK }) => {
               padding: 10,
               borderWidth: 1,
               borderRadius: 10,
-              borderColor: colors.text,
+              borderColor: colors.fgDefault,
               maxHeight: '45%',
             }}
           >
@@ -169,7 +168,7 @@ const NewSeed: React.FunctionComponent<NewSeedProps> = ({ onClickOK }) => {
               }}
             >
               <RegText
-                color={colors.text}
+                color={colors.fgDefault}
                 style={{
                   textAlign: 'center',
                 }}
@@ -199,7 +198,7 @@ const NewSeed: React.FunctionComponent<NewSeedProps> = ({ onClickOK }) => {
               >
                 <Text
                   style={{
-                    color: colors.text,
+                    color: colors.fgDefault,
                     textDecorationLine: 'underline',
                     padding: 10,
                     marginTop: 0,
@@ -240,7 +239,7 @@ const NewSeed: React.FunctionComponent<NewSeedProps> = ({ onClickOK }) => {
                 }
               }}
             >
-              <RegText color={colors.text} style={{ textAlign: 'center' }}>
+              <RegText color={colors.fgDefault} style={{ textAlign: 'center' }}>
                 {!expandBirthday
                   ? Utils.trimToSmall(birthdayNumber, 1)
                   : birthdayNumber}

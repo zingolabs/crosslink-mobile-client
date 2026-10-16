@@ -4,3 +4,8 @@ declare module '*.svg' {
   const content: React.FC<SvgProps>;
   export default content;
 }
+
+declare module '*.woff2' {
+  const src: string;
+  export default src;
+}

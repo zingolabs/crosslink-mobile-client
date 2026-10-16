@@ -1,8 +1,7 @@
-import { useTheme } from '@react-navigation/native';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { ThemeType } from '../../app/types';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { StyleSheet, Text, View } from 'react-native';
 import { faChevronLeft, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { text, useTheme } from '../../app/theme';
+import HeaderIconButton from './HeaderIconButton';
 
 type HeaderTitleProps = {
   title: string;
@@ -17,28 +16,22 @@ const HeaderTitle: React.FC<HeaderTitleProps> = ({
   bottomSheet,
   ExtraComponent,
 }) => {
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
 
   return (
     <View style={styles.header}>
       <View style={styles.side}>
-        <TouchableOpacity
+        <HeaderIconButton
+          icon={bottomSheet ? faXmark : faChevronLeft}
           onPress={goBack}
-          style={[styles.backButton, { borderColor: colors.text }]}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <FontAwesomeIcon
-            icon={bottomSheet ? faXmark : faChevronLeft}
-            size={22}
-            color={colors.text}
-          />
-        </TouchableOpacity>
+          accessibilityLabel={bottomSheet ? 'Close' : 'Back'}
+        />
       </View>
 
       <View pointerEvents="none" style={styles.titleContainer}>
         <Text
           numberOfLines={1}
-          style={[styles.headerTitle, { color: colors.text }]}
+          style={[styles.headerTitle, { color: colors.fgDefault }]}
         >
           {title}
         </Text>
@@ -67,24 +60,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  backButton: {
-    width: 48,
-    height: 48,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 30,
-    borderWidth: 0.2,
-  },
   bubble: {
     position: 'absolute',
-    top: 0,
-    right: 10,
+    top: 2,
+    right: 16,
   },
   headerTitle: {
+    ...text.headline,
     textAlign: 'center',
-    fontSize: 22,
-    fontStyle: 'normal',
-    fontWeight: '400',
   },
 });
 

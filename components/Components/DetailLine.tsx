@@ -2,13 +2,12 @@
 import React, { ReactNode, useContext } from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
-import { useTheme } from '@react-navigation/native';
 
 import FadeText from './FadeText';
 import RegText from './RegText';
-import { ThemeType } from '../../app/types';
 import { ContextAppLoaded } from '../../app/context';
 import { ScreenEnum, SnackbarDurationEnum } from '../../app/AppState';
+import { useTheme } from '../../app/theme';
 
 type DetailLineProps = {
   label: string;
@@ -25,7 +24,7 @@ const DetailLine: React.FunctionComponent<DetailLineProps> = ({
   testID,
   screenName,
 }) => {
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const context = useContext(ContextAppLoaded);
   const { addLastSnackbar, translate } = context;
 
@@ -43,7 +42,7 @@ const DetailLine: React.FunctionComponent<DetailLineProps> = ({
             });
           }}
         >
-          <RegText testID={testID} color={colors.text}>
+          <RegText testID={testID} color={colors.fgDefault}>
             {value}
           </RegText>
         </TouchableOpacity>

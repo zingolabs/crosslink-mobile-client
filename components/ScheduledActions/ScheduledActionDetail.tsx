@@ -13,12 +13,11 @@ import {
   Alert,
   Dimensions,
 } from 'react-native';
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
-import { ThemeType } from '../../app/types';
 import {
   RouteEnum,
   ScheduledActionType,
@@ -42,6 +41,7 @@ import Zap from '../../assets/icons/zap.svg';
 import Clipboard from '../../assets/icons/clipboard.svg';
 import { formatSeconds } from '../../app/utils/Utils';
 import { scheduleReminder } from '../Staking/components/scheduleReminder';
+import { useTheme } from '../../app/theme';
 
 type ModalState = 'idle' | 'sending' | 'success';
 
@@ -78,7 +78,7 @@ const ScheduledActionDetail: React.FC<ScheduledActionDetailProps> = ({
       : ({} as ScheduledActionType);
 
   const navigation: any = useNavigation();
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
   const [modalState, setModalState] = useState<ModalState>('idle');
@@ -245,7 +245,7 @@ const ScheduledActionDetail: React.FC<ScheduledActionDetailProps> = ({
       <KeyboardAvoidingView
         style={{
           flex: 1,
-          backgroundColor: colors.background,
+          backgroundColor: colors.bgCanvas,
         }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={
@@ -288,7 +288,7 @@ const ScheduledActionDetail: React.FC<ScheduledActionDetailProps> = ({
           style={{
             fontSize: 17,
             fontWeight: '600',
-            color: colors.text,
+            color: colors.fgDefault,
             marginBottom: 15,
             marginTop: 5,
             alignSelf: 'center',
@@ -358,13 +358,13 @@ const ScheduledActionDetail: React.FC<ScheduledActionDetailProps> = ({
         <View
           style={{
             borderRadius: 26,
-            backgroundColor: colors.secondary,
+            backgroundColor: colors.bgSurface,
             marginTop: 20,
             paddingVertical: 5,
             marginHorizontal: 24,
           }}
         >
-          {item.finalizer && (
+          {!!item.finalizer && (
             <React.Fragment>
               <View
                 style={{
@@ -392,7 +392,7 @@ const ScheduledActionDetail: React.FC<ScheduledActionDetailProps> = ({
                   </View>
                   <Text
                     style={{
-                      color: colors.placeholder,
+                      color: colors.fgSubtle,
                       fontSize: 16,
                       marginLeft: 5,
                     }}
@@ -406,10 +406,10 @@ const ScheduledActionDetail: React.FC<ScheduledActionDetailProps> = ({
                   </Text>
                 </View>
               </View>
-              <View style={{ height: 1, backgroundColor: colors.border }} />
+              <View style={{ height: 1, backgroundColor: colors.bgFaint }} />
             </React.Fragment>
           )}
-          {item.finalizerTo && (
+          {!!item.finalizerTo && (
             <React.Fragment>
               <View
                 style={{
@@ -433,7 +433,7 @@ const ScheduledActionDetail: React.FC<ScheduledActionDetailProps> = ({
                   </View>
                   <Text
                     style={{
-                      color: colors.placeholder,
+                      color: colors.fgSubtle,
                       fontSize: 16,
                       marginLeft: 5,
                     }}
@@ -448,10 +448,10 @@ const ScheduledActionDetail: React.FC<ScheduledActionDetailProps> = ({
                   </Text>
                 </View>
               </View>
-              <View style={{ height: 1, backgroundColor: colors.border }} />
+              <View style={{ height: 1, backgroundColor: colors.bgFaint }} />
             </React.Fragment>
           )}
-          {item.amount && (
+          {!!item.amount && (
             <React.Fragment>
               <View
                 style={{
@@ -584,18 +584,18 @@ const ScheduledActionDetail: React.FC<ScheduledActionDetailProps> = ({
               style={[
                 styles.modalCard,
                 {
-                  backgroundColor: colors.background,
-                  borderColor: colors.border,
+                  backgroundColor: colors.bgCanvas,
+                  borderColor: colors.borderFaint,
                 },
               ]}
             >
               {modalState === 'sending' && (
                 <>
-                  <ActivityIndicator size="large" color={colors.text} />
+                  <ActivityIndicator size="large" color={colors.fgDefault} />
                   <Text
                     style={{
                       marginTop: 16,
-                      color: colors.text,
+                      color: colors.fgDefault,
                       fontSize: 16,
                       textAlign: 'center',
                     }}
@@ -610,12 +610,12 @@ const ScheduledActionDetail: React.FC<ScheduledActionDetailProps> = ({
                   <FontAwesomeIcon
                     icon={faCheckCircle}
                     size={40}
-                    color={colors.primary}
+                    color={colors.fgAccent}
                   />
                   <Text
                     style={{
                       marginTop: 16,
-                      color: colors.text,
+                      color: colors.fgDefault,
                       fontSize: 18,
                       fontWeight: '600',
                       textAlign: 'center',

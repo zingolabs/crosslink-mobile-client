@@ -2,10 +2,8 @@
 import React, { useContext } from 'react';
 import { View, ScrollView } from 'react-native';
 
-import { useTheme } from '@react-navigation/native';
-
 import DetailLine from '../Components/DetailLine';
-import { AppDrawerParamList, ThemeType } from '../../app/types';
+import { AppDrawerParamList } from '../../app/types';
 import { ContextAppLoaded } from '../../app/context';
 import PriceFetcher from '../Components/PriceFetcher';
 import CurrencyAmount from '../Components/CurrencyAmount';
@@ -21,6 +19,7 @@ import { ToastProvider, useToast } from 'react-native-toastier';
 import { DrawerScreenProps } from '@react-navigation/drawer';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../Header';
+import { useTheme } from '../../app/theme';
 
 type InfoProps = DrawerScreenProps<AppDrawerParamList, RouteEnum.Info>;
 
@@ -36,7 +35,7 @@ const Info: React.FunctionComponent<InfoProps> = ({ navigation }) => {
     snackbars,
     removeFirstSnackbar,
   } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.Info;
 
@@ -127,12 +126,12 @@ const Info: React.FunctionComponent<InfoProps> = ({ navigation }) => {
                   screenName={screenName}
                 >
                   {zecPrice.zecPrice === -1 && (
-                    <RegText color={colors.text}>
+                    <RegText color={colors.fgDefault}>
                       {translate('info.errorgemini') as string}
                     </RegText>
                   )}
                   {zecPrice.zecPrice === -2 && (
-                    <RegText color={colors.text}>
+                    <RegText color={colors.fgDefault}>
                       {translate('info.errorrpcmodule') as string}
                     </RegText>
                   )}

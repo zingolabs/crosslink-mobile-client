@@ -1,14 +1,12 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { useContext, useState } from 'react';
 import { View, TouchableOpacity, Keyboard } from 'react-native';
-import { useTheme } from '@react-navigation/native';
 
 import {
   GlobalConst,
   ScreenEnum,
   SnackbarDurationEnum,
 } from '../../../app/AppState';
-import { ThemeType } from '../../../app/types';
 import { ContextAppLoaded } from '../../../app/context';
 import { useToast } from 'react-native-toastier';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -22,6 +20,7 @@ import { RPCCheckAddressType } from '../../../app/rpc/types/RPCCheckAddressType'
 import { VerifyCheckIcon } from '../../Components/Icons/VerifyCheckIcon';
 import { VerifyXIcon } from '../../Components/Icons/VerifyXIcon';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
+import { useTheme } from '../../../app/theme';
 
 type VerifyAddressProps = {
   closeSheet: () => void;
@@ -35,7 +34,7 @@ const VerifyAddress: React.FunctionComponent<VerifyAddressProps> = ({
 }) => {
   const context = useContext(ContextAppLoaded);
   const { translate, addLastSnackbar, indexerServer } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const { clear } = useToast();
 
   const [address, setAddress] = useState<string>('');
@@ -115,7 +114,7 @@ const VerifyAddress: React.FunctionComponent<VerifyAddressProps> = ({
         setHeightLayout(height + 70);
       }}
       style={{
-        backgroundColor: colors.background,
+        backgroundColor: colors.bgCanvas,
       }}
     >
       <TouchableOpacity
@@ -131,7 +130,7 @@ const VerifyAddress: React.FunctionComponent<VerifyAddressProps> = ({
         <FontAwesomeIcon
           size={30}
           icon={faXmark}
-          color={colors.text}
+          color={colors.fgDefault}
           style={{ marginTop: 10, marginRight: 20, alignSelf: 'flex-end' }}
         />
       </TouchableOpacity>
@@ -158,7 +157,7 @@ const VerifyAddress: React.FunctionComponent<VerifyAddressProps> = ({
             marginVertical: 5,
           }}
         >
-          <FadeText style={{ color: colors.primary }}>{errorAddress}</FadeText>
+          <FadeText style={{ color: colors.fgAccent }}>{errorAddress}</FadeText>
         </View>
       )}
       {verifyOK !== null && (
@@ -181,10 +180,10 @@ const VerifyAddress: React.FunctionComponent<VerifyAddressProps> = ({
               }}
             >
               <VerifyCheckIcon
-                color={colors.primary}
+                color={colors.fgAccent}
                 style={{ marginRight: 10 }}
               />
-              <FadeText style={{ color: colors.text }}>
+              <FadeText style={{ color: colors.fgDefault }}>
                 {translate('receive.verification-success') as string}
               </FadeText>
             </View>
@@ -198,10 +197,10 @@ const VerifyAddress: React.FunctionComponent<VerifyAddressProps> = ({
               }}
             >
               <VerifyXIcon
-                color={colors.danger.primary}
+                color={colors.fgDanger}
                 style={{ marginRight: 10 }}
               />
-              <FadeText style={{ color: colors.text }}>
+              <FadeText style={{ color: colors.fgDefault }}>
                 {translate('receive.verification-failure') as string}
               </FadeText>
             </View>
@@ -228,7 +227,7 @@ const VerifyAddress: React.FunctionComponent<VerifyAddressProps> = ({
             disabled={!address || !!errorAddress}
           />
           <LiquidPrimaryButton
-            tintColor={colors.secondary}
+            tintColor={colors.bgSurface}
             title={translate('cancel') as string}
             onPress={() => {
               setAddress('');

@@ -1,15 +1,15 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { View, Animated, TouchableOpacity } from 'react-native';
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { isEqual } from 'lodash';
 
 import { ContextAppLoaded } from '../../../app/context';
-import { ThemeType } from '../../../app/types';
 import { RouteEnum, SelectServerEnum } from '../../../app/AppState';
 import { RPCSyncStatusType } from '../../../app/rpc/types/RPCSyncStatusType';
 import ZecAmount from '../../Components/ZecAmount';
 import FadeText from '../../Components/FadeText';
+import { useTheme } from '../../../app/theme';
 
 type WalletSummaryHeaderProps = {
   show_staked: boolean;
@@ -19,7 +19,7 @@ const WalletSummaryHeader: React.FC<WalletSummaryHeaderProps> = ({
   show_staked = false,
 }) => {
   const navigation: any = useNavigation();
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
 
   const {
     totalBalance,
@@ -117,7 +117,7 @@ const WalletSummaryHeader: React.FC<WalletSummaryHeaderProps> = ({
         alignItems: 'center',
         paddingTop: 10,
         paddingBottom: 10,
-        backgroundColor: colors.background,
+        backgroundColor: colors.bgCanvas,
       }}
     >
       {/* Balance */}
@@ -131,7 +131,7 @@ const WalletSummaryHeader: React.FC<WalletSummaryHeaderProps> = ({
       >
         <ZecAmount
           currencyName={info.currencyName}
-          color={colors.text}
+          color={colors.fgDefault}
           size={36}
           amtZec={balanceTotal}
           privacy={privacy}
@@ -156,7 +156,7 @@ const WalletSummaryHeader: React.FC<WalletSummaryHeaderProps> = ({
                 height: 5,
                 width: '100%',
                 borderRadius: 3,
-                backgroundColor: colors.secondary,
+                backgroundColor: colors.bgSurface,
               }}
             />
             <View
@@ -175,7 +175,7 @@ const WalletSummaryHeader: React.FC<WalletSummaryHeaderProps> = ({
               height: 5,
               width: '100%',
               borderRadius: 3,
-              backgroundColor: colors.syncing,
+              backgroundColor: colors.bgSyncing,
             }}
           />
         ) : null}
@@ -199,7 +199,7 @@ const WalletSummaryHeader: React.FC<WalletSummaryHeaderProps> = ({
               marginHorizontal: 2.5,
               paddingHorizontal: 5,
               paddingVertical: 1,
-              borderColor: colors.zingo,
+              borderColor: colors.borderMuted,
               borderWidth: 1,
               borderRadius: 10,
               minWidth: 25,

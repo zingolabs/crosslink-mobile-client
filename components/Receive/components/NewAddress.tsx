@@ -8,7 +8,6 @@ import {
   Keyboard,
   Platform,
 } from 'react-native';
-import { useTheme } from '@react-navigation/native';
 
 import {
   AddressKindEnum,
@@ -17,7 +16,6 @@ import {
   ScreenEnum,
   SnackbarDurationEnum,
 } from '../../../app/AppState';
-import { ThemeType } from '../../../app/types';
 import RegText from '../../Components/RegText';
 import { ContextAppLoaded } from '../../../app/context';
 import { useToast } from 'react-native-toastier';
@@ -29,6 +27,7 @@ import ContextMenu, {
 } from 'react-native-context-menu-view';
 import RPCModule from '../../../app/RPCModule';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
+import { useTheme } from '../../../app/theme';
 
 type NewAddressProps = {
   addressKind: AddressKindEnum;
@@ -44,7 +43,7 @@ const NewAddress: React.FunctionComponent<NewAddressProps> = ({
 }) => {
   const context = useContext(ContextAppLoaded);
   const { translate, addLastSnackbar } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const { clear } = useToast();
 
   const [label, setLabel] = useState<string>('');
@@ -111,7 +110,7 @@ const NewAddress: React.FunctionComponent<NewAddressProps> = ({
         setHeightLayout(height + 80);
       }}
       style={{
-        backgroundColor: colors.background,
+        backgroundColor: colors.bgCanvas,
       }}
     >
       <TouchableOpacity
@@ -127,7 +126,7 @@ const NewAddress: React.FunctionComponent<NewAddressProps> = ({
         <FontAwesomeIcon
           size={30}
           icon={faXmark}
-          color={colors.text}
+          color={colors.fgDefault}
           style={{ marginTop: 10, marginRight: 20, alignSelf: 'flex-end' }}
         />
       </TouchableOpacity>
@@ -159,7 +158,7 @@ const NewAddress: React.FunctionComponent<NewAddressProps> = ({
               flexGrow: 1,
               borderWidth: 1,
               borderRadius: 5,
-              borderColor: colors.text,
+              borderColor: colors.fgDefault,
               minWidth: 48,
               minHeight: 48,
               maxHeight: 150,
@@ -167,7 +166,7 @@ const NewAddress: React.FunctionComponent<NewAddressProps> = ({
           >
             <TextInput
               style={{
-                color: colors.text,
+                color: colors.fgDefault,
                 fontWeight: '600',
                 fontSize: 14,
                 minWidth: 48,
@@ -176,7 +175,7 @@ const NewAddress: React.FunctionComponent<NewAddressProps> = ({
                 backgroundColor: 'transparent',
               }}
               placeholder={translate('history.label-placeholder') as string}
-              placeholderTextColor={colors.placeholder}
+              placeholderTextColor={colors.fgSubtle}
               value={label}
               onChangeText={(text: string) => setLabel(text)}
               maxLength={50}
@@ -232,7 +231,7 @@ const NewAddress: React.FunctionComponent<NewAddressProps> = ({
                     flexDirection: 'row',
                     borderWidth: 1,
                     borderRadius: 5,
-                    borderColor: colors.text,
+                    borderColor: colors.fgDefault,
                     backgroundColor: '#303d4f',
                     minWidth: 48,
                     minHeight: 48,
@@ -243,7 +242,7 @@ const NewAddress: React.FunctionComponent<NewAddressProps> = ({
                 >
                   <RegText
                     style={{
-                      color: colors.text,
+                      color: colors.fgDefault,
                       fontWeight: '600',
                       minWidth: 48,
                       minHeight: 48,
@@ -267,7 +266,7 @@ const NewAddress: React.FunctionComponent<NewAddressProps> = ({
                   <FontAwesomeIcon
                     size={15}
                     icon={faChevronDown}
-                    color={colors.text}
+                    color={colors.fgDefault}
                     style={{ marginRight: 20 }}
                   />
                 </View>
@@ -294,7 +293,7 @@ const NewAddress: React.FunctionComponent<NewAddressProps> = ({
             }}
           />
           <LiquidPrimaryButton
-            tintColor={colors.secondary}
+            tintColor={colors.bgSurface}
             title={translate('cancel') as string}
             onPress={() => {
               setLabel('');

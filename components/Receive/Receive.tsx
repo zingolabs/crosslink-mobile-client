@@ -15,11 +15,11 @@ import {
   Route,
   NavigationState,
 } from 'react-native-tab-view';
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
 import Clipboard from '@react-native-clipboard/clipboard';
 import SingleAddress from '../Components/SingleAddress';
-import { AppDrawerParamList, ThemeType } from '../../app/types';
+import { AppDrawerParamList } from '../../app/types';
 import { ContextAppLoaded } from '../../app/context';
 
 import {
@@ -46,6 +46,7 @@ import ExpandedAddress from './components/ExpandedAddress';
 import { DrawerScreenProps } from '@react-navigation/drawer';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../Header';
+import { useTheme } from '../../app/theme';
 
 type ReceiveProps = DrawerScreenProps<AppDrawerParamList, RouteEnum.Receive> & {
   toggleMenuDrawer: () => void;
@@ -71,7 +72,7 @@ const Receive: React.FunctionComponent<ReceiveProps> = (
     removeFirstSnackbar,
     addLastSnackbar,
   } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.Receive;
 
@@ -318,11 +319,11 @@ const Receive: React.FunctionComponent<ReceiveProps> = (
         enablePanDownToClose
         keyboardBehavior={'interactive'}
         handleStyle={{ display: 'none' }}
-        backgroundStyle={{ backgroundColor: colors.background }}
+        backgroundStyle={{ backgroundColor: colors.bgCanvas }}
         backdropComponent={renderBackdrop}
       >
         <BottomSheetView
-          style={{ backgroundColor: colors.background, height: '100%' }}
+          style={{ backgroundColor: colors.bgCanvas, height: '100%' }}
         >
           {sheetType === 'NA' && (
             <NewAddress

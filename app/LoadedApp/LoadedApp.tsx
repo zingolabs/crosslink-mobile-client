@@ -8,7 +8,6 @@ import {
   Linking,
   Platform,
 } from 'react-native';
-import { useTheme } from '@react-navigation/native';
 import { I18n } from 'i18n-js';
 import { isEqual } from 'lodash';
 import { StackScreenProps } from '@react-navigation/stack';
@@ -67,7 +66,6 @@ import {
   StakingActionKindEnum,
 } from '../AppState';
 import Utils from '../utils';
-import { ThemeType } from '../types';
 import SettingsFileImpl from '../../components/Settings/SettingsFileImpl';
 import { ContextAppLoadedProvider } from '../context';
 import { parseZcashURI } from '../uris';
@@ -114,6 +112,7 @@ import ScheduledActionsFileImpl from '../../components/ScheduledActions/Schedule
 import ScheduledActionDetail from '../../components/ScheduledActions/ScheduledActionDetail';
 import { FinalizerDetail } from '../../components/Staking/Finalizers/FinalizerDetail';
 import { scheduleReminder } from '../../components/Staking/components/scheduleReminder';
+import { useTheme, AppTheme } from '../theme';
 
 const LoadedAppStack = createNativeStackNavigator<LoadedAppStackParamList>();
 
@@ -164,7 +163,7 @@ const SERVER_DEFAULT_0: ServerType = {
 } as ServerType;
 
 export default function LoadedApp(props: LoadedAppProps) {
-  const theme = useTheme() as ThemeType;
+  const theme = useTheme();
   const [loading, setLoading] = useState<boolean>(true);
 
   const [language, setLanguage] = useState<LanguageEnum>(LanguageEnum.en);
@@ -440,7 +439,7 @@ type LoadedAppClassProps = {
   >['navigation'];
   route: StackScreenProps<AppStackParamList, RouteEnum.LoadedApp>['route'];
   translate: (key: string) => TranslateType;
-  theme: ThemeType;
+  theme: AppTheme;
   language: LanguageEnum;
   currency: CurrencyEnum;
   indexerServer: ServerType;

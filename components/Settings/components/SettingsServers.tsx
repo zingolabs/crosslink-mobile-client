@@ -2,12 +2,9 @@
 import React, { useContext } from 'react';
 import { View } from 'react-native';
 
-import { useTheme } from '@react-navigation/native';
-
 import {
   AppDrawerParamList,
   LoadingAppNavigationState,
-  ThemeType,
 } from '../../../app/types';
 import { ContextAppLoaded } from '../../../app/context';
 import Snackbars from '../../Components/Snackbars';
@@ -20,6 +17,7 @@ import RegText from '../../Components/RegText';
 import FadeText from '../../Components/FadeText';
 import { HeaderTitle } from '../../Header';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
+import { useTheme } from '../../../app/theme';
 
 type SettingsServersProps = DrawerScreenProps<
   AppDrawerParamList,
@@ -34,7 +32,7 @@ const SettingsServers: React.FunctionComponent<SettingsServersProps> = ({
 }) => {
   const context = useContext(ContextAppLoaded);
   const { snackbars, removeFirstSnackbar, info, indexerServer } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.SettingsServers;
 
@@ -78,7 +76,7 @@ const SettingsServers: React.FunctionComponent<SettingsServersProps> = ({
           <View
             style={{
               borderRadius: 26,
-              backgroundColor: colors.secondary,
+              backgroundColor: colors.bgSurface,
               width: '100%',
               marginTop: 40,
               paddingVertical: 10,
@@ -133,7 +131,7 @@ const SettingsServers: React.FunctionComponent<SettingsServersProps> = ({
           <View
             style={{
               borderRadius: 26,
-              backgroundColor: colors.secondary,
+              backgroundColor: colors.bgSurface,
               width: '100%',
               marginTop: 20,
               paddingVertical: 10,
@@ -160,7 +158,7 @@ const SettingsServers: React.FunctionComponent<SettingsServersProps> = ({
                 <RegText style={{ fontSize: 13 }}>{info.version}</RegText>
               </View>
             </View>
-            <View style={{ height: 1, backgroundColor: colors.zingo }} />
+            <View style={{ height: 1, backgroundColor: colors.bgMuted }} />
             <View
               style={{
                 flexDirection: 'row',
@@ -192,7 +190,7 @@ const SettingsServers: React.FunctionComponent<SettingsServersProps> = ({
                 </RegText>
               </View>
             </View>
-            <View style={{ height: 1, backgroundColor: colors.zingo }} />
+            <View style={{ height: 1, backgroundColor: colors.bgMuted }} />
             <View
               style={{
                 flexDirection: 'row',

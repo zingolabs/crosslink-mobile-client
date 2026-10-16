@@ -1,52 +1,111 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext } from 'react';
-import { View, Alert, KeyboardAvoidingView, Platform } from 'react-native';
-import { useTheme } from '@react-navigation/native';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  View,
+  Alert,
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+  LayoutChangeEvent,
+  useWindowDimensions,
+} from 'react-native';
+import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 
-import { NetInfoStateType } from '@react-native-community/netinfo/src/index';
-
-import { ThemeType } from '../../types';
-import { ScreenEnum, SelectServerEnum } from '../../AppState';
+import { ScreenEnum } from '../../AppState';
 import { ContextAppLoading } from '../../context';
 import BoldText from '../../../components/Components/BoldText';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import Snackbars from '../../../components/Components/Snackbars';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import RegText from '../../../components/Components/RegText';
-import { HeaderTitle } from '../../../components/Header';
+import { faNetworkWired } from '@fortawesome/free-solid-svg-icons';
+import { HeaderIconButton } from '../../../components/Header';
 import LiquidPrimaryButton from '../../../components/Components/LiquidButton/LiquidPrimaryButton';
 import Button from '../../../components/Components/Button';
+import ChalkBackground from '../../../components/Chalk/ChalkBackground';
+import { useChalkIntro } from '../../../components/Chalk/useChalkIntro';
+import { useTheme } from '../../theme';
+import { useBackdropSetter } from '../../Backdrop';
 
 type StartMenuProps = {
   actionButtonsDisabled: boolean;
   walletExists: boolean;
+  playIntro: boolean;
   openCurrentWallet: () => void;
   createNewWallet: () => void;
   getwalletToRestore: () => void;
   openServers: () => void;
 };
 
+const OFFSCREEN = 4000;
+
 const StartMenu: React.FunctionComponent<StartMenuProps> = ({
   actionButtonsDisabled,
   walletExists,
+  playIntro,
   openCurrentWallet,
   createNewWallet,
   getwalletToRestore,
   openServers,
 }) => {
   const context = useContext(ContextAppLoading);
-  const {
-    netInfo,
-    translate,
-    selectIndexerServer,
-    snackbars,
-    removeFirstSnackbar,
-  } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { translate, snackbars, removeFirstSnackbar } = context;
+  const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.StartMenu;
-
   const insets = useSafeAreaInsets();
+
+  const rootRef = useRef<View>(null);
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  const [bottomGap, setBottomGap] = useState(0);
+  const win = useWindowDimensions();
+  const setBackdrop = useBackdropSetter();
+  const [actionsHeight, setActionsHeight] = useState(0);
+  const reveal = useChalkIntro(size.width > 0, !playIntro);
+  const enter = useAnimatedStyle(() => ({
+    transform: [{ scale: 0.95 + 0.05 * reveal.ui.value }],
+  }));
+  const glass = useAnimatedStyle(() => ({
+    transform: [{ translateX: reveal.ui.value > 0 ? 0 : -OFFSCREEN }],
+  }));
+  const enterSecondary = useAnimatedStyle(() => ({
+    opacity: reveal.secondary.value,
+    transform: [{ scale: 0.95 + 0.05 * reveal.secondary.value }],
+  }));
+
+  const onRootLayout = (e: LayoutChangeEvent) => {
+    const { width, height } = e.nativeEvent.layout;
+    setSize({ width, height });
+    rootRef.current?.measureInWindow((_x, y, _w, h) =>
+      setBottomGap(Math.max(0, Dimensions.get('window').height - y - h)),
+    );
+  };
+
+  const background = useMemo(
+    () => (
+      <ChalkBackground
+        width={setBackdrop ? win.width : size.width}
+        height={setBackdrop ? win.height : size.height}
+        actionsHeight={actionsHeight + (setBackdrop ? bottomGap : 0)}
+        reveal={reveal}
+      />
+    ),
+    [
+      setBackdrop,
+      win.width,
+      win.height,
+      size.width,
+      size.height,
+      actionsHeight,
+      bottomGap,
+      reveal,
+    ],
+  );
+
+  useEffect(() => {
+    setBackdrop?.(background);
+  }, [setBackdrop, background]);
+
+  useEffect(() => () => setBackdrop?.(null), [setBackdrop]);
 
   return (
     <ToastProvider>
@@ -56,157 +115,76 @@ const StartMenu: React.FunctionComponent<StartMenuProps> = ({
         screenName={screenName}
       />
 
-      <KeyboardAvoidingView
+      <View
+        ref={rootRef}
         style={{
           flex: 1,
-          backgroundColor: colors.background,
+          backgroundColor: setBackdrop ? 'transparent' : colors.bgCanvas,
         }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
+        onLayout={onRootLayout}
       >
-        <HeaderTitle
-          title=""
-          goBack={() => {
-            clear();
-            openServers();
-          }}
-        />
+        {!setBackdrop && background}
+
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
+        >
+          <View
+            style={{
+              height: 48,
+              marginTop: 10,
+              paddingHorizontal: 16,
+              flexDirection: 'row',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+            }}
+          >
+            <Animated.View style={enter}>
+              <Animated.View style={glass}>
+                <HeaderIconButton
+                  icon={faNetworkWired}
+                  disabled={actionButtonsDisabled}
+                  onPress={() => {
+                    clear();
+                    openServers();
+                  }}
+                  accessibilityLabel="Change indexer"
+                  accessibilityHint="Choose the network and indexer this wallet uses"
+                />
+              </Animated.View>
+            </Animated.View>
+          </View>
+        </KeyboardAvoidingView>
 
         <View
           style={{
-            flexGrow: 1,
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
             alignItems: 'center',
-            justifyContent: 'center',
-            paddingTop: insets.top,
-            paddingBottom: insets.bottom + 8,
-            paddingHorizontal: 16,
+            paddingHorizontal: 20,
+            paddingBottom: 12,
           }}
+          onLayout={e => setActionsHeight(e.nativeEvent.layout.height)}
         >
-          <RegText color={colors.text} style={{ fontSize: 30 }}>
-            Welcome to
-          </RegText>
-          <RegText color={colors.text} style={{ fontSize: 30 }}>
-            your wallet
-          </RegText>
-
-          {(!netInfo.isConnected ||
-            netInfo.type === NetInfoStateType.cellular ||
-            netInfo.isConnectionExpensive) &&
-            false && (
-              <>
-                <BoldText style={{ fontSize: 15, marginBottom: 3 }}>
-                  {translate('report.networkstatus') as string}
-                </BoldText>
-                <View
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'flex-end',
-                    marginHorizontal: 20,
-                  }}
-                >
-                  <View
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      marginBottom: 10,
-                    }}
-                  >
-                    {!netInfo.isConnected && (
-                      <BoldText style={{ fontSize: 15, color: 'red' }}>
-                        {' '}
-                        {translate('report.nointernet') as string}{' '}
-                      </BoldText>
-                    )}
-                    {netInfo.type === NetInfoStateType.cellular && (
-                      <BoldText style={{ fontSize: 15, color: 'yellow' }}>
-                        {' '}
-                        {translate('report.cellulardata') as string}{' '}
-                      </BoldText>
-                    )}
-                    {netInfo.isConnectionExpensive && (
-                      <BoldText style={{ fontSize: 15, color: 'yellow' }}>
-                        {' '}
-                        {translate('report.connectionexpensive') as string}{' '}
-                      </BoldText>
-                    )}
-                  </View>
-                </View>
-              </>
-            )}
-
-          {(!netInfo.isConnected ||
-            selectIndexerServer === SelectServerEnum.offline) &&
-            !walletExists &&
-            false && (
-              <View
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'flex-end',
-                  marginHorizontal: 20,
-                }}
-              >
-                <View
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    marginTop: 20,
-                    borderColor: colors.primary,
-                    borderWidth: 1,
-                    borderRadius: 5,
-                    padding: 5,
-                  }}
-                >
-                  <BoldText
-                    style={{ fontSize: 15, color: colors.primaryDisabled }}
-                  >
-                    {translate('loadingapp.nointernet-message') as string}
-                  </BoldText>
-                </View>
-              </View>
-            )}
-        </View>
-        <View
-          style={{
-            marginTop: 'auto',
-            alignItems: 'center',
-            justifyContent: 'center',
-            paddingTop: 10,
-            paddingBottom: 20,
-          }}
-        >
-          {/**
-           * TODO: Delete
-           */}
           {walletExists && (
             <>
               <View
                 style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'flex-end',
-                  marginHorizontal: 20,
+                  borderColor: colors.borderAccent,
+                  borderWidth: 1,
+                  borderRadius: 5,
+                  padding: 5,
                   marginBottom: 20,
                 }}
               >
-                <View
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    marginTop: 10,
-                    borderColor: colors.primary,
-                    borderWidth: 1,
-                    borderRadius: 5,
-                    padding: 5,
-                  }}
+                <BoldText
+                  style={{ fontSize: 15, color: colors.fgAccentDisabled }}
                 >
-                  <BoldText
-                    style={{ fontSize: 15, color: colors.primaryDisabled }}
-                  >
-                    {translate('loadingapp.noopenwallet-message') as string}
-                  </BoldText>
-                </View>
+                  {translate('loadingapp.noopenwallet-message') as string}
+                </BoldText>
               </View>
               <Button
                 title={translate('loadingapp.opencurrentwallet') as string}
@@ -217,49 +195,50 @@ const StartMenu: React.FunctionComponent<StartMenuProps> = ({
             </>
           )}
 
-          <View
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              width: '100%',
-              paddingHorizontal: 20,
-            }}
-          >
+          <Animated.View style={[{ marginBottom: 8 }, enterSecondary]}>
             <Button
-              testID="loadingapp.restorewalletseedufvk"
-              variant="secondary"
+              testID="loadingapp.restorewallet"
+              variant="ghost"
               title={'Import wallet'}
               disabled={actionButtonsDisabled}
               onPress={() => getwalletToRestore()}
             />
+          </Animated.View>
 
-            <LiquidPrimaryButton
-              title={'Create new wallet'}
-              disabled={actionButtonsDisabled}
-              onPress={() => {
-                if (walletExists) {
-                  Alert.alert(
-                    translate('loadingapp.alert-newwallet-title') as string,
-                    translate('loadingapp.alert-newwallet-body') as string,
-                    [
-                      {
-                        text: translate('confirm') as string,
-                        onPress: () => createNewWallet(),
-                      },
-                      { text: translate('cancel') as string, style: 'cancel' },
-                    ],
-                    { cancelable: false },
-                  );
-                } else {
-                  createNewWallet();
-                }
-              }}
-              style={{ marginBottom: 10, marginTop: 10, width: '100%' }}
-            />
+          <View style={{ width: '100%' }}>
+            <Animated.View style={enter}>
+              <Animated.View style={glass}>
+                <LiquidPrimaryButton
+                  title={'Create new wallet'}
+                  disabled={actionButtonsDisabled}
+                  onPress={() => {
+                    if (walletExists) {
+                      Alert.alert(
+                        translate('loadingapp.alert-newwallet-title') as string,
+                        translate('loadingapp.alert-newwallet-body') as string,
+                        [
+                          {
+                            text: translate('confirm') as string,
+                            onPress: () => createNewWallet(),
+                          },
+                          {
+                            text: translate('cancel') as string,
+                            style: 'cancel',
+                          },
+                        ],
+                        { cancelable: false },
+                      );
+                    } else {
+                      createNewWallet();
+                    }
+                  }}
+                  style={{ width: '100%' }}
+                />
+              </Animated.View>
+            </Animated.View>
           </View>
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </ToastProvider>
   );
 };

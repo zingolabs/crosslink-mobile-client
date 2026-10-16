@@ -2,20 +2,20 @@
 import React, { useContext } from 'react';
 import { View, ScrollView } from 'react-native';
 
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
-import { ThemeType } from '../../../app/types';
 import { ContextAppLoaded } from '../../../app/context';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FadeText from '../../Components/FadeText';
 import { HeaderTitle } from '../../Header';
+import { useTheme } from '../../../app/theme';
 
 export const Notes: React.FunctionComponent = () => {
   const navigation = useNavigation();
   const context = useContext(ContextAppLoaded);
   const {} = context;
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const { clear } = useToast();
 
   const insets = useSafeAreaInsets();
@@ -50,7 +50,7 @@ export const Notes: React.FunctionComponent = () => {
           <View
             style={{
               borderRadius: 26,
-              backgroundColor: colors.secondary,
+              backgroundColor: colors.bgSurface,
               width: '100%',
               marginTop: 20,
               paddingVertical: 10,

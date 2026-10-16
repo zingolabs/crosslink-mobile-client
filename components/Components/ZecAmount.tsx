@@ -7,13 +7,12 @@ import {
   TextStyle,
   TouchableOpacity,
 } from 'react-native';
-import { useTheme } from '@react-navigation/native';
 import { getNumberFormatSettings } from 'react-native-localize';
 
 import Utils from '../../app/utils';
-import { ThemeType } from '../../app/types';
 import { SvgXml } from 'react-native-svg';
 import { CurrencyNameEnum, GlobalConst } from '../../app/AppState';
+import { useTheme } from '../../app/theme';
 
 type ZecAmountProps = {
   color?: string;
@@ -40,7 +39,7 @@ const ZecAmount: React.FunctionComponent<ZecAmountProps> = ({
 }) => {
   const [privacyHigh, setPrivacyHigh] = useState<boolean>(privacy || false);
   const splits = Utils.splitZecAmountIntoBigSmall(amtZec);
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const { decimalSeparator } = getNumberFormatSettings();
 
   useEffect(() => {
@@ -58,7 +57,7 @@ const ZecAmount: React.FunctionComponent<ZecAmountProps> = ({
   }
 
   if (!color) {
-    color = colors.money;
+    color = colors.fgMuted;
   }
 
   if (!smallPrefix) {

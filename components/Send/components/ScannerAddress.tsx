@@ -4,14 +4,14 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { ContextAppLoaded } from '../../../app/context';
 import Scanner from '../../Scanner';
 import { GlobalConst, RouteEnum, ScreenEnum } from '../../../app/AppState';
-import { useTheme } from '@react-navigation/native';
-import { AppDrawerParamList, ThemeType } from '../../../app/types';
+import { AppDrawerParamList } from '../../../app/types';
 
 import { View } from 'react-native';
 import Snackbars from '../../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { DrawerScreenProps } from '@react-navigation/drawer';
 import { HeaderTitle } from '../../Header';
+import { useTheme } from '../../../app/theme';
 
 type ScannerAddressProps = DrawerScreenProps<
   AppDrawerParamList,
@@ -28,7 +28,7 @@ const ScannerAddress: React.FunctionComponent<ScannerAddressProps> = ({
       : () => {};
   const context = useContext(ContextAppLoaded);
   const { snackbars, removeFirstSnackbar } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.ScannerAddress;
 
@@ -94,7 +94,7 @@ const ScannerAddress: React.FunctionComponent<ScannerAddressProps> = ({
       <View
         style={{
           flex: 1,
-          backgroundColor: colors.background,
+          backgroundColor: colors.bgCanvas,
           marginTop: 15,
         }}
       >

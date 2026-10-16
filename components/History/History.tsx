@@ -16,7 +16,7 @@ import {
   Pressable,
 } from 'react-native';
 import moment from 'moment';
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faAngleUp } from '@fortawesome/free-solid-svg-icons';
 
@@ -26,7 +26,6 @@ import {
   ScreenEnum,
   ValueTransferType,
 } from '../../app/AppState';
-import { ThemeType } from '../../app/types';
 import FadeText from '../Components/FadeText';
 import ValueTransferLine from './components/ValueTransferLine';
 import { ContextAppLoaded } from '../../app/context';
@@ -51,6 +50,7 @@ import EmptyList from '../../assets/icons/empty-cardboard-box.svg';
 import { RPCValueTransferStatusEnum } from '../../app/rpc/enums/RPCValueTransferStatusEnum';
 import Button from '../Components/Button';
 import { MainTabParamList } from '../../app/types/NavigationTypes';
+import { useTheme } from '../../app/theme';
 
 const ViewTypes = {
   WITH_MONTH: 0,
@@ -97,7 +97,7 @@ const History: React.FunctionComponent<HistoryProps> = ({
     doRefresh,
     zenniesDonationAddress,
   } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const screenName = ScreenEnum.History;
 
   const [numVt, setNumVt] = useState<number>(50);
@@ -375,7 +375,7 @@ const History: React.FunctionComponent<HistoryProps> = ({
       accessibilityLabel={translate('history.title-acc') as string}
       style={{
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: colors.bgCanvas,
       }}
     >
       <View
@@ -392,7 +392,7 @@ const History: React.FunctionComponent<HistoryProps> = ({
       {/* Header + quick actions */}
       <View
         style={{
-          backgroundColor: colors.background,
+          backgroundColor: colors.bgCanvas,
           paddingTop: 10,
           paddingBottom: 10,
         }}
@@ -405,7 +405,7 @@ const History: React.FunctionComponent<HistoryProps> = ({
       {loading ? (
         <ActivityIndicator
           size="large"
-          color={colors.primary}
+          color={colors.fgAccent}
           style={{ marginVertical: 20 }}
         />
       ) : (
@@ -419,7 +419,7 @@ const History: React.FunctionComponent<HistoryProps> = ({
                   <RefreshControl
                     refreshing={false}
                     onRefresh={() => doRefresh(screenName)}
-                    tintColor={colors.text}
+                    tintColor={colors.fgDefault}
                     title={translate('history.refreshing') as string}
                   />
                 ),
@@ -516,8 +516,8 @@ const History: React.FunctionComponent<HistoryProps> = ({
                     borderStyle: 'solid',
                   }}
                 >
-                  <EmptyList width={100} height={100} color={colors.text} />
-                  <FadeText style={{ color: colors.text }}>
+                  <EmptyList width={100} height={100} color={colors.fgDefault} />
+                  <FadeText style={{ color: colors.fgDefault }}>
                     {'There are no transactions yet.'}
                   </FadeText>
                 </View>
@@ -538,11 +538,11 @@ const History: React.FunctionComponent<HistoryProps> = ({
                 right: 10,
                 paddingHorizontal: 5,
                 paddingVertical: 10,
-                backgroundColor: colors.sideMenuBackground,
+                backgroundColor: colors.bgChrome,
                 borderRadius: 50,
                 transform: [{ scale: pressed ? 0.9 : 1 }],
                 borderWidth: 1,
-                borderColor: colors.zingo,
+                borderColor: colors.borderMuted,
                 opacity: isScrollingToTop ? 0.5 : 1,
               })}
             >
@@ -550,7 +550,7 @@ const History: React.FunctionComponent<HistoryProps> = ({
                 style={{ marginLeft: 5, marginRight: 5, marginTop: 0 }}
                 size={16}
                 icon={faAngleUp}
-                color={colors.zingo}
+                color={colors.fgMuted}
               />
             </Pressable>
           )}

@@ -2,6 +2,7 @@
   "name": "zingodelegator",
   "version": "0.0.1",
   "private": true,
+  "main": "App.tsx",
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
@@ -17,8 +18,21 @@
     "build:release:split": "cd android && ./gradlew assembleRelease -PsplitApk=true && cd ..",
     "build:debug": "cd android && ./gradlew assembleDebug && cd ..",
     "build:debug:split": "cd android && ./gradlew assembleDebug -PsplitApk=true && cd ..",
+    "rust:ios": "node rust/ios/build_ios.mjs",
+    "rust:ios:sim": "node rust/ios/build_ios.mjs sim",
+    "rust:android": "node rust/android/build_android.mjs",
+    "rust:android-local": "node rust/android/build_android_local.mjs",
+    "rust:android-local:all": "node rust/android/build_android_local.mjs all",
+    "build:ios": "yarn rust:ios",
+    "build:ios:sim": "yarn rust:ios:sim",
+    "build:android": "yarn rust:android-local",
+    "build:android:all": "yarn rust:android-local:all",
     "cargo:update": "cd rust && cargo update -p zingolib --aggressive && cd ..",
-    "cargo:clean": "cd rust && cargo clean && cd .."
+    "cargo:clean": "cd rust && cargo clean && cd ..",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "start:storybook": "STORYBOOK_ENABLED=true react-native start",
+    "storybook:ios": "STORYBOOK_ENABLED=true react-native run-ios --no-packager"
   },
   "dependencies": {
     "@bottom-tabs/react-navigation": "^1.0.2",
@@ -41,6 +55,7 @@
     "@react-navigation/native-stack": "^7.3.26",
     "@react-navigation/stack": "^7.4.8",
     "@sayem314/react-native-keep-awake": "^1.3.1",
+    "@shopify/react-native-skia": "2.9.1",
     "buffer": "^6.0.3",
     "i18n-js": "^4.5.1",
     "js-base64": "^3.7.8",
@@ -89,6 +104,12 @@
     "@react-native/eslint-config": "^0.81.1",
     "@react-native/metro-config": "0.81.4",
     "@react-native/typescript-config": "0.81.4",
+    "@storybook/addon-docs": "^10.6.0",
+    "@storybook/addon-ondevice-actions": "^10.5.4",
+    "@storybook/addon-ondevice-backgrounds": "^10.5.4",
+    "@storybook/addon-ondevice-controls": "^10.5.4",
+    "@storybook/react-native": "^10.5.4",
+    "@storybook/react-native-web-vite": "^10.6.0",
     "@testing-library/react-native": "^13.2.0",
     "@types/jest": "^29.5.13",
     "@types/lodash": "^4.17.16",
@@ -105,9 +126,13 @@
     "jest": "^30.1.3",
     "prettier": "^3.6.2",
     "react-native-svg-transformer": "^1.5.2",
+    "react-native-web": "^0.21.2",
     "react-test-renderer": "19.1.0",
     "rimraf": "^6.0.1",
-    "typescript": "5.5.4"
+    "storybook": "^10.6.0",
+    "typescript": "5.9.3",
+    "vite": "^8.2.2",
+    "vite-plugin-svgr": "^5.2.0"
   },
   "engines": {
     "node": ">=20"

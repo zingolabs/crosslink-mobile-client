@@ -16,16 +16,16 @@ import { mockInfo } from '../__mocks__/dataMocks/mockInfo';
 import { mockTotalBalance } from '../__mocks__/dataMocks/mockTotalBalance';
 
 // test suite
-describe('Component ImportUfvk - test', () => {
+describe('Component Import - test', () => {
   //snapshot test
-  test('ImportUfvk - snapshot', () => {
+  test('Import - snapshot', () => {
     const state = defaultAppContextLoaded;
     state.translate = mockTranslate;
     state.info = mockInfo;
     state.totalBalance = mockTotalBalance;
     const onCancel = jest.fn();
     const onOK = jest.fn();
-    const importUfvk = render(
+    const importSeed = render(
       <ContextAppLoadedProvider value={state}>
         <Import
           actionButtonsDisabled={false}
@@ -34,6 +34,6 @@ describe('Component ImportUfvk - test', () => {
         />
       </ContextAppLoadedProvider>,
     );
-    expect(importUfvk.toJSON()).toMatchSnapshot();
+    expect(importSeed.toJSON()).toMatchSnapshot();
   });
 });

@@ -31,11 +31,13 @@ exports[`Component Info - test Info - snapshot 1`] = `
       }
     >
       <View
+        accessibilityLabel="Back"
+        accessibilityRole="button"
         accessibilityState={
           {
             "busy": undefined,
             "checked": undefined,
-            "disabled": undefined,
+            "disabled": false,
             "expanded": undefined,
             "selected": undefined,
           }
@@ -51,15 +53,9 @@ exports[`Component Info - test Info - snapshot 1`] = `
         accessible={true}
         collapsable={false}
         focusable={true}
-        hitSlop={
-          {
-            "bottom": 10,
-            "left": 10,
-            "right": 10,
-            "top": 10,
-          }
-        }
+        onBlur={[Function]}
         onClick={[Function]}
+        onFocus={[Function]}
         onResponderGrant={[Function]}
         onResponderMove={[Function]}
         onResponderRelease={[Function]}
@@ -68,36 +64,49 @@ exports[`Component Info - test Info - snapshot 1`] = `
         onStartShouldSetResponder={[Function]}
         style={
           {
-            "alignItems": "center",
-            "borderColor": "#c3c3c3",
-            "borderRadius": 30,
-            "borderWidth": 0.2,
-            "height": 48,
-            "justifyContent": "center",
-            "opacity": 1,
-            "width": 48,
+            "alignSelf": "flex-start",
+            "height": 44,
+            "width": 44,
           }
         }
       >
-        <
-          color="#c3c3c3"
-          icon={
-            {
-              "icon": [
-                320,
-                512,
-                [
-                  9001,
-                ],
-                "f053",
-                "M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z",
-              ],
-              "iconName": "chevron-left",
-              "prefix": "fas",
-            }
+        <div
+          colorScheme="system"
+          effect="regular"
+          interactive={true}
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 9999,
+                "height": 44,
+                "justifyContent": "center",
+                "width": 44,
+              },
+              false,
+            ]
           }
-          size={22}
-        />
+        >
+          <
+            color="#c3c3c3"
+            icon={
+              {
+                "icon": [
+                  320,
+                  512,
+                  [
+                    9001,
+                  ],
+                  "f053",
+                  "M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z",
+                ],
+                "iconName": "chevron-left",
+                "prefix": "fas",
+              }
+            }
+            size={17}
+          />
+        </div>
       </View>
     </View>
     <View
@@ -117,9 +126,10 @@ exports[`Component Info - test Info - snapshot 1`] = `
         style={
           [
             {
-              "fontSize": 22,
-              "fontStyle": "normal",
-              "fontWeight": "400",
+              "fontSize": 17,
+              "fontWeight": "600",
+              "letterSpacing": -0.41,
+              "lineHeight": 22,
               "textAlign": "center",
             },
             {
@@ -135,8 +145,8 @@ exports[`Component Info - test Info - snapshot 1`] = `
       style={
         {
           "position": "absolute",
-          "right": 10,
-          "top": 0,
+          "right": 16,
+          "top": 2,
         }
       }
     />
@@ -594,7 +604,7 @@ exports[`Component Info - test Info - snapshot 1`] = `
                     <Text
                       style={
                         {
-                          "color": "#ffffff",
+                          "color": "#888888",
                           "fontSize": 20,
                           "fontWeight": "700",
                         }

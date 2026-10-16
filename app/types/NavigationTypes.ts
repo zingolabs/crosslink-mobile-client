@@ -1,6 +1,8 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
+import type { Probes } from '../LoadingApp/hooks/useIndexerProbes';
 import {
   AddressKindEnum,
+  ChainNameEnum,
   LaunchingModeEnum,
   RouteEnum,
   ScheduledActionType,
@@ -25,6 +27,14 @@ export type AppStackParamList = {
   // Stack
   [RouteEnum.LoadingApp]: LoadingAppNavigationState | undefined;
   [RouteEnum.LoadedApp]: LoadedAppRouteParams | undefined;
+};
+
+export type LoadingAppStackParamList = {
+  [RouteEnum.StartMenu]: undefined;
+  [RouteEnum.ChooseIndexer]: undefined;
+  [RouteEnum.ListedIndexers]: { probes?: Probes } | undefined;
+  [RouteEnum.CustomIndexer]: { network?: ChainNameEnum } | undefined;
+  [RouteEnum.Import]: undefined;
 };
 
 /**

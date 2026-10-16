@@ -1,16 +1,17 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { useContext } from 'react';
 import { View } from 'react-native';
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
 import RegText from '../../../components/Components/RegText';
-import { AppDrawerParamList, ThemeType } from '../../types';
+import { AppDrawerParamList } from '../../types';
 import { RouteEnum, ValueTransferType } from '../../AppState';
 import { DrawerScreenProps } from '@react-navigation/drawer';
 import { ContextAppLoaded } from '../../context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import Button from '../../../components/Components/Button';
+import { useTheme } from '../../theme';
 
 type ComputingOKProps = DrawerScreenProps<
   AppDrawerParamList,
@@ -21,7 +22,7 @@ const ComputingOK: React.FunctionComponent<ComputingOKProps> = ({ route }) => {
   const navigation: any = useNavigation();
   const context = useContext(ContextAppLoaded);
   const { valueTransfers } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
 
   const txid =
     !!route.params && route.params.txid !== undefined ? route.params.txid : '';
@@ -30,7 +31,7 @@ const ComputingOK: React.FunctionComponent<ComputingOKProps> = ({ route }) => {
     <View
       style={{
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: colors.bgCanvas,
       }}
     >
       <View
@@ -42,7 +43,7 @@ const ComputingOK: React.FunctionComponent<ComputingOKProps> = ({ route }) => {
       >
         <View
           style={{
-            backgroundColor: colors.secondary,
+            backgroundColor: colors.bgSurface,
             paddingHorizontal: 20,
             paddingVertical: 40,
             width: '90%',

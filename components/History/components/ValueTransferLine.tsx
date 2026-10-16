@@ -1,7 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { useContext, useEffect } from 'react';
 import { View, TouchableOpacity } from 'react-native';
-import { useTheme } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import {
   faArrowDown,
@@ -18,7 +17,6 @@ import {
   GlobalConst,
   ScreenEnum,
 } from '../../../app/AppState';
-import { ThemeType } from '../../../app/types';
 
 import { ContextAppLoaded } from '../../../app/context';
 import { RPCValueTransferStatusEnum } from '../../../app/rpc/enums/RPCValueTransferStatusEnum';
@@ -26,6 +24,7 @@ import Utils from '../../../app/utils';
 import RegText from '../../Components/RegText';
 import Stake from '../../../assets/icons/stake-blue.svg';
 import Unstake from '../../../assets/icons/unstake-yellow.svg';
+import { useTheme } from '../../../app/theme';
 
 type ValueTransferLineProps = {
   index: number;
@@ -49,7 +48,7 @@ const ValueTransferLine: React.FunctionComponent<ValueTransferLineProps> = ({
 }) => {
   const context = useContext(ContextAppLoaded);
   const { translate, language, privacy, info } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
 
   //const [messagesAddress, setMessagesAddress] = useState<boolean>(false);
 
@@ -59,7 +58,7 @@ const ValueTransferLine: React.FunctionComponent<ValueTransferLineProps> = ({
   //};
   //const maxWidthHit = useRef<boolean>(false);
 
-  const amountColor = Utils.valueTransferKindColor(colors.text, vt);
+  const amountColor = Utils.valueTransferKindColor(colors.fgDefault, vt);
 
   const icon =
     vt.kind === ValueTransferKindEnum.Received ||
@@ -99,7 +98,7 @@ const ValueTransferLine: React.FunctionComponent<ValueTransferLineProps> = ({
       <TouchableOpacity
         style={{
           zIndex: 999,
-          backgroundColor: colors.secondary,
+          backgroundColor: colors.bgSurface,
           paddingHorizontal: 5,
         }}
         onPress={async () => {
@@ -206,8 +205,8 @@ const ValueTransferLine: React.FunctionComponent<ValueTransferLineProps> = ({
                               RPCValueTransferStatusEnum.calculated ||
                             vt.status === RPCValueTransferStatusEnum.mempool ||
                             vt.status === RPCValueTransferStatusEnum.failed
-                              ? colors.primary
-                              : colors.primaryDisabled,
+                              ? colors.fgAccent
+                              : colors.fgAccentDisabled,
                           fontSize: 12,
                           opacity: 1,
                           fontWeight: '700',

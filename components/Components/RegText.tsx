@@ -1,7 +1,6 @@
 import React from 'react';
 import { Text, TextStyle, StyleProp, TextProps } from 'react-native';
-import { useTheme } from '@react-navigation/native';
-import { ThemeType } from '../../app/types';
+import { useTheme } from '../../app/theme';
 
 type RegTextProps = TextProps & {
   style?: StyleProp<TextStyle>;
@@ -15,7 +14,7 @@ const RegText: React.FunctionComponent<RegTextProps> = ({
   children,
   ...props
 }) => {
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
 
   return (
     <Text
@@ -23,7 +22,7 @@ const RegText: React.FunctionComponent<RegTextProps> = ({
       style={[
         // eslint-disable-next-line react-native/no-inline-styles
         {
-          color: color || colors.text,
+          color: color || colors.fgDefault,
           fontSize: 18,
           fontWeight: '600',
           opacity: 1,

@@ -10,9 +10,12 @@ import {
 } from 'react-native';
 
 import Clipboard from '@react-native-clipboard/clipboard';
-import { useTheme } from '@react-navigation/native';
 import { I18n } from 'i18n-js';
 import { StackScreenProps } from '@react-navigation/stack';
+import {
+  NativeStackNavigationProp,
+  createNativeStackNavigator,
+} from '@react-navigation/native-stack';
 import NetInfo, {
   NetInfoSubscription,
   NetInfoState,
@@ -42,14 +45,12 @@ import {
   AppContextLoading,
   ZecPriceType,
   BackgroundErrorType,
-  RestoreFromTypeEnum,
   ScreenEnum,
   LaunchingModeEnum,
 } from '../AppState';
-import { parseServerURI, serverUris } from '../uris';
+import { serverUris } from '../uris';
 import SettingsFileImpl from '../../components/Settings/SettingsFileImpl';
 import RPC from '../rpc';
-import { ThemeType } from '../types';
 import { ContextAppLoadingProvider } from '../context';
 import BackgroundFileImpl from '../../components/Background';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -59,7 +60,7 @@ import Snackbars from '../../components/Components/Snackbars';
 import { RPCSeedType } from '../rpc/types/RPCSeedType';
 import Launching from './components/Launching';
 import simpleBiometrics from '../simpleBiometrics';
-import selectingServer, { pingIndexerServer } from '../selectingServer';
+import selectingServer from '../selectingServer';
 import { isEqual } from 'lodash';
 import {
   createUpdateRecoveryWalletInfo,
@@ -76,13 +77,15 @@ import { ToastProvider } from 'react-native-toastier';
 import { RPCUfvkType } from '../rpc/types/RPCUfvkType';
 import { RPCPerformanceLevelEnum } from '../rpc/enums/RPCPerformanceLevelEnum';
 import NewSeed from './components/NewSeed';
-import { AppStackParamList } from '../types';
-import SelectNetwork from './components/SelectNetwork';
-import ConnectIndexer from './components/ConnectIndexer';
+import { AppStackParamList, LoadingAppStackParamList } from '../types';
+import ChooseIndexer from './components/ChooseIndexer';
+import ListedIndexers from './components/ListedIndexers';
+import { fastestIndexer } from './hooks/useIndexerProbes';
+import CustomIndexer from './components/CustomIndexer';
 import ScheduledActionsFileImpl from '../../components/ScheduledActions/ScheduledActionsFileImpl';
 import { getIndexerList, IndexerList } from '../utils/Utils';
-import { ServerListScreen } from './components/ServerListScreen';
 import notifee from '@notifee/react-native';
+import { useTheme, AppTheme } from '../theme';
 
 const en = require('../translations/en.json');
 const es = require('../translations/es.json');
@@ -101,13 +104,15 @@ type LoadingAppProps = {
   route: StackScreenProps<AppStackParamList, RouteEnum.LoadingApp>['route'];
 };
 
+const LoadingStack = createNativeStackNavigator<LoadingAppStackParamList>();
+
 const SERVER_DEFAULT_0: ServerType = {
   uri: '',
   chainName: ChainNameEnum.testChainName,
 } as ServerType;
 
 export default function LoadingApp(props: LoadingAppProps) {
-  const theme = useTheme() as ThemeType;
+  const theme = useTheme();
   const [loading, setLoading] = useState<boolean>(true);
 
   const [language, setLanguage] = useState<LanguageEnum>(LanguageEnum.en);
@@ -379,7 +384,7 @@ type LoadingAppClassProps = {
   >['navigation'];
   route: StackScreenProps<AppStackParamList, RouteEnum.LoadingApp>['route'];
   translate: (key: string) => TranslateType;
-  theme: ThemeType;
+  theme: AppTheme;
   language: LanguageEnum;
   currency: CurrencyEnum;
   indexerServer: ServerType;
@@ -405,9 +410,12 @@ export class LoadingAppClass extends Component<
   appstate: NativeEventSubscription;
   unsubscribeNetInfo: NetInfoSubscription;
   screenName = ScreenEnum.LoadingApp;
+  coldStart: boolean;
 
   constructor(props: LoadingAppClassProps) {
     super(props);
+
+    this.coldStart = props.route.params?.startingApp ?? true;
 
     this.state = {
       indexerList: [] as IndexerList,
@@ -428,7 +436,6 @@ export class LoadingAppClass extends Component<
       removeFirstSnackbar: this.removeFirstSnackbar,
       zingolibVersion: '',
       setPrivacyOption: this.setPrivacyOption,
-      fromSettings: false,
 
       // context settings
       indexerServer: props.indexerServer,
@@ -536,26 +543,17 @@ export class LoadingAppClass extends Component<
     const has = await hasRecoveryWalletInfo();
     this.setState({ hasRecoveryWalletInfoSaved: has });
 
-    // First, check servers (only indexer server)
-    // valid scenarios:
-    // 1. server with uri & select server custom
-    // 2. called from settings
-    if (
-      (!this.state.indexerServer.uri &&
-        this.state.selectIndexerServer === SelectServerEnum.custom) ||
-      ((this.state.screen === 0.5 || this.state.screen === 0.55) &&
-        !this.state.startingApp)
-    ) {
-      this.setState({
-        screen: this.state.screen === 0.55 ? 0.55 : 0.5,
-        actionButtonsDisabled: false,
-        fromSettings:
-          (this.state.screen === 0.5 || this.state.screen === 0.55) &&
-          !this.state.startingApp
-            ? true
-            : false,
-      });
-      return;
+    if (!this.state.indexerServer.uri) {
+      const fastest = await fastestIndexer(indexerList);
+      const first = serverUris()[0];
+      const server: ServerType = fastest
+        ? { uri: fastest, chainName: ChainNameEnum.testChainName }
+        : { uri: first.uri, chainName: first.chainName };
+      this.setState({ indexerServer: server });
+      await SettingsFileImpl.writeSettings(
+        SettingsNameEnum.indexerServer,
+        server,
+      );
     }
 
     // Second, check if a wallet exists. Do it async so the basic screen has time to render
@@ -848,19 +846,6 @@ export class LoadingAppClass extends Component<
     return someServerIsWorking;
   };
 
-  openServers = () => {
-    // reset the custom server, if any. To the fist one
-    this.setState({
-      screen: 0.5,
-      fromSettings: false,
-      actionButtonsDisabled: false,
-      indexerServer: {
-        uri: serverUris()[0].uri,
-        chainName: serverUris()[0].chainName,
-      } as ServerType,
-    });
-  };
-
   checkServer: (s: ServerType) => Promise<boolean> = async (
     server: ServerType,
   ) => {
@@ -1048,76 +1033,10 @@ export class LoadingAppClass extends Component<
     );
   };
 
-  closeServers = () => {
-    // the app can have a wallet file already...
-    this.setState({
-      screen: 0,
-    });
-    this.componentDidMount();
-  };
-
-  goConnectIndexer = () => {
-    this.setState({
-      screen: 0.55,
-    });
-  };
-
-  /**
-   * TODO: IMPLEMENT WITHOUT RANDOM CONSTANTS
-   */
-  goAvailableServers = () => {
-    this.setState({
-      screen: 5,
-    });
-  };
-
-  goSelectNetwork = () => {
-    this.setState({
-      screen: 0.5,
-    });
-  };
-
-  checkIndexerServer = async (indexerServerUri: string) => {
-    if (!indexerServerUri) {
-      return {
-        result: false,
-        indexerServerUriParsed: indexerServerUri,
-      };
-    }
-
-    console.log(indexerServerUri);
-
-    this.setState({ actionButtonsDisabled: true });
-
-    try {
-      const uri: string = parseServerURI(
-        indexerServerUri,
-        this.state.translate,
-      );
-
-      if (!uri || uri.toLowerCase().startsWith(GlobalConst.error)) {
-        return {
-          result: false,
-          indexerServerUriParsed: indexerServerUri,
-        };
-      }
-
-      const latency = await pingIndexerServer(uri);
-
-      if (latency !== null) {
-        return {
-          result: true,
-          indexerServerUriParsed: uri,
-        };
-      }
-
-      return {
-        result: false,
-        indexerServerUriParsed: indexerServerUri,
-      };
-    } finally {
-      this.setState({ actionButtonsDisabled: false });
-    }
+  closeServers = (
+    navigation: NativeStackNavigationProp<LoadingAppStackParamList>,
+  ) => {
+    navigation.popToTop();
   };
 
   navigateToLoadedApp = (
@@ -1239,11 +1158,11 @@ export class LoadingAppClass extends Component<
   };
 
   getwalletToRestore = async () => {
-    this.setState({ wallet: {} as WalletType, screen: 3 });
+    this.setState({ wallet: {} as WalletType });
   };
 
-  doRestore = async (seedUfvk: string, birthday: number) => {
-    if (!seedUfvk) {
+  doRestore = async (seed: string, birthday: number) => {
+    if (!seed) {
       createAlert(
         this.setBackgroundError,
         this.addLastSnackbar,
@@ -1256,10 +1175,8 @@ export class LoadingAppClass extends Component<
       return;
     }
     if (
-      (seedUfvk.toLowerCase().startsWith(GlobalConst.uview) &&
-        this.state.indexerServer.chainName !== ChainNameEnum.mainChainName) ||
-      (seedUfvk.toLowerCase().startsWith(GlobalConst.utestview) &&
-        this.state.indexerServer.chainName === ChainNameEnum.mainChainName)
+      seed.toLowerCase().startsWith(GlobalConst.uview) ||
+      seed.toLowerCase().startsWith(GlobalConst.utestview)
     ) {
       createAlert(
         this.setBackgroundError,
@@ -1282,37 +1199,16 @@ export class LoadingAppClass extends Component<
       walletBirthday = '0';
     }
 
-    let type: RestoreFromTypeEnum = RestoreFromTypeEnum.seedRestoreFrom;
-    if (
-      seedUfvk.toLowerCase().startsWith(GlobalConst.uview) ||
-      seedUfvk.toLowerCase().startsWith(GlobalConst.utestview)
-    ) {
-      // this is a UFVK
-      type = RestoreFromTypeEnum.ufvkRestoreFrom;
-    }
+    const result: string = await RPCModule.restoreWalletFromSeed(
+      seed.toLowerCase(),
+      walletBirthday || '0',
+      this.state.indexerServer.uri,
+      this.state.indexerServer.chainName,
+      this.state.performanceLevel,
+      GlobalConst.minConfirmations.toString(),
+    );
 
-    let result: string;
-    if (type === RestoreFromTypeEnum.seedRestoreFrom) {
-      result = await RPCModule.restoreWalletFromSeed(
-        seedUfvk.toLowerCase(),
-        walletBirthday || '0',
-        this.state.indexerServer.uri,
-        this.state.indexerServer.chainName,
-        this.state.performanceLevel,
-        GlobalConst.minConfirmations.toString(),
-      );
-    } else {
-      result = await RPCModule.restoreWalletFromUfvk(
-        seedUfvk.toLowerCase(),
-        walletBirthday || '0',
-        this.state.indexerServer.uri,
-        this.state.indexerServer.chainName,
-        this.state.performanceLevel,
-        GlobalConst.minConfirmations.toString(),
-      );
-    }
-
-    //console.log(seedUfvk);
+    //console.log(seed);
     //console.log(result);
     let error = false;
     let errorText = '';
@@ -1323,23 +1219,11 @@ export class LoadingAppClass extends Component<
         if (!resultJson.error) {
           // storing the seed/ufvk & birthday in KeyChain/KeyStore
           if (this.state.recoveryWalletInfoOnDevice) {
-            if (type === RestoreFromTypeEnum.seedRestoreFrom) {
-              // here I have to store the seed/birthday in the device
-              // because the user is restoring from seed (same or different)
-              const walletSeed: WalletType = {
-                seed: seedUfvk.toLowerCase(),
-                birthday: Number(walletBirthday),
-              };
-              await createUpdateRecoveryWalletInfo(walletSeed);
-            } else {
-              // here I have to store the ufvk in the device
-              // because the user is restoring from ufvk (same or different)
-              const walletUfvk: WalletType = {
-                ufvk: seedUfvk.toLowerCase(),
-                birthday: Number(walletBirthday),
-              };
-              await createUpdateRecoveryWalletInfo(walletUfvk);
-            }
+            const walletSeed: WalletType = {
+              seed: seed.toLowerCase(),
+              birthday: Number(walletBirthday),
+            };
+            await createUpdateRecoveryWalletInfo(walletSeed);
           } else {
             if (this.state.hasRecoveryWalletInfoSaved) {
               await removeRecoveryWalletInfo();
@@ -1575,7 +1459,6 @@ export class LoadingAppClass extends Component<
       orchardPool,
       saplingPool,
       transparentPool,
-      fromSettings,
     } = this.state;
 
     //console.log('render loadingAppClass - 3', this.state.privacy);
@@ -1636,46 +1519,75 @@ export class LoadingAppClass extends Component<
               }}
             />
           )}
-          {screen === 0.5 && (
-            <SelectNetwork
-              actionButtonsDisabled={actionButtonsDisabled}
-              setIndexerServer={this.setIndexerServer}
-              checkIndexerServer={this.checkIndexerServer}
-              closeServers={this.closeServers}
-              fromSettings={fromSettings}
-              goConnectIndexer={this.goConnectIndexer}
-              goAvailableServers={this.goAvailableServers}
-            />
-          )}
-          {screen === 0.55 && (
-            <ConnectIndexer
-              actionButtonsDisabled={actionButtonsDisabled}
-              setIndexerServer={this.setIndexerServer}
-              checkIndexerServer={this.checkIndexerServer}
-              closeServers={this.closeServers}
-              fromSettings={fromSettings}
-              goSelectNetwork={this.goSelectNetwork}
-            />
-          )}
-          {screen === 5 && (
-            <ServerListScreen
-              goBack={fromSettings ? this.closeServers : this.goSelectNetwork}
-              indexerList={this.state.indexerList}
-              setIndexerServer={this.setIndexerServer}
-              checkIndexerServer={this.checkIndexerServer}
-              closeServers={this.closeServers}
-              previousServer={this.state.indexerServer.uri}
-            />
-          )}
-          {screen === 1 && (
-            <StartMenu
-              actionButtonsDisabled={actionButtonsDisabled}
-              walletExists={walletExists}
-              openCurrentWallet={this.openCurrentWallet}
-              createNewWallet={this.createNewWallet}
-              getwalletToRestore={this.getwalletToRestore}
-              openServers={this.openServers}
-            />
+          {(screen === 1 || screen === 3) && (
+            <LoadingStack.Navigator
+              initialRouteName={
+                screen === 3 ? RouteEnum.Import : RouteEnum.StartMenu
+              }
+              screenOptions={{ headerShown: false }}
+            >
+              <LoadingStack.Screen
+                name={RouteEnum.StartMenu}
+                options={{ contentStyle: { backgroundColor: 'transparent' } }}
+              >
+                {({ navigation }) => (
+                  <StartMenu
+                    actionButtonsDisabled={actionButtonsDisabled}
+                    walletExists={walletExists}
+                    playIntro={this.coldStart && !walletExists}
+                    openCurrentWallet={this.openCurrentWallet}
+                    createNewWallet={this.createNewWallet}
+                    getwalletToRestore={() => {
+                      this.getwalletToRestore();
+                      navigation.navigate(RouteEnum.Import);
+                    }}
+                    openServers={() =>
+                      navigation.navigate(RouteEnum.ChooseIndexer)
+                    }
+                  />
+                )}
+              </LoadingStack.Screen>
+              <LoadingStack.Screen name={RouteEnum.Import}>
+                {({ navigation }) => (
+                  <Import
+                    actionButtonsDisabled={actionButtonsDisabled}
+                    onClickOK={(s: string, b: number) => this.doRestore(s, b)}
+                    onClickCancel={() => {
+                      if (navigation.canGoBack()) {
+                        navigation.goBack();
+                        return;
+                      }
+                      this.setState({ screen: 1 });
+                      navigation.replace(RouteEnum.StartMenu);
+                    }}
+                  />
+                )}
+              </LoadingStack.Screen>
+              <LoadingStack.Screen name={RouteEnum.ChooseIndexer}>
+                {() => <ChooseIndexer indexerList={this.state.indexerList} />}
+              </LoadingStack.Screen>
+              <LoadingStack.Screen name={RouteEnum.ListedIndexers}>
+                {({ navigation }) => (
+                  <ListedIndexers
+                    indexerList={this.state.indexerList}
+                    setIndexerServer={this.setIndexerServer}
+                    closeServers={() => this.closeServers(navigation)}
+                    previousServer={this.state.indexerServer.uri}
+                  />
+                )}
+              </LoadingStack.Screen>
+              <LoadingStack.Screen
+                name={RouteEnum.CustomIndexer}
+                initialParams={{ network: ChainNameEnum.testChainName }}
+              >
+                {({ navigation }) => (
+                  <CustomIndexer
+                    setIndexerServer={this.setIndexerServer}
+                    closeServers={() => this.closeServers(navigation)}
+                  />
+                )}
+              </LoadingStack.Screen>
+            </LoadingStack.Navigator>
           )}
           {screen === 2 && wallet && (
             <Modal
@@ -1702,20 +1614,6 @@ export class LoadingAppClass extends Component<
                     firstLaunchingMessage,
                   )
                 }
-              />
-            </Modal>
-          )}
-          {screen === 3 && (
-            <Modal
-              animationType="slide"
-              transparent={true}
-              visible={screen === 3}
-              onRequestClose={() => this.setState({ screen: 1 })}
-            >
-              <Import
-                actionButtonsDisabled={actionButtonsDisabled}
-                onClickOK={(s: string, b: number) => this.doRestore(s, b)}
-                onClickCancel={() => this.setState({ screen: 1 })}
               />
             </Modal>
           )}

@@ -9,7 +9,6 @@ import {
   Keyboard,
 } from 'react-native';
 
-import { useTheme } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { IconDefinition, faDotCircle } from '@fortawesome/free-solid-svg-icons';
 import { faCircle as farCircle } from '@fortawesome/free-regular-svg-icons';
@@ -18,7 +17,7 @@ import RegText from '../Components/RegText';
 import FadeText from '../Components/FadeText';
 import BoldText from '../Components/BoldText';
 import { checkServerURI, parseServerURI, serverUris } from '../../app/uris';
-import { AppDrawerParamList, ThemeType } from '../../app/types';
+import { AppDrawerParamList } from '../../app/types';
 import { ContextAppLoaded } from '../../app/context';
 
 import {
@@ -44,6 +43,7 @@ import { DrawerScreenProps } from '@react-navigation/drawer';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../Header';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
+import { useTheme } from '../../app/theme';
 
 type SettingsProps = DrawerScreenProps<
   AppDrawerParamList,
@@ -155,7 +155,7 @@ const Settings: React.FunctionComponent<SettingsProps> = ({
     PERFORMANCELEVELMENU = performanceLevelsArray as Options[];
   }
 
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const screenName = ScreenEnum.Settings;
 
   const [autoServerUri, setAutoServerUri] = useState<string>('');
@@ -684,7 +684,7 @@ const Settings: React.FunctionComponent<SettingsProps> = ({
                 typeOption(item.value) === valueOption ? faDotCircle : farCircle
               }
               size={20}
-              color={colors.border}
+              color={colors.fgFaint}
             />
             <RegText key={'text-' + item.value} style={{ marginLeft: 10 }}>
               {translate(`settings.value-${label}-${item.value}`) as string}
@@ -723,8 +723,8 @@ const Settings: React.FunctionComponent<SettingsProps> = ({
           isChecked={value}
           useBuiltInState={false}
           onPress={() => setValue(!value)}
-          unFillColor={colors.background}
-          fillColor={colors.primary}
+          unFillColor={colors.bgCanvas}
+          fillColor={colors.bgAccent}
           style={{
             marginRight: 10,
           }}
@@ -751,7 +751,7 @@ const Settings: React.FunctionComponent<SettingsProps> = ({
       <KeyboardAvoidingView
         style={{
           flex: 1,
-          backgroundColor: colors.background,
+          backgroundColor: colors.bgCanvas,
         }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={
@@ -928,7 +928,7 @@ const Settings: React.FunctionComponent<SettingsProps> = ({
                       <FontAwesomeIcon
                         icon={offlineIcon}
                         size={20}
-                        color={colors.border}
+                        color={colors.fgFaint}
                       />
                     )}
                     <RegText style={{ marginLeft: 10 }}>
@@ -976,7 +976,7 @@ const Settings: React.FunctionComponent<SettingsProps> = ({
                       <FontAwesomeIcon
                         icon={autoIcon}
                         size={20}
-                        color={colors.border}
+                        color={colors.fgFaint}
                       />
                     )}
                     <RegText style={{ marginLeft: 10 }}>
@@ -1007,7 +1007,7 @@ const Settings: React.FunctionComponent<SettingsProps> = ({
                     pickerProps={{
                       mode: 'dialog',
                       itemStyle: {
-                        color: colors.background,
+                        color: colors.bgCanvas,
                       },
                     }}
                     fixAndroidTouchableBug={true}
@@ -1016,7 +1016,7 @@ const Settings: React.FunctionComponent<SettingsProps> = ({
                     placeholder={{
                       label: translate('settings.select-placeholder') as string,
                       value: null,
-                      color: colors.primary,
+                      color: colors.fgAccent,
                     }}
                     useNativeAndroidPickerStyle={false}
                     onValueChange={(itemValue: string) => {
@@ -1057,7 +1057,7 @@ const Settings: React.FunctionComponent<SettingsProps> = ({
                         <FontAwesomeIcon
                           icon={listIcon}
                           size={20}
-                          color={colors.border}
+                          color={colors.fgFaint}
                         />
                       )}
                       <RegText
@@ -1089,7 +1089,7 @@ const Settings: React.FunctionComponent<SettingsProps> = ({
                       <FontAwesomeIcon
                         icon={listIcon}
                         size={20}
-                        color={colors.border}
+                        color={colors.fgFaint}
                       />
                     )}
                     <RegText style={{ marginLeft: 10 }}>
@@ -1138,7 +1138,7 @@ const Settings: React.FunctionComponent<SettingsProps> = ({
                       <FontAwesomeIcon
                         icon={customIcon}
                         size={20}
-                        color={colors.border}
+                        color={colors.fgFaint}
                       />
                     )}
                     <RegText style={{ marginLeft: 10 }}>
@@ -1162,7 +1162,7 @@ const Settings: React.FunctionComponent<SettingsProps> = ({
                         translate('settings.server-acc') as string
                       }
                       style={{
-                        borderColor: colors.border,
+                        borderColor: colors.borderFaint,
                         borderWidth: 1,
                         marginLeft: 5,
                         width: 'auto',
@@ -1174,9 +1174,9 @@ const Settings: React.FunctionComponent<SettingsProps> = ({
                       <TextInput
                         testID="settings.custom-server-field"
                         placeholder={GlobalConst.serverPlaceHolder}
-                        placeholderTextColor={colors.placeholder}
+                        placeholderTextColor={colors.fgSubtle}
                         style={{
-                          color: colors.text,
+                          color: colors.fgDefault,
                           fontWeight: '600',
                           fontSize: 18,
                           minWidth: '50%',
@@ -1322,7 +1322,7 @@ const Settings: React.FunctionComponent<SettingsProps> = ({
               <View style={{ display: 'flex' }}>
                 <FadeText
                   style={{
-                    color: colors.primary,
+                    color: colors.fgAccent,
                     textAlign: 'center',
                     marginTop: 10,
                     padding: 5,
@@ -1342,7 +1342,7 @@ const Settings: React.FunctionComponent<SettingsProps> = ({
               >
                 <FadeText
                   style={{
-                    color: colors.primary,
+                    color: colors.fgAccent,
                     textAlign: 'center',
                     marginVertical: 10,
                     padding: 5,
