@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { AccessibilityInfo, Platform, TextStyle } from 'react-native';
 import moment from 'moment';
 import {
@@ -21,7 +21,11 @@ import {
   ValueTransferType,
 } from '../../app/AppState';
 import { RPCValueTransferStatusEnum } from '../../app/rpc/enums/RPCValueTransferStatusEnum';
-import { ContextAppLoaded } from '../../app/context';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedWallet,
+} from '../../app/context';
 import { recipientNames } from './data';
 
 export const gold = '#F2CC50';
@@ -262,7 +266,7 @@ export const relativeBucket = (vt: ValueTransferType) => {
 };
 
 export const useTransfers = () => {
-  const { valueTransfers } = useContext(ContextAppLoaded);
+  const { valueTransfers } = useAppLoadedWallet();
   return useMemo(
     () =>
       (valueTransfers ?? [])
@@ -273,7 +277,7 @@ export const useTransfers = () => {
 };
 
 export const useSync = () => {
-  const { syncingStatus, netInfo } = useContext(ContextAppLoaded);
+  const { syncingStatus, netInfo } = useAppLoadedWallet();
   const pct =
     syncingStatus?.percentage_total_outputs_scanned ||
     syncingStatus?.percentage_total_blocks_scanned ||
@@ -296,7 +300,8 @@ export const useSync = () => {
 };
 
 export const usePrivacy = () => {
-  const { privacy, setPrivacyOption } = useContext(ContextAppLoaded);
+  const { setPrivacyOption } = useAppLoadedActions();
+  const { privacy } = useAppLoadedSettings();
   const [hidden, setHidden] = useState<boolean>(!!privacy);
   useEffect(() => setHidden(!!privacy), [privacy]);
   const toggle = () => {

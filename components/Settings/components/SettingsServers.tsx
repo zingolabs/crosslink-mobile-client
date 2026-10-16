@@ -1,16 +1,21 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext } from 'react';
+import React from 'react';
 import { View } from 'react-native';
 
 import {
-  AppDrawerParamList,
+  LoadedAppStackParamList,
   LoadingAppNavigationState,
 } from '../../../app/types';
-import { ContextAppLoaded } from '../../../app/context';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedWallet,
+  useAppLoadedUi,
+} from '../../../app/context';
 import Snackbars from '../../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { ChainNameEnum, RouteEnum, ScreenEnum } from '../../../app/AppState';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faServer } from '@fortawesome/free-solid-svg-icons';
 import RegText from '../../Components/RegText';
@@ -18,9 +23,10 @@ import FadeText from '../../Components/FadeText';
 import { HeaderTitle } from '../../Header';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
 import { useTheme } from '../../../app/theme';
+import { LoadingAppEntryEnum } from '../../../app/AppState';
 
-type SettingsServersProps = DrawerScreenProps<
-  AppDrawerParamList,
+type SettingsServersProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
   RouteEnum.SettingsServers
 > & {
   navigateToLoadingApp: (state: LoadingAppNavigationState) => Promise<void>;
@@ -30,18 +36,26 @@ const SettingsServers: React.FunctionComponent<SettingsServersProps> = ({
   navigateToLoadingApp,
   navigation,
 }) => {
-  const context = useContext(ContextAppLoaded);
-  const { snackbars, removeFirstSnackbar, info, indexerServer } = context;
+  const { removeFirstSnackbar } = useAppLoadedActions();
+  const { indexerServer } = useAppLoadedSettings();
+  const { info } = useAppLoadedWallet();
+  const { snackbars } = useAppLoadedUi();
   const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.SettingsServers;
 
   const changeServerTesnet = () => {
-    navigateToLoadingApp({ screen: 0.5, startingApp: false });
+    navigateToLoadingApp({
+      entry: LoadingAppEntryEnum.boot,
+      startingApp: false,
+    });
   };
 
   const changeServerRegtest = () => {
-    navigateToLoadingApp({ screen: 0.55, startingApp: false });
+    navigateToLoadingApp({
+      entry: LoadingAppEntryEnum.boot,
+      startingApp: false,
+    });
   };
 
   return (

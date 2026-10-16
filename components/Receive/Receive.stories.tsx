@@ -9,7 +9,6 @@ const meta = {
   component: Receive,
   args: {
     ...screenProps(RouteEnum.Receive),
-    toggleMenuDrawer: () => {},
     setSecurityOption: async () => {},
   },
 } satisfies Meta<typeof Receive>;

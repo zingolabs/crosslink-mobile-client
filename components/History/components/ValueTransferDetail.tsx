@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   ScrollView,
@@ -25,8 +25,13 @@ import Utils from '../../../app/utils';
 import RegText from '../../Components/RegText';
 import ZecAmount from '../../Components/ZecAmount';
 import FadeText from '../../Components/FadeText';
-import { AppDrawerParamList } from '../../../app/types';
-import { ContextAppLoaded } from '../../../app/context';
+import { LoadedAppStackParamList } from '../../../app/types';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedWallet,
+  useAppLoadedUi,
+} from '../../../app/context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import Stake from '../../../assets/icons/stake-white.svg';
 import Unstake from '../../../assets/icons/unstake-white.svg';
@@ -38,13 +43,13 @@ import {
 import { RPCValueTransferStatusEnum } from '../../../app/rpc/enums/RPCValueTransferStatusEnum';
 import Snackbars from '../../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../../Header';
 import { useTheme } from '../../../app/theme';
 
-type ValueTransferDetailProps = DrawerScreenProps<
-  AppDrawerParamList,
+type ValueTransferDetailProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
   RouteEnum.ValueTransferDetail
 >;
 
@@ -52,16 +57,11 @@ const ValueTransferDetail: React.FunctionComponent<
   ValueTransferDetailProps
 > = ({ route }) => {
   const navigation: any = useNavigation();
-  const context = useContext(ContextAppLoaded);
-  const {
-    info,
-    translate,
-    language,
-    privacy,
-    addLastSnackbar,
-    snackbars,
-    removeFirstSnackbar,
-  } = context;
+  const { translate, addLastSnackbar, removeFirstSnackbar } =
+    useAppLoadedActions();
+  const { language, privacy } = useAppLoadedSettings();
+  const { info } = useAppLoadedWallet();
+  const { snackbars } = useAppLoadedUi();
   const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.ValueTransferDetail;
@@ -83,7 +83,10 @@ const ValueTransferDetail: React.FunctionComponent<
 
   const memo = valueTransfer.memos;
 
-  const iconColor = Utils.valueTransferKindColor(colors.fgDefault, valueTransfer);
+  const iconColor = Utils.valueTransferKindColor(
+    colors.fgDefault,
+    valueTransfer,
+  );
 
   const icon =
     valueTransfer.kind === ValueTransferKindEnum.Received ||

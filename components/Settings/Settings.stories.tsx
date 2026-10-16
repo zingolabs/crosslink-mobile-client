@@ -14,7 +14,6 @@ const meta = {
   component: Settings,
   args: {
     ...screenProps(RouteEnum.Settings),
-    toggleMenuDrawer: () => {},
     setServerOption: async () => {},
     setCurrencyOption: async () => {},
     setLanguageOption: async () => {},

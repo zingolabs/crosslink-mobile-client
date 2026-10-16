@@ -8,7 +8,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useNavigation } from '@react-navigation/native';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import {
   NetInfoType,
@@ -18,7 +18,11 @@ import {
   RouteEnum,
   ScreenEnum,
 } from '../../app/AppState';
-import { ContextAppLoaded } from '../../app/context';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedWallet,
+} from '../../app/context';
 import ZecAmount from '../Components/ZecAmount';
 import { NetInfoStateType } from '@react-native-community/netinfo/src/index';
 import { Animated } from 'react-native';
@@ -70,28 +74,22 @@ const Header: React.FunctionComponent<HeaderProps> = ({
   screenName,
 }) => {
   const navigation: any = useNavigation();
-  const context = useContext(ContextAppLoaded);
-  const { totalBalance, info, syncingStatus, security, selectIndexerServer } =
-    context;
+  const { translate: translateContext } = useAppLoadedActions();
+  const {
+    security,
+    selectIndexerServer,
+    privacy: privacyContext,
+  } = useAppLoadedSettings();
+  const {
+    totalBalance,
+    info,
+    syncingStatus,
+    netInfo: netInfoContext,
+  } = useAppLoadedWallet();
 
-  let translate: (key: string) => TranslateType,
-    netInfo: NetInfoType,
-    privacy: boolean;
-  if (translateProp) {
-    translate = translateProp;
-  } else {
-    translate = context.translate;
-  }
-  if (netInfoProp) {
-    netInfo = netInfoProp;
-  } else {
-    netInfo = context.netInfo;
-  }
-  if (privacyProp) {
-    privacy = privacyProp;
-  } else {
-    privacy = context.privacy;
-  }
+  const translate = translateProp ?? translateContext;
+  const netInfo = netInfoProp ?? netInfoContext;
+  const privacy = privacyProp ?? privacyContext;
 
   const { colors } = useTheme();
 

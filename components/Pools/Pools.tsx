@@ -1,40 +1,40 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext } from 'react';
+import React from 'react';
 import { View, ScrollView, ActivityIndicator } from 'react-native';
 
 import ZecAmount from '../Components/ZecAmount';
 import BoldText from '../Components/BoldText';
 import DetailLine from '../Components/DetailLine';
-import { AppDrawerParamList } from '../../app/types';
-import { ContextAppLoaded } from '../../app/context';
+import { LoadedAppStackParamList } from '../../app/types';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedWallet,
+  useAppLoadedUi,
+} from '../../app/context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import FadeText from '../Components/FadeText';
 import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { RouteEnum, ScreenEnum } from '../../app/AppState';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../Header';
 import { useTheme } from '../../app/theme';
 
-type PoolsProps = DrawerScreenProps<AppDrawerParamList, RouteEnum.Pools>;
+type PoolsProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
+  RouteEnum.Pools
+>;
 
 const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
-  const context = useContext(ContextAppLoaded);
-  const {
-    totalBalance,
-    info,
-    translate,
-    privacy,
-    somePending,
-    shieldingAmount,
-    snackbars,
-    removeFirstSnackbar,
-    orchardPool,
-    saplingPool,
-    transparentPool,
-  } = context;
+  const { translate, removeFirstSnackbar } = useAppLoadedActions();
+  const { privacy, orchardPool, saplingPool, transparentPool } =
+    useAppLoadedSettings();
+  const { totalBalance, info, somePending, shieldingAmount } =
+    useAppLoadedWallet();
+  const { snackbars } = useAppLoadedUi();
   const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.Pools;

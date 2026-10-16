@@ -1,11 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {
-  useState,
-  useEffect,
-  useContext,
-  useCallback,
-  useRef,
-} from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   ScrollView,
@@ -47,14 +41,19 @@ import {
 import { parseZcashURI } from '../../app/uris';
 import RPCModule from '../../app/RPCModule';
 import Utils from '../../app/utils';
-import { AppDrawerParamList } from '../../app/types';
-import { ContextAppLoaded } from '../../app/context';
+import { LoadedAppStackParamList } from '../../app/types';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedWallet,
+  useAppLoadedUi,
+} from '../../app/context';
 import { createAlert } from '../../app/createAlert';
 import { RPCSendProposeType } from '../../app/rpc/types/RPCSendProposeType';
 import { RPCSpendablebalanceType } from '../../app/rpc/types/RPCSpendablebalanceType';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import Snackbars from '../Components/Snackbars';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Wallet from '../../assets/icons/wallet.svg';
 import { HeaderTitle } from '../Header';
@@ -62,8 +61,10 @@ import { XIcon } from '../Components/Icons/XIcon';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
 import { useTheme } from '../../app/theme';
 
-type SendProps = DrawerScreenProps<AppDrawerParamList, RouteEnum.Send> & {
-  toggleMenuDrawer: () => void;
+type SendProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
+  RouteEnum.Send
+> & {
   setShieldingAmount: (value: number) => void;
   setScrollToTop: (value: boolean) => void;
   setScrollToBottom: (value: boolean) => void;
@@ -92,28 +93,30 @@ const Send: React.FunctionComponent<SendProps> = ({
   setScrollToBottom,
 }) => {
   const navigation: any = useNavigation();
-  const context = useContext(ContextAppLoaded);
   const {
     translate,
-    info,
-    totalBalance,
-    sendPageState,
-    zecPrice,
-    netInfo,
-    privacy,
-    indexerServer,
     setBackgroundError,
     addLastSnackbar,
-    somePending,
+    removeFirstSnackbar,
+  } = useAppLoadedActions();
+  const {
+    privacy,
+    indexerServer,
     donation,
+    selectIndexerServer,
+    zenniesDonationAddress,
+  } = useAppLoadedSettings();
+  const {
+    info,
+    totalBalance,
+    zecPrice,
+    netInfo,
+    somePending,
     addresses,
     defaultUnifiedAddress,
     shieldingAmount,
-    selectIndexerServer,
-    zenniesDonationAddress,
-    snackbars,
-    removeFirstSnackbar,
-  } = context;
+  } = useAppLoadedWallet();
+  const { sendPageState, snackbars } = useAppLoadedUi();
 
   const { colors } = useTheme();
   const { clear } = useToast();
@@ -921,11 +924,7 @@ const Send: React.FunctionComponent<SendProps> = ({
                           padding: 0,
                         }}
                       >
-                        <XIcon
-                          color={colors.bgCanvas}
-                          width={20}
-                          height={20}
-                        />
+                        <XIcon color={colors.bgCanvas} width={20} height={20} />
                       </View>
                     </TouchableOpacity>
                   )}

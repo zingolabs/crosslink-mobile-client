@@ -39,7 +39,6 @@ import { RPCSpendablebalanceType } from './types/RPCSpendablebalanceType';
 import { RPCConfigWalletPerformanceType } from './types/RPCConfigWalletPerformanceType';
 import { RPCPerformanceLevelEnum } from './enums/RPCPerformanceLevelEnum';
 import { RPCWalletVersionType } from './types/RPCWalletVersionType';
-import { LoadingAppNavigationState } from '../types';
 import { StakeJsonToTypeType } from '../AppState/types/ValueTransferType';
 import RPCWalletBondsType from './types/RPCWalletBondsType';
 import { RPCStakedType } from './types/RPCStakedType';
@@ -63,7 +62,7 @@ export default class RPC {
   fnSetZingolib: (zingolib: string) => void;
   fnSetWallet: (wallet: WalletType) => void;
   fnSetLastError: (error: string) => void;
-  fnOnClickOKChangeWallet: (state: LoadingAppNavigationState) => Promise<void>;
+  fnRecoverWallet: (seed: string, birthday: number) => Promise<void>;
 
   updateTimerID?: NodeJS.Timeout;
 
@@ -117,9 +116,7 @@ export default class RPC {
     fnSetZingolib: (zingolib: string) => void,
     fnSetWallet: (wallet: WalletType) => void,
     fnSetLastError: (error: string) => void,
-    fnOnClickOKChangeWallet: (
-      state: LoadingAppNavigationState,
-    ) => Promise<void>,
+    fnRecoverWallet: (seed: string, birthday: number) => Promise<void>,
     readOnly: boolean,
     indexerServer: ServerType,
     performanceLevel: RPCPerformanceLevelEnum,
@@ -138,7 +135,7 @@ export default class RPC {
     this.fnSetZingolib = fnSetZingolib;
     this.fnSetWallet = fnSetWallet;
     this.fnSetLastError = fnSetLastError;
-    this.fnOnClickOKChangeWallet = fnOnClickOKChangeWallet;
+    this.fnRecoverWallet = fnRecoverWallet;
 
     this.lastWalletBlockHeight = 0;
     this.lastServerBlockHeight = 0;
@@ -763,15 +760,12 @@ export default class RPC {
           this.walletSeed,
         );
         if (this.walletSeed) {
-          this.fnOnClickOKChangeWallet({
-            screen: 0,
-            startingApp: false,
-            walletSeed: this.walletSeed,
-            walletBirthday:
-              this.walletBirthday > this.lastServerBlockHeight
-                ? 1
-                : this.walletBirthday,
-          });
+          this.fnRecoverWallet(
+            this.walletSeed,
+            this.walletBirthday > this.lastServerBlockHeight
+              ? 1
+              : this.walletBirthday,
+          );
         } else {
           let result: string = await RPCModule.loadExistingWallet(
             this.indexerServer.uri,

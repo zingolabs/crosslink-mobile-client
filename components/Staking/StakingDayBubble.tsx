@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -11,7 +11,7 @@ import LinearGradient from 'react-native-linear-gradient';
 
 import ClockActiveWithCheck from '../../assets/icons/clock-active-with-check.svg';
 import TriangleYellow from '../../assets/icons/triangle-yellow.svg';
-import { ContextAppLoaded } from '../../app/context';
+import { useAppLoadedWallet } from '../../app/context';
 import RegText from '../Components/RegText';
 import { formatSeconds } from '../../app/utils/Utils';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
@@ -24,12 +24,11 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 const CENTER_LEFT = (SCREEN_WIDTH - EXPANDED_WIDTH) / 2;
 
 const StakingDayBubble: React.FC = () => {
-  const context = useContext(ContextAppLoaded);
   const {
     stakingDay,
     timeToStakingDaySeconds: timeToStakingDay,
     timeLeftStakingDaySeconds: timeLeftStakingDay,
-  } = context;
+  } = useAppLoadedWallet();
 
   const [expanded, setExpanded] = useState(false);
   const [anchorX, setAnchorX] = useState(0);

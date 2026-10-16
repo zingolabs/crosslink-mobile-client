@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -21,8 +21,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCheckCircle, faCircle } from '@fortawesome/free-solid-svg-icons';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
-import { DrawerScreenProps } from '@react-navigation/drawer';
-import { AppDrawerParamList } from '../../../app/types';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { LoadedAppStackParamList } from '../../../app/types';
 import {
   RouteEnum,
   ScheduledActionType,
@@ -30,7 +30,7 @@ import {
   StakingActionKindEnum,
   ToAddrClass,
 } from '../../../app/AppState';
-import { ContextAppLoaded } from '../../../app/context';
+import { useAppLoadedSettings, useAppLoadedWallet } from '../../../app/context';
 import Utils from '../../../app/utils';
 import FadeText from '../../Components/FadeText';
 import ZecAmount from '../../Components/ZecAmount';
@@ -44,8 +44,8 @@ const PRESET_AMOUNTS = [0.01, 0.1, 1, 10];
 
 type ModalState = 'idle' | 'sending' | 'success';
 
-type AddStakeScreenProps = DrawerScreenProps<
-  AppDrawerParamList,
+type AddStakeScreenProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
   RouteEnum.Stake
 >;
 
@@ -53,14 +53,9 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
   const navigation: any = useNavigation();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-  const {
-    totalBalance,
-    info,
-    privacy,
-    globalStaked,
-    stakingDay,
-    scheduledActions,
-  } = useContext(ContextAppLoaded);
+  const { privacy } = useAppLoadedSettings();
+  const { totalBalance, info, globalStaked, stakingDay, scheduledActions } =
+    useAppLoadedWallet();
 
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [modalState, setModalState] = useState<ModalState>('idle');
@@ -366,7 +361,11 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
                     <Text
                       style={[
                         styles.pillAmount,
-                        { color: isSelected ? colors.fgAccent : colors.fgDefault },
+                        {
+                          color: isSelected
+                            ? colors.fgAccent
+                            : colors.fgDefault,
+                        },
                       ]}
                     >
                       +{value}
@@ -375,9 +374,7 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
                       style={[
                         styles.pillLabel,
                         {
-                          color: isSelected
-                            ? colors.fgAccent
-                            : colors.fgSubtle,
+                          color: isSelected ? colors.fgAccent : colors.fgSubtle,
                         },
                       ]}
                     >

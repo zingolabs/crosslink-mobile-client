@@ -1,14 +1,12 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { AppDrawerParamList } from '../../app/types';
-import { ContextAppLoaded } from '../../app/context';
+import { LoadedAppStackParamList } from '../../app/types';
+import {
+  useAppLoadedActions,
+  useAppLoadedWallet,
+  useAppLoadedUi,
+} from '../../app/context';
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import {
@@ -17,7 +15,7 @@ import {
   ScreenEnum,
   StakeType,
 } from '../../app/AppState';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HeaderTitle } from '../Header';
 import {
   Dimensions,
@@ -48,8 +46,8 @@ import { XIcon } from '../Components/Icons/XIcon';
 import StakingDayBubble from '../Staking/StakingDayBubble';
 import { useTheme } from '../../app/theme';
 
-type FinalizersProps = DrawerScreenProps<
-  AppDrawerParamList,
+type FinalizersProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
   RouteEnum.Finalizers
 >;
 
@@ -71,15 +69,9 @@ const Finalizers: React.FunctionComponent<FinalizersProps> = ({
       : '';
 
   const { colors } = useTheme();
-  const context = useContext(ContextAppLoaded);
-  const {
-    snackbars,
-    removeFirstSnackbar,
-    staked,
-    globalStaked,
-    info,
-    walletBonds,
-  } = context;
+  const { removeFirstSnackbar } = useAppLoadedActions();
+  const { staked, globalStaked, info, walletBonds } = useAppLoadedWallet();
+  const { snackbars } = useAppLoadedUi();
   const { clear } = useToast();
   const screenName = ScreenEnum.About;
 

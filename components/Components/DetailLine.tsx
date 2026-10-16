@@ -1,11 +1,11 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { ReactNode, useContext } from 'react';
+import React, { ReactNode } from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 
 import FadeText from './FadeText';
 import RegText from './RegText';
-import { ContextAppLoaded } from '../../app/context';
+import { useAppLoadedActions } from '../../app/context';
 import { ScreenEnum, SnackbarDurationEnum } from '../../app/AppState';
 import { useTheme } from '../../app/theme';
 
@@ -25,8 +25,7 @@ const DetailLine: React.FunctionComponent<DetailLineProps> = ({
   screenName,
 }) => {
   const { colors } = useTheme();
-  const context = useContext(ContextAppLoaded);
-  const { addLastSnackbar, translate } = context;
+  const { addLastSnackbar, translate } = useAppLoadedActions();
 
   return (
     <View style={{ display: 'flex', marginTop: 20 }}>

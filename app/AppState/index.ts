@@ -16,7 +16,6 @@ export { default as SettingsFileClass } from './classes/SettingsFileClass';
 export { default as ToAddrClass } from './classes/ToAddrClass';
 export { default as TotalBalanceClass } from './classes/TotalBalanceClass';
 
-export { MenuItemEnum } from './enums/MenuItemEnum';
 export { LanguageEnum } from './enums/LanguageEnum';
 export { CurrencyEnum } from './enums/CurrencyEnum';
 export { SelectServerEnum } from './enums/SelectServerEnum';
@@ -44,6 +43,7 @@ export { AddressUnifiedTypeEnum } from './enums/AddressUnifiedTypeEnum';
 export { ZcashUriFieldEnum } from './enums/ZcashUriFieldEnum';
 export { ScreenEnum } from './enums/ScreenEnum';
 export { LaunchingModeEnum } from './enums/LaunchingModeEnum';
+export { LoadingAppEntryEnum } from './enums/LoadingAppEntryEnum';
 export { StakingActionKindEnum } from './enums/StakingActionKindEnum';
 
 export { GlobalConst } from './const/GlobalConst';

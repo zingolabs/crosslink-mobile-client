@@ -1,20 +1,20 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-import { ContextAppLoaded } from '../../../app/context';
+import { useAppLoadedActions, useAppLoadedUi } from '../../../app/context';
 import Scanner from '../../Scanner';
 import { GlobalConst, RouteEnum, ScreenEnum } from '../../../app/AppState';
-import { AppDrawerParamList } from '../../../app/types';
+import { LoadedAppStackParamList } from '../../../app/types';
 
 import { View } from 'react-native';
 import Snackbars from '../../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HeaderTitle } from '../../Header';
 import { useTheme } from '../../../app/theme';
 
-type ScannerAddressProps = DrawerScreenProps<
-  AppDrawerParamList,
+type ScannerAddressProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
   RouteEnum.ScannerAddress
 >;
 
@@ -26,8 +26,8 @@ const ScannerAddress: React.FunctionComponent<ScannerAddressProps> = ({
     !!route.params && route.params.setAddress !== undefined
       ? route.params.setAddress
       : () => {};
-  const context = useContext(ContextAppLoaded);
-  const { snackbars, removeFirstSnackbar } = context;
+  const { removeFirstSnackbar } = useAppLoadedActions();
+  const { snackbars } = useAppLoadedUi();
   const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.ScannerAddress;

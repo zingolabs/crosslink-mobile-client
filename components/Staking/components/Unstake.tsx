@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -27,9 +27,9 @@ import {
   StakingActionKindEnum,
   WalletBondsType,
 } from '../../../app/AppState';
-import { AppDrawerParamList } from '../../../app/types';
-import { DrawerScreenProps } from '@react-navigation/drawer';
-import { ContextAppLoaded } from '../../../app/context';
+import { LoadedAppStackParamList } from '../../../app/types';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useAppLoadedSettings, useAppLoadedWallet } from '../../../app/context';
 import { HeaderTitle } from '../../Header';
 import { ChevronDown } from '../../Components/Icons/Chevron';
 import FadeText from '../../Components/FadeText';
@@ -42,7 +42,10 @@ import { useTheme } from '../../../app/theme';
 
 type ModalState = 'idle' | 'sending' | 'success';
 
-type UnstakeProps = DrawerScreenProps<AppDrawerParamList, RouteEnum.Unstake>;
+type UnstakeProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
+  RouteEnum.Unstake
+>;
 
 const Unstake: React.FC<UnstakeProps> = ({ route }) => {
   const finalizer =
@@ -70,16 +73,15 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
 
   const modalVisible = modalState !== 'idle';
 
-  const context = useContext(ContextAppLoaded);
+  const { privacy } = useAppLoadedSettings();
   const {
     walletBonds,
     valueTransfers,
     staked,
     info,
-    privacy,
     stakingDay,
     scheduledActions,
-  } = context;
+  } = useAppLoadedWallet();
 
   console.log('FINALIZER', finalizerFromText);
 

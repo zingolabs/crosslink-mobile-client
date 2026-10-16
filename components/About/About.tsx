@@ -1,24 +1,31 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext } from 'react';
+import React from 'react';
 import { View, ScrollView } from 'react-native';
 
 import FadeText from '../Components/FadeText';
-import { AppDrawerParamList } from '../../app/types';
-import { ContextAppLoaded } from '../../app/context';
+import { LoadedAppStackParamList } from '../../app/types';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedUi,
+} from '../../app/context';
 import DetailLine from '../Components/DetailLine';
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { RouteEnum, ScreenEnum } from '../../app/AppState';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../Header';
 
-type AboutProps = DrawerScreenProps<AppDrawerParamList, RouteEnum.About>;
+type AboutProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
+  RouteEnum.About
+>;
 
 const About: React.FunctionComponent<AboutProps> = ({ navigation }) => {
-  const context = useContext(ContextAppLoaded);
-  const { zingolibVersion, translate, snackbars, removeFirstSnackbar } =
-    context;
+  const { translate, removeFirstSnackbar } = useAppLoadedActions();
+  const { zingolibVersion } = useAppLoadedSettings();
+  const { snackbars } = useAppLoadedUi();
   const { clear } = useToast();
   const screenName = ScreenEnum.About;
 

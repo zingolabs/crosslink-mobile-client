@@ -1,9 +1,9 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Lock, QrCode, Send } from 'lucide-react-native';
 
-import { ContextAppLoaded } from '../../app/context';
+import { useAppLoadedWallet } from '../../app/context';
 import { useTheme } from '../../app/theme';
 import {
   MASK,
@@ -37,7 +37,7 @@ const Trends: React.FC<VariantActions & { insetTop: number }> = ({
   onReceive,
 }) => {
   const { colors } = useTheme();
-  const { totalBalance, info } = useContext(ContextAppLoaded);
+  const { totalBalance, info } = useAppLoadedWallet();
   const transfers = useTransfers();
   const { hidden, toggle } = usePrivacy();
   const { selected, current, onSelect } = useSelection(transfers);

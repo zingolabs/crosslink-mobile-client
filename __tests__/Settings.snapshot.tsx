@@ -16,12 +16,12 @@ import { mockTranslate } from '../__mocks__/dataMocks/mockTranslate';
 import { mockInfo } from '../__mocks__/dataMocks/mockInfo';
 import { mockTotalBalance } from '../__mocks__/dataMocks/mockTotalBalance';
 import { mockIndexerServer } from '../__mocks__/dataMocks/mockServers';
-import { DrawerScreenProps } from '@react-navigation/drawer';
-import { AppDrawerParamList } from '../app/types';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { LoadedAppStackParamList } from '../app/types';
 import mockNavigation from '../__mocks__/dataMocks/mockNavigation';
 
-function makeDrawerProps(): DrawerScreenProps<
-  AppDrawerParamList,
+function makeDrawerProps(): NativeStackScreenProps<
+  LoadedAppStackParamList,
   RouteEnum.Settings
 > {
   return {
@@ -48,7 +48,6 @@ describe('Component Settings - test', () => {
   state.recoveryWalletInfoOnDevice = true;
   state.donation = false;
   const onSetOption = jest.fn();
-  const toggle = jest.fn();
   const props = makeDrawerProps();
   test('Settings - snapshot', () => {
     const settings = render(
@@ -65,7 +64,6 @@ describe('Component Settings - test', () => {
           setRescanMenuOption={onSetOption}
           setRecoveryWalletInfoOnDeviceOption={onSetOption}
           setPerformanceLevelOption={onSetOption}
-          toggleMenuDrawer={toggle}
         />
       </ContextAppLoadedProvider>,
     );

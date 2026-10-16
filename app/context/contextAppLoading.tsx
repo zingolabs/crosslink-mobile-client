@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useRef } from 'react';
 
 import {
   AppContextLoading,
@@ -63,12 +63,20 @@ type ContextProviderProps = {
   value: AppContextLoading;
 };
 
+const KEYS = Object.keys(
+  defaultAppContextLoading,
+) as (keyof AppContextLoading)[];
+
 export const ContextAppLoadingProvider = ({
   children,
   value,
 }: ContextProviderProps) => {
+  const ref = useRef<AppContextLoading>(value);
+  const prev = ref.current;
+  const stable = KEYS.every(k => Object.is(prev[k], value[k])) ? prev : value;
+  ref.current = stable;
   return (
-    <ContextAppLoading.Provider value={value}>
+    <ContextAppLoading.Provider value={stable}>
       {children}
     </ContextAppLoading.Provider>
   );

@@ -1,9 +1,9 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext, useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, ScrollView, TouchableOpacity, Text } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 
-import { ContextAppLoaded } from '../../app/context';
+import { useAppLoadedActions, useAppLoadedSettings } from '../../app/context';
 import {
   AddressKindEnum,
   ScreenEnum,
@@ -41,8 +41,8 @@ const SingleAddress: React.FunctionComponent<SingleAddressProps> = ({
   showMoreOptions,
   setShowMoreOptions,
 }) => {
-  const context = useContext(ContextAppLoaded);
-  const { translate, privacy, addLastSnackbar } = context;
+  const { translate, addLastSnackbar } = useAppLoadedActions();
+  const { privacy } = useAppLoadedSettings();
   const { colors } = useTheme();
 
   const [expandQRAddress, setExpandQRAddress] = useState<boolean>(true);

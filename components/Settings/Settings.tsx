@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -17,8 +17,12 @@ import RegText from '../Components/RegText';
 import FadeText from '../Components/FadeText';
 import BoldText from '../Components/BoldText';
 import { checkServerURI, parseServerURI, serverUris } from '../../app/uris';
-import { AppDrawerParamList } from '../../app/types';
-import { ContextAppLoaded } from '../../app/context';
+import { LoadedAppStackParamList } from '../../app/types';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedWallet,
+} from '../../app/context';
 
 import {
   LanguageEnum,
@@ -39,14 +43,14 @@ import RNPickerSelect from 'react-native-picker-select';
 import { hasRecoveryWalletInfo } from '../../app/recoveryWalletInfov10';
 import { ToastProvider } from 'react-native-toastier';
 import { RPCPerformanceLevelEnum } from '../../app/rpc/enums/RPCPerformanceLevelEnum';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../Header';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
 import { useTheme } from '../../app/theme';
 
-type SettingsProps = DrawerScreenProps<
-  AppDrawerParamList,
+type SettingsProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
   RouteEnum.Settings
 > & {
   setServerOption: (
@@ -64,7 +68,6 @@ type SettingsProps = DrawerScreenProps<
   setRescanMenuOption: (value: boolean) => Promise<void>;
   setRecoveryWalletInfoOnDeviceOption: (value: boolean) => Promise<void>;
   setPerformanceLevelOption: (value: RPCPerformanceLevelEnum) => Promise<void>;
-  toggleMenuDrawer: () => void;
 };
 
 type Options = {
@@ -85,25 +88,23 @@ const Settings: React.FunctionComponent<SettingsProps> = ({
   setRecoveryWalletInfoOnDeviceOption,
   setPerformanceLevelOption,
 }) => {
-  const context = useContext(ContextAppLoaded);
+  const { translate, addLastSnackbar, setPrivacyOption } =
+    useAppLoadedActions();
   const {
-    translate,
     indexerServer: indexerServerContext,
     currency: currencyContext,
     language: languageContext,
     sendAll: sendAllContext,
     donation: donationContext,
     privacy: privacyContext,
-    netInfo,
-    addLastSnackbar,
     security: securityContext,
     selectIndexerServer: selectIndexerServerContext,
     rescanMenu: rescanMenuContext,
     recoveryWalletInfoOnDevice: recoveryWalletInfoOnDeviceContext,
     performanceLevel: performanceLevelContext,
     readOnly,
-    setPrivacyOption,
-  } = context;
+  } = useAppLoadedSettings();
+  const { netInfo } = useAppLoadedWallet();
 
   const currenciesArray = translate('settings.currencies');
   let CURRENCIES: Options[] = [];

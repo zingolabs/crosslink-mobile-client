@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -26,9 +26,9 @@ import {
   StakingActionType,
   ToAddrClass,
 } from '../../app/AppState';
-import { AppDrawerParamList } from '../../app/types';
-import { DrawerScreenProps } from '@react-navigation/drawer';
-import { ContextAppLoaded } from '../../app/context';
+import { LoadedAppStackParamList } from '../../app/types';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useAppLoadedActions, useAppLoadedWallet } from '../../app/context';
 import { HeaderTitle } from '../Header';
 import RegText from '../Components/RegText';
 import ZecAmount from '../Components/ZecAmount';
@@ -50,8 +50,8 @@ const dimensions = {
   height: Dimensions.get('window').height,
 };
 
-type ScheduledActionDetailProps = DrawerScreenProps<
-  AppDrawerParamList,
+type ScheduledActionDetailProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
   RouteEnum.ScheduledActionDetail
 > & {
   stakeTransaction: (
@@ -87,16 +87,15 @@ const ScheduledActionDetail: React.FC<ScheduledActionDetailProps> = ({
 
   const modalVisible = modalState !== 'idle';
 
-  const context = useContext(ContextAppLoaded);
+  const { setScheduledActions } = useAppLoadedActions();
   const {
     valueTransfers,
     stakingDay,
-    setScheduledActions,
     info,
     walletBonds,
     timeToStakingDaySeconds: timeToStakingDay,
     scheduledActions,
-  } = context;
+  } = useAppLoadedWallet();
 
   useEffect(() => {
     const s1 = Keyboard.addListener('keyboardDidShow', () => setKbOpen(true));
