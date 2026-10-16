@@ -49,7 +49,7 @@ const SettingsMenu: React.FunctionComponent<SettingsMenuProps> = ({
         {
           text: translate('confirm') as string,
           onPress: () =>
-            onClickOKChangeWallet({ screen: 3, startingApp: false }),
+            onClickOKChangeWallet({ screen: 1, startingApp: false }),
         },
         { text: translate('cancel') as string, style: 'cancel' },
       ],

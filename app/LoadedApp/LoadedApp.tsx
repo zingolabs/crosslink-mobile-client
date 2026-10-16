@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { I18n } from 'i18n-js';
 import { isEqual } from 'lodash';
-import { StackScreenProps } from '@react-navigation/stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LoadingAppNavigationState } from '../types';
 import NetInfo, {
   NetInfoSubscription,
@@ -150,11 +150,11 @@ const tr = require('../translations/tr.json');
 //const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 type LoadedAppProps = {
-  navigation: StackScreenProps<
+  navigation: NativeStackScreenProps<
     AppStackParamList,
     RouteEnum.LoadedApp
   >['navigation'];
-  route: StackScreenProps<AppStackParamList, RouteEnum.LoadedApp>['route'];
+  route: NativeStackScreenProps<AppStackParamList, RouteEnum.LoadedApp>['route'];
 };
 
 const SERVER_DEFAULT_0: ServerType = {
@@ -433,11 +433,11 @@ export default function LoadedApp(props: LoadedAppProps) {
 }
 
 type LoadedAppClassProps = {
-  navigationApp: StackScreenProps<
+  navigationApp: NativeStackScreenProps<
     AppStackParamList,
     RouteEnum.LoadedApp
   >['navigation'];
-  route: StackScreenProps<AppStackParamList, RouteEnum.LoadedApp>['route'];
+  route: NativeStackScreenProps<AppStackParamList, RouteEnum.LoadedApp>['route'];
   translate: (key: string) => TranslateType;
   theme: AppTheme;
   language: LanguageEnum;
@@ -1583,7 +1583,7 @@ export class LoadedAppClass extends Component<
             text: translate('confirm') as string,
             onPress: async () =>
               await this.onClickOKChangeWallet({
-                screen: 3,
+                screen: 1,
                 startingApp: false,
               }),
           },
