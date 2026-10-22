@@ -65,7 +65,6 @@ export type { default as NetInfoType } from './types/NetInfoType';
 export type { default as ServerType } from './types/ServerType';
 export type { default as SnackbarType } from './types/SnackbarType';
 export type { default as SecurityType } from './types/SecurityType';
-export type { default as ServerUrisType } from './types/ServerUrisType';
 export type { default as ValueTransferType } from './types/ValueTransferType';
 export type { default as ContactType } from './types/ContactType';
 export type { default as TransactionType } from './types/TransactionType';

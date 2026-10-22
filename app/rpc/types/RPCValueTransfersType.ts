@@ -1,6 +1,6 @@
 import { RPCValueTransferType } from './RPCValueTransferType';
 
 export type RPCValueTransfersType = {
-  value_transfers: RPCValueTransferType[];
+  wallet_events: RPCValueTransferType[];
   total: number;
 };

@@ -1,8 +1,7 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
-import type { Probes } from '../LoadingApp/hooks/useIndexerProbes';
+import type { IndexerReport } from '../indexers';
 import {
   AddressKindEnum,
-  ChainNameEnum,
   LaunchingModeEnum,
   LoadingAppEntryEnum,
   RouteEnum,
@@ -33,8 +32,8 @@ export type AppStackParamList = {
 export type LoadingAppStackParamList = {
   [RouteEnum.StartMenu]: undefined;
   [RouteEnum.ChooseIndexer]: undefined;
-  [RouteEnum.ListedIndexers]: { probes?: Probes } | undefined;
-  [RouteEnum.CustomIndexer]: { network?: ChainNameEnum } | undefined;
+  [RouteEnum.ListedIndexers]: { report?: IndexerReport } | undefined;
+  [RouteEnum.CustomIndexer]: undefined;
   [RouteEnum.Import]: undefined;
 };
 
