@@ -7,6 +7,7 @@ export default interface AppStateLoading {
   entry: LoadingAppEntryEnum;
   actionButtonsDisabled: boolean;
   walletExists: boolean;
+  openWalletFailed: boolean;
   biometricsFailed: boolean;
   startingApp: boolean;
   serverErrorTries: number;

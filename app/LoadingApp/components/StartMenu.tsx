@@ -29,6 +29,7 @@ import { useBackdropSetter } from '../../Backdrop';
 type StartMenuProps = {
   actionButtonsDisabled: boolean;
   walletExists: boolean;
+  openWalletFailed?: boolean;
   playIntro: boolean;
   openCurrentWallet: () => void;
   createNewWallet: () => void;
@@ -41,6 +42,7 @@ const OFFSCREEN = 4000;
 const StartMenu: React.FunctionComponent<StartMenuProps> = ({
   actionButtonsDisabled,
   walletExists,
+  openWalletFailed = false,
   playIntro,
   openCurrentWallet,
   createNewWallet,
@@ -171,21 +173,23 @@ const StartMenu: React.FunctionComponent<StartMenuProps> = ({
         >
           {walletExists && (
             <>
-              <View
-                style={{
-                  borderColor: colors.borderAccent,
-                  borderWidth: 1,
-                  borderRadius: 5,
-                  padding: 5,
-                  marginBottom: 20,
-                }}
-              >
-                <BoldText
-                  style={{ fontSize: 15, color: colors.fgAccentDisabled }}
+              {openWalletFailed && (
+                <View
+                  style={{
+                    borderColor: colors.borderAccent,
+                    borderWidth: 1,
+                    borderRadius: 5,
+                    padding: 5,
+                    marginBottom: 20,
+                  }}
                 >
-                  {translate('loadingapp.noopenwallet-message') as string}
-                </BoldText>
-              </View>
+                  <BoldText
+                    style={{ fontSize: 15, color: colors.fgAccentDisabled }}
+                  >
+                    {translate('loadingapp.noopenwallet-message') as string}
+                  </BoldText>
+                </View>
+              )}
               <Button
                 title={translate('loadingapp.opencurrentwallet') as string}
                 disabled={actionButtonsDisabled}

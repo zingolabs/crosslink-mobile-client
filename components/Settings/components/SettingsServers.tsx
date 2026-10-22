@@ -44,16 +44,9 @@ const SettingsServers: React.FunctionComponent<SettingsServersProps> = ({
   const { clear } = useToast();
   const screenName = ScreenEnum.SettingsServers;
 
-  const changeServerTesnet = () => {
+  const changeServer = () => {
     navigateToLoadingApp({
-      entry: LoadingAppEntryEnum.boot,
-      startingApp: false,
-    });
-  };
-
-  const changeServerRegtest = () => {
-    navigateToLoadingApp({
-      entry: LoadingAppEntryEnum.boot,
+      entry: LoadingAppEntryEnum.menu,
       startingApp: false,
     });
   };
@@ -243,11 +236,7 @@ const SettingsServers: React.FunctionComponent<SettingsServersProps> = ({
       >
         <LiquidPrimaryButton
           title={'Switch to different server'}
-          onPress={
-            indexerServer.chainName === ChainNameEnum.testChainName
-              ? changeServerTesnet
-              : changeServerRegtest
-          }
+          onPress={changeServer}
           style={{ alignSelf: 'stretch' }}
         />
       </View>

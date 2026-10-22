@@ -15,10 +15,8 @@ import {
   SnackbarType,
 } from '../AppState';
 import { RPCPerformanceLevelEnum } from '../rpc/enums/RPCPerformanceLevelEnum';
-import { IndexerList } from '../utils/Utils';
 
 export const defaultAppContextLoading: AppContextLoading = {
-  indexerList: [] as IndexerList,
   netInfo: {} as NetInfoType,
   wallet: {} as WalletType,
   indexerServer: {} as ServerType,

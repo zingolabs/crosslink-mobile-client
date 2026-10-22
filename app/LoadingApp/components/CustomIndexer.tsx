@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import { Keyboard, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated, {
   CSSAnimationProperties,
@@ -16,10 +16,10 @@ import Animated, {
 } from 'react-native-reanimated';
 import { ToastProvider, useToast } from 'react-native-toastier';
 
-import { ChainNameEnum, RouteEnum, ScreenEnum } from '../../AppState';
+import { ChainNameEnum, ScreenEnum } from '../../AppState';
 import { ContextAppLoading } from '../../context';
 import { LoadingAppStackParamList } from '../../types';
-import { pingIndexerServer } from '../../selectingServer';
+import { Probe, probeIndexer } from '../../indexers';
 import {
   endpointUri,
   formatEndpoint,
@@ -31,37 +31,29 @@ import BlurInText from '../../../components/Components/BlurInText';
 import EndpointInput from '../../../components/Components/EndpointInput';
 import JellyLoader from '../../../components/Components/Icons/JellyLoader';
 import LiquidPrimaryButton from '../../../components/Components/LiquidButton/LiquidPrimaryButton';
-import Segmented from '../../../components/Components/Segmented';
 import { HeaderTitle } from '../../../components/Header';
 import { text, useTheme } from '../../theme';
 
 type CustomIndexerProps = {
   setIndexerServer: (u: string, c: ChainNameEnum) => Promise<void>;
   closeServers: () => void;
-  initialNetwork?: ChainNameEnum;
+  probe?: Probe;
 };
-
-type Network = ChainNameEnum.testChainName | ChainNameEnum.regtestChainName;
 
 type Status =
   | { state: 'idle' }
   | { state: 'checking' }
-  | { state: 'online' }
+  | { state: 'online'; latencyMs: number }
   | { state: 'offline' };
 
 const DEBOUNCE_MS = 900;
-const PROBE_TIMEOUT_MS = 3000;
+const DEFAULT_PORT = '18234';
 const EASE_OUT = cubicBezier(0.23, 1, 0.32, 1);
-
-const DEFAULT_PORT: Record<Network, string> = {
-  [ChainNameEnum.testChainName]: '18234',
-  [ChainNameEnum.regtestChainName]: '18232',
-};
 
 const CustomIndexer: React.FC<CustomIndexerProps> = ({
   setIndexerServer,
   closeServers,
-  initialNetwork,
+  probe = probeIndexer,
 }) => {
   const { snackbars, removeFirstSnackbar } = useContext(ContextAppLoading);
   const { colors } = useTheme();
@@ -70,15 +62,8 @@ const CustomIndexer: React.FC<CustomIndexerProps> = ({
   const reducedMotion = useReducedMotion();
   const navigation =
     useNavigation<NativeStackNavigationProp<LoadingAppStackParamList>>();
-  const route =
-    useRoute<RouteProp<LoadingAppStackParamList, RouteEnum.CustomIndexer>>();
   const screenName = ScreenEnum.Servers;
 
-  const [network, setNetwork] = useState<Network>(
-    (route.params?.network ?? initialNetwork) === ChainNameEnum.regtestChainName
-      ? ChainNameEnum.regtestChainName
-      : ChainNameEnum.testChainName,
-  );
   const [value, setValue] = useState('');
   const [status, setStatus] = useState<Status>({ state: 'idle' });
   const [connecting, setConnecting] = useState(false);
@@ -88,19 +73,24 @@ const CustomIndexer: React.FC<CustomIndexerProps> = ({
   const complete = isCompleteEndpoint(endpoint);
   const key = formatEndpoint(endpoint);
 
-  const probe = useCallback(async () => {
+  const check = useCallback(async () => {
     const e = parseEndpoint(value);
     if (!isCompleteEndpoint(e)) {
       return;
     }
     const run = ++runRef.current;
     setStatus({ state: 'checking' });
-    const latency = await pingIndexerServer(endpointUri(e), PROBE_TIMEOUT_MS);
+    const found = await probe(endpointUri(e));
     if (run !== runRef.current) {
       return;
     }
-    setStatus({ state: latency === null ? 'offline' : 'online' });
-  }, [value]);
+    setStatus(
+      found ? { state: 'online', latencyMs: found.latencyMs } : { state: 'offline' },
+    );
+  }, [value, probe]);
+
+  const checkRef = useRef(check);
+  checkRef.current = check;
 
   useEffect(() => {
     runRef.current++;
@@ -108,9 +98,8 @@ const CustomIndexer: React.FC<CustomIndexerProps> = ({
     if (!complete) {
       return;
     }
-    const t = setTimeout(probe, DEBOUNCE_MS);
+    const t = setTimeout(() => checkRef.current(), DEBOUNCE_MS);
     return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, complete]);
 
   const goBack = () => {
@@ -129,7 +118,7 @@ const CustomIndexer: React.FC<CustomIndexerProps> = ({
     setConnecting(true);
     Keyboard.dismiss();
     clear();
-    await setIndexerServer(endpointUri(endpoint), network);
+    await setIndexerServer(endpointUri(endpoint), ChainNameEnum.testChainName);
     closeServers();
   };
 
@@ -153,23 +142,12 @@ const CustomIndexer: React.FC<CustomIndexerProps> = ({
       <View style={[styles.screen, { backgroundColor: colors.bgCanvas }]}>
         <HeaderTitle title="Custom indexer" goBack={goBack} />
 
-        <View style={styles.segmented}>
-          <Segmented<Network>
-            options={[
-              { value: ChainNameEnum.testChainName, label: 'Testnet' },
-              { value: ChainNameEnum.regtestChainName, label: 'Regtest' },
-            ]}
-            value={network}
-            onChange={setNetwork}
-          />
-        </View>
-
         <View style={styles.field}>
           <EndpointInput
             value={value}
             onChange={setValue}
-            onSubmit={probe}
-            placeholderPort={DEFAULT_PORT[network]}
+            onSubmit={check}
+            placeholderPort={DEFAULT_PORT}
             error={status.state === 'offline'}
             editable={!connecting}
           />
@@ -184,7 +162,15 @@ const CustomIndexer: React.FC<CustomIndexerProps> = ({
               style={[styles.statusText, { color: colors.fgDanger }]}
               accessibilityLiveRegion="polite"
             >
-              {`Could not reach ${key}.`}
+              {`${key} does not serve this chain.`}
+            </BlurInText>
+          ) : status.state === 'online' ? (
+            <BlurInText
+              containerStyle={styles.statusWrap}
+              style={[styles.statusText, { color: colors.fgSubtle }]}
+              accessibilityLiveRegion="polite"
+            >
+              {`${status.latencyMs} ms`}
             </BlurInText>
           ) : null}
         </View>
@@ -215,12 +201,8 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
-  segmented: {
-    marginTop: 12,
-    marginHorizontal: 20,
-    marginBottom: 24,
-  },
   field: {
+    marginTop: 24,
     marginHorizontal: 20,
   },
   status: {

@@ -1,46 +1,53 @@
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 
 import ChooseIndexer from './ChooseIndexer';
+import { IndexerReport } from '../../indexers';
 
 const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
 
-const latencies: Record<string, number | null> = {
-  'https://zec.rocks:443': 180,
-  'https://na.zec.rocks:443': 42,
-  'https://eu.zec.rocks:443': 95,
-  'https://ai.zec.rocks:443': null,
+const report: IndexerReport = {
+  indexers: [
+    {
+      uri: 'http://88.198.67.189:18234',
+      latencyMs: 42,
+      tipHeight: 78916,
+      tipAgeSecs: 12,
+      fromPeers: false,
+    },
+    {
+      uri: 'http://45.63.75.9:18234',
+      latencyMs: 95,
+      tipHeight: 78916,
+      tipAgeSecs: 30,
+      fromPeers: true,
+    },
+  ],
+  errors: [],
 };
 
-const pingServer = async (uri: string) => {
-  const ms = latencies[uri] ?? null;
-  await wait(ms ?? 1500);
-  return ms;
+const discover = async () => {
+  await wait(1200);
+  return report;
 };
 
 const meta = {
   title: 'Onboarding/ChooseIndexer',
   component: ChooseIndexer,
-  args: {
-    indexerList: Object.keys(latencies).map(url => ({ url })),
-    pingServer,
-  },
+  args: { discover },
 } satisfies Meta<typeof ChooseIndexer>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Pushed from the welcome screen. The listed card probes on mount. */
+/** Pushed from the welcome screen. Discovery runs on mount. */
 export const Default: Story = {};
 
-/** Every probe is still in flight. */
-export const Checking: Story = {
-  args: { pingServer: () => new Promise(() => {}) },
+/** Discovery is still running. */
+export const Discovering: Story = {
+  args: { discover: () => new Promise(() => {}) },
 };
 
 /** Nothing responds. */
-export const AllOffline: Story = {
-  args: { pingServer: async () => null },
+export const NoneReachable: Story = {
+  args: { discover: async () => ({ indexers: [], errors: [] }) },
 };
-
-/** The aggregator returned nothing. */
-export const EmptyList: Story = { args: { indexerList: [] } };

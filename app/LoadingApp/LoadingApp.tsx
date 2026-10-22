@@ -27,7 +27,6 @@ import {
   NetInfoType,
   ServerType,
   SecurityType,
-  ServerUrisType,
   LanguageEnum,
   CurrencyEnum,
   SelectServerEnum,
@@ -45,7 +44,6 @@ import {
   ScreenEnum,
   LaunchingModeEnum,
 } from '../AppState';
-import { serverUris } from '../uris';
 import SettingsFileImpl from '../../components/Settings/SettingsFileImpl';
 import RPC from '../rpc';
 import { ContextAppLoadingProvider } from '../context';
@@ -57,7 +55,6 @@ import Snackbars from '../../components/Components/Snackbars';
 import { RPCSeedType } from '../rpc/types/RPCSeedType';
 import Launching from './components/Launching';
 import simpleBiometrics from '../simpleBiometrics';
-import selectingServer from '../selectingServer';
 import { isEqual } from 'lodash';
 import {
   createUpdateRecoveryWalletInfo,
@@ -76,10 +73,9 @@ import { RPCPerformanceLevelEnum } from '../rpc/enums/RPCPerformanceLevelEnum';
 import { AppStackParamList, LoadingAppStackParamList } from '../types';
 import ChooseIndexer from './components/ChooseIndexer';
 import ListedIndexers from './components/ListedIndexers';
-import { fastestIndexer } from './hooks/useIndexerProbes';
 import CustomIndexer from './components/CustomIndexer';
 import ScheduledActionsFileImpl from '../../components/ScheduledActions/ScheduledActionsFileImpl';
-import { getIndexerList, IndexerList } from '../utils/Utils';
+import { discoverIndexers, probeIndexer } from '../indexers';
 import notifee from '@notifee/react-native';
 import { useTheme, AppTheme } from '../theme';
 import { LoadingAppEntryEnum } from '../AppState/enums/LoadingAppEntryEnum';
@@ -235,22 +231,7 @@ export default function LoadingApp(props: LoadingAppProps) {
           currency,
         );
       }
-      // lightwallet server
       if (settings.indexerServer) {
-        // check the server info, just in case...
-        if (
-          serverUris().filter(s => s.uri === settings.indexerServer.uri)
-            .length > 0
-        ) {
-          settings.indexerServer.chainName = serverUris().filter(
-            s => s.uri === settings.indexerServer.uri,
-          )[0].chainName;
-          // if chain name changed store it in settings.
-          await SettingsFileImpl.writeSettings(
-            SettingsNameEnum.indexerServer,
-            settings.indexerServer,
-          );
-        }
         setIndexerServer(settings.indexerServer);
       } else {
         await SettingsFileImpl.writeSettings(
@@ -418,6 +399,7 @@ type BootResult =
   | { kind: 'biometricsFailed' }
   | { kind: 'opened'; wallet: WalletKind }
   | { kind: 'noWallet' }
+  | { kind: 'menu' }
   | { kind: 'restore'; seed: string; birthday: number }
   | { kind: 'error'; message: string; title: string };
 
@@ -435,7 +417,6 @@ export class LoadingAppClass extends Component<
     this.coldStart = props.route.params?.startingApp ?? true;
 
     this.state = {
-      indexerList: [] as IndexerList,
       // context
       netInfo: {} as NetInfoType,
       wallet: {} as WalletType,
@@ -472,6 +453,7 @@ export class LoadingAppClass extends Component<
       entry: props.route.params?.entry ?? LoadingAppEntryEnum.boot,
       actionButtonsDisabled: false,
       walletExists: false,
+      openWalletFailed: false,
       biometricsFailed:
         !!props.route.params &&
         props.route.params.biometricsFailed !== undefined
@@ -582,8 +564,6 @@ export class LoadingAppClass extends Component<
       },
     });
 
-    const indexerList = await getIndexerList();
-    this.setState({ indexerList });
     this.fetchZingolibVersion();
 
     if (this.state.startingApp) {
@@ -606,16 +586,24 @@ export class LoadingAppClass extends Component<
     this.setState({ hasRecoveryWalletInfoSaved: has });
 
     if (!this.state.indexerServer.uri) {
-      const fastest = await fastestIndexer(indexerList);
-      const first = serverUris()[0];
-      const server: ServerType = fastest
-        ? { uri: fastest, chainName: ChainNameEnum.testChainName }
-        : { uri: first.uri, chainName: first.chainName };
-      this.setState({ indexerServer: server });
-      await SettingsFileImpl.writeSettings(
-        SettingsNameEnum.indexerServer,
-        server,
-      );
+      const { indexers } = await discoverIndexers();
+      const best = indexers[0];
+      if (best) {
+        const server: ServerType = {
+          uri: best.uri,
+          chainName: ChainNameEnum.testChainName,
+        };
+        this.setState({ indexerServer: server });
+        await SettingsFileImpl.writeSettings(
+          SettingsNameEnum.indexerServer,
+          server,
+        );
+      } else {
+        this.addLastSnackbar({
+          message: this.state.translate('loadingapp.noservers') as string,
+          screenName: [this.screenName],
+        });
+      }
     }
 
     await AsyncStorage.setItem(GlobalConst.background, GlobalConst.no);
@@ -637,6 +625,9 @@ export class LoadingAppClass extends Component<
     }
 
     this.setState({ walletExists: true });
+    if (this.state.entry === LoadingAppEntryEnum.menu) {
+      return { kind: 'menu' };
+    }
     const result: string = await RPCModule.loadExistingWallet(
       this.state.indexerServer.uri,
       this.state.indexerServer.chainName,
@@ -682,6 +673,14 @@ export class LoadingAppClass extends Component<
           this.state.firstLaunchingMessage,
         );
         return;
+      case 'menu':
+        this.setState({
+          entry: LoadingAppEntryEnum.menu,
+          walletExists: true,
+          openWalletFailed: false,
+          actionButtonsDisabled: false,
+        });
+        return;
       case 'noWallet':
         this.setState(state => ({
           entry:
@@ -696,6 +695,7 @@ export class LoadingAppClass extends Component<
         await this.doRestore(result.seed, result.birthday);
         return;
       case 'error':
+        this.setState({ openWalletFailed: true });
         await this.walletErrorHandle(
           result.message,
           result.title,
@@ -753,27 +753,18 @@ export class LoadingAppClass extends Component<
   };
 
   selectTheBestServer = async (aDifferentOne: boolean): Promise<boolean> => {
-    // avoiding obsolete ones
-    let someServerIsWorking: boolean = true;
     const actualServer = this.state.indexerServer;
-    const server = await selectingServer(
-      serverUris().filter(
-        (s: ServerUrisType) =>
-          !s.obsolete && s.uri !== (aDifferentOne ? actualServer.uri : ''),
-      ),
+    const { indexers } = await discoverIndexers();
+    const best = indexers.find(
+      i => !aDifferentOne || i.uri !== actualServer.uri,
     );
-    let fasterServer: ServerType = {} as ServerType;
-    if (server && server.latency) {
-      fasterServer = { uri: server.uri, chainName: server.chainName };
-    } else {
-      fasterServer = actualServer;
-      // likely here there is a internet/wifi conection problem
-      // all of the servers return an error because they are unreachable probably.
-      // the 30 seconds timout was fired.
-      someServerIsWorking = false;
+    if (!best) {
+      return false;
     }
-    //console.log(server);
-    console.log(fasterServer);
+    const fasterServer: ServerType = {
+      uri: best.uri,
+      chainName: ChainNameEnum.testChainName,
+    };
     this.setState({
       indexerServer: fasterServer,
       selectIndexerServer: SelectServerEnum.custom,
@@ -786,48 +777,29 @@ export class LoadingAppClass extends Component<
       SettingsNameEnum.selectIndexerServer,
       SelectServerEnum.custom,
     );
-    // message with the result only for advanced users
-    if (someServerIsWorking) {
-      if (isEqual(actualServer, fasterServer)) {
-        this.addLastSnackbar({
-          message: this.state.translate(
-            'loadedapp.selectingserversame',
-          ) as string,
-          duration: SnackbarDurationEnum.long,
-          screenName: [this.screenName],
-        });
-      } else {
-        this.addLastSnackbar({
-          message:
-            (this.state.translate('loadedapp.selectingserverbest') as string) +
-            ' ' +
-            fasterServer.uri,
-          duration: SnackbarDurationEnum.long,
-          screenName: [this.screenName],
-        });
-      }
+    if (isEqual(actualServer, fasterServer)) {
+      this.addLastSnackbar({
+        message: this.state.translate(
+          'loadedapp.selectingserversame',
+        ) as string,
+        duration: SnackbarDurationEnum.long,
+        screenName: [this.screenName],
+      });
+    } else {
+      this.addLastSnackbar({
+        message:
+          (this.state.translate('loadedapp.selectingserverbest') as string) +
+          ' ' +
+          fasterServer.uri,
+        duration: SnackbarDurationEnum.long,
+        screenName: [this.screenName],
+      });
     }
-    return someServerIsWorking;
+    return true;
   };
 
-  checkServer: (s: ServerType) => Promise<boolean> = async (
-    server: ServerType,
-  ) => {
-    const s = {
-      uri: server.uri,
-      chainName: server.chainName,
-      region: '',
-      default: false,
-      latency: null,
-      obsolete: false,
-    } as ServerUrisType;
-    const serverChecked = await selectingServer([s]);
-    if (serverChecked && serverChecked.latency) {
-      return true;
-    } else {
-      return false;
-    }
-  };
+  checkServer = async (server: ServerType): Promise<boolean> =>
+    (await probeIndexer(server.uri)) !== null;
 
   walletErrorHandle = async (
     result: string,
@@ -1281,7 +1253,10 @@ export class LoadingAppClass extends Component<
   };
 
   openCurrentWallet = () => {
-    this.setState({ startingApp: false }, () => this.runBoot());
+    this.setState(
+      { startingApp: false, entry: LoadingAppEntryEnum.boot },
+      () => this.runBoot(),
+    );
   };
 
   async fetchZingolibVersion(): Promise<void> {
@@ -1320,6 +1295,7 @@ export class LoadingAppClass extends Component<
       entry,
       actionButtonsDisabled,
       walletExists,
+      openWalletFailed,
       snackbars,
       firstLaunchingMessage,
       biometricsFailed,
@@ -1329,7 +1305,6 @@ export class LoadingAppClass extends Component<
     //console.log('render loadingAppClass - 3', this.state.privacy);
 
     const context = {
-      indexerList: this.state.indexerList,
       // context
       netInfo: this.state.netInfo,
       wallet: this.state.wallet,
@@ -1405,6 +1380,7 @@ export class LoadingAppClass extends Component<
                       <StartMenu
                         actionButtonsDisabled={actionButtonsDisabled}
                         walletExists={walletExists}
+                        openWalletFailed={openWalletFailed}
                         playIntro={this.coldStart && !walletExists}
                         openCurrentWallet={this.openCurrentWallet}
                         createNewWallet={this.createNewWallet}
@@ -1437,24 +1413,18 @@ export class LoadingAppClass extends Component<
                     )}
                   </LoadingStack.Screen>
                   <LoadingStack.Screen name={RouteEnum.ChooseIndexer}>
-                    {() => (
-                      <ChooseIndexer indexerList={this.state.indexerList} />
-                    )}
+                    {() => <ChooseIndexer />}
                   </LoadingStack.Screen>
                   <LoadingStack.Screen name={RouteEnum.ListedIndexers}>
                     {({ navigation }) => (
                       <ListedIndexers
-                        indexerList={this.state.indexerList}
                         setIndexerServer={this.setIndexerServer}
                         closeServers={() => this.closeServers(navigation)}
                         previousServer={this.state.indexerServer.uri}
                       />
                     )}
                   </LoadingStack.Screen>
-                  <LoadingStack.Screen
-                    name={RouteEnum.CustomIndexer}
-                    initialParams={{ network: ChainNameEnum.testChainName }}
-                  >
+                  <LoadingStack.Screen name={RouteEnum.CustomIndexer}>
                     {({ navigation }) => (
                       <CustomIndexer
                         setIndexerServer={this.setIndexerServer}
