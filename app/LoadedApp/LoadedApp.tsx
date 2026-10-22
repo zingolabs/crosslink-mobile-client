@@ -439,6 +439,8 @@ type LoadedAppClassProps = {
 
 type LoadedAppClassState = AppStateLoaded & AppContextLoaded;
 
+let initialUrlConsumed = false;
+
 export class LoadedAppClass extends Component<
   LoadedAppClassProps,
   LoadedAppClassState
@@ -830,18 +832,20 @@ export class LoadedAppClass extends Component<
   };
 
   handleInitialUrl = async () => {
-    const initialUrl = await Linking.getInitialURL();
-    if (initialUrl !== null) {
-      await this.handleUrl(initialUrl);
+    if (initialUrlConsumed) {
+      return;
     }
+    initialUrlConsumed = true;
+    const initialUrl = await Linking.getInitialURL();
+    await this.handleUrl(initialUrl);
   };
 
   handleUrl = async (url: string | null) => {
     if (!url) {
       return;
     }
-    await this.readUrl(url);
-    if (!this.state.readOnly) {
+    const filled = await this.readUrl(url);
+    if (filled) {
       this.navigateTo(RouteEnum.Send);
     }
   };
@@ -940,10 +944,8 @@ export class LoadedAppClass extends Component<
     }
   };
 
-  readUrl = async (url: string) => {
-    //console.log(url);
-    // Attempt to parse as URI if it starts with zcash
-    // only if it is a spendable wallet
+  readUrl = async (url: string): Promise<boolean> => {
+    let filled = false;
     if (url && url.startsWith(GlobalConst.zcash) && !this.state.readOnly) {
       const { error, target } = await parseZcashURI(
         url,
@@ -988,13 +990,14 @@ export class LoadedAppClass extends Component<
           newSendPageState.toaddr = uriToAddr;
 
           this.setSendPageState(newSendPageState);
+          filled = true;
         }
       }
       if (error) {
-        // Show the error message as a toast
         this.addLastSnackbar({ message: error, screenName: [this.screenName] });
       }
     }
+    return filled;
   };
 
   fetchBackgroundSyncing = async () => {

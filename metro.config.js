@@ -20,7 +20,11 @@ const resolveRequest = (context, moduleName, platform) => {
   if (storybookEnabled && storybookStubs.includes(moduleName)) {
     return { type: 'empty' };
   }
-  if (reactScanEnabled && moduleName.endsWith('/devtools/ReactScan')) {
+  if (
+    reactScanEnabled &&
+    context.dev &&
+    moduleName.endsWith('/devtools/ReactScan')
+  ) {
     return context.resolveRequest(context, `${moduleName}.on`, platform);
   }
   return context.resolveRequest(context, moduleName, platform);
