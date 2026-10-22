@@ -98,6 +98,7 @@ import ComputingError from './components/ComputingError';
 import { AddStakeScreen, Unstake } from '../../components/Staking';
 import { StakeJsonToTypeType } from '../AppState/types/ValueTransferType';
 import Distribution from '../../components/Distribution';
+import SyncReport from '../../components/SyncReport';
 import Redelegate from '../../components/Staking/components/Redelegate';
 import Finalizers from '../../components/Finalizers/Finalizers';
 import { reverseHex32Bytes } from '../utils/hex';
@@ -1975,6 +1976,10 @@ export class LoadedAppClass extends Component<
 
               <LoadedAppStack.Screen name={RouteEnum.Distribution}>
                 {props => <Distribution {...props} />}
+              </LoadedAppStack.Screen>
+
+              <LoadedAppStack.Screen name={RouteEnum.SyncReport}>
+                {props => <SyncReport {...props} />}
               </LoadedAppStack.Screen>
 
               <LoadedAppStack.Screen
