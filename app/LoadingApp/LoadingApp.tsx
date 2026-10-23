@@ -80,7 +80,6 @@ import notifee from '@notifee/react-native';
 import { useTheme, AppTheme } from '../theme';
 import { LoadingAppEntryEnum } from '../AppState/enums/LoadingAppEntryEnum';
 import { BackdropHost } from '../Backdrop';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 const en = require('../translations/en.json');
 const es = require('../translations/es.json');
@@ -1255,9 +1254,8 @@ export class LoadingAppClass extends Component<
   };
 
   openCurrentWallet = () => {
-    this.setState(
-      { startingApp: false, entry: LoadingAppEntryEnum.boot },
-      () => this.runBoot(),
+    this.setState({ startingApp: false, entry: LoadingAppEntryEnum.boot }, () =>
+      this.runBoot(),
     );
   };
 
@@ -1341,104 +1339,100 @@ export class LoadingAppClass extends Component<
 
     return (
       <BackdropHost>
-        <SafeAreaView style={{ flex: 1 }}>
-          <ToastProvider>
-            <Snackbars
-              snackbars={snackbars}
-              removeFirstSnackbar={this.removeFirstSnackbar}
-              screenName={this.screenName}
-            />
+        <ToastProvider>
+          <Snackbars
+            snackbars={snackbars}
+            removeFirstSnackbar={this.removeFirstSnackbar}
+            screenName={this.screenName}
+          />
 
-            <ContextAppLoadingProvider value={context}>
-              {entry === LoadingAppEntryEnum.boot && (
-                <Launching
-                  empty={true}
-                  translate={translate}
-                  firstLaunchingMessage={firstLaunchingMessage}
-                  biometricsFailed={biometricsFailed}
-                  tryAgain={() => {
-                    this.setState({ biometricsFailed: false }, () =>
-                      this.runBoot(),
-                    );
+          <ContextAppLoadingProvider value={context}>
+            {entry === LoadingAppEntryEnum.boot && (
+              <Launching
+                empty={true}
+                translate={translate}
+                firstLaunchingMessage={firstLaunchingMessage}
+                biometricsFailed={biometricsFailed}
+                tryAgain={() => {
+                  this.setState({ biometricsFailed: false }, () =>
+                    this.runBoot(),
+                  );
+                }}
+              />
+            )}
+            {entry !== LoadingAppEntryEnum.boot && (
+              <LoadingStack.Navigator
+                initialRouteName={
+                  entry === LoadingAppEntryEnum.import
+                    ? RouteEnum.Import
+                    : RouteEnum.StartMenu
+                }
+                screenOptions={{ headerShown: false }}
+              >
+                <LoadingStack.Screen
+                  name={RouteEnum.StartMenu}
+                  options={{
+                    contentStyle: { backgroundColor: 'transparent' },
                   }}
-                />
-              )}
-              {entry !== LoadingAppEntryEnum.boot && (
-                <LoadingStack.Navigator
-                  initialRouteName={
-                    entry === LoadingAppEntryEnum.import
-                      ? RouteEnum.Import
-                      : RouteEnum.StartMenu
-                  }
-                  screenOptions={{ headerShown: false }}
                 >
-                  <LoadingStack.Screen
-                    name={RouteEnum.StartMenu}
-                    options={{
-                      contentStyle: { backgroundColor: 'transparent' },
-                    }}
-                  >
-                    {({ navigation }) => (
-                      <StartMenu
-                        actionButtonsDisabled={actionButtonsDisabled}
-                        walletExists={walletExists}
-                        openWalletFailed={openWalletFailed}
-                        playIntro={this.coldStart && !walletExists}
-                        openCurrentWallet={this.openCurrentWallet}
-                        createNewWallet={this.createNewWallet}
-                        getwalletToRestore={() => {
-                          this.getwalletToRestore();
-                          navigation.navigate(RouteEnum.Import);
-                        }}
-                        openServers={() =>
-                          navigation.navigate(RouteEnum.ChooseIndexer)
+                  {({ navigation }) => (
+                    <StartMenu
+                      actionButtonsDisabled={actionButtonsDisabled}
+                      walletExists={walletExists}
+                      openWalletFailed={openWalletFailed}
+                      playIntro={this.coldStart && !walletExists}
+                      openCurrentWallet={this.openCurrentWallet}
+                      createNewWallet={this.createNewWallet}
+                      getwalletToRestore={() => {
+                        this.getwalletToRestore();
+                        navigation.navigate(RouteEnum.Import);
+                      }}
+                      openServers={() =>
+                        navigation.navigate(RouteEnum.ChooseIndexer)
+                      }
+                    />
+                  )}
+                </LoadingStack.Screen>
+                <LoadingStack.Screen name={RouteEnum.Import}>
+                  {({ navigation }) => (
+                    <Import
+                      actionButtonsDisabled={actionButtonsDisabled}
+                      onClickOK={(s: string, b: number) => this.doRestore(s, b)}
+                      onClickCancel={() => {
+                        if (navigation.canGoBack()) {
+                          navigation.goBack();
+                          return;
                         }
-                      />
-                    )}
-                  </LoadingStack.Screen>
-                  <LoadingStack.Screen name={RouteEnum.Import}>
-                    {({ navigation }) => (
-                      <Import
-                        actionButtonsDisabled={actionButtonsDisabled}
-                        onClickOK={(s: string, b: number) =>
-                          this.doRestore(s, b)
-                        }
-                        onClickCancel={() => {
-                          if (navigation.canGoBack()) {
-                            navigation.goBack();
-                            return;
-                          }
-                          this.setState({ entry: LoadingAppEntryEnum.menu });
-                          navigation.replace(RouteEnum.StartMenu);
-                        }}
-                      />
-                    )}
-                  </LoadingStack.Screen>
-                  <LoadingStack.Screen name={RouteEnum.ChooseIndexer}>
-                    {() => <ChooseIndexer />}
-                  </LoadingStack.Screen>
-                  <LoadingStack.Screen name={RouteEnum.ListedIndexers}>
-                    {({ navigation }) => (
-                      <ListedIndexers
-                        setIndexerServer={this.setIndexerServer}
-                        closeServers={() => this.closeServers(navigation)}
-                        previousServer={this.state.indexerServer.uri}
-                      />
-                    )}
-                  </LoadingStack.Screen>
-                  <LoadingStack.Screen name={RouteEnum.CustomIndexer}>
-                    {({ navigation }) => (
-                      <CustomIndexer
-                        setIndexerServer={this.setIndexerServer}
-                        closeServers={() => this.closeServers(navigation)}
-                      />
-                    )}
-                  </LoadingStack.Screen>
-                </LoadingStack.Navigator>
-              )}
-            </ContextAppLoadingProvider>
-          </ToastProvider>
-        </SafeAreaView>
+                        this.setState({ entry: LoadingAppEntryEnum.menu });
+                        navigation.replace(RouteEnum.StartMenu);
+                      }}
+                    />
+                  )}
+                </LoadingStack.Screen>
+                <LoadingStack.Screen name={RouteEnum.ChooseIndexer}>
+                  {() => <ChooseIndexer />}
+                </LoadingStack.Screen>
+                <LoadingStack.Screen name={RouteEnum.ListedIndexers}>
+                  {({ navigation }) => (
+                    <ListedIndexers
+                      setIndexerServer={this.setIndexerServer}
+                      closeServers={() => this.closeServers(navigation)}
+                      previousServer={this.state.indexerServer.uri}
+                    />
+                  )}
+                </LoadingStack.Screen>
+                <LoadingStack.Screen name={RouteEnum.CustomIndexer}>
+                  {({ navigation }) => (
+                    <CustomIndexer
+                      setIndexerServer={this.setIndexerServer}
+                      closeServers={() => this.closeServers(navigation)}
+                    />
+                  )}
+                </LoadingStack.Screen>
+              </LoadingStack.Navigator>
+            )}
+          </ContextAppLoadingProvider>
+        </ToastProvider>
       </BackdropHost>
     );
   }

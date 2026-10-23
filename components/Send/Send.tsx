@@ -809,7 +809,7 @@ const Send: React.FunctionComponent<SendProps> = ({
         style={{ flex: 1, backgroundColor: colors.bgCanvas }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={
-          Platform.OS === 'ios' ? insets.top : kbOpen ? insets.top : 0
+          Platform.OS === 'ios' ? 0 : kbOpen ? insets.top : 0
         }
       >
         <HeaderTitle
@@ -830,7 +830,7 @@ const Send: React.FunctionComponent<SendProps> = ({
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
             flexGrow: 1,
-            paddingTop: insets.top,
+            paddingTop: 8,
             paddingBottom: insets.bottom + 8,
             paddingHorizontal: 16,
           }}

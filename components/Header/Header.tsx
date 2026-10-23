@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useRef, useState } from 'react';
 import { TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   NetInfoType,
   TranslateType,
@@ -92,6 +93,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
   const privacy = privacyProp ?? privacyContext;
 
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const opacityValue = useRef(new Animated.Value(1)).current;
   const animationRef = useRef<Animated.CompositeAnimation | null>(null);
@@ -184,7 +186,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
             alignItems: 'center',
             paddingBottom: 0,
             backgroundColor: colors.bgCanvas,
-            paddingTop: 10,
+            paddingTop: insets.top + 10,
             minHeight: !noDrawMenu ? 60 : 25,
           }}
         >
@@ -563,6 +565,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
             style={{
               padding: 11.5,
               position: 'absolute',
+              top: insets.top,
               left: 0,
             }}
           >
@@ -592,6 +595,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
           style={{
             padding: 13,
             position: 'absolute',
+            top: insets.top,
             right: 0,
           }}
         >

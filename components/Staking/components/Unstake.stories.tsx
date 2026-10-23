@@ -3,7 +3,10 @@ import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { Unstake } from '..';
 import { RouteEnum } from '../../../app/AppState';
 import { screenProps } from '../../../.storybook/screenProps';
-import { mockFinalizerA, mockWalletBonds } from '../../../.storybook/mockStaking';
+import {
+  mockFinalizerA,
+  mockWalletBonds,
+} from '../../../.storybook/mockStaking';
 
 const meta = {
   title: 'Staking/Unstake',

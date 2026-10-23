@@ -147,7 +147,7 @@ const ValueTransferDetail: React.FunctionComponent<
           backgroundColor: colors.bgCanvas,
         }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
+        keyboardVerticalOffset={0}
       >
         <HeaderTitle
           title="Transaction details"
@@ -163,7 +163,7 @@ const ValueTransferDetail: React.FunctionComponent<
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
             flexGrow: 1,
-            paddingTop: insets.top + 8,
+            paddingTop: 8,
             paddingBottom: insets.bottom + 8,
             paddingHorizontal: 10,
           }}

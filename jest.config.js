@@ -16,5 +16,6 @@ module.exports = {
     '^@shopify/react-native-skia$': '<rootDir>/__mocks__/skiaMock.tsx',
     '^react-native-worklets$': '<rootDir>/__mocks__/workletsMock.js',
     '\\.(ttf|otf|woff2?)$': '<rootDir>/__mocks__/fileMock.js',
+    '\\.(png|jpe?g|gif|webp)$': '<rootDir>/__mocks__/fileMock.js',
   },
 };

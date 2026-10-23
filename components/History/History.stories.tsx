@@ -3,6 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import History from './History';
 import { RouteEnum } from '../../app/AppState';
 import { screenProps } from '../../.storybook/screenProps';
+import { mockValueTransfers } from '../../__mocks__/dataMocks/mockValueTransfers';
+import { RPCValueTransferStatusEnum } from '../../app/rpc/enums/RPCValueTransferStatusEnum';
 
 /** The Home tab. */
 const meta = {
@@ -32,8 +34,22 @@ export const NotLoadedYet: Story = {
   parameters: { context: { valueTransfers: null, valueTransfersTotal: null } },
 };
 
+/** The newest transfer is still in the mempool: the loader takes the time slot. */
 export const SomePending: Story = {
-  parameters: { context: { somePending: true } },
+  parameters: {
+    context: {
+      valueTransfers: [
+        {
+          ...mockValueTransfers[0],
+          txid: 'pending-txid',
+          confirmations: 0,
+          status: RPCValueTransferStatusEnum.mempool,
+          time: Math.floor(Date.now() / 1000),
+        },
+        ...mockValueTransfers,
+      ],
+    },
+  },
 };
 
 export const PrivacyOn: Story = { parameters: { context: { privacy: true } } };

@@ -14,12 +14,16 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
   <View />
   <View
     style={
-      {
-        "height": 48,
-        "justifyContent": "center",
-        "marginTop": 10,
-        "paddingHorizontal": 16,
-      }
+      [
+        {
+          "height": 48,
+          "justifyContent": "center",
+          "paddingHorizontal": 16,
+        },
+        {
+          "marginTop": 10,
+        },
+      ]
     }
   >
     <View
@@ -155,7 +159,7 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
     contentContainerStyle={
       {
         "flexGrow": 1,
-        "paddingBottom": NaN,
+        "paddingBottom": 8,
         "paddingHorizontal": 10,
       }
     }
@@ -707,12 +711,16 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
   <View />
   <View
     style={
-      {
-        "height": 48,
-        "justifyContent": "center",
-        "marginTop": 10,
-        "paddingHorizontal": 16,
-      }
+      [
+        {
+          "height": 48,
+          "justifyContent": "center",
+          "paddingHorizontal": 16,
+        },
+        {
+          "marginTop": 10,
+        },
+      ]
     }
   >
     <View
@@ -848,7 +856,7 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
     contentContainerStyle={
       {
         "flexGrow": 1,
-        "paddingBottom": NaN,
+        "paddingBottom": 8,
         "paddingHorizontal": 10,
       }
     }
@@ -1744,6 +1752,7 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
               "left": 0,
               "padding": 11.5,
               "position": "absolute",
+              "top": 0,
             }
           }
         >
@@ -1764,6 +1773,7 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
             "padding": 13,
             "position": "absolute",
             "right": 0,
+            "top": 0,
           }
         }
       >
@@ -2212,12 +2222,16 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
   <View />
   <View
     style={
-      {
-        "height": 48,
-        "justifyContent": "center",
-        "marginTop": 10,
-        "paddingHorizontal": 16,
-      }
+      [
+        {
+          "height": 48,
+          "justifyContent": "center",
+          "paddingHorizontal": 16,
+        },
+        {
+          "marginTop": 10,
+        },
+      ]
     }
   >
     <View
@@ -2353,7 +2367,7 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
     contentContainerStyle={
       {
         "flexGrow": 1,
-        "paddingBottom": NaN,
+        "paddingBottom": 8,
         "paddingHorizontal": 10,
       }
     }
@@ -2905,12 +2919,16 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
   <View />
   <View
     style={
-      {
-        "height": 48,
-        "justifyContent": "center",
-        "marginTop": 10,
-        "paddingHorizontal": 16,
-      }
+      [
+        {
+          "height": 48,
+          "justifyContent": "center",
+          "paddingHorizontal": 16,
+        },
+        {
+          "marginTop": 10,
+        },
+      ]
     }
   >
     <View
@@ -3046,7 +3064,7 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
     contentContainerStyle={
       {
         "flexGrow": 1,
-        "paddingBottom": NaN,
+        "paddingBottom": 8,
         "paddingHorizontal": 10,
       }
     }

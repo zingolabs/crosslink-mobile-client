@@ -130,12 +130,12 @@ const StartMenu: React.FunctionComponent<StartMenuProps> = ({
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
+          keyboardVerticalOffset={0}
         >
           <View
             style={{
               height: 48,
-              marginTop: 10,
+              marginTop: insets.top + 10,
               paddingHorizontal: 16,
               flexDirection: 'row',
               justifyContent: 'flex-end',
@@ -167,7 +167,7 @@ const StartMenu: React.FunctionComponent<StartMenuProps> = ({
             bottom: 0,
             alignItems: 'center',
             paddingHorizontal: 20,
-            paddingBottom: 12,
+            paddingBottom: insets.bottom + 12,
           }}
           onLayout={e => setActionsHeight(e.nativeEvent.layout.height)}
         >
