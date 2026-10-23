@@ -66,7 +66,7 @@ const AppContent: React.FunctionComponent = () => {
       <NavigationContainer ref={navigationRef} theme={theme} linking={linking}>
         <Stack.Navigator
           initialRouteName={RouteEnum.LoadingApp}
-          screenOptions={{ headerShown: false }}
+          screenOptions={{ headerShown: false, animation: 'fade' }}
         >
           <Stack.Screen name={RouteEnum.LoadingApp}>
             {props => <LoadingApp {...props} />}

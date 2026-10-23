@@ -451,7 +451,9 @@ export class LoadingAppClass extends Component<
       // state
       appStateStatus: AppState.currentState,
       entry: props.route.params?.entry ?? LoadingAppEntryEnum.boot,
-      actionButtonsDisabled: false,
+      // Start until boot() proves otherwise, so a wallet switch (entry: menu)
+      // never shows enabled buttons while netInfo is still empty.
+      actionButtonsDisabled: true,
       walletExists: false,
       openWalletFailed: false,
       biometricsFailed:
