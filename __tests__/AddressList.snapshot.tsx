@@ -14,13 +14,13 @@ import { AddressList } from '../components/AddressList';
 import { mockTranslate } from '../__mocks__/dataMocks/mockTranslate';
 import { mockAddresses } from '../__mocks__/dataMocks/mockAddresses';
 import { AddressKindEnum, RouteEnum } from '../app/AppState';
-import { DrawerScreenProps } from '@react-navigation/drawer';
-import { AppDrawerParamList } from '../app/types';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { LoadedAppStackParamList } from '../app/types';
 import mockNavigation from '../__mocks__/dataMocks/mockNavigation';
 
 function makeDrawerProps(
   ak: AddressKindEnum,
-): DrawerScreenProps<AppDrawerParamList, RouteEnum.AddressList> {
+): NativeStackScreenProps<LoadedAppStackParamList, RouteEnum.AddressList> {
   return {
     navigation: mockNavigation,
     route: {

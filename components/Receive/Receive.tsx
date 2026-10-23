@@ -1,6 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {
-  useContext,
   useState,
   ReactNode,
   useEffect,
@@ -15,12 +14,16 @@ import {
   Route,
   NavigationState,
 } from 'react-native-tab-view';
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
 import Clipboard from '@react-native-clipboard/clipboard';
 import SingleAddress from '../Components/SingleAddress';
-import { AppDrawerParamList, ThemeType } from '../../app/types';
-import { ContextAppLoaded } from '../../app/context';
+import { LoadedAppStackParamList } from '../../app/types';
+import {
+  useAppLoadedActions,
+  useAppLoadedWallet,
+  useAppLoadedUi,
+} from '../../app/context';
 
 import {
   AddressKindEnum,
@@ -43,12 +46,15 @@ import { ToastProvider, useToast } from 'react-native-toastier';
 import Snackbars from '../Components/Snackbars';
 import TransparentWarning from './components/TransparentWarning';
 import ExpandedAddress from './components/ExpandedAddress';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../Header';
+import { useTheme } from '../../app/theme';
 
-type ReceiveProps = DrawerScreenProps<AppDrawerParamList, RouteEnum.Receive> & {
-  toggleMenuDrawer: () => void;
+type ReceiveProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
+  RouteEnum.Receive
+> & {
   setSecurityOption: (s: SecurityType) => Promise<void>;
 };
 
@@ -62,16 +68,11 @@ const Receive: React.FunctionComponent<ReceiveProps> = (
   },
 ) => {
   const navigation: any = useNavigation();
-  const context = useContext(ContextAppLoaded);
-  const {
-    translate,
-    addresses,
-    defaultUnifiedAddress,
-    snackbars,
-    removeFirstSnackbar,
-    addLastSnackbar,
-  } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { translate, removeFirstSnackbar, addLastSnackbar } =
+    useAppLoadedActions();
+  const { addresses, defaultUnifiedAddress } = useAppLoadedWallet();
+  const { snackbars } = useAppLoadedUi();
+  const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.Receive;
 
@@ -318,11 +319,11 @@ const Receive: React.FunctionComponent<ReceiveProps> = (
         enablePanDownToClose
         keyboardBehavior={'interactive'}
         handleStyle={{ display: 'none' }}
-        backgroundStyle={{ backgroundColor: colors.background }}
+        backgroundStyle={{ backgroundColor: colors.bgCanvas }}
         backdropComponent={renderBackdrop}
       >
         <BottomSheetView
-          style={{ backgroundColor: colors.background, height: '100%' }}
+          style={{ backgroundColor: colors.bgCanvas, height: '100%' }}
         >
           {sheetType === 'NA' && (
             <NewAddress

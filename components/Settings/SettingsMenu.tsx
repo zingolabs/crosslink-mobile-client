@@ -1,13 +1,11 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext } from 'react';
+import React from 'react';
 import { View, TouchableOpacity, Alert } from 'react-native';
 
-import { useTheme } from '@react-navigation/native';
-
 import { LoadingAppNavigationState } from '../../app/types';
-import { ContextAppLoaded } from '../../app/context';
+import { useAppLoadedActions } from '../../app/context';
 import { ToastProvider, useToast } from 'react-native-toastier';
-import { RouteEnum } from '../../app/AppState';
+import { LoadingAppEntryEnum, RouteEnum } from '../../app/AppState';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import {
   faChevronRight,
@@ -23,7 +21,7 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SettingsStackParamList } from './SettingsNavigator';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
-import { ThemeType } from '../../app/types';
+import { useTheme } from '../../app/theme';
 
 type SettingsMenuProps = NativeStackScreenProps<
   SettingsStackParamList,
@@ -36,9 +34,8 @@ const SettingsMenu: React.FunctionComponent<SettingsMenuProps> = ({
   onClickOKChangeWallet,
   navigation,
 }) => {
-  const context = useContext(ContextAppLoaded);
-  const { translate } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { translate } = useAppLoadedActions();
+  const { colors } = useTheme();
   const { clear } = useToast();
 
   const insets = useSafeAreaInsets();
@@ -51,7 +48,10 @@ const SettingsMenu: React.FunctionComponent<SettingsMenuProps> = ({
         {
           text: translate('confirm') as string,
           onPress: () =>
-            onClickOKChangeWallet({ screen: 3, startingApp: false }),
+            onClickOKChangeWallet({
+              entry: LoadingAppEntryEnum.menu,
+              startingApp: false,
+            }),
         },
         { text: translate('cancel') as string, style: 'cancel' },
       ],
@@ -128,11 +128,11 @@ const SettingsMenu: React.FunctionComponent<SettingsMenuProps> = ({
               <View
                 style={{
                   borderRadius: 25,
-                  borderColor: colors.text,
+                  borderColor: colors.fgDefault,
                   borderWidth: 1,
                   padding: 10,
                   margin: 10,
-                  backgroundColor: colors.background,
+                  backgroundColor: colors.bgCanvas,
                   alignSelf: 'flex-start',
                 }}
               >
@@ -147,7 +147,7 @@ const SettingsMenu: React.FunctionComponent<SettingsMenuProps> = ({
                   <FontAwesomeIcon
                     size={30}
                     icon={faChevronLeft}
-                    color={colors.text}
+                    color={colors.fgDefault}
                   />
                 </TouchableOpacity>
               </View>
@@ -156,7 +156,7 @@ const SettingsMenu: React.FunctionComponent<SettingsMenuProps> = ({
             <View
               style={{
                 borderRadius: 26,
-                backgroundColor: colors.secondary,
+                backgroundColor: colors.bgSurface,
                 width: '100%',
                 marginTop: 20,
                 paddingVertical: 5,
@@ -186,21 +186,21 @@ const SettingsMenu: React.FunctionComponent<SettingsMenuProps> = ({
                         <FontAwesomeIcon
                           size={20}
                           icon={item.icon}
-                          color={colors.text}
+                          color={colors.fgDefault}
                         />
                         <RegText>{item.label}</RegText>
                       </View>
                       <FontAwesomeIcon
                         size={20}
                         icon={faChevronRight}
-                        color={colors.text}
+                        color={colors.fgDefault}
                       />
                     </TouchableOpacity>
                   </View>
 
                   {index < routes.length - 1 && (
                     <View
-                      style={{ height: 1, backgroundColor: colors.border }}
+                      style={{ height: 1, backgroundColor: colors.bgFaint }}
                     />
                   )}
                 </React.Fragment>
@@ -220,7 +220,7 @@ const SettingsMenu: React.FunctionComponent<SettingsMenuProps> = ({
         }}
       >
         <LiquidPrimaryButton
-          tintColor={colors.danger.primary}
+          tintColor={colors.bgDanger}
           title={'Switch to different wallet'}
           onPress={restoreWallet}
           style={{ alignSelf: 'stretch' }}

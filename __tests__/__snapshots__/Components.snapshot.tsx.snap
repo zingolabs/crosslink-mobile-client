@@ -71,7 +71,7 @@ exports[`Component Components - test CurrencyAmount High Privacy - snapshot 1`] 
         style={
           {
             "backgroundColor": "red",
-            "color": "#ffffff",
+            "color": "#888888",
             "fontSize": 20,
             "fontWeight": "700",
           }
@@ -139,7 +139,7 @@ exports[`Component Components - test CurrencyAmount Normal Privacy with TOR - sn
         style={
           {
             "backgroundColor": "red",
-            "color": "#ffffff",
+            "color": "#888888",
             "fontSize": 20,
             "fontWeight": "700",
           }

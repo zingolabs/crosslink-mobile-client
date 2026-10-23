@@ -19,10 +19,10 @@ let loadTestWallet = async () => {
     .withTimeout(sync_timeout);
   await element(by.text('CONFIRM')).tap();
 
-  await waitFor(element(by.id('import.seedufvkinput')))
+  await waitFor(element(by.id('import.seedinput')))
     .toBeVisible()
     .withTimeout(sync_timeout);
-  await element(by.id('import.seedufvkinput')).replaceText(
+  await element(by.id('import.seedinput')).replaceText(
     'lottery multiply patient simple ivory leisure swift square west despair beauty match crowd margin reject box always title photo remind word diet ecology badge',
   );
   await waitFor(element(by.id('import.birthdayinput')))

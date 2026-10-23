@@ -1,7 +1,10 @@
 import {
   defaultAppContextLoaded,
-  ContextAppLoaded,
   ContextAppLoadedProvider,
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedWallet,
+  useAppLoadedUi,
 } from './contextAppLoaded';
 import {
   defaultAppContextLoading,
@@ -11,8 +14,11 @@ import {
 
 export {
   defaultAppContextLoaded,
-  ContextAppLoaded,
   ContextAppLoadedProvider,
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedWallet,
+  useAppLoadedUi,
   defaultAppContextLoading,
   ContextAppLoading,
   ContextAppLoadingProvider,

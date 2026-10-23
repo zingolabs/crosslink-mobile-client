@@ -1,14 +1,12 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { AppDrawerParamList, ThemeType } from '../../app/types';
-import { ContextAppLoaded } from '../../app/context';
+import { LoadedAppStackParamList } from '../../app/types';
+import {
+  useAppLoadedActions,
+  useAppLoadedWallet,
+  useAppLoadedUi,
+} from '../../app/context';
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import {
@@ -17,7 +15,7 @@ import {
   ScreenEnum,
   StakeType,
 } from '../../app/AppState';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HeaderTitle } from '../Header';
 import {
   Dimensions,
@@ -30,7 +28,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useTheme } from '@react-navigation/native';
 import RegText from '../Components/RegText';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import {
@@ -47,9 +44,10 @@ import ZcashIcon from '../../assets/icons/zcash.svg';
 import ZecAmount from '../Components/ZecAmount';
 import { XIcon } from '../Components/Icons/XIcon';
 import StakingDayBubble from '../Staking/StakingDayBubble';
+import { useTheme } from '../../app/theme';
 
-type FinalizersProps = DrawerScreenProps<
-  AppDrawerParamList,
+type FinalizersProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
   RouteEnum.Finalizers
 >;
 
@@ -70,16 +68,10 @@ const Finalizers: React.FunctionComponent<FinalizersProps> = ({
       ? route.params.exclude
       : '';
 
-  const { colors } = useTheme() as ThemeType;
-  const context = useContext(ContextAppLoaded);
-  const {
-    snackbars,
-    removeFirstSnackbar,
-    staked,
-    globalStaked,
-    info,
-    walletBonds,
-  } = context;
+  const { colors } = useTheme();
+  const { removeFirstSnackbar } = useAppLoadedActions();
+  const { staked, globalStaked, info, walletBonds } = useAppLoadedWallet();
+  const { snackbars } = useAppLoadedUi();
   const { clear } = useToast();
   const screenName = ScreenEnum.About;
 
@@ -289,11 +281,11 @@ const Finalizers: React.FunctionComponent<FinalizersProps> = ({
                   gap: 5,
                 }}
               >
-                <ChartPieIcon height={16} width={16} color={colors.text} />
+                <ChartPieIcon height={16} width={16} color={colors.fgDefault} />
                 <FadeText style={{ marginRight: 10 }}>
                   {getPercent(percent)}
                 </FadeText>
-                <ZcashIcon height={16} width={16} color={colors.text} />
+                <ZcashIcon height={16} width={16} color={colors.fgDefault} />
                 <ZecAmount
                   amtZec={item.votingPower}
                   size={14}
@@ -313,7 +305,7 @@ const Finalizers: React.FunctionComponent<FinalizersProps> = ({
               style={{ marginRight: 15 }}
               size={15}
               icon={faChevronRight}
-              color={colors.text}
+              color={colors.fgDefault}
             />
           </View>
         </View>
@@ -346,7 +338,7 @@ const Finalizers: React.FunctionComponent<FinalizersProps> = ({
           justifyContent: 'flex-start',
           borderRadius: 20,
           marginBottom: 10,
-          backgroundColor: colors.secondary,
+          backgroundColor: colors.bgSurface,
           height: 44,
           alignItems: 'center',
           paddingHorizontal: 16,
@@ -356,18 +348,18 @@ const Finalizers: React.FunctionComponent<FinalizersProps> = ({
         <FontAwesomeIcon
           icon={faMagnifyingGlass}
           size={17}
-          color={colors.placeholder}
+          color={colors.fgSubtle}
           style={{ marginRight: 10 }}
         />
         <TextInput
           style={{
             flex: 1,
-            color: colors.text,
+            color: colors.fgDefault,
             fontSize: 17,
             fontWeight: '400',
           }}
           placeholder="Search finalizer..."
-          placeholderTextColor={colors.placeholder}
+          placeholderTextColor={colors.fgSubtle}
           keyboardType={'default'}
           value={searchText}
           onChangeText={setSearchText}
@@ -382,14 +374,14 @@ const Finalizers: React.FunctionComponent<FinalizersProps> = ({
               style={{
                 justifyContent: 'center',
                 alignItems: 'center',
-                backgroundColor: colors.zingo,
+                backgroundColor: colors.bgMuted,
                 borderRadius: 11,
                 height: 22,
                 width: 22,
                 padding: 0,
               }}
             >
-              <XIcon color={colors.background} width={20} height={20} />
+              <XIcon color={colors.bgCanvas} width={20} height={20} />
             </View>
           </TouchableOpacity>
         )}
@@ -411,7 +403,7 @@ const Finalizers: React.FunctionComponent<FinalizersProps> = ({
               marginHorizontal: 10,
               padding: 5,
               alignItems: 'flex-start',
-              backgroundColor: colors.secondary,
+              backgroundColor: colors.bgSurface,
               borderRadius: 26,
             }}
           >
@@ -437,11 +429,11 @@ const Finalizers: React.FunctionComponent<FinalizersProps> = ({
             right: 20,
             paddingHorizontal: 5,
             paddingVertical: 10,
-            backgroundColor: colors.sideMenuBackground,
+            backgroundColor: colors.bgChrome,
             borderRadius: 50,
             transform: [{ scale: pressed ? 0.9 : 1 }],
             borderWidth: 1,
-            borderColor: colors.zingo,
+            borderColor: colors.borderMuted,
             opacity: isScrollingToTop ? 0.5 : 1,
           })}
         >
@@ -449,7 +441,7 @@ const Finalizers: React.FunctionComponent<FinalizersProps> = ({
             style={{ marginLeft: 5, marginRight: 5, marginTop: 0 }}
             size={16}
             icon={faAngleUp}
-            color={colors.zingo}
+            color={colors.fgMuted}
           />
         </Pressable>
       )}

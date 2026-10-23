@@ -1,18 +1,18 @@
 import { AppStateStatus } from 'react-native';
 import { LaunchingModeEnum } from './enums/LaunchingModeEnum';
+import { LoadingAppEntryEnum } from './enums/LoadingAppEntryEnum';
 
 export default interface AppStateLoading {
-  // state
   appStateStatus: AppStateStatus;
-  screen: number;
+  entry: LoadingAppEntryEnum;
   actionButtonsDisabled: boolean;
   walletExists: boolean;
+  openWalletFailed: boolean;
   biometricsFailed: boolean;
   startingApp: boolean;
   serverErrorTries: number;
   firstLaunchingMessage: LaunchingModeEnum;
   hasRecoveryWalletInfoSaved: boolean;
-  fromSettings: boolean;
   walletSeed: string;
   walletBirthday: number;
 }

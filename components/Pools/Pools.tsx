@@ -1,42 +1,41 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext } from 'react';
+import React from 'react';
 import { View, ScrollView, ActivityIndicator } from 'react-native';
-
-import { useTheme } from '@react-navigation/native';
 
 import ZecAmount from '../Components/ZecAmount';
 import BoldText from '../Components/BoldText';
 import DetailLine from '../Components/DetailLine';
-import { AppDrawerParamList, ThemeType } from '../../app/types';
-import { ContextAppLoaded } from '../../app/context';
+import { LoadedAppStackParamList } from '../../app/types';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedWallet,
+  useAppLoadedUi,
+} from '../../app/context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import FadeText from '../Components/FadeText';
 import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { RouteEnum, ScreenEnum } from '../../app/AppState';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../Header';
+import { useTheme } from '../../app/theme';
 
-type PoolsProps = DrawerScreenProps<AppDrawerParamList, RouteEnum.Pools>;
+type PoolsProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
+  RouteEnum.Pools
+>;
 
 const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
-  const context = useContext(ContextAppLoaded);
-  const {
-    totalBalance,
-    info,
-    translate,
-    privacy,
-    somePending,
-    shieldingAmount,
-    snackbars,
-    removeFirstSnackbar,
-    orchardPool,
-    saplingPool,
-    transparentPool,
-  } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { translate, removeFirstSnackbar } = useAppLoadedActions();
+  const { privacy, orchardPool, saplingPool, transparentPool } =
+    useAppLoadedSettings();
+  const { totalBalance, info, somePending, shieldingAmount } =
+    useAppLoadedWallet();
+  const { snackbars } = useAppLoadedUi();
+  const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.Pools;
 
@@ -84,7 +83,7 @@ const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
                 {!orchardPool && !saplingPool && !transparentPool && (
                   <ActivityIndicator
                     size="large"
-                    color={colors.primary}
+                    color={colors.fgAccent}
                     style={{ marginVertical: 20 }}
                   />
                 )}
@@ -130,7 +129,7 @@ const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
                             totalBalance.confirmedOrchardBalance > 0 &&
                             totalBalance.confirmedOrchardBalance ===
                               totalBalance.totalOrchardBalance
-                              ? colors.primary
+                              ? colors.fgAccent
                               : 'red'
                           }
                           privacy={privacy}
@@ -192,7 +191,7 @@ const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
                             totalBalance.confirmedSaplingBalance > 0 &&
                             totalBalance.confirmedSaplingBalance ===
                               totalBalance.totalSaplingBalance
-                              ? colors.syncing
+                              ? colors.fgSyncing
                               : 'red'
                           }
                           privacy={privacy}
@@ -262,7 +261,7 @@ const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
                         display: 'flex',
                         flexDirection: 'row',
                         marginTop: 5,
-                        backgroundColor: colors.background,
+                        backgroundColor: colors.bgCanvas,
                         padding: 5,
                         borderRadius: 10,
                       }}
@@ -270,7 +269,7 @@ const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
                       <FontAwesomeIcon
                         icon={faInfoCircle}
                         size={20}
-                        color={colors.primary}
+                        color={colors.fgAccent}
                         style={{ marginRight: 5 }}
                       />
                       <FadeText>{translate('pools.dust') as string}</FadeText>
@@ -283,7 +282,7 @@ const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
                       display: 'flex',
                       flexDirection: 'row',
                       marginTop: 5,
-                      backgroundColor: colors.background,
+                      backgroundColor: colors.bgCanvas,
                       padding: 5,
                       borderRadius: 10,
                     }}
@@ -291,7 +290,7 @@ const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
                     <FontAwesomeIcon
                       icon={faInfoCircle}
                       size={20}
-                      color={colors.primary}
+                      color={colors.fgAccent}
                       style={{ marginRight: 5 }}
                     />
                     <FadeText>{translate('send.somefunds') as string}</FadeText>

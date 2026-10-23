@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, ScrollView, ActivityIndicator, Platform } from 'react-native';
 
 import FadeText from '../../Components/FadeText';
@@ -7,12 +7,16 @@ import BoldText from '../../Components/BoldText';
 import RegText from '../../Components/RegText';
 import ZecAmount from '../../Components/ZecAmount';
 import CurrencyAmount from '../../Components/CurrencyAmount';
-import { useTheme } from '@react-navigation/native';
-import { ContextAppLoaded } from '../../../app/context';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedWallet,
+  useAppLoadedUi,
+} from '../../../app/context';
 import AddressItem from '../../Components/AddressItem';
 import simpleBiometrics from '../../../app/simpleBiometrics';
 
-import { AppDrawerParamList, ThemeType } from '../../../app/types';
+import { LoadedAppStackParamList } from '../../../app/types';
 import Utils from '../../../app/utils';
 import {
   PrivacyLevelFromEnum,
@@ -26,13 +30,17 @@ import { RPCReceiversEnum } from '../../../app/rpc/enums/RPCReceiversEnum';
 import { RPCParseAddressStatusEnum } from '../../../app/rpc/enums/RPCParseAddressStatusEnum';
 import Snackbars from '../../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RPCParseAddressType } from '../../../app/rpc/types/RPCParseAddressType';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../../Header';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
+import { useTheme } from '../../../app/theme';
 
-type ConfirmProps = DrawerScreenProps<AppDrawerParamList, RouteEnum.Confirm>;
+type ConfirmProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
+  RouteEnum.Confirm
+>;
 
 const Confirm: React.FunctionComponent<ConfirmProps> = ({
   navigation,
@@ -46,22 +54,13 @@ const Confirm: React.FunctionComponent<ConfirmProps> = ({
     !!route.params && route.params.calculateFeeWithPropose !== undefined
       ? route.params.calculateFeeWithPropose
       : async () => {};
-  const context = useContext(ContextAppLoaded);
-  const {
-    info,
-    translate,
-    currency,
-    zecPrice,
-    defaultUnifiedAddress,
-    privacy,
-    totalBalance,
-    addLastSnackbar,
-    indexerServer,
-    security,
-    snackbars,
-    removeFirstSnackbar,
-  } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { translate, addLastSnackbar, removeFirstSnackbar } =
+    useAppLoadedActions();
+  const { currency, privacy, indexerServer, security } = useAppLoadedSettings();
+  const { info, zecPrice, defaultUnifiedAddress, totalBalance } =
+    useAppLoadedWallet();
+  const { snackbars } = useAppLoadedUi();
+  const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.Confirm;
 
@@ -394,7 +393,7 @@ const Confirm: React.FunctionComponent<ConfirmProps> = ({
               padding: 10,
               borderWidth: 1,
               borderRadius: 10,
-              borderColor: colors.border,
+              borderColor: colors.borderFaint,
             }}
           >
             <BoldText
@@ -429,7 +428,7 @@ const Confirm: React.FunctionComponent<ConfirmProps> = ({
                   size={
                     Platform.OS === GlobalConst.platformOSios ? 'small' : 12
                   }
-                  color={colors.primary}
+                  color={colors.fgAccent}
                 />
               ) : (
                 <RegText>{privacyLevel}</RegText>

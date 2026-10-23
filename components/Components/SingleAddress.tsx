@@ -1,11 +1,9 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext, useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, ScrollView, TouchableOpacity, Text } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
-import { useTheme } from '@react-navigation/native';
 
-import { ThemeType } from '../../app/types';
-import { ContextAppLoaded } from '../../app/context';
+import { useAppLoadedActions, useAppLoadedSettings } from '../../app/context';
 import {
   AddressKindEnum,
   ScreenEnum,
@@ -20,6 +18,7 @@ import { CopyIcon } from './Icons/CopyIcon';
 import { TriangleAlert } from './Icons/TriangleAlert';
 import { ShieldIcon } from './Icons/ShieldIcon';
 import Address from './Address/Address';
+import { useTheme } from '../../app/theme';
 
 type SingleAddressProps = {
   address?: UnifiedAddressClass | TransparentAddressClass;
@@ -42,9 +41,9 @@ const SingleAddress: React.FunctionComponent<SingleAddressProps> = ({
   showMoreOptions,
   setShowMoreOptions,
 }) => {
-  const context = useContext(ContextAppLoaded);
-  const { translate, privacy, addLastSnackbar } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { translate, addLastSnackbar } = useAppLoadedActions();
+  const { privacy } = useAppLoadedSettings();
+  const { colors } = useTheme();
 
   const [expandQRAddress, setExpandQRAddress] = useState<boolean>(true);
 
@@ -113,9 +112,9 @@ const SingleAddress: React.FunctionComponent<SingleAddressProps> = ({
                   flexDirection: 'column',
                   alignItems: 'flex-start',
                   justifyContent: 'center',
-                  backgroundColor: colors.warning.background,
+                  backgroundColor: colors.bgWarning,
                   borderRadius: 10,
-                  borderColor: colors.warning.border,
+                  borderColor: colors.borderWarning,
                   borderWidth: 1,
                   padding: 10,
                   marginTop: 10,
@@ -130,13 +129,13 @@ const SingleAddress: React.FunctionComponent<SingleAddressProps> = ({
                   }}
                 >
                   <TriangleAlert
-                    color={colors.warning.primary}
+                    color={colors.fgWarning}
                     size={24}
                     style={{ marginRight: 10 }}
                   />
                   <Text
                     style={{
-                      color: colors.warning.title,
+                      color: colors.fgWarningEmphasis,
                       fontWeight: 'bold',
                       fontSize: 16,
                     }}
@@ -144,7 +143,7 @@ const SingleAddress: React.FunctionComponent<SingleAddressProps> = ({
                     {translate('receive.transparent.warning.title') as string}
                   </Text>
                 </View>
-                <Text style={{ color: colors.warning.text }}>
+                <Text style={{ color: colors.fgWarningMuted }}>
                   {
                     translate(
                       'receive.transparent.warning.description',
@@ -161,20 +160,20 @@ const SingleAddress: React.FunctionComponent<SingleAddressProps> = ({
                     justifyContent: 'center',
                     alignItems: 'center',
                     width: '100%',
-                    backgroundColor: colors.primary,
+                    backgroundColor: colors.bgAccent,
                     padding: 10,
                     borderRadius: 5,
                     marginTop: 10,
                   }}
                 >
                   <ShieldIcon
-                    color={colors.background}
+                    color={colors.bgCanvas}
                     size={24}
                     style={{ marginRight: 5 }}
                   />
                   <Text
                     style={{
-                      color: colors.background,
+                      color: colors.bgCanvas,
                       fontWeight: 'bold',
                       fontSize: 14,
                     }}
@@ -190,7 +189,7 @@ const SingleAddress: React.FunctionComponent<SingleAddressProps> = ({
                 marginTop: 20,
                 marginHorizontal: 20,
                 padding: 10,
-                backgroundColor: colors.text,
+                backgroundColor: colors.fgDefault,
                 borderRadius: 15,
               }}
             >
@@ -198,10 +197,10 @@ const SingleAddress: React.FunctionComponent<SingleAddressProps> = ({
                 value={address ? address.address : ''}
                 size={200}
                 ecl="L"
-                backgroundColor={colors.text}
+                backgroundColor={colors.fgDefault}
                 logo={require('../../assets/img/logobig-zingo-delegator.png')}
                 logoSize={30}
-                logoBackgroundColor={colors.text}
+                logoBackgroundColor={colors.fgDefault}
                 logoBorderRadius={5} /* android not soported */
                 logoMargin={3}
               />
@@ -210,7 +209,7 @@ const SingleAddress: React.FunctionComponent<SingleAddressProps> = ({
             <View
               style={{
                 marginTop: 40,
-                backgroundColor: colors.secondary,
+                backgroundColor: colors.bgSurface,
                 padding: 10,
                 width: '90%',
                 borderRadius: 20,
@@ -221,7 +220,7 @@ const SingleAddress: React.FunctionComponent<SingleAddressProps> = ({
             >
               <Address
                 address={address?.address ? address.address : ''}
-                style={{ color: colors.money, fontSize: 18, opacity: 0.8 }}
+                style={{ color: colors.fgMuted, fontSize: 18, opacity: 0.8 }}
                 onPress={() => show('EA')}
               />
               <View
@@ -235,14 +234,14 @@ const SingleAddress: React.FunctionComponent<SingleAddressProps> = ({
                   <View
                     style={{
                       borderRadius: 30,
-                      borderColor: colors.zingo,
+                      borderColor: colors.borderMuted,
                       paddingHorizontal: 5,
                       paddingVertical: 5,
                       marginHorizontal: 10,
                     }}
                   >
                     <CopyIcon
-                      color={colors.money}
+                      color={colors.fgMuted}
                       size={24}
                       opacity={0.9}
                       style={{ margin: 3 }}

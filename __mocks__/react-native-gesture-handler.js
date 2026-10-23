@@ -1,4 +1,8 @@
 export const GestureHandlerRootView = ({ children }) => children;
+export const GestureDetector = ({ children }) => children;
+
+const chain = new Proxy({}, { get: () => () => chain });
+export const Gesture = new Proxy({}, { get: () => () => chain });
 
 export default {
   Swipeable: jest.fn().mockImplementation(({ children }) => children),

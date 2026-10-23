@@ -1,11 +1,10 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { useTheme } from '@react-navigation/native';
-import { ThemeType } from '../../../app/types';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import RegText from '../../Components/RegText';
+import { useTheme } from '../../../app/theme';
 
 type ExpandedAddressProps = {
   address: string;
@@ -24,7 +23,7 @@ const ExpandedAddress: React.FunctionComponent<ExpandedAddressProps> = ({
   button,
   setHeightLayout,
 }) => {
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
 
   return (
     <View
@@ -34,7 +33,7 @@ const ExpandedAddress: React.FunctionComponent<ExpandedAddressProps> = ({
         setHeightLayout(height + 70);
       }}
       style={{
-        backgroundColor: colors.background,
+        backgroundColor: colors.bgCanvas,
       }}
     >
       <TouchableOpacity
@@ -45,7 +44,7 @@ const ExpandedAddress: React.FunctionComponent<ExpandedAddressProps> = ({
         <FontAwesomeIcon
           size={30}
           icon={faXmark}
-          color={colors.text}
+          color={colors.fgDefault}
           style={{ marginTop: 10, marginRight: 20, alignSelf: 'flex-end' }}
         />
       </TouchableOpacity>
@@ -59,7 +58,7 @@ const ExpandedAddress: React.FunctionComponent<ExpandedAddressProps> = ({
           width: '90%',
           padding: 16,
           borderRadius: 8,
-          backgroundColor: colors.background,
+          backgroundColor: colors.bgCanvas,
           alignSelf: 'center',
         }}
       >

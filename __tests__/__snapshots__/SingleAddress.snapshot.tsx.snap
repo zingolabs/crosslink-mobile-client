@@ -40,7 +40,7 @@ exports[`Component SingleAddress - test SingleAddress - snapshot 1`] = `
         style={
           {
             "alignItems": "center",
-            "backgroundColor": undefined,
+            "backgroundColor": "#222223",
             "borderRadius": 20,
             "flexDirection": "row",
             "justifyContent": "center",
@@ -73,6 +73,7 @@ exports[`Component SingleAddress - test SingleAddress - snapshot 1`] = `
           accessible={true}
           collapsable={false}
           focusable={true}
+          hitSlop={8}
           onBlur={[Function]}
           onClick={[Function]}
           onFocus={[Function]}
@@ -82,48 +83,93 @@ exports[`Component SingleAddress - test SingleAddress - snapshot 1`] = `
           onResponderTerminate={[Function]}
           onResponderTerminationRequest={[Function]}
           onStartShouldSetResponder={[Function]}
-          style={
-            [
-              {
-                "alignItems": "center",
-                "borderRadius": 20,
-                "justifyContent": "center",
-                "minHeight": 44,
-                "paddingHorizontal": 16,
-              },
-              false,
-              {
-                "backgroundColor": "transparent",
-                "borderWidth": 0,
-              },
-              false,
-              false,
-              undefined,
-            ]
-          }
+          style={false}
         >
-          <Text
+          <View
             style={
               [
                 {
-                  "fontSize": 16,
-                  "fontWeight": "600",
-                  "textAlign": "center",
+                  "alignItems": "center",
+                  "borderRadius": 9999,
+                  "height": 50,
+                  "justifyContent": "center",
+                  "opacity": 1,
+                  "paddingHorizontal": 20,
+                  "transform": [
+                    {
+                      "scale": 1,
+                    },
+                  ],
                 },
                 {
-                  "color": "#c3c3c3",
+                  "backgroundColor": "transparent",
                 },
                 {
-                  "color": "#ffffff",
-                  "fontFamily": "monospace",
-                  "fontSize": 16,
-                  "opacity": 0.8,
+                  "transitionDuration": "120ms",
+                  "transitionProperty": [
+                    "transform",
+                    "opacity",
+                  ],
+                  "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
                 },
+                false,
+                false,
+                undefined,
               ]
             }
           >
-            UA-orchard...1234567890
-          </Text>
+            <View
+              style={
+                [
+                  {
+                    "alignItems": "center",
+                    "justifyContent": "center",
+                  },
+                  {
+                    "opacity": 1,
+                    "transitionDuration": "150ms",
+                    "transitionProperty": "opacity",
+                    "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                  },
+                ]
+              }
+            >
+              <Text
+                maxFontSizeMultiplier={1.4}
+                numberOfLines={1}
+                style={
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "600",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                      "textAlign": "center",
+                    },
+                    {
+                      "color": "#18bd18",
+                    },
+                    [
+                      {
+                        "fontFamily": "Menlo",
+                        "fontSize": 16,
+                        "fontWeight": "400",
+                        "letterSpacing": 0,
+                        "lineHeight": 21,
+                      },
+                      {
+                        "color": "#888888",
+                        "fontSize": 18,
+                        "opacity": 0.8,
+                      },
+                    ],
+                  ]
+                }
+              >
+                UA-orchard...1234567890
+              </Text>
+            </View>
+          </View>
         </View>
         <View
           style={
@@ -189,7 +235,7 @@ exports[`Component SingleAddress - test SingleAddress - snapshot 1`] = `
                 meetOrSlice={0}
                 minX={0}
                 minY={0}
-                stroke="#ffffff"
+                stroke="#888888"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
@@ -227,7 +273,7 @@ exports[`Component SingleAddress - test SingleAddress - snapshot 1`] = `
                   }
                   stroke={
                     {
-                      "payload": 4294967295,
+                      "payload": 4287137928,
                       "type": 0,
                     }
                   }

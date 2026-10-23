@@ -1,11 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {
-  useState,
-  useEffect,
-  useContext,
-  useCallback,
-  useRef,
-} from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   ScrollView,
@@ -26,7 +20,7 @@ import {
   faInfoCircle,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { getNumberFormatSettings } from 'react-native-localize';
 
 import FadeText from '../Components/FadeText';
@@ -47,22 +41,30 @@ import {
 import { parseZcashURI } from '../../app/uris';
 import RPCModule from '../../app/RPCModule';
 import Utils from '../../app/utils';
-import { AppDrawerParamList, ThemeType } from '../../app/types';
-import { ContextAppLoaded } from '../../app/context';
+import { LoadedAppStackParamList } from '../../app/types';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedWallet,
+  useAppLoadedUi,
+} from '../../app/context';
 import { createAlert } from '../../app/createAlert';
 import { RPCSendProposeType } from '../../app/rpc/types/RPCSendProposeType';
 import { RPCSpendablebalanceType } from '../../app/rpc/types/RPCSpendablebalanceType';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import Snackbars from '../Components/Snackbars';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Wallet from '../../assets/icons/wallet.svg';
 import { HeaderTitle } from '../Header';
 import { XIcon } from '../Components/Icons/XIcon';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
+import { useTheme } from '../../app/theme';
 
-type SendProps = DrawerScreenProps<AppDrawerParamList, RouteEnum.Send> & {
-  toggleMenuDrawer: () => void;
+type SendProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
+  RouteEnum.Send
+> & {
   setShieldingAmount: (value: number) => void;
   setScrollToTop: (value: boolean) => void;
   setScrollToBottom: (value: boolean) => void;
@@ -91,30 +93,32 @@ const Send: React.FunctionComponent<SendProps> = ({
   setScrollToBottom,
 }) => {
   const navigation: any = useNavigation();
-  const context = useContext(ContextAppLoaded);
   const {
     translate,
-    info,
-    totalBalance,
-    sendPageState,
-    zecPrice,
-    netInfo,
-    privacy,
-    indexerServer,
     setBackgroundError,
     addLastSnackbar,
-    somePending,
+    removeFirstSnackbar,
+  } = useAppLoadedActions();
+  const {
+    privacy,
+    indexerServer,
     donation,
+    selectIndexerServer,
+    zenniesDonationAddress,
+  } = useAppLoadedSettings();
+  const {
+    info,
+    totalBalance,
+    zecPrice,
+    netInfo,
+    somePending,
     addresses,
     defaultUnifiedAddress,
     shieldingAmount,
-    selectIndexerServer,
-    zenniesDonationAddress,
-    snackbars,
-    removeFirstSnackbar,
-  } = context;
+  } = useAppLoadedWallet();
+  const { sendPageState, snackbars } = useAppLoadedUi();
 
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.Send;
   const insets = useSafeAreaInsets();
@@ -802,7 +806,7 @@ const Send: React.FunctionComponent<SendProps> = ({
       />
 
       <KeyboardAvoidingView
-        style={{ flex: 1, backgroundColor: colors.background }}
+        style={{ flex: 1, backgroundColor: colors.bgCanvas }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={
           Platform.OS === 'ios' ? insets.top : kbOpen ? insets.top : 0
@@ -846,7 +850,7 @@ const Send: React.FunctionComponent<SendProps> = ({
                     <View testID="send.address.check">
                       <FontAwesomeIcon
                         icon={faCheck}
-                        color={colors.primary}
+                        color={colors.fgAccent}
                         style={{ marginHorizontal: 10 }}
                       />
                     </View>
@@ -869,7 +873,7 @@ const Send: React.FunctionComponent<SendProps> = ({
                     borderWidth: 1,
                     borderRadius: 25,
                     marginBottom: 10,
-                    backgroundColor: colors.secondary,
+                    backgroundColor: colors.bgSurface,
                     width: '100%',
                     maxWidth: maxW,
                     minWidth: '50%',
@@ -881,12 +885,12 @@ const Send: React.FunctionComponent<SendProps> = ({
                 >
                   <TextInput
                     placeholder="Enter address"
-                    placeholderTextColor={colors.placeholder}
+                    placeholderTextColor={colors.fgSubtle}
                     testID="import.seedufvkinput"
                     style={{
                       flexGrow: 1,
                       flexShrink: 1,
-                      color: colors.text,
+                      color: colors.fgDefault,
                       fontWeight: '600',
                       fontSize: 16,
                       minHeight: 48,
@@ -913,18 +917,14 @@ const Send: React.FunctionComponent<SendProps> = ({
                         style={{
                           justifyContent: 'center',
                           alignItems: 'center',
-                          backgroundColor: colors.zingo,
+                          backgroundColor: colors.bgMuted,
                           borderRadius: 11,
                           height: 22,
                           width: 22,
                           padding: 0,
                         }}
                       >
-                        <XIcon
-                          color={colors.background}
-                          width={20}
-                          height={20}
-                        />
+                        <XIcon color={colors.bgCanvas} width={20} height={20} />
                       </View>
                     </TouchableOpacity>
                   )}
@@ -938,7 +938,7 @@ const Send: React.FunctionComponent<SendProps> = ({
                       style={{ marginLeft: 10 }}
                       size={22}
                       icon={faQrcode}
-                      color={colors.placeholder}
+                      color={colors.fgSubtle}
                     />
                   </TouchableOpacity>
                 </View>
@@ -971,11 +971,11 @@ const Send: React.FunctionComponent<SendProps> = ({
                   style={{
                     flexDirection: 'column',
                     justifyContent: 'flex-start',
-                    borderColor: colors.border,
+                    borderColor: colors.borderFaint,
                     borderWidth: 1,
                     borderRadius: 25,
                     marginBottom: 10,
-                    backgroundColor: colors.secondary,
+                    backgroundColor: colors.bgSurface,
                     width: '100%',
                     maxWidth: maxW,
                     minWidth: '50%',
@@ -988,11 +988,11 @@ const Send: React.FunctionComponent<SendProps> = ({
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <TextInput
                       placeholder={'0'}
-                      placeholderTextColor={colors.placeholder}
+                      placeholderTextColor={colors.fgSubtle}
                       style={{
                         flexGrow: 1,
                         flexShrink: 1,
-                        color: colors.text,
+                        color: colors.fgDefault,
                         fontWeight: '600',
                         fontSize: 45,
                         minHeight: 48,
@@ -1040,10 +1040,10 @@ const Send: React.FunctionComponent<SendProps> = ({
                         <View
                           style={{
                             flexDirection: 'row',
-                            borderColor: colors.text,
+                            borderColor: colors.fgDefault,
                             borderWidth: 1,
                             borderRadius: 20,
-                            backgroundColor: colors.background,
+                            backgroundColor: colors.bgCanvas,
                             paddingHorizontal: 10,
                             paddingVertical: 10,
                             justifyContent: 'center',
@@ -1102,7 +1102,7 @@ const Send: React.FunctionComponent<SendProps> = ({
                                 negativeMaxAmount ||
                                 !!sendability.error
                                   ? 'red'
-                                  : colors.text
+                                  : colors.fgDefault
                               }
                               size={15}
                               amtZec={sendability.maxAmount}
@@ -1134,12 +1134,12 @@ const Send: React.FunctionComponent<SendProps> = ({
                               margin: 0,
                               paddingHorizontal: 8,
                               paddingVertical: 5,
-                              backgroundColor: colors.background,
+                              backgroundColor: colors.bgCanvas,
                             }}
                           >
                             <RegText
                               style={{ fontSize: 14 }}
-                              color={colors.text}
+                              color={colors.fgDefault}
                             >
                               {'Max.'}
                             </RegText>
@@ -1158,7 +1158,7 @@ const Send: React.FunctionComponent<SendProps> = ({
                             display: 'flex',
                             flexDirection: 'row',
                             marginTop: 0,
-                            backgroundColor: colors.secondary,
+                            backgroundColor: colors.bgSurface,
                             padding: 5,
                             borderRadius: 10,
                           }}
@@ -1166,7 +1166,7 @@ const Send: React.FunctionComponent<SendProps> = ({
                           <FontAwesomeIcon
                             icon={faInfoCircle}
                             size={20}
-                            color={colors.primary}
+                            color={colors.fgAccent}
                             style={{ marginRight: 5 }}
                           />
                           <FadeText>{'( '}</FadeText>
@@ -1191,7 +1191,7 @@ const Send: React.FunctionComponent<SendProps> = ({
                               style={{
                                 color: proposeSendLastError
                                   ? 'red'
-                                  : colors.money,
+                                  : colors.fgMuted,
                               }}
                             >
                               {(translate('send.fee') as string) +
@@ -1215,7 +1215,7 @@ const Send: React.FunctionComponent<SendProps> = ({
                             display: 'flex',
                             flexDirection: 'row',
                             marginTop: 0,
-                            backgroundColor: colors.secondary,
+                            backgroundColor: colors.bgSurface,
                             padding: 5,
                             borderRadius: 10,
                           }}
@@ -1223,7 +1223,7 @@ const Send: React.FunctionComponent<SendProps> = ({
                           <FontAwesomeIcon
                             icon={faInfoCircle}
                             size={20}
-                            color={colors.primary}
+                            color={colors.fgAccent}
                             style={{ marginRight: 5 }}
                           />
                           <FadeText style={{ fontSize: 12.5 }}>
@@ -1239,8 +1239,8 @@ const Send: React.FunctionComponent<SendProps> = ({
                   style={{
                     padding: 10,
                     paddingHorizontal: 12,
-                    borderColor: colors.text,
-                    backgroundColor: colors.background,
+                    borderColor: colors.fgDefault,
+                    backgroundColor: colors.bgCanvas,
                     borderWidth: 1,
                     borderRadius: 30,
                     marginTop: -25,
@@ -1250,7 +1250,7 @@ const Send: React.FunctionComponent<SendProps> = ({
                   <FontAwesomeIcon
                     icon={faArrowDown}
                     size={25}
-                    color={colors.text}
+                    color={colors.fgDefault}
                   />
                 </View>
 
@@ -1258,11 +1258,11 @@ const Send: React.FunctionComponent<SendProps> = ({
                   style={{
                     flexDirection: 'row',
                     justifyContent: 'center',
-                    borderColor: colors.border,
+                    borderColor: colors.borderFaint,
                     borderWidth: 1,
                     borderRadius: 25,
                     marginBottom: 10,
-                    backgroundColor: colors.background,
+                    backgroundColor: colors.bgCanvas,
                     width: '100%',
                     maxWidth: maxW,
                     minWidth: '50%',

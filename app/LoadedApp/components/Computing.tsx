@@ -1,27 +1,27 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext } from 'react';
+import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { useTheme } from '@react-navigation/native';
 
 import RegText from '../../../components/Components/RegText';
-import { AppDrawerParamList, ThemeType } from '../../types';
+import { LoadedAppStackParamList } from '../../types';
 import { RouteEnum, SendPageStateClass } from '../../AppState';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Utils from '../../utils';
 import ZecAmount from '../../../components/Components/ZecAmount';
-import { ContextAppLoaded } from '../../context';
+import { useAppLoadedSettings, useAppLoadedWallet } from '../../context';
 import { faPaperPlane } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { useTheme } from '../../theme';
 
-type ComputingProps = DrawerScreenProps<
-  AppDrawerParamList,
+type ComputingProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
   RouteEnum.Computing
 >;
 
 const Computing: React.FunctionComponent<ComputingProps> = ({ route }) => {
-  const context = useContext(ContextAppLoaded);
-  const { info, privacy } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { privacy } = useAppLoadedSettings();
+  const { info } = useAppLoadedWallet();
+  const { colors } = useTheme();
 
   const sendPageStatePar =
     !!route.params && route.params.sendPageStatePar !== undefined
@@ -32,7 +32,7 @@ const Computing: React.FunctionComponent<ComputingProps> = ({ route }) => {
     <View
       style={{
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: colors.bgCanvas,
       }}
     >
       <View
@@ -44,7 +44,7 @@ const Computing: React.FunctionComponent<ComputingProps> = ({ route }) => {
       >
         <View
           style={{
-            backgroundColor: colors.secondary,
+            backgroundColor: colors.bgSurface,
             padding: 50,
             width: '90%',
             borderRadius: 50,
@@ -73,14 +73,14 @@ const Computing: React.FunctionComponent<ComputingProps> = ({ route }) => {
           </RegText>
           <ActivityIndicator
             size="large"
-            color={colors.text}
+            color={colors.fgDefault}
             style={{ marginVertical: 20 }}
           />
         </View>
         <View
           style={{
             marginTop: 20,
-            backgroundColor: colors.secondary,
+            backgroundColor: colors.bgSurface,
             padding: 50,
             width: '90%',
             borderRadius: 20,
@@ -90,7 +90,7 @@ const Computing: React.FunctionComponent<ComputingProps> = ({ route }) => {
         >
           <ZecAmount
             currencyName={info.currencyName}
-            color={colors.text}
+            color={colors.fgDefault}
             size={20}
             amtZec={Utils.parseStringLocaleToNumberFloat(
               sendPageStatePar.toaddr.amount,

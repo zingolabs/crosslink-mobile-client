@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -16,21 +16,20 @@ import {
   TextInput,
   TouchableOpacity,
 } from 'react-native';
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCheckCircle, faCircle } from '@fortawesome/free-solid-svg-icons';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
-import { ThemeType } from '../../../app/types';
 import {
   RouteEnum,
   ScheduledActionType,
   StakingActionKindEnum,
   WalletBondsType,
 } from '../../../app/AppState';
-import { AppDrawerParamList } from '../../../app/types';
-import { DrawerScreenProps } from '@react-navigation/drawer';
-import { ContextAppLoaded } from '../../../app/context';
+import { LoadedAppStackParamList } from '../../../app/types';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useAppLoadedSettings, useAppLoadedWallet } from '../../../app/context';
 import { HeaderTitle } from '../../Header';
 import { ChevronDown } from '../../Components/Icons/Chevron';
 import FadeText from '../../Components/FadeText';
@@ -39,10 +38,14 @@ import RegText from '../../Components/RegText';
 import { WalletBondsStatusEnum } from '../../../app/AppState/enums/WalletBondsStatusEnum';
 import ZecAmount from '../../Components/ZecAmount';
 import StakingDayBubble from '../StakingDayBubble';
+import { useTheme } from '../../../app/theme';
 
 type ModalState = 'idle' | 'sending' | 'success';
 
-type UnstakeProps = DrawerScreenProps<AppDrawerParamList, RouteEnum.Unstake>;
+type UnstakeProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
+  RouteEnum.Unstake
+>;
 
 const Unstake: React.FC<UnstakeProps> = ({ route }) => {
   const finalizer =
@@ -57,7 +60,7 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
       : 0;
 
   const navigation: any = useNavigation();
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
   const [finalizerFromText, setFinalizerFromText] = useState<string>(finalizer);
@@ -70,16 +73,15 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
 
   const modalVisible = modalState !== 'idle';
 
-  const context = useContext(ContextAppLoaded);
+  const { privacy } = useAppLoadedSettings();
   const {
     walletBonds,
     valueTransfers,
     staked,
     info,
-    privacy,
     stakingDay,
     scheduledActions,
-  } = context;
+  } = useAppLoadedWallet();
 
   console.log('FINALIZER', finalizerFromText);
 
@@ -245,8 +247,8 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
         style={[
           styles.txRow,
           {
-            borderColor: isSelected ? colors.primary : colors.border,
-            backgroundColor: isSelected ? colors.secondary : colors.background,
+            borderColor: isSelected ? colors.borderAccent : colors.borderFaint,
+            backgroundColor: isSelected ? colors.bgSurface : colors.bgCanvas,
           },
         ]}
       >
@@ -257,7 +259,7 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
             )}
             <Text
               style={{
-                color: colors.text,
+                color: colors.fgDefault,
                 fontSize: 13,
                 fontWeight: '500',
               }}
@@ -270,7 +272,7 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
           </View>
           <Text
             style={{
-              color: colors.placeholder,
+              color: colors.fgSubtle,
               fontSize: 11,
               marginTop: 2,
             }}
@@ -285,7 +287,7 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
           }}
           size={14}
           currencyName={info.currencyName}
-          color={colors.text}
+          color={colors.fgDefault}
           amtZec={item.amount}
           privacy={privacy}
         />
@@ -298,7 +300,7 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
       <KeyboardAvoidingView
         style={{
           flex: 1,
-          backgroundColor: colors.background,
+          backgroundColor: colors.bgCanvas,
         }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={
@@ -319,7 +321,7 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
           style={{
             fontSize: 16,
             fontWeight: '600',
-            color: colors.text,
+            color: colors.fgDefault,
             marginBottom: 8,
             marginTop: 15,
             marginHorizontal: 20,
@@ -371,12 +373,12 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
                   style={{
                     flexGrow: 1,
                     flexShrink: 1,
-                    color: colors.text,
+                    color: colors.fgDefault,
                     fontSize: 17,
                     fontWeight: '400',
                   }}
                   placeholder="Tap here for finalizer address"
-                  placeholderTextColor={colors.placeholder}
+                  placeholderTextColor={colors.fgSubtle}
                   value={shortenTxid(finalizerFromText)}
                   editable={false}
                   onChangeText={setFinalizerFromText}
@@ -394,7 +396,7 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
                       style={{
                         justifyContent: 'center',
                         alignItems: 'center',
-                        backgroundColor: colors.zingo,
+                        backgroundColor: colors.bgMuted,
                         borderRadius: 11,
                         height: 22,
                         width: 22,
@@ -402,7 +404,7 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
                       }}
                     >
                       <RegText
-                        style={{ color: colors.background, marginTop: -3 }}
+                        style={{ color: colors.bgCanvas, marginTop: -3 }}
                       >
                         x
                       </RegText>
@@ -433,7 +435,7 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
               width={30}
               height={30}
               style={{ marginLeft: 5 }}
-              color={colors.text}
+              color={colors.fgDefault}
             />
           )}
         </View>
@@ -451,7 +453,7 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
             style={{
               fontSize: 16,
               fontWeight: '600',
-              color: colors.text,
+              color: colors.fgDefault,
               marginBottom: 8,
             }}
           >
@@ -461,7 +463,7 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
           <Text
             style={{
               fontSize: 12,
-              color: colors.placeholder,
+              color: colors.fgSubtle,
               marginBottom: 8,
             }}
           >
@@ -483,7 +485,7 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
               ListEmptyComponent={
                 <Text
                   style={{
-                    color: colors.placeholder,
+                    color: colors.fgSubtle,
                     fontSize: 13,
                     textAlign: 'center',
                     marginTop: 16,
@@ -533,18 +535,18 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
               style={[
                 styles.modalCard,
                 {
-                  backgroundColor: colors.background,
-                  borderColor: colors.border,
+                  backgroundColor: colors.bgCanvas,
+                  borderColor: colors.borderFaint,
                 },
               ]}
             >
               {modalState === 'sending' && (
                 <>
-                  <ActivityIndicator size="large" color={colors.text} />
+                  <ActivityIndicator size="large" color={colors.fgDefault} />
                   <Text
                     style={{
                       marginTop: 16,
-                      color: colors.text,
+                      color: colors.fgDefault,
                       fontSize: 16,
                       textAlign: 'center',
                     }}
@@ -559,12 +561,12 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
                   <FontAwesomeIcon
                     icon={faCheckCircle}
                     size={40}
-                    color={colors.primary}
+                    color={colors.fgAccent}
                   />
                   <Text
                     style={{
                       marginTop: 16,
-                      color: colors.text,
+                      color: colors.fgDefault,
                       fontSize: 18,
                       fontWeight: '600',
                       textAlign: 'center',

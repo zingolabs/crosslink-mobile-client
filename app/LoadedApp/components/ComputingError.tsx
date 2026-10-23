@@ -2,20 +2,21 @@
 //import React, { useContext, useState } from 'react';
 import React, { useState } from 'react';
 import { View } from 'react-native';
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
 import RegText from '../../../components/Components/RegText';
-import { AppDrawerParamList, ThemeType } from '../../types';
+import { LoadedAppStackParamList } from '../../types';
 import { RouteEnum } from '../../AppState';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 //import { ContextAppLoaded } from '../../context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import FadeText from '../../../components/Components/FadeText';
 import LiquidPrimaryButton from '../../../components/Components/LiquidButton/LiquidPrimaryButton';
+import { useTheme } from '../../theme';
 
-type ComputingErrorProps = DrawerScreenProps<
-  AppDrawerParamList,
+type ComputingErrorProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
   RouteEnum.ComputingError
 >;
 
@@ -25,7 +26,7 @@ const ComputingError: React.FunctionComponent<ComputingErrorProps> = ({
   const navigation: any = useNavigation();
   //const context = useContext(ContextAppLoaded);
   //const { valueTransfers } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
 
   const [showDetails, setShowDetails] = useState<boolean>(false);
 
@@ -38,7 +39,7 @@ const ComputingError: React.FunctionComponent<ComputingErrorProps> = ({
     <View
       style={{
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: colors.bgCanvas,
       }}
     >
       <View
@@ -50,7 +51,7 @@ const ComputingError: React.FunctionComponent<ComputingErrorProps> = ({
       >
         <View
           style={{
-            backgroundColor: colors.secondary,
+            backgroundColor: colors.bgSurface,
             paddingHorizontal: 20,
             paddingVertical: 40,
             width: '90%',
@@ -91,7 +92,7 @@ const ComputingError: React.FunctionComponent<ComputingErrorProps> = ({
             }}
           >
             <LiquidPrimaryButton
-              tintColor={colors.secondary}
+              tintColor={colors.bgSurface}
               title={'Details'}
               onPress={() => {
                 setShowDetails(true);

@@ -31,7 +31,9 @@ jobs:
         id: ios-check-build-cache
         uses: actions/cache/restore@v4
         with:
-          path: rust/lib/Generated
+          path: |
+            ios/Zingolib.xcframework
+            ios/zingo.swift
           key: native-ios-uniffi-universal-${{ env.CACHE-KEY }}
           lookup-only: true
 
@@ -77,52 +79,21 @@ jobs:
       - name: Install protoc
         run: brew install protobuf
 
-      - name: Install Cargo Lipo
-        run: sudo cargo install cargo-lipo
+      - name: Install rust Targets
+        run: sudo rustup target add aarch64-apple-ios-sim x86_64-apple-ios
 
-      - name: Install rust Target
-        run: sudo rustup target add aarch64-apple-ios-sim
-
-      - name: cargo build release
-        working-directory: rust/lib
-        run: sudo cargo build --release --target aarch64-apple-ios-sim
-
-      - name: Cargo uniffi swift
-        working-directory: rust/lib
-        run: |
-          sudo cargo run --features=uniffi/cli --release --bin uniffi-bindgen \
-          generate --library ../target/aarch64-apple-ios-sim/release/libzingo.dylib --language swift \
-          --out-dir ./Generated
-
-      # this issue is solved in bindgen 0.70
-      # But we have a dependency that are using a incompatible version 0.69.
-      - name: Cargo env for iOS sim (bindgen/cc)
-        shell: bash
-        run: |
-          mkdir -p .cargo
-          SDKROOT="$(xcrun --sdk iphonesimulator --show-sdk-path)"
-          cat > .cargo/config.toml <<EOF
-          [env]
-          BINDGEN_EXTRA_CLANG_ARGS_aarch64_apple_ios_sim = "--target=arm64-apple-ios-simulator -isysroot $SDKROOT"
-          CFLAGS_aarch64_apple_ios_sim = "--target=arm64-apple-ios-simulator -isysroot $SDKROOT"
-          CXXFLAGS_aarch64_apple_ios_sim = "--target=arm64-apple-ios-simulator -isysroot $SDKROOT"
-          EOF
-
-      - name: Cargo lipo universal library
-        working-directory: rust/lib
-        run: |
-          sudo cargo lipo --release --targets aarch64-apple-ios-sim
-
-      - name: Copy libraries to ios folder
-        working-directory: rust/lib
-        run: |
-          sudo cp ../target/universal/release/libzingo.a ./Generated/libzingo.a
+      # Builds ios/Zingolib.xcframework (simulator slice) + ios/zingo.swift.
+      # Same script developers run locally: yarn rust:ios:sim
+      - name: Build Zingolib xcframework (simulator)
+        run: sudo node rust/ios/build_ios.mjs sim
 
       - name: Upload native rust
         uses: actions/upload-artifact@v4
         with:
           name: native-ios-uniffi-universal-${{ env.CACHE-KEY }}
-          path: rust/lib/Generated
+          path: |
+            ios/Zingolib.xcframework
+            ios/zingo.swift
 
   cache-native-ios-uniffi:
     name: Cache native rust
@@ -142,10 +113,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: native-ios-uniffi-universal-${{ env.CACHE-KEY }}
-          path: rust/lib/Generated
+          path: |
+            ios/Zingolib.xcframework
+            ios/zingo.swift
 
       - name: Cache native rust
         uses: actions/cache/save@v4
         with:
-          path: rust/lib/Generated
+          path: |
+            ios/Zingolib.xcframework
+            ios/zingo.swift
           key: native-ios-uniffi-universal-${{ env.CACHE-KEY }}

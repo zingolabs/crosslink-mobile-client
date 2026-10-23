@@ -1,8 +1,6 @@
-import { useTheme } from '@react-navigation/native';
 import React from 'react';
 import {
   Pressable,
-  Text,
   StyleSheet,
   Platform,
   TextStyle,
@@ -10,7 +8,8 @@ import {
   ViewStyle,
   View,
 } from 'react-native';
-import { ThemeType } from '../../../app/types';
+import { radiusPill, useTheme } from '../../../app/theme';
+import BlurInText from '../BlurInText';
 
 type NativePrimaryFallbackProps = {
   title: string;
@@ -31,9 +30,9 @@ const NativePrimaryFallback: React.FC<NativePrimaryFallbackProps> = ({
   tintColor,
   testID,
 }) => {
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
 
-  const primary = disabled ? colors.secondary : (tintColor ?? colors.primary);
+  const primary = disabled ? colors.bgSurface : (tintColor ?? colors.bgAccent);
 
   return (
     <View style={[styles.container, style]}>
@@ -50,7 +49,12 @@ const NativePrimaryFallback: React.FC<NativePrimaryFallbackProps> = ({
           disabled && styles.primaryDisabled,
         ]}
       >
-        <Text style={[styles.primaryText, textStyle]}>{title}</Text>
+        <BlurInText
+          style={[styles.primaryText, { color: colors.bgCanvas }, textStyle]}
+          numberOfLines={1}
+        >
+          {title}
+        </BlurInText>
       </Pressable>
     </View>
   );
@@ -59,7 +63,7 @@ const NativePrimaryFallback: React.FC<NativePrimaryFallbackProps> = ({
 const styles = StyleSheet.create({
   container: {},
   primary: {
-    borderRadius: 18,
+    borderRadius: radiusPill,
     paddingHorizontal: 20,
     paddingVertical: 14,
     minWidth: 160,
@@ -83,7 +87,6 @@ const styles = StyleSheet.create({
   primaryText: {
     fontSize: 17,
     fontWeight: '600',
-    color: 'white',
   },
 });
 

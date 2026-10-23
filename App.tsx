@@ -1,62 +1,28 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { BackHandler, LogBox, StatusBar } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
   createNavigationContainerRef,
-  DefaultTheme,
   LinkingOptions,
   NavigationContainer,
   ParamListBase,
 } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { LoadedApp } from './app/LoadedApp';
 import { LoadingApp } from './app/LoadingApp';
-import { ThemeType, AppStackParamList } from './app/types';
+import { AppStackParamList } from './app/types';
+import { ThemeProvider, navigationTheme, useTheme } from './app/theme';
 import { RouteEnum } from './app/AppState';
+import ReactScanGate from './app/devtools/ReactScan';
 
 LogBox.ignoreLogs([
   '[Reanimated] Reduced motion setting is enabled on this device.',
 ]);
 
-const zingoTheme: ThemeType = {
-  ...DefaultTheme,
-  dark: true,
-  colors: {
-    background: '#0f0f0f',
-    card: '#0f0f0f',
-    border: '#3C3C3D',
-    primary: '#1c78d2',
-    primaryDisabled: '#b4b4b4',
-    secondary: '#222223',
-    secondaryDisabled: '#b4b4b4',
-    text: '#ffffff',
-    zingo: '#b4b4b4',
-    placeholder: '#8D8D8D',
-    money: '#b4b4b4',
-    syncing: '#ebff5a',
-    notification: '',
-    sideMenuBackground: '#0f0f0f',
-    warning: {
-      background: '#262527',
-      border: '#65491C',
-      primary: '#F99D00',
-      primaryDark: '#DD7500',
-      title: '#E1AA1B',
-      text: '#FEE587',
-    },
-    danger: {
-      primary: '#FE383C',
-      background: '#240E0C',
-      border: '#572317',
-      text: '#FFB972',
-    },
-    modal: '#1e293b',
-  },
-};
-
-const Stack = createStackNavigator<AppStackParamList>();
+const Stack = createNativeStackNavigator<AppStackParamList>();
 
 const navigationRef = createNavigationContainerRef<AppStackParamList>();
 
@@ -78,7 +44,10 @@ const linking: LinkingOptions<AppStackParamList> = {
   },
 };
 
-const App: React.FunctionComponent = () => {
+const AppContent: React.FunctionComponent = () => {
+  const { colors } = useTheme();
+  const theme = useMemo(() => navigationTheme(colors), [colors]);
+
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
       if (navigationRef.isReady() && navigationRef.canGoBack()) {
@@ -93,33 +62,36 @@ const App: React.FunctionComponent = () => {
 
   return (
     <SafeAreaProvider>
-      <StatusBar backgroundColor={zingoTheme.colors.background} />
-      <NavigationContainer
-        ref={navigationRef}
-        theme={zingoTheme}
-        linking={linking}
-      >
-        <SafeAreaView
-          style={{
-            flex: 1,
-            backgroundColor: zingoTheme.colors.background,
-          }}
+      <StatusBar backgroundColor={colors.bgCanvas} />
+      <NavigationContainer ref={navigationRef} theme={theme} linking={linking}>
+        <Stack.Navigator
+          initialRouteName={RouteEnum.LoadingApp}
+          screenOptions={{ headerShown: false, animation: 'fade' }}
         >
-          <Stack.Navigator
-            initialRouteName={RouteEnum.LoadingApp}
-            screenOptions={{ headerShown: false, animation: 'none' }}
-          >
-            <Stack.Screen name={RouteEnum.LoadingApp}>
-              {props => <LoadingApp {...props} />}
-            </Stack.Screen>
-            <Stack.Screen name={RouteEnum.LoadedApp}>
-              {props => <LoadedApp {...props} />}
-            </Stack.Screen>
-          </Stack.Navigator>
-        </SafeAreaView>
+          <Stack.Screen name={RouteEnum.LoadingApp}>
+            {props => <LoadingApp {...props} />}
+          </Stack.Screen>
+          <Stack.Screen name={RouteEnum.LoadedApp}>
+            {props => (
+              <SafeAreaView style={{ flex: 1 }}>
+                <LoadedApp {...props} />
+              </SafeAreaView>
+            )}
+          </Stack.Screen>
+        </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
   );
 };
+
+const App: React.FunctionComponent = () => (
+  <ReactScanGate>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
+    </GestureHandlerRootView>
+  </ReactScanGate>
+);
 
 export default App;

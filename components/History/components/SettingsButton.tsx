@@ -1,12 +1,12 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import SettingsIcon from '../../../assets/icons/settings.svg';
 import ChartPieIcon from '../../../assets/icons/chart-pie.svg';
 
-import { ThemeType } from '../../../app/types';
 import { RouteEnum, ScreenEnum } from '../../../app/AppState';
+import { useTheme } from '../../../app/theme';
 
 type SettingsButtonProps = {
   screenName: ScreenEnum;
@@ -14,7 +14,7 @@ type SettingsButtonProps = {
 
 const SettingsButton: React.FC<SettingsButtonProps> = ({ screenName }) => {
   const navigation: any = useNavigation();
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
 
   return (
     <View
@@ -34,7 +34,7 @@ const SettingsButton: React.FC<SettingsButtonProps> = ({ screenName }) => {
             navigation.navigate(RouteEnum.Distribution);
           }}
         >
-          <ChartPieIcon height={30} width={30} color={colors.text} />
+          <ChartPieIcon height={30} width={30} color={colors.fgDefault} />
         </TouchableOpacity>
       )}
       <TouchableOpacity
@@ -43,7 +43,7 @@ const SettingsButton: React.FC<SettingsButtonProps> = ({ screenName }) => {
           navigation.navigate(RouteEnum.SettingsStack);
         }}
       >
-        <SettingsIcon height={30} width={30} color={colors.text} />
+        <SettingsIcon height={30} width={30} color={colors.fgDefault} />
       </TouchableOpacity>
     </View>
   );

@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -12,9 +12,9 @@ import {
   StyleSheet,
 } from 'react-native';
 
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
-import { AppDrawerParamList, ThemeType } from '../../../app/types';
+import { LoadedAppStackParamList } from '../../../app/types';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../../Header';
 import { FinalizerCard } from './FinalizerCard';
@@ -23,15 +23,16 @@ import { RouteEnum, WalletBondsType } from '../../../app/AppState';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import { WalletBondsStatusEnum } from '../../../app/AppState/enums/WalletBondsStatusEnum';
-import { ContextAppLoaded } from '../../../app/context';
+import { useAppLoadedWallet } from '../../../app/context';
 import { FinalizerPosition } from './FinalizerPosition';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import StakingDayBubble from '../StakingDayBubble';
+import { useTheme } from '../../../app/theme';
 
 type ModalState = 'idle' | 'sending' | 'success';
 
-type FinalizerDetailProps = DrawerScreenProps<
-  AppDrawerParamList,
+type FinalizerDetailProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
   RouteEnum.FinalizerDetail
 >;
 
@@ -47,7 +48,7 @@ export function FinalizerDetail({ route }: FinalizerDetailProps) {
       : null;
 
   const navigation: any = useNavigation();
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
   const [finalizerFromText] = useState<string | null>(finalizer);
@@ -58,8 +59,7 @@ export function FinalizerDetail({ route }: FinalizerDetailProps) {
 
   const modalVisible = modalState !== 'idle';
 
-  const context = useContext(ContextAppLoaded);
-  const { walletBonds, staked, globalStaked } = context;
+  const { walletBonds, staked, globalStaked } = useAppLoadedWallet();
 
   console.log('FINALIZER', finalizer);
 
@@ -147,7 +147,7 @@ export function FinalizerDetail({ route }: FinalizerDetailProps) {
     <KeyboardAvoidingView
       style={{
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: colors.bgCanvas,
         gap: 20,
       }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -187,7 +187,7 @@ export function FinalizerDetail({ route }: FinalizerDetailProps) {
           style={{
             fontSize: 16,
             fontWeight: '600',
-            color: colors.text,
+            color: colors.fgDefault,
             marginBottom: 8,
           }}
         >
@@ -208,7 +208,7 @@ export function FinalizerDetail({ route }: FinalizerDetailProps) {
             ListEmptyComponent={
               <Text
                 style={{
-                  color: colors.placeholder,
+                  color: colors.fgSubtle,
                   fontSize: 13,
                   textAlign: 'center',
                   marginTop: 16,
@@ -238,18 +238,18 @@ export function FinalizerDetail({ route }: FinalizerDetailProps) {
             style={[
               styles.modalCard,
               {
-                backgroundColor: colors.background,
-                borderColor: colors.border,
+                backgroundColor: colors.bgCanvas,
+                borderColor: colors.borderFaint,
               },
             ]}
           >
             {modalState === 'sending' && (
               <>
-                <ActivityIndicator size="large" color={colors.text} />
+                <ActivityIndicator size="large" color={colors.fgDefault} />
                 <Text
                   style={{
                     marginTop: 16,
-                    color: colors.text,
+                    color: colors.fgDefault,
                     fontSize: 16,
                     textAlign: 'center',
                   }}
@@ -264,12 +264,12 @@ export function FinalizerDetail({ route }: FinalizerDetailProps) {
                 <FontAwesomeIcon
                   icon={faCheckCircle}
                   size={40}
-                  color={colors.primary}
+                  color={colors.fgAccent}
                 />
                 <Text
                   style={{
                     marginTop: 16,
-                    color: colors.text,
+                    color: colors.fgDefault,
                     fontSize: 18,
                     fontWeight: '600',
                     textAlign: 'center',

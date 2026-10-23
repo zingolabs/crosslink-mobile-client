@@ -1,6 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {
-  useContext,
   useState,
   useEffect,
   useCallback,
@@ -16,7 +15,7 @@ import {
   Pressable,
 } from 'react-native';
 
-import { useTheme, useScrollToTop } from '@react-navigation/native';
+import { useScrollToTop } from '@react-navigation/native';
 import {
   AddressKindEnum,
   RouteEnum,
@@ -24,21 +23,26 @@ import {
   TransparentAddressClass,
   UnifiedAddressClass,
 } from '../../app/AppState';
-import { AppDrawerParamList, ThemeType } from '../../app/types';
+import { LoadedAppStackParamList } from '../../app/types';
 import FadeText from '../Components/FadeText';
 import AlSummaryLine from './components/AlSummaryLine';
-import { ContextAppLoaded } from '../../app/context';
+import {
+  useAppLoadedActions,
+  useAppLoadedWallet,
+  useAppLoadedUi,
+} from '../../app/context';
 import { Header } from '../Header';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faAngleUp } from '@fortawesome/free-solid-svg-icons';
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { RPCAddressScopeEnum } from '../../app/rpc/enums/RPCAddressScopeEnum';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
+import { useTheme } from '../../app/theme';
 
-type AddressListProps = DrawerScreenProps<
-  AppDrawerParamList,
+type AddressListProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
   RouteEnum.AddressList
 >;
 
@@ -50,9 +54,10 @@ const AddressList: React.FunctionComponent<AddressListProps> = ({
     !!route.params && route.params.setIndex !== undefined
       ? route.params.setIndex
       : () => {};
-  const context = useContext(ContextAppLoaded);
-  const { translate, addresses, snackbars, removeFirstSnackbar } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { translate, removeFirstSnackbar } = useAppLoadedActions();
+  const { addresses } = useAppLoadedWallet();
+  const { snackbars } = useAppLoadedUi();
+  const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.AddressList;
 
@@ -175,7 +180,7 @@ const AddressList: React.FunctionComponent<AddressListProps> = ({
       <View
         style={{
           flex: 1,
-          backgroundColor: colors.background,
+          backgroundColor: colors.bgCanvas,
         }}
       >
         <Header
@@ -220,7 +225,7 @@ const AddressList: React.FunctionComponent<AddressListProps> = ({
                 marginTop: 30,
               }}
             >
-              <FadeText style={{ color: colors.primary }}>
+              <FadeText style={{ color: colors.fgAccent }}>
                 {translate('history.empty') as string}
               </FadeText>
             </View>
@@ -229,7 +234,7 @@ const AddressList: React.FunctionComponent<AddressListProps> = ({
             <ActivityIndicator
               style={{ marginTop: 7, marginRight: 7 }}
               size={25}
-              color={colors.primaryDisabled}
+              color={colors.fgAccentDisabled}
             />
           ) : (
             <>
@@ -266,7 +271,7 @@ const AddressList: React.FunctionComponent<AddressListProps> = ({
               }}
             >
               <LiquidPrimaryButton
-                tintColor={colors.secondary}
+                tintColor={colors.bgSurface}
                 title={translate('history.loadmore') as string}
                 onPress={loadMoreClicked}
               />
@@ -284,7 +289,7 @@ const AddressList: React.FunctionComponent<AddressListProps> = ({
                     marginBottom: 30,
                   }}
                 >
-                  <FadeText style={{ color: colors.primary }}>
+                  <FadeText style={{ color: colors.fgAccent }}>
                     {translate('history.end') as string}
                   </FadeText>
                 </View>
@@ -302,11 +307,11 @@ const AddressList: React.FunctionComponent<AddressListProps> = ({
               right: 10,
               paddingHorizontal: 5,
               paddingVertical: 10,
-              backgroundColor: colors.sideMenuBackground,
+              backgroundColor: colors.bgChrome,
               borderRadius: 50,
               transform: [{ scale: pressed ? 0.9 : 1 }],
               borderWidth: 1,
-              borderColor: colors.zingo,
+              borderColor: colors.borderMuted,
               opacity: isScrollingToTop ? 0.5 : 1,
             })}
           >
@@ -314,7 +319,7 @@ const AddressList: React.FunctionComponent<AddressListProps> = ({
               style={{ marginLeft: 5, marginRight: 5, marginTop: 0 }}
               size={20}
               icon={faAngleUp}
-              color={colors.zingo}
+              color={colors.fgMuted}
             />
           </Pressable>
         )}

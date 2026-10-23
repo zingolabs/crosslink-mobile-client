@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Text,
   StyleSheet,
   ViewStyle,
   TextStyle,
@@ -8,13 +7,13 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import { useTheme } from '@react-navigation/native';
 import {
   LiquidGlassView,
   isLiquidGlassSupported,
 } from '@callstack/liquid-glass';
-import { ThemeType } from '../../../app/types';
 import NativePrimaryFallback from './NativePrimaryFallback';
+import BlurInText from '../BlurInText';
+import { radiusPill, useTheme } from '../../../app/theme';
 
 type Props = {
   title: string;
@@ -33,10 +32,10 @@ const LiquidPrimaryButton: React.FC<Props> = ({
   textStyle,
   tintColor,
 }) => {
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const [, setPressed] = useState(false);
 
-  const primary = disabled ? colors.secondary : (tintColor ?? colors.primary);
+  const primary = disabled ? colors.bgSurface : (tintColor ?? colors.bgAccent);
 
   if (!isLiquidGlassSupported) {
     return (
@@ -69,7 +68,9 @@ const LiquidPrimaryButton: React.FC<Props> = ({
         tintColor={primary}
         style={[styles.glass, style, disabled && styles.disabled]}
       >
-        <Text style={[styles.text, textStyle]}>{title}</Text>
+        <BlurInText style={[styles.text, textStyle]} numberOfLines={1}>
+          {title}
+        </BlurInText>
       </LiquidGlassView>
     </TouchableWithoutFeedback>
   );
@@ -77,7 +78,7 @@ const LiquidPrimaryButton: React.FC<Props> = ({
 
 const styles = StyleSheet.create({
   glass: {
-    borderRadius: 30,
+    borderRadius: radiusPill,
     paddingHorizontal: 20,
     paddingVertical: 14,
     minWidth: 160,

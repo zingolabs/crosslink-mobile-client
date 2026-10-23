@@ -2,19 +2,16 @@ import React, { Component, useState, useMemo, useEffect } from 'react';
 import {
   Alert,
   I18nManager,
-  EmitterSubscription,
   AppState,
-  NativeEventSubscription,
+  AppStateStatus,
   Linking,
   Platform,
 } from 'react-native';
-import { useTheme } from '@react-navigation/native';
 import { I18n } from 'i18n-js';
 import { isEqual } from 'lodash';
-import { StackScreenProps } from '@react-navigation/stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LoadingAppNavigationState } from '../types';
 import NetInfo, {
-  NetInfoSubscription,
   NetInfoState,
 } from '@react-native-community/netinfo/src/index';
 import {
@@ -35,13 +32,10 @@ import {
   TranslateType,
   ServerType,
   SecurityType,
-  MenuItemEnum,
   LanguageEnum,
   CurrencyEnum,
   SelectServerEnum,
   ChainNameEnum,
-  SeedActionEnum,
-  UfvkActionEnum,
   SettingsNameEnum,
   RouteEnum,
   SnackbarType,
@@ -67,14 +61,12 @@ import {
   StakingActionKindEnum,
 } from '../AppState';
 import Utils from '../utils';
-import { ThemeType } from '../types';
 import SettingsFileImpl from '../../components/Settings/SettingsFileImpl';
 import { ContextAppLoadedProvider } from '../context';
 import { parseZcashURI } from '../uris';
 import BackgroundFileImpl from '../../components/Background';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAlert } from '../createAlert';
-import { sendEmail } from '../sendEmail';
 import Snackbars from '../../components/Components/Snackbars';
 import { RPCSeedType } from '../rpc/types/RPCSeedType';
 import { Launching } from '../LoadingApp';
@@ -91,8 +83,8 @@ import { ToastProvider } from 'react-native-toastier';
 import { RPCSyncStatusType } from '../rpc/types/RPCSyncStatusType';
 import { RPCUfvkType } from '../rpc/types/RPCUfvkType';
 import { RPCPerformanceLevelEnum } from '../rpc/enums/RPCPerformanceLevelEnum';
-import { AppStackParamList } from '../types';
-import { DrawerContentComponentProps } from '@react-navigation/drawer';
+import { AppStackParamList, LoadedAppStackParamList } from '../types';
+import { LoadingAppEntryEnum } from '../AppState/enums/LoadingAppEntryEnum';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Send from '../../components/Send';
 import Receive from '../../components/Receive';
@@ -106,6 +98,7 @@ import ComputingError from './components/ComputingError';
 import { AddStakeScreen, Unstake } from '../../components/Staking';
 import { StakeJsonToTypeType } from '../AppState/types/ValueTransferType';
 import Distribution from '../../components/Distribution';
+import SyncReport from '../../components/SyncReport';
 import Redelegate from '../../components/Staking/components/Redelegate';
 import Finalizers from '../../components/Finalizers/Finalizers';
 import { reverseHex32Bytes } from '../utils/hex';
@@ -114,32 +107,9 @@ import ScheduledActionsFileImpl from '../../components/ScheduledActions/Schedule
 import ScheduledActionDetail from '../../components/ScheduledActions/ScheduledActionDetail';
 import { FinalizerDetail } from '../../components/Staking/Finalizers/FinalizerDetail';
 import { scheduleReminder } from '../../components/Staking/components/scheduleReminder';
+import { useTheme, AppTheme } from '../theme';
 
 const LoadedAppStack = createNativeStackNavigator<LoadedAppStackParamList>();
-
-type LoadedAppStackParamList = {
-  [RouteEnum.MainTabs]: undefined;
-  [RouteEnum.SettingsStack]: undefined;
-  // [RouteEnum.SettingsMenu]: undefined;
-  // [RouteEnum.SettingsServers]: undefined;
-  // [RouteEnum.DebugInfo]: undefined;
-  [RouteEnum.Send]: undefined;
-  [RouteEnum.Receive]: undefined;
-  [RouteEnum.Faucet]: undefined;
-  [RouteEnum.Computing]: undefined;
-  [RouteEnum.ComputingOK]: undefined;
-  [RouteEnum.ComputingError]: undefined;
-  [RouteEnum.ValueTransferDetail]: undefined;
-  [RouteEnum.ScannerAddress]: undefined;
-  // [RouteEnum.Seed]: undefined;
-  [RouteEnum.Stake]: undefined;
-  [RouteEnum.Unstake]: undefined;
-  [RouteEnum.Distribution]: undefined;
-  [RouteEnum.Redelegate]: undefined;
-  [RouteEnum.Finalizers]: undefined;
-  [RouteEnum.ScheduledActionDetail]: undefined;
-  [RouteEnum.FinalizerDetail]: undefined;
-};
 
 const en = require('../translations/en.json');
 const es = require('../translations/es.json');
@@ -151,11 +121,14 @@ const tr = require('../translations/tr.json');
 //const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 type LoadedAppProps = {
-  navigation: StackScreenProps<
+  navigation: NativeStackScreenProps<
     AppStackParamList,
     RouteEnum.LoadedApp
   >['navigation'];
-  route: StackScreenProps<AppStackParamList, RouteEnum.LoadedApp>['route'];
+  route: NativeStackScreenProps<
+    AppStackParamList,
+    RouteEnum.LoadedApp
+  >['route'];
 };
 
 const SERVER_DEFAULT_0: ServerType = {
@@ -164,7 +137,7 @@ const SERVER_DEFAULT_0: ServerType = {
 } as ServerType;
 
 export default function LoadedApp(props: LoadedAppProps) {
-  const theme = useTheme() as ThemeType;
+  const theme = useTheme();
   const [loading, setLoading] = useState<boolean>(true);
 
   const [language, setLanguage] = useState<LanguageEnum>(LanguageEnum.en);
@@ -434,13 +407,16 @@ export default function LoadedApp(props: LoadedAppProps) {
 }
 
 type LoadedAppClassProps = {
-  navigationApp: StackScreenProps<
+  navigationApp: NativeStackScreenProps<
     AppStackParamList,
     RouteEnum.LoadedApp
   >['navigation'];
-  route: StackScreenProps<AppStackParamList, RouteEnum.LoadedApp>['route'];
+  route: NativeStackScreenProps<
+    AppStackParamList,
+    RouteEnum.LoadedApp
+  >['route'];
   translate: (key: string) => TranslateType;
-  theme: ThemeType;
+  theme: AppTheme;
   language: LanguageEnum;
   currency: CurrencyEnum;
   indexerServer: ServerType;
@@ -463,15 +439,14 @@ type LoadedAppClassProps = {
 
 type LoadedAppClassState = AppStateLoaded & AppContextLoaded;
 
+let initialUrlConsumed = false;
+
 export class LoadedAppClass extends Component<
   LoadedAppClassProps,
   LoadedAppClassState
 > {
   rpc: RPC;
-  appstate: NativeEventSubscription;
-  linking: EmitterSubscription;
-  unsubscribeNetInfo: NetInfoSubscription;
-  unsubscribeNotifee: any;
+  subscriptions: (() => void)[] = [];
   screenName = ScreenEnum.LoadedApp;
 
   private lastBlockTimestamp: number | null = null;
@@ -554,16 +529,12 @@ export class LoadedAppClass extends Component<
       performanceLevel: props.performanceLevel,
 
       // state
-      navigationHome: null,
       appStateStatus:
         Platform.OS === GlobalConst.platformOSios
           ? AppStateStatusEnum.active
           : AppState.currentState,
-      newIndexerServer: {} as ServerType,
-      newSelectIndexerServer: null,
       scrollToTop: false,
       scrollToBottom: false,
-      isSeedViewModalOpen: false,
     };
 
     this.rpc = new RPC(
@@ -581,16 +552,11 @@ export class LoadedAppClass extends Component<
       this.setZingolibVersion,
       this.setWallet,
       this.setLastError,
-      this.onClickOKChangeWallet,
+      this.recoverWalletFromSeed,
       props.readOnly,
       props.indexerServer,
       props.performanceLevel,
     );
-
-    this.appstate = {} as NativeEventSubscription;
-    this.linking = {} as EmitterSubscription;
-    this.unsubscribeNetInfo = {} as NetInfoSubscription;
-    this.unsubscribeNotifee = null;
   }
 
   private formatSeconds = (totalSeconds: number): string => {
@@ -663,20 +629,31 @@ export class LoadedAppClass extends Component<
     });
   };
 
-  openScheduledTab = () => {
-    console.log('NOTIFEE stakinghome -> tab');
+  navigateTo = <RouteName extends keyof LoadedAppStackParamList>(
+    screen: RouteName,
+    params?: LoadedAppStackParamList[RouteName],
+  ) => {
     this.props.navigationApp.navigate(RouteEnum.LoadedApp, {
-      screen: RouteEnum.MainTabs,
-      params: {
-        screen: RouteEnum.StakingHome,
-        params: {
-          tab: 'scheduled',
-        },
-      },
+      screen,
+      params,
+    } as never);
+  };
+
+  openScheduledTab = () => {
+    this.navigateTo(RouteEnum.MainTabs, {
+      screen: RouteEnum.StakingHome,
+      params: { tab: 'scheduled' },
     });
   };
 
   componentDidMount = async () => {
+    await this.startSession();
+    this.subscribe();
+    await this.handleInitialUrl();
+    await this.handleInitialNotification();
+  };
+
+  startSession = async () => {
     await this.stakingDayCalculation();
 
     this.setScheduledActions(await ScheduledActionsFileImpl.listActions());
@@ -710,198 +687,209 @@ export class LoadedAppClass extends Component<
     await this.rpc.configure();
 
     this.clearToAddr();
+  };
 
-    this.appstate = AppState.addEventListener(
+  subscribe = () => {
+    const appState = AppState.addEventListener(
       EventListenerEnum.change,
-      async nextAppState => {
-        //console.log('LOADED', 'prior', this.state.appStateStatus, 'next', nextAppState);
-        // let's catch the prior value
-        const priorAppState = this.state.appStateStatus;
-        if (Platform.OS === GlobalConst.platformOSios) {
-          if (
-            (priorAppState === AppStateStatusEnum.inactive &&
-              nextAppState === AppStateStatusEnum.active) ||
-            (priorAppState === AppStateStatusEnum.active &&
-              nextAppState === AppStateStatusEnum.inactive)
-          ) {
-            //console.log('LOADED SAVED IOS do nothing', nextAppState);
-            this.setState({ appStateStatus: nextAppState });
-            return;
-          }
-          if (
-            priorAppState === AppStateStatusEnum.inactive &&
-            nextAppState === AppStateStatusEnum.background
-          ) {
-            console.log('App LOADED IOS is gone to the background!');
-            this.setState({ appStateStatus: nextAppState });
-            // setting value for background task Android
-            await AsyncStorage.setItem(GlobalConst.background, GlobalConst.yes);
-            //console.log('&&&&& background yes in storage &&&&&');
-            await this.rpc.clearTimers();
-            //console.log('clear timers IOS');
-            this.setSyncingStatus({} as RPCSyncStatusType);
-            //console.log('clear sync status state');
-            //console.log('LOADED SAVED IOS background', nextAppState);
-            // We need to save the wallet file here because
-            // sometimes the App can lose the last synced chunk
-            await RPCModule.doSave();
-            return;
-          }
-        }
-        if (Platform.OS === GlobalConst.platformOSandroid) {
-          if (priorAppState !== nextAppState) {
-            //console.log('LOADED SAVED Android', nextAppState);
-            this.setState({ appStateStatus: nextAppState });
-          }
-        }
-        if (
-          (priorAppState === AppStateStatusEnum.inactive ||
-            priorAppState === AppStateStatusEnum.background) &&
-          nextAppState === AppStateStatusEnum.active
-        ) {
-          //console.log('App LOADED Android & IOS has come to the foreground!');
-          if (Platform.OS === GlobalConst.platformOSios) {
-            //console.log('LOADED SAVED IOS foreground', nextAppState);
-            this.setState({ appStateStatus: nextAppState });
-          }
-          // (PIN or TouchID or FaceID)
-          const resultBio = this.state.security.foregroundApp
-            ? await simpleBiometrics({ translate: this.state.translate })
-            : true;
-          // can be:
-          // - true      -> the user do pass the authentication
-          // - false     -> the user do NOT pass the authentication
-          // - undefined -> no biometric authentication available -> Passcode -> Nothing.
-          //console.log('BIOMETRIC FOREGROUND --------> ', resultBio);
-          if (resultBio === false) {
-            this.navigateToLoadingApp({
-              startingApp: true,
-              biometricsFailed: true,
-            });
-          } else {
-            // reading background task info
-            await this.fetchBackgroundSyncing();
-            // setting value for background task Android
-            await AsyncStorage.setItem(GlobalConst.background, GlobalConst.no);
-            //console.log('&&&&& background no in storage &&&&&');
-            // needs this because when the App go from back to fore
-            // it have to re-launch all the tasks.
-            await this.rpc.clearTimers();
-            await this.rpc.configure();
-            //console.log('configure start timers Android & IOS');
-            if (
-              this.state.backgroundError &&
-              (this.state.backgroundError.title ||
-                this.state.backgroundError.error)
-            ) {
-              Alert.alert(
-                this.state.backgroundError.title,
-                this.state.backgroundError.error,
-              );
-              this.setBackgroundError('', '');
-            }
-          }
-        } else if (
-          priorAppState === AppStateStatusEnum.active &&
-          (nextAppState === AppStateStatusEnum.inactive ||
-            nextAppState === AppStateStatusEnum.background)
-        ) {
-          console.log('App LOADED is gone to the background!');
-          // setting value for background task Android
-          await AsyncStorage.setItem(GlobalConst.background, GlobalConst.yes);
-          //console.log('&&&&& background yes in storage &&&&&');
-          await this.rpc.clearTimers();
-          //console.log('clear timers');
-          this.setSyncingStatus({} as RPCSyncStatusType);
-          //console.log('clear sync status state');
-          // We need to save the wallet file here because
-          // sometimes the App can lose the last synced chunk
-          await RPCModule.doSave();
-          if (Platform.OS === GlobalConst.platformOSios) {
-            //console.log('LOADED SAVED IOS background', nextAppState);
-            this.setState({ appStateStatus: nextAppState });
-          }
-        } else {
-          if (Platform.OS === GlobalConst.platformOSios) {
-            if (priorAppState !== nextAppState) {
-              //console.log('LOADED SAVED IOS', nextAppState);
-              this.setState({ appStateStatus: nextAppState });
-            }
-          }
-        }
-      },
+      this.handleAppStateChange,
     );
-
-    const initialUrl = await Linking.getInitialURL();
-    console.log('INITIAL URI', initialUrl);
-    if (initialUrl !== null) {
-      this.readUrl(initialUrl);
-
-      this.state.navigationHome?.navigate(RouteEnum.Send);
-    }
-
-    this.linking = Linking.addEventListener(
-      EventListenerEnum.url,
-      async ({ url }) => {
-        console.log('EVENT LISTENER URI', url);
-        if (url !== null) {
-          this.readUrl(url);
-        }
-
-        this.state.navigationHome?.navigate(RouteEnum.Send);
-      },
+    const linking = Linking.addEventListener(EventListenerEnum.url, ({ url }) =>
+      this.handleUrl(url),
     );
-
-    this.unsubscribeNetInfo = NetInfo.addEventListener(
-      async (state: NetInfoState) => {
-        const { isConnected, type, isConnectionExpensive } = this.state.netInfo;
-        if (
-          isConnected !== state.isConnected ||
-          type !== state.type ||
-          isConnectionExpensive !== state.details?.isConnectionExpensive
-        ) {
-          //console.log('fetch net info');
-          this.setState({
-            netInfo: {
-              isConnected: state.isConnected,
-              type: state.type,
-              isConnectionExpensive:
-                state.details && state.details.isConnectionExpensive,
-            },
-          });
-          if (isConnected !== state.isConnected) {
-            if (!state.isConnected) {
-              //console.log('EVENT Loaded: No internet connection.');
-            } else {
-              //console.log('EVENT Loaded: YES internet connection.');
-              // restart the interval process again...
-              await this.rpc.clearTimers();
-              await this.rpc.configure();
-            }
-          }
-        }
-      },
-    );
-
-    // notifee...
-    const initialNotification = await notifee.getInitialNotification();
-    if (initialNotification) {
-      const deeplink = initialNotification.notification.data?.deeplink;
-      console.log('NOTIFEE CLOSED', deeplink, this.props.navigationApp);
-      if (deeplink === 'delegator://reminder-opened') {
-        this.openScheduledTab();
-      }
-    }
-
-    this.unsubscribeNotifee = notifee.onForegroundEvent(({ type, detail }) => {
+    const netInfo = NetInfo.addEventListener(this.handleNetInfoChange);
+    const notifee_ = notifee.onForegroundEvent(({ type, detail }) => {
       if (type === EventType.PRESS) {
-        const deeplink = detail.notification?.data?.deeplink;
-        console.log('NOTIFEE OPENED', deeplink, this.props.navigationApp);
-        if (deeplink === 'delegator://reminder-opened') {
-          this.openScheduledTab();
-        }
+        this.handleNotificationDeeplink(detail.notification?.data?.deeplink);
       }
     });
+    this.subscriptions = [
+      () => appState?.remove?.(),
+      () => linking?.remove?.(),
+      netInfo,
+      notifee_,
+    ];
+  };
+
+  unsubscribe = () => {
+    this.subscriptions.forEach(off => typeof off === 'function' && off());
+    this.subscriptions = [];
+  };
+
+  handleAppStateChange = async (nextAppState: AppStateStatus) => {
+    const priorAppState = this.state.appStateStatus;
+    if (Platform.OS === GlobalConst.platformOSios) {
+      if (
+        (priorAppState === AppStateStatusEnum.inactive &&
+          nextAppState === AppStateStatusEnum.active) ||
+        (priorAppState === AppStateStatusEnum.active &&
+          nextAppState === AppStateStatusEnum.inactive)
+      ) {
+        //console.log('LOADED SAVED IOS do nothing', nextAppState);
+        this.setState({ appStateStatus: nextAppState });
+        return;
+      }
+      if (
+        priorAppState === AppStateStatusEnum.inactive &&
+        nextAppState === AppStateStatusEnum.background
+      ) {
+        console.log('App LOADED IOS is gone to the background!');
+        this.setState({ appStateStatus: nextAppState });
+        // setting value for background task Android
+        await AsyncStorage.setItem(GlobalConst.background, GlobalConst.yes);
+        //console.log('&&&&& background yes in storage &&&&&');
+        await this.rpc.clearTimers();
+        //console.log('clear timers IOS');
+        this.setSyncingStatus({} as RPCSyncStatusType);
+        //console.log('clear sync status state');
+        //console.log('LOADED SAVED IOS background', nextAppState);
+        // We need to save the wallet file here because
+        // sometimes the App can lose the last synced chunk
+        await RPCModule.doSave();
+        return;
+      }
+    }
+    if (Platform.OS === GlobalConst.platformOSandroid) {
+      if (priorAppState !== nextAppState) {
+        //console.log('LOADED SAVED Android', nextAppState);
+        this.setState({ appStateStatus: nextAppState });
+      }
+    }
+    if (
+      (priorAppState === AppStateStatusEnum.inactive ||
+        priorAppState === AppStateStatusEnum.background) &&
+      nextAppState === AppStateStatusEnum.active
+    ) {
+      //console.log('App LOADED Android & IOS has come to the foreground!');
+      if (Platform.OS === GlobalConst.platformOSios) {
+        //console.log('LOADED SAVED IOS foreground', nextAppState);
+        this.setState({ appStateStatus: nextAppState });
+      }
+      // (PIN or TouchID or FaceID)
+      const resultBio = this.state.security.foregroundApp
+        ? await simpleBiometrics({ translate: this.state.translate })
+        : true;
+      // can be:
+      // - true      -> the user do pass the authentication
+      // - false     -> the user do NOT pass the authentication
+      // - undefined -> no biometric authentication available -> Passcode -> Nothing.
+      //console.log('BIOMETRIC FOREGROUND --------> ', resultBio);
+      if (resultBio === false) {
+        this.navigateToLoadingApp({
+          startingApp: true,
+          biometricsFailed: true,
+        });
+      } else {
+        // reading background task info
+        await this.fetchBackgroundSyncing();
+        // setting value for background task Android
+        await AsyncStorage.setItem(GlobalConst.background, GlobalConst.no);
+        //console.log('&&&&& background no in storage &&&&&');
+        // needs this because when the App go from back to fore
+        // it have to re-launch all the tasks.
+        await this.rpc.clearTimers();
+        await this.rpc.configure();
+        //console.log('configure start timers Android & IOS');
+        if (
+          this.state.backgroundError &&
+          (this.state.backgroundError.title || this.state.backgroundError.error)
+        ) {
+          Alert.alert(
+            this.state.backgroundError.title,
+            this.state.backgroundError.error,
+          );
+          this.setBackgroundError('', '');
+        }
+      }
+    } else if (
+      priorAppState === AppStateStatusEnum.active &&
+      (nextAppState === AppStateStatusEnum.inactive ||
+        nextAppState === AppStateStatusEnum.background)
+    ) {
+      console.log('App LOADED is gone to the background!');
+      // setting value for background task Android
+      await AsyncStorage.setItem(GlobalConst.background, GlobalConst.yes);
+      //console.log('&&&&& background yes in storage &&&&&');
+      await this.rpc.clearTimers();
+      //console.log('clear timers');
+      this.setSyncingStatus({} as RPCSyncStatusType);
+      //console.log('clear sync status state');
+      // We need to save the wallet file here because
+      // sometimes the App can lose the last synced chunk
+      await RPCModule.doSave();
+      if (Platform.OS === GlobalConst.platformOSios) {
+        //console.log('LOADED SAVED IOS background', nextAppState);
+        this.setState({ appStateStatus: nextAppState });
+      }
+    } else {
+      if (Platform.OS === GlobalConst.platformOSios) {
+        if (priorAppState !== nextAppState) {
+          //console.log('LOADED SAVED IOS', nextAppState);
+          this.setState({ appStateStatus: nextAppState });
+        }
+      }
+    }
+  };
+
+  handleInitialUrl = async () => {
+    if (initialUrlConsumed) {
+      return;
+    }
+    initialUrlConsumed = true;
+    const initialUrl = await Linking.getInitialURL();
+    await this.handleUrl(initialUrl);
+  };
+
+  handleUrl = async (url: string | null) => {
+    if (!url) {
+      return;
+    }
+    const filled = await this.readUrl(url);
+    if (filled) {
+      this.navigateTo(RouteEnum.Send);
+    }
+  };
+
+  handleNetInfoChange = async (state: NetInfoState) => {
+    const { isConnected, type, isConnectionExpensive } = this.state.netInfo;
+    if (
+      isConnected !== state.isConnected ||
+      type !== state.type ||
+      isConnectionExpensive !== state.details?.isConnectionExpensive
+    ) {
+      //console.log('fetch net info');
+      this.setState({
+        netInfo: {
+          isConnected: state.isConnected,
+          type: state.type,
+          isConnectionExpensive:
+            state.details && state.details.isConnectionExpensive,
+        },
+      });
+      if (isConnected !== state.isConnected) {
+        if (!state.isConnected) {
+          //console.log('EVENT Loaded: No internet connection.');
+        } else {
+          //console.log('EVENT Loaded: YES internet connection.');
+          // restart the interval process again...
+          await this.rpc.clearTimers();
+          await this.rpc.configure();
+        }
+      }
+    }
+  };
+
+  handleInitialNotification = async () => {
+    const initialNotification = await notifee.getInitialNotification();
+    this.handleNotificationDeeplink(
+      initialNotification?.notification.data?.deeplink,
+    );
+  };
+
+  handleNotificationDeeplink = (deeplink: unknown) => {
+    if (deeplink === 'delegator://reminder-opened') {
+      this.openScheduledTab();
+    }
   };
 
   componentDidUpdate = async (
@@ -943,17 +931,9 @@ export class LoadedAppClass extends Component<
   };
 
   componentWillUnmount = async () => {
+    this.unsubscribe();
+    this.keepAwake(false);
     await this.rpc.clearTimers();
-    this.appstate &&
-      typeof this.appstate.remove === 'function' &&
-      this.appstate.remove();
-    this.linking && typeof this.linking === 'function' && this.linking.remove();
-    this.unsubscribeNetInfo &&
-      typeof this.unsubscribeNetInfo === 'function' &&
-      this.unsubscribeNetInfo();
-    this.unsubscribeNotifee &&
-      typeof this.unsubscribeNotifee === 'function' &&
-      this.unsubscribeNotifee();
   };
 
   keepAwake = (keep: boolean): void => {
@@ -964,10 +944,8 @@ export class LoadedAppClass extends Component<
     }
   };
 
-  readUrl = async (url: string) => {
-    //console.log(url);
-    // Attempt to parse as URI if it starts with zcash
-    // only if it is a spendable wallet
+  readUrl = async (url: string): Promise<boolean> => {
+    let filled = false;
     if (url && url.startsWith(GlobalConst.zcash) && !this.state.readOnly) {
       const { error, target } = await parseZcashURI(
         url,
@@ -1012,13 +990,14 @@ export class LoadedAppClass extends Component<
           newSendPageState.toaddr = uriToAddr;
 
           this.setSendPageState(newSendPageState);
+          filled = true;
         }
       }
       if (error) {
-        // Show the error message as a toast
         this.addLastSnackbar({ message: error, screenName: [this.screenName] });
       }
     }
+    return filled;
   };
 
   fetchBackgroundSyncing = async () => {
@@ -1085,12 +1064,6 @@ export class LoadedAppClass extends Component<
       this.setState({ syncingStatus });
       //console.log('=========================================== > SYNC STATUS STORED SETSTATE - ', Date.now() - start);
     }
-  };
-
-  setIsSeedViewModalOpen = (value: boolean) => {
-    this.setState({
-      isSeedViewModalOpen: value,
-    });
   };
 
   setValueTransfersList = async (
@@ -1516,145 +1489,6 @@ export class LoadedAppClass extends Component<
     }
   };
 
-  onMenuItemSelected = async (item: MenuItemEnum) => {
-    // Depending on the menu item, open the appropriate screen
-    if (item === MenuItemEnum.About) {
-      this.state.navigationHome?.navigate(RouteEnum.About);
-      return;
-    } else if (item === MenuItemEnum.Settings) {
-      this.state.navigationHome?.navigate(RouteEnum.SettingsStack);
-      return;
-    } else if (item === MenuItemEnum.Rescan) {
-      this.state.navigationHome?.navigate(RouteEnum.Rescan);
-      return;
-    } else if (item === MenuItemEnum.Info) {
-      this.state.navigationHome?.navigate(RouteEnum.Info);
-      return;
-    } else if (item === MenuItemEnum.SyncReport) {
-      this.state.navigationHome?.navigate(RouteEnum.SyncReport);
-      return;
-    } else if (item === MenuItemEnum.FundPools) {
-      this.state.navigationHome?.navigate(RouteEnum.Pools);
-      return;
-    } else if (item === MenuItemEnum.Insight) {
-      this.state.navigationHome?.navigate(RouteEnum.InsightStack, {
-        screen: RouteEnum.Insight,
-      });
-      return;
-    } else if (item === MenuItemEnum.WalletSeedUfvk) {
-      if (this.state.readOnly) {
-        this.state.navigationHome?.navigate(RouteEnum.Ufvk, {
-          action: UfvkActionEnum.view,
-        });
-      } else {
-        this.state.navigationHome?.navigate(RouteEnum.Seed, {
-          action: SeedActionEnum.view,
-        });
-      }
-      return;
-    } else if (item === MenuItemEnum.ChangeWallet) {
-      if (this.state.readOnly) {
-        this.state.navigationHome?.navigate(RouteEnum.Ufvk, {
-          action: UfvkActionEnum.change,
-        });
-      } else {
-        this.state.navigationHome?.navigate(RouteEnum.Seed, {
-          action: SeedActionEnum.change,
-        });
-      }
-      return;
-    } else if (item === MenuItemEnum.RestoreWalletBackup) {
-      if (this.state.readOnly) {
-        this.state.navigationHome?.navigate(RouteEnum.Ufvk, {
-          action: UfvkActionEnum.backup,
-        });
-      } else {
-        this.state.navigationHome?.navigate(RouteEnum.Seed, {
-          action: SeedActionEnum.backup,
-        });
-      }
-      return;
-    } else if (item === MenuItemEnum.LoadWalletFromSeed) {
-      const { translate } = this.state;
-      Alert.alert(
-        translate('loadedapp.restorewallet-title') as string,
-        translate('loadedapp.restorewallet-alert') as string,
-        [
-          {
-            text: translate('confirm') as string,
-            onPress: async () =>
-              await this.onClickOKChangeWallet({
-                screen: 3,
-                startingApp: false,
-              }),
-          },
-          { text: translate('cancel') as string, style: 'cancel' },
-        ],
-        { cancelable: false },
-      );
-    } else if (item === MenuItemEnum.TipZingoLabs) {
-      const { translate } = this.state;
-      Alert.alert(
-        translate('loadingapp.alert-donation-title') as string,
-        translate('loadingapp.alert-donation-body') as string,
-        [
-          {
-            text: translate('confirm') as string,
-            onPress: async () => await this.setDonationOption(true),
-          },
-          {
-            text: translate('cancel') as string,
-            onPress: async () => await this.setDonationOption(false),
-            style: 'cancel',
-          },
-        ],
-        { cancelable: false },
-      );
-    } else if (item === MenuItemEnum.VoteForNym) {
-      let update = false;
-      if (
-        this.state.sendPageState.toaddr.to &&
-        this.state.sendPageState.toaddr.to !==
-          (await Utils.getNymDonationAddress(
-            this.state.indexerServer.chainName,
-          ))
-      ) {
-        await ShowAddressAlertAsync(this.state.translate)
-          .then(async () => {
-            // fill the fields in the screen with the donation data
-            update = true;
-          })
-          .catch(() => {});
-      } else {
-        // fill the fields in the screen with the donation data
-        update = true;
-      }
-      if (update) {
-        const newSendPageState = new SendPageStateClass(new ToAddrClass(0));
-        let uriToAddr: ToAddrClass = new ToAddrClass(0);
-        const to = new ToAddrClass(0);
-
-        to.to = await Utils.getNymDonationAddress(
-          this.state.indexerServer.chainName,
-        );
-        to.amount = Utils.getNymDonationAmount();
-        to.memo = Utils.getNymDonationMemo(this.state.translate);
-        to.includeUAMemo = true;
-
-        uriToAddr = to;
-
-        newSendPageState.toaddr = uriToAddr;
-
-        this.setSendPageState(newSendPageState);
-      }
-      this.state.navigationHome?.navigate(RouteEnum.Send);
-    } else if (item === MenuItemEnum.Support) {
-      this.setShowSwipeableIcons(false);
-      await sendEmail(this.state.translate, this.state.zingolibVersion);
-      this.setShowSwipeableIcons(true);
-    }
-  };
-
   setServerOption = async (
     value: ServerType,
     selectServer: SelectServerEnum,
@@ -1738,17 +1572,6 @@ export class LoadedAppClass extends Component<
 
     // if the chainName is different between server or we cannot open the wallet...
     if (error) {
-      // I need to open the modal ASAP, and keep going with the toast.
-      if (this.state.readOnly) {
-        this.state.navigationHome?.navigate(RouteEnum.Ufvk, {
-          action: UfvkActionEnum.server,
-        });
-      } else {
-        this.state.navigationHome?.navigate(RouteEnum.Seed, {
-          action: SeedActionEnum.server,
-        });
-      }
-      //console.log(`Error Reading Wallet ${value} - ${error}`);
       if (toast) {
         this.addLastSnackbar({
           message: `${this.state.translate('loadedapp.readingwallet-error')} ${value.uri}`,
@@ -1760,10 +1583,7 @@ export class LoadedAppClass extends Component<
       const oldSettings = await SettingsFileImpl.readSettings();
       await RPCModule.changeServerProcess(oldSettings.indexerServer.uri);
 
-      // go to the seed screen for changing the wallet for another in the new server or cancel this action.
       this.setState({
-        newIndexerServer: value as ServerType,
-        newSelectIndexerServer: selectServer,
         indexerServer: oldSettings.indexerServer,
         selectIndexerServer: oldSettings.selectIndexerServer,
       });
@@ -1918,6 +1738,18 @@ export class LoadedAppClass extends Component<
     });
   };
 
+  recoverWalletFromSeed = async (
+    walletSeed: string,
+    walletBirthday: number,
+  ) => {
+    await this.onClickOKChangeWallet({
+      entry: LoadingAppEntryEnum.boot,
+      startingApp: false,
+      walletSeed,
+      walletBirthday,
+    });
+  };
+
   onClickOKChangeWallet = async (state: LoadingAppNavigationState) => {
     const { indexerServer } = this.state;
 
@@ -1981,108 +1813,18 @@ export class LoadedAppClass extends Component<
     this.navigateToLoadingApp({ startingApp: false });
   };
 
-  onClickOKServerWallet = async () => {
-    if (this.state.newIndexerServer && this.state.newSelectIndexerServer) {
-      const beforeServer = this.state.indexerServer;
-
-      const resultStrServerPromise = await RPCModule.changeServerProcess(
-        this.state.newIndexerServer.uri,
-      );
-      const timeoutServerPromise = new Promise((_, reject) => {
-        setTimeout(() => {
-          reject(new Error('Promise changeserver Timeout 30 seconds'));
-        }, 30 * 1000);
-      });
-
-      const resultStrServer: string = await Promise.race([
-        resultStrServerPromise,
-        timeoutServerPromise,
-      ]);
-      //console.log(resultStrServer);
-
-      if (
-        resultStrServer &&
-        resultStrServer.toLowerCase().startsWith(GlobalConst.error)
-      ) {
-        //console.log(`Error change server ${value} - ${resultStr}`);
-        this.addLastSnackbar({
-          message: `${this.state.translate('loadedapp.changeservernew-error')} ${resultStrServer}`,
-          screenName: [this.screenName],
-        });
-        return;
-      } else {
-        //console.log(`change server ok ${value}`);
-      }
-
-      await SettingsFileImpl.writeSettings(
-        SettingsNameEnum.indexerServer,
-        this.state.newIndexerServer,
-      );
-      await SettingsFileImpl.writeSettings(
-        SettingsNameEnum.selectIndexerServer,
-        this.state.newSelectIndexerServer,
-      );
-      this.setState({
-        indexerServer: this.state.newIndexerServer,
-        selectIndexerServer: this.state.selectIndexerServer,
-        newIndexerServer: {} as ServerType,
-        newSelectIndexerServer: null,
-      });
-
-      await this.rpc.fetchInfoAndServerHeight();
-
-      let resultStr2 = '';
-      // if the server was testnet or regtest -> no need backup the wallet.
-      if (beforeServer.chainName === ChainNameEnum.mainChainName) {
-        // backup
-        resultStr2 = (await this.rpc.changeWallet()) as string;
-      } else {
-        // no backup
-        resultStr2 = (await this.rpc.changeWalletNoBackup()) as string;
-      }
-
-      //console.log("jc change", resultStr);
-      if (
-        resultStr2 &&
-        resultStr2.toLowerCase().startsWith(GlobalConst.error)
-      ) {
-        //console.log(`Error change wallet. ${resultStr}`);
-        createAlert(
-          this.setBackgroundError,
-          this.addLastSnackbar,
-          [this.screenName],
-          this.state.translate('loadedapp.changingwallet-label') as string,
-          resultStr2,
-          false,
-          this.state.translate,
-        );
-        //return;
-      }
-
-      await ScheduledActionsFileImpl.resetSA();
-      this.setScheduledActions([]);
-      await notifee.cancelAllNotifications();
-
-      // no need to restart the tasks because is about to restart the app.
-      this.navigateToLoadingApp({ startingApp: false });
-    }
-  };
-
   setBackgroundError = (title: string, error: string) => {
     this.setState({ backgroundError: { title, error } });
   };
 
   addLastSnackbar = (snackbar: SnackbarType) => {
-    const newSnackbars = this.state.snackbars;
-    // if the last one is the same don't do anything.
-    if (
-      newSnackbars.length > 0 &&
-      newSnackbars[newSnackbars.length - 1].message === snackbar.message
-    ) {
-      return;
-    }
-    newSnackbars.push(snackbar);
-    this.setState({ snackbars: newSnackbars });
+    this.setState(({ snackbars }) => {
+      const last = snackbars[snackbars.length - 1];
+      if (last && last.message === snackbar.message) {
+        return null;
+      }
+      return { snackbars: [...snackbars, snackbar] };
+    });
   };
 
   setLastError = (error: string) => {
@@ -2090,11 +1832,11 @@ export class LoadedAppClass extends Component<
   };
 
   removeFirstSnackbar = (screenName: ScreenEnum) => {
-    const newSnackbars = this.state.snackbars.filter((s: SnackbarType) =>
-      s.screenName.includes(screenName),
-    );
-    newSnackbars.shift();
-    this.setState({ snackbars: newSnackbars });
+    this.setState(({ snackbars }) => ({
+      snackbars: snackbars
+        .filter((s: SnackbarType) => s.screenName.includes(screenName))
+        .slice(1),
+    }));
   };
 
   setScrollToTop = (value: boolean) => {
@@ -2113,16 +1855,6 @@ export class LoadedAppClass extends Component<
     this.setState({
       scheduledActions,
     });
-  };
-
-  setNavigationHome = (
-    navigationHome: DrawerContentComponentProps['navigation'],
-  ) => {
-    if (!this.state.navigationHome) {
-      this.setState({
-        navigationHome,
-      });
-    }
   };
 
   render() {
@@ -2221,21 +1953,9 @@ export class LoadedAppClass extends Component<
                 )}
               </LoadedAppStack.Screen>
 
-              {/* <LoadedAppStack.Screen name={RouteEnum.SettingsMenu}>
-                {props => (
-                  <SettingsMenu
-                    {...props}
-                    onClickOKChangeWallet={this.onClickOKChangeWallet}
-                  />
-                )}
-              </LoadedAppStack.Screen> */}
-
               <LoadedAppStack.Screen name={RouteEnum.Send}>
                 {props => (
                   <Send
-                    toggleMenuDrawer={function (): void {
-                      throw new Error('Function not implemented.');
-                    }}
                     setShieldingAmount={this.setShieldingAmount}
                     setScrollToTop={this.setScrollToTop}
                     setScrollToBottom={this.setScrollToBottom}
@@ -2251,26 +1971,18 @@ export class LoadedAppClass extends Component<
               <LoadedAppStack.Screen name={RouteEnum.Receive}>
                 {props => (
                   <Receive
-                    toggleMenuDrawer={function (): void {
-                      throw new Error('Function not implemented.');
-                    }}
                     setSecurityOption={this.setSecurityOption}
                     {...props}
                   />
                 )}
               </LoadedAppStack.Screen>
 
-              {/* <LoadedAppStack.Screen name={RouteEnum.SettingsServers}>
-                {props => (
-                  <SettingsServers
-                    {...props}
-                    navigateToLoadingApp={this.navigateToLoadingApp}
-                  />
-                )}
-              </LoadedAppStack.Screen> */}
-
               <LoadedAppStack.Screen name={RouteEnum.Distribution}>
                 {props => <Distribution {...props} />}
+              </LoadedAppStack.Screen>
+
+              <LoadedAppStack.Screen name={RouteEnum.SyncReport}>
+                {props => <SyncReport {...props} />}
               </LoadedAppStack.Screen>
 
               <LoadedAppStack.Screen
@@ -2279,10 +1991,6 @@ export class LoadedAppClass extends Component<
               >
                 {props => <Finalizers {...props} />}
               </LoadedAppStack.Screen>
-
-              {/* <LoadedAppStack.Screen name={RouteEnum.DebugInfo}>
-                {props => <DebugInfo {...props} />}
-              </LoadedAppStack.Screen> */}
 
               <LoadedAppStack.Screen name={RouteEnum.Faucet}>
                 {props => <Faucet {...props} />}

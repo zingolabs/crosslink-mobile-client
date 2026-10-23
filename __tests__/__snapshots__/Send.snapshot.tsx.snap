@@ -45,11 +45,13 @@ exports[`Component Send - test Send currency USD, privacy high & mode advanced -
         }
       >
         <View
+          accessibilityLabel="Back"
+          accessibilityRole="button"
           accessibilityState={
             {
               "busy": undefined,
               "checked": undefined,
-              "disabled": undefined,
+              "disabled": false,
               "expanded": undefined,
               "selected": undefined,
             }
@@ -65,15 +67,9 @@ exports[`Component Send - test Send currency USD, privacy high & mode advanced -
           accessible={true}
           collapsable={false}
           focusable={true}
-          hitSlop={
-            {
-              "bottom": 10,
-              "left": 10,
-              "right": 10,
-              "top": 10,
-            }
-          }
+          onBlur={[Function]}
           onClick={[Function]}
+          onFocus={[Function]}
           onResponderGrant={[Function]}
           onResponderMove={[Function]}
           onResponderRelease={[Function]}
@@ -82,36 +78,49 @@ exports[`Component Send - test Send currency USD, privacy high & mode advanced -
           onStartShouldSetResponder={[Function]}
           style={
             {
-              "alignItems": "center",
-              "borderColor": "#c3c3c3",
-              "borderRadius": 30,
-              "borderWidth": 0.2,
-              "height": 48,
-              "justifyContent": "center",
-              "opacity": 1,
-              "width": 48,
+              "alignSelf": "flex-start",
+              "height": 44,
+              "width": 44,
             }
           }
         >
-          <
-            color="#c3c3c3"
-            icon={
-              {
-                "icon": [
-                  320,
-                  512,
-                  [
-                    9001,
-                  ],
-                  "f053",
-                  "M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z",
-                ],
-                "iconName": "chevron-left",
-                "prefix": "fas",
-              }
+          <div
+            colorScheme="system"
+            effect="regular"
+            interactive={true}
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 9999,
+                  "height": 44,
+                  "justifyContent": "center",
+                  "width": 44,
+                },
+                false,
+              ]
             }
-            size={22}
-          />
+          >
+            <
+              color="#c3c3c3"
+              icon={
+                {
+                  "icon": [
+                    320,
+                    512,
+                    [
+                      9001,
+                    ],
+                    "f053",
+                    "M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z",
+                  ],
+                  "iconName": "chevron-left",
+                  "prefix": "fas",
+                }
+              }
+              size={17}
+            />
+          </div>
         </View>
       </View>
       <View
@@ -131,9 +140,10 @@ exports[`Component Send - test Send currency USD, privacy high & mode advanced -
           style={
             [
               {
-                "fontSize": 22,
-                "fontStyle": "normal",
-                "fontWeight": "400",
+                "fontSize": 17,
+                "fontWeight": "600",
+                "letterSpacing": -0.41,
+                "lineHeight": 22,
                 "textAlign": "center",
               },
               {
@@ -149,8 +159,8 @@ exports[`Component Send - test Send currency USD, privacy high & mode advanced -
         style={
           {
             "position": "absolute",
-            "right": 10,
-            "top": 0,
+            "right": 16,
+            "top": 2,
           }
         }
       />
@@ -189,7 +199,7 @@ exports[`Component Send - test Send currency USD, privacy high & mode advanced -
             style={
               {
                 "alignItems": "center",
-                "backgroundColor": undefined,
+                "backgroundColor": "#222223",
                 "borderColor": "transparent",
                 "borderRadius": 25,
                 "borderWidth": 1,
@@ -443,7 +453,7 @@ exports[`Component Send - test Send currency USD, privacy high & mode advanced -
           [
             {
               "alignItems": "center",
-              "borderRadius": 30,
+              "borderRadius": 9999,
               "justifyContent": "center",
               "minWidth": 160,
               "paddingHorizontal": 20,
@@ -464,21 +474,90 @@ exports[`Component Send - test Send currency USD, privacy high & mode advanced -
             },
           ]
         }
+        tintColor="#222223"
       >
-        <Text
-          style={
-            [
-              {
-                "color": "white",
-                "fontSize": 18,
-                "fontWeight": "600",
-              },
-              undefined,
-            ]
-          }
-        >
-          Continue
-        </Text>
+        <View>
+          <Text
+            numberOfLines={1}
+            style={
+              [
+                [
+                  {
+                    "color": "white",
+                    "fontSize": 18,
+                    "fontWeight": "600",
+                  },
+                  undefined,
+                ],
+                {
+                  "opacity": 1,
+                },
+                {
+                  "animationDuration": 350,
+                  "animationName": {
+                    "from": {
+                      "opacity": 0,
+                    },
+                    "to": {
+                      "opacity": 1,
+                    },
+                  },
+                  "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                },
+              ]
+            }
+          >
+            Continue
+          </Text>
+          <Text
+            accessible={false}
+            importantForAccessibility="no-hide-descendants"
+            numberOfLines={1}
+            style={
+              [
+                [
+                  {
+                    "color": "white",
+                    "fontSize": 18,
+                    "fontWeight": "600",
+                  },
+                  undefined,
+                ],
+                {
+                  "bottom": 0,
+                  "color": "transparent",
+                  "left": 0,
+                  "opacity": 0,
+                  "position": "absolute",
+                  "right": 0,
+                  "textShadowOffset": {
+                    "height": 0,
+                    "width": 0,
+                  },
+                  "top": 0,
+                },
+                {
+                  "textShadowColor": "white",
+                  "textShadowRadius": 6,
+                },
+                {
+                  "animationDuration": 350,
+                  "animationName": {
+                    "from": {
+                      "opacity": 1,
+                    },
+                    "to": {
+                      "opacity": 0,
+                    },
+                  },
+                  "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                },
+              ]
+            }
+          >
+            Continue
+          </Text>
+        </View>
       </div>
     </View>
   </View>
@@ -530,11 +609,13 @@ exports[`Component Send - test Send no currency, privacy normal & mode basic - s
         }
       >
         <View
+          accessibilityLabel="Back"
+          accessibilityRole="button"
           accessibilityState={
             {
               "busy": undefined,
               "checked": undefined,
-              "disabled": undefined,
+              "disabled": false,
               "expanded": undefined,
               "selected": undefined,
             }
@@ -550,15 +631,9 @@ exports[`Component Send - test Send no currency, privacy normal & mode basic - s
           accessible={true}
           collapsable={false}
           focusable={true}
-          hitSlop={
-            {
-              "bottom": 10,
-              "left": 10,
-              "right": 10,
-              "top": 10,
-            }
-          }
+          onBlur={[Function]}
           onClick={[Function]}
+          onFocus={[Function]}
           onResponderGrant={[Function]}
           onResponderMove={[Function]}
           onResponderRelease={[Function]}
@@ -567,36 +642,49 @@ exports[`Component Send - test Send no currency, privacy normal & mode basic - s
           onStartShouldSetResponder={[Function]}
           style={
             {
-              "alignItems": "center",
-              "borderColor": "#c3c3c3",
-              "borderRadius": 30,
-              "borderWidth": 0.2,
-              "height": 48,
-              "justifyContent": "center",
-              "opacity": 1,
-              "width": 48,
+              "alignSelf": "flex-start",
+              "height": 44,
+              "width": 44,
             }
           }
         >
-          <
-            color="#c3c3c3"
-            icon={
-              {
-                "icon": [
-                  320,
-                  512,
-                  [
-                    9001,
-                  ],
-                  "f053",
-                  "M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z",
-                ],
-                "iconName": "chevron-left",
-                "prefix": "fas",
-              }
+          <div
+            colorScheme="system"
+            effect="regular"
+            interactive={true}
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 9999,
+                  "height": 44,
+                  "justifyContent": "center",
+                  "width": 44,
+                },
+                false,
+              ]
             }
-            size={22}
-          />
+          >
+            <
+              color="#c3c3c3"
+              icon={
+                {
+                  "icon": [
+                    320,
+                    512,
+                    [
+                      9001,
+                    ],
+                    "f053",
+                    "M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z",
+                  ],
+                  "iconName": "chevron-left",
+                  "prefix": "fas",
+                }
+              }
+              size={17}
+            />
+          </div>
         </View>
       </View>
       <View
@@ -616,9 +704,10 @@ exports[`Component Send - test Send no currency, privacy normal & mode basic - s
           style={
             [
               {
-                "fontSize": 22,
-                "fontStyle": "normal",
-                "fontWeight": "400",
+                "fontSize": 17,
+                "fontWeight": "600",
+                "letterSpacing": -0.41,
+                "lineHeight": 22,
                 "textAlign": "center",
               },
               {
@@ -634,8 +723,8 @@ exports[`Component Send - test Send no currency, privacy normal & mode basic - s
         style={
           {
             "position": "absolute",
-            "right": 10,
-            "top": 0,
+            "right": 16,
+            "top": 2,
           }
         }
       />
@@ -674,7 +763,7 @@ exports[`Component Send - test Send no currency, privacy normal & mode basic - s
             style={
               {
                 "alignItems": "center",
-                "backgroundColor": undefined,
+                "backgroundColor": "#222223",
                 "borderColor": "transparent",
                 "borderRadius": 25,
                 "borderWidth": 1,
@@ -928,7 +1017,7 @@ exports[`Component Send - test Send no currency, privacy normal & mode basic - s
           [
             {
               "alignItems": "center",
-              "borderRadius": 30,
+              "borderRadius": 9999,
               "justifyContent": "center",
               "minWidth": 160,
               "paddingHorizontal": 20,
@@ -949,21 +1038,90 @@ exports[`Component Send - test Send no currency, privacy normal & mode basic - s
             },
           ]
         }
+        tintColor="#222223"
       >
-        <Text
-          style={
-            [
-              {
-                "color": "white",
-                "fontSize": 18,
-                "fontWeight": "600",
-              },
-              undefined,
-            ]
-          }
-        >
-          Continue
-        </Text>
+        <View>
+          <Text
+            numberOfLines={1}
+            style={
+              [
+                [
+                  {
+                    "color": "white",
+                    "fontSize": 18,
+                    "fontWeight": "600",
+                  },
+                  undefined,
+                ],
+                {
+                  "opacity": 1,
+                },
+                {
+                  "animationDuration": 350,
+                  "animationName": {
+                    "from": {
+                      "opacity": 0,
+                    },
+                    "to": {
+                      "opacity": 1,
+                    },
+                  },
+                  "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                },
+              ]
+            }
+          >
+            Continue
+          </Text>
+          <Text
+            accessible={false}
+            importantForAccessibility="no-hide-descendants"
+            numberOfLines={1}
+            style={
+              [
+                [
+                  {
+                    "color": "white",
+                    "fontSize": 18,
+                    "fontWeight": "600",
+                  },
+                  undefined,
+                ],
+                {
+                  "bottom": 0,
+                  "color": "transparent",
+                  "left": 0,
+                  "opacity": 0,
+                  "position": "absolute",
+                  "right": 0,
+                  "textShadowOffset": {
+                    "height": 0,
+                    "width": 0,
+                  },
+                  "top": 0,
+                },
+                {
+                  "textShadowColor": "white",
+                  "textShadowRadius": 6,
+                },
+                {
+                  "animationDuration": 350,
+                  "animationName": {
+                    "from": {
+                      "opacity": 1,
+                    },
+                    "to": {
+                      "opacity": 0,
+                    },
+                  },
+                  "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                },
+              ]
+            }
+          >
+            Continue
+          </Text>
+        </View>
       </div>
     </View>
   </View>

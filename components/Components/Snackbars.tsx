@@ -6,9 +6,8 @@ import {
   SnackbarType,
   ScreenEnum,
 } from '../../app/AppState';
-import { ThemeType } from '../../app/types';
-import { useTheme } from '@react-navigation/native';
 import { useToast } from 'react-native-toastier';
+import { useTheme } from '../../app/theme';
 
 type SnackbarProps = {
   snackbars: SnackbarType[];
@@ -21,7 +20,7 @@ const Snackbars: React.FunctionComponent<SnackbarProps> = ({
   removeFirstSnackbar,
   screenName,
 }) => {
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
   const snacking = useRef<boolean>(false);
   const snackingMessage = useRef<string>(undefined);
   const [duration, setDuration] = useState<number>(4000);
@@ -76,7 +75,7 @@ const Snackbars: React.FunctionComponent<SnackbarProps> = ({
           paddingVertical: 10,
         },
         messageStyle: {
-          color: colors.background,
+          color: colors.bgCanvas,
           fontSize: 15,
           padding: 0,
           margin: 0,
@@ -89,7 +88,7 @@ const Snackbars: React.FunctionComponent<SnackbarProps> = ({
         },
         contentContainerStyle: {
           flex: 0.999,
-          backgroundColor: colors.zingo,
+          backgroundColor: colors.bgMuted,
           marginBottom: 100,
           padding: 0,
           paddingLeft: 20,
@@ -98,8 +97,8 @@ const Snackbars: React.FunctionComponent<SnackbarProps> = ({
       });
     }
   }, [
-    colors.background,
-    colors.zingo,
+    colors.bgCanvas,
+    colors.bgMuted,
     snackbarsFiltered,
     snackbarsFiltered.length,
     duration,

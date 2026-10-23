@@ -1,12 +1,15 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext } from 'react';
+import React from 'react';
 import { View, ScrollView } from 'react-native';
 
-import { useTheme } from '@react-navigation/native';
-
 import DetailLine from '../Components/DetailLine';
-import { AppDrawerParamList, ThemeType } from '../../app/types';
-import { ContextAppLoaded } from '../../app/context';
+import { LoadedAppStackParamList } from '../../app/types';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedWallet,
+  useAppLoadedUi,
+} from '../../app/context';
 import PriceFetcher from '../Components/PriceFetcher';
 import CurrencyAmount from '../Components/CurrencyAmount';
 import RegText from '../Components/RegText';
@@ -18,25 +21,22 @@ import {
 } from '../../app/AppState';
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../Header';
+import { useTheme } from '../../app/theme';
 
-type InfoProps = DrawerScreenProps<AppDrawerParamList, RouteEnum.Info>;
+type InfoProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
+  RouteEnum.Info
+>;
 
 const Info: React.FunctionComponent<InfoProps> = ({ navigation }) => {
-  const context = useContext(ContextAppLoaded);
-  const {
-    info,
-    translate,
-    currency,
-    zecPrice,
-    privacy,
-    setZecPrice,
-    snackbars,
-    removeFirstSnackbar,
-  } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { translate, setZecPrice, removeFirstSnackbar } = useAppLoadedActions();
+  const { currency, privacy } = useAppLoadedSettings();
+  const { info, zecPrice } = useAppLoadedWallet();
+  const { snackbars } = useAppLoadedUi();
+  const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.Info;
 
@@ -127,12 +127,12 @@ const Info: React.FunctionComponent<InfoProps> = ({ navigation }) => {
                   screenName={screenName}
                 >
                   {zecPrice.zecPrice === -1 && (
-                    <RegText color={colors.text}>
+                    <RegText color={colors.fgDefault}>
                       {translate('info.errorgemini') as string}
                     </RegText>
                   )}
                   {zecPrice.zecPrice === -2 && (
-                    <RegText color={colors.text}>
+                    <RegText color={colors.fgDefault}>
                       {translate('info.errorrpcmodule') as string}
                     </RegText>
                   )}

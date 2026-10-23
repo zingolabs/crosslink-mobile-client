@@ -1,10 +1,15 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext } from 'react';
+import React from 'react';
 import { View, ScrollView } from 'react-native';
 
 import RegText from '../Components/RegText';
-import { AppDrawerParamList } from '../../app/types';
-import { ContextAppLoaded } from '../../app/context';
+import { LoadedAppStackParamList } from '../../app/types';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedWallet,
+  useAppLoadedUi,
+} from '../../app/context';
 import {
   RouteEnum,
   ScreenEnum,
@@ -13,12 +18,15 @@ import {
 } from '../../app/AppState';
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../Header';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
 
-type RescanProps = DrawerScreenProps<AppDrawerParamList, RouteEnum.Rescan> & {
+type RescanProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
+  RouteEnum.Rescan
+> & {
   doRescan: () => Promise<void>;
 };
 
@@ -26,16 +34,11 @@ const Rescan: React.FunctionComponent<RescanProps> = ({
   navigation,
   doRescan,
 }) => {
-  const context = useContext(ContextAppLoaded);
-  const {
-    wallet,
-    translate,
-    netInfo,
-    addLastSnackbar,
-    selectIndexerServer,
-    snackbars,
-    removeFirstSnackbar,
-  } = context;
+  const { translate, addLastSnackbar, removeFirstSnackbar } =
+    useAppLoadedActions();
+  const { wallet, selectIndexerServer } = useAppLoadedSettings();
+  const { netInfo } = useAppLoadedWallet();
+  const { snackbars } = useAppLoadedUi();
   const { clear } = useToast();
   const screenName = ScreenEnum.Rescan;
 

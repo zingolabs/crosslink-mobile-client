@@ -1,8 +1,8 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, TouchableOpacity, View } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
-import { ContextAppLoaded } from '../../app/context';
+import { useAppLoadedActions, useAppLoadedSettings } from '../../app/context';
 import RegText from './RegText';
 import Utils from '../../app/utils';
 import {
@@ -13,10 +13,10 @@ import {
   SelectServerEnum,
   ScreenEnum,
 } from '../../app/AppState';
-import { useNavigation, useTheme } from '@react-navigation/native';
-import { ThemeType } from '../../app/types';
+import { useNavigation } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
+import { useTheme } from '../../app/theme';
 
 type AddressItemProps = {
   address: string;
@@ -39,16 +39,10 @@ const AddressItem: React.FunctionComponent<AddressItemProps> = ({
   ufvk,
 }) => {
   const navigation: any = useNavigation();
-  const context = useContext(ContextAppLoaded);
-  const {
-    translate,
-    addLastSnackbar,
-    privacy,
-    readOnly,
-    selectIndexerServer,
-    setSendPageState,
-  } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { translate, addLastSnackbar, setSendPageState } =
+    useAppLoadedActions();
+  const { privacy, readOnly, selectIndexerServer } = useAppLoadedSettings();
+  const { colors } = useTheme();
 
   const [expandAddress, setExpandAddress] = useState<boolean>(false);
   const [numLinesAddress, setNumLinesAddress] = useState<number>(0);
@@ -79,7 +73,7 @@ const AddressItem: React.FunctionComponent<AddressItemProps> = ({
   return (
     <>
       {loading ? (
-        <ActivityIndicator size="small" color={colors.primary} />
+        <ActivityIndicator size="small" color={colors.fgAccent} />
       ) : (
         <View
           style={{
@@ -160,7 +154,7 @@ const AddressItem: React.FunctionComponent<AddressItemProps> = ({
                   style={{ marginTop: 3 }}
                   size={30}
                   icon={faPaperPlane}
-                  color={colors.primary}
+                  color={colors.fgAccent}
                 />
               </TouchableOpacity>
             )}

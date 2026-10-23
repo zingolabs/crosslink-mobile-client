@@ -1,16 +1,25 @@
+/* eslint-disable react-native/no-inline-styles */
+// The app's one button. Pill, 50pt, SF-style label with tight tracking.
+// Press feedback is a Reanimated CSS transition: it runs on the UI thread,
+// starts on press-in, and needs no shared value for a two-state change.
 import React from 'react';
 import {
-  Pressable,
-  Text,
-  StyleSheet,
-  ViewStyle,
-  TextStyle,
-  StyleProp,
   ActivityIndicator,
+  Pressable,
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextStyle,
+  View,
+  ViewStyle,
 } from 'react-native';
-import { useTheme } from '@react-navigation/native';
+import Animated, {
+  CSSTransitionProperties,
+  cubicBezier,
+  useReducedMotion,
+} from 'react-native-reanimated';
 
-import { ThemeType } from '../../app/types';
+import { radiusPill, text, useTheme } from '../../app/theme';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
@@ -27,6 +36,9 @@ type ButtonProps = {
   accessibilityLabel?: string;
 };
 
+// Strong ease-out: the visible part of the motion happens first.
+const EASE_OUT = cubicBezier(0.23, 1, 0.32, 1);
+
 export default function Button({
   title,
   onPress,
@@ -39,40 +51,33 @@ export default function Button({
   testID,
   accessibilityLabel,
 }: ButtonProps) {
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
+  const reducedMotion = useReducedMotion();
   const isDisabled = disabled || loading;
 
-  const variants: Record<ButtonVariant, ViewStyle> = {
-    primary: {
-      backgroundColor: colors.primary,
-      borderWidth: 1,
-      borderColor: colors.primary,
-    },
-    secondary: {
-      backgroundColor: 'transparent',
-      borderWidth: 1,
-      borderColor: colors.border,
-    },
-    ghost: {
-      backgroundColor: 'transparent',
-      borderWidth: 0,
-    },
-    danger: {
-      backgroundColor: colors.danger.primary,
-      borderWidth: 1,
-      borderColor: colors.danger.primary,
-    },
+  // iOS button styles: filled, tinted, plain. Danger is filled in red.
+  const surfaces: Record<ButtonVariant, ViewStyle> = {
+    primary: { backgroundColor: colors.bgAccent },
+    secondary: { backgroundColor: colors.bgAccentTint },
+    ghost: { backgroundColor: 'transparent' },
+    danger: { backgroundColor: colors.bgDanger },
   };
 
-  const textVariants: Record<ButtonVariant, TextStyle> = {
-    primary: { color: colors.text },
-    secondary: { color: colors.text },
-    ghost: { color: colors.text },
-    danger: { color: colors.text },
+  const labels: Record<ButtonVariant, TextStyle> = {
+    primary: { color: colors.bgCanvas },
+    secondary: { color: colors.fgAccent },
+    ghost: { color: colors.fgAccent },
+    danger: { color: colors.fgDefault },
   };
 
-  const spinnerColor =
-    variant === 'secondary' || variant === 'ghost' ? colors.text : colors.text;
+  const spinnerColor = labels[variant].color;
+
+  // Reduced motion keeps the pressed look, drops the movement.
+  const transition: CSSTransitionProperties = {
+    transitionProperty: ['transform', 'opacity'],
+    transitionDuration: reducedMotion ? '0ms' : '120ms',
+    transitionTimingFunction: EASE_OUT,
+  };
 
   return (
     <Pressable
@@ -82,46 +87,88 @@ export default function Button({
       accessibilityState={{ disabled: isDisabled, busy: loading }}
       disabled={isDisabled}
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.base,
-        fullWidth && styles.fullWidth,
-        variants[variant],
-        isDisabled && styles.disabled,
-        pressed && !isDisabled && styles.pressed,
-        style,
-      ]}
+      hitSlop={8}
+      pressRetentionOffset={16}
+      style={fullWidth && styles.fullWidth}
     >
-      {loading ? (
-        <ActivityIndicator size="small" color={spinnerColor} />
-      ) : (
-        <Text style={[styles.label, textVariants[variant], textStyle]}>
-          {title}
-        </Text>
+      {({ pressed }) => (
+        <Animated.View
+          style={[
+            styles.base,
+            surfaces[variant],
+            transition,
+            isDisabled && styles.disabled,
+            pressed &&
+              !isDisabled &&
+              (reducedMotion ? styles.pressedStill : styles.pressed),
+            style,
+          ]}
+        >
+          <Animated.View
+            style={[
+              styles.labelWrap,
+              {
+                opacity: loading ? 0 : 1,
+                transitionProperty: 'opacity',
+                transitionDuration: reducedMotion ? '0ms' : '150ms',
+                transitionTimingFunction: EASE_OUT,
+              },
+            ]}
+          >
+            <Text
+              style={[styles.label, labels[variant], textStyle]}
+              numberOfLines={1}
+              maxFontSizeMultiplier={1.4}
+            >
+              {title}
+            </Text>
+          </Animated.View>
+          {loading ? (
+            <View style={styles.spinner} pointerEvents="none">
+              <ActivityIndicator size="small" color={spinnerColor} />
+            </View>
+          ) : null}
+        </Animated.View>
       )}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  base: {
-    minHeight: 44,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   fullWidth: {
     width: '100%',
   },
+  base: {
+    height: 50,
+    paddingHorizontal: 20,
+    borderRadius: radiusPill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    transform: [{ scale: 1 }],
+    opacity: 1,
+  },
+  labelWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   label: {
-    fontSize: 16,
-    fontWeight: '600',
+    ...text.headline,
     textAlign: 'center',
   },
+  spinner: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  // Press-in: 3% smaller and a little dimmer, like a filled iOS button.
   pressed: {
-    opacity: 0.9,
+    transform: [{ scale: 0.97 }],
+    opacity: 0.8,
+  },
+  pressedStill: {
+    opacity: 0.8,
   },
   disabled: {
-    opacity: 0.55,
+    opacity: 0.4,
   },
 });

@@ -30,11 +30,16 @@ Also, make sure your JAVA_HOME is set, for example: <br />
 ## Building
 1. Clone the repository.
 2. Go to the cloned repo `cd crosslink-mobile-client`.
-3. In the `rust` directory, run: <br />
-   `./build.sh` <br />
-   This step may take a long time.
-4. From the root of the project, run: <br />
+3. From the root of the project, run: <br />
    `yarn`
+4. Then run: <br />
+   `yarn rust:android-local` (alias: `yarn build:android`) <br />
+   This builds the arm64 native library and the Kotlin bindings on the host with
+   cargo-ndk. It needs NDK 28.2.13676358 (Android Studio SDK Manager) and
+   `cargo install --version 4.0.1 cargo-ndk`. <br />
+   `yarn rust:android-local:all` builds all four ABIs. <br />
+   `yarn rust:android` runs the reproducible Docker build of all four ABIs
+   instead (same as `rust/build.sh`).
 
 ## Launching the app
 ### Android Studio

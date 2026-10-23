@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
-exports[`Component ImportUfvk - test ImportUfvk - snapshot 1`] = `
+exports[`Component Import - test Import - snapshot 1`] = `
 <View
   style={
     [
@@ -16,23 +16,20 @@ exports[`Component ImportUfvk - test ImportUfvk - snapshot 1`] = `
     onLayout={[Function]}
     style={
       [
-        {
-          "backgroundColor": "#011401",
-          "flex": 1,
-        },
+        [
+          {
+            "flex": 1,
+          },
+          {
+            "backgroundColor": "#011401",
+          },
+        ],
         {
           "paddingBottom": 0,
         },
       ]
     }
   >
-    <View
-      style={
-        {
-          "marginTop": undefined,
-        }
-      }
-    />
     <View
       style={
         {
@@ -52,11 +49,13 @@ exports[`Component ImportUfvk - test ImportUfvk - snapshot 1`] = `
         }
       >
         <View
+          accessibilityLabel="Back"
+          accessibilityRole="button"
           accessibilityState={
             {
               "busy": undefined,
               "checked": undefined,
-              "disabled": undefined,
+              "disabled": false,
               "expanded": undefined,
               "selected": undefined,
             }
@@ -72,15 +71,9 @@ exports[`Component ImportUfvk - test ImportUfvk - snapshot 1`] = `
           accessible={true}
           collapsable={false}
           focusable={true}
-          hitSlop={
-            {
-              "bottom": 10,
-              "left": 10,
-              "right": 10,
-              "top": 10,
-            }
-          }
+          onBlur={[Function]}
           onClick={[Function]}
+          onFocus={[Function]}
           onResponderGrant={[Function]}
           onResponderMove={[Function]}
           onResponderRelease={[Function]}
@@ -89,36 +82,49 @@ exports[`Component ImportUfvk - test ImportUfvk - snapshot 1`] = `
           onStartShouldSetResponder={[Function]}
           style={
             {
-              "alignItems": "center",
-              "borderColor": "#c3c3c3",
-              "borderRadius": 30,
-              "borderWidth": 0.2,
-              "height": 48,
-              "justifyContent": "center",
-              "opacity": 1,
-              "width": 48,
+              "alignSelf": "flex-start",
+              "height": 44,
+              "width": 44,
             }
           }
         >
-          <
-            color="#c3c3c3"
-            icon={
-              {
-                "icon": [
-                  320,
-                  512,
-                  [
-                    9001,
-                  ],
-                  "f053",
-                  "M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z",
-                ],
-                "iconName": "chevron-left",
-                "prefix": "fas",
-              }
+          <div
+            colorScheme="system"
+            effect="regular"
+            interactive={true}
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 9999,
+                  "height": 44,
+                  "justifyContent": "center",
+                  "width": 44,
+                },
+                false,
+              ]
             }
-            size={22}
-          />
+          >
+            <
+              color="#c3c3c3"
+              icon={
+                {
+                  "icon": [
+                    320,
+                    512,
+                    [
+                      9001,
+                    ],
+                    "f053",
+                    "M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z",
+                  ],
+                  "iconName": "chevron-left",
+                  "prefix": "fas",
+                }
+              }
+              size={17}
+            />
+          </div>
         </View>
       </View>
       <View
@@ -138,9 +144,10 @@ exports[`Component ImportUfvk - test ImportUfvk - snapshot 1`] = `
           style={
             [
               {
-                "fontSize": 22,
-                "fontStyle": "normal",
-                "fontWeight": "400",
+                "fontSize": 17,
+                "fontWeight": "600",
+                "letterSpacing": -0.41,
+                "lineHeight": 22,
                 "textAlign": "center",
               },
               {
@@ -156,212 +163,220 @@ exports[`Component ImportUfvk - test ImportUfvk - snapshot 1`] = `
         style={
           {
             "position": "absolute",
-            "right": 10,
-            "top": 0,
-          }
-        }
-      />
-    </View>
-    <View
-      style={
-        {
-          "flexGrow": 1,
-          "paddingBottom": NaN,
-          "paddingHorizontal": 10,
-        }
-      }
-    >
-      <View
-        style={
-          {
-            "alignItems": "center",
-            "flexGrow": 1,
-            "justifyContent": "flex-start",
+            "right": 16,
+            "top": 2,
           }
         }
       >
-        <Text
-          style={
-            {
-              "color": "#c3c3c3",
-              "marginBottom": 15,
-              "marginTop": 5,
-              "opacity": 0.65,
-            }
-          }
-        >
-          Enter your recovery phrase
-        </Text>
         <View
-          style={
+          accessibilityLabel="Paste phrase"
+          accessibilityRole="button"
+          accessibilityState={
             {
-              "alignItems": "center",
-              "backgroundColor": undefined,
-              "borderColor": "#ffffff",
-              "borderRadius": 25,
-              "borderWidth": 1,
-              "flexDirection": "row",
-              "justifyContent": "flex-start",
-              "marginBottom": 10,
-              "maxWidth": 520,
-              "minHeight": 48,
-              "minWidth": "50%",
-              "paddingHorizontal": 25,
-              "paddingVertical": 7,
-              "width": "100%",
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": false,
+              "expanded": undefined,
+              "selected": undefined,
             }
           }
-        >
-          <TextInput
-            autoCapitalize="none"
-            autoCorrect={false}
-            editable={true}
-            keyboardType="default"
-            multiline={true}
-            onChangeText={[Function]}
-            placeholder="Paste your seed phrase (24 words)"
-            placeholderTextColor="#888888"
-            returnKeyType="done"
-            style={
-              {
-                "backgroundColor": "transparent",
-                "color": "#c3c3c3",
-                "flexGrow": 1,
-                "flexShrink": 1,
-                "fontSize": 16,
-                "fontWeight": "600",
-                "marginHorizontal": 5,
-                "minHeight": 100,
-                "textAlignVertical": "top",
-              }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
             }
-            testID="import.seedufvkinput"
-            value=""
-          />
-        </View>
-        <Text
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          hitSlop={10}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
           style={
             [
               {
-                "color": "#c3c3c3",
-                "fontSize": 18,
-                "fontWeight": "600",
-                "opacity": 1,
+                "height": 44,
+                "justifyContent": "center",
+                "paddingHorizontal": 4,
               },
-              {
-                "fontSize": 20,
-                "marginBottom": 10,
-                "marginTop": 20,
-              },
+              false,
             ]
           }
         >
-          Birthday (Optional)
-        </Text>
-        <View
-          style={
-            {
-              "alignItems": "center",
-              "backgroundColor": undefined,
-              "borderColor": "#ffffff",
-              "borderRadius": 25,
-              "borderWidth": 1,
-              "flexDirection": "row",
-              "justifyContent": "flex-start",
-              "marginBottom": 10,
-              "marginTop": 10,
-              "minHeight": 48,
-              "minWidth": "50%",
-              "paddingHorizontal": 25,
-              "paddingVertical": 7,
-              "width": "100%",
-            }
-          }
-        >
-          <TextInput
-            autoCapitalize="none"
-            autoCorrect={false}
-            editable={true}
-            keyboardType="numeric"
-            maxLength={100}
-            onChangeText={[Function]}
-            placeholder="0"
-            placeholderTextColor="#888888"
-            returnKeyType="done"
+          <Text
             style={
-              {
-                "backgroundColor": "transparent",
-                "color": "#c3c3c3",
-                "flexGrow": 1,
-                "flexShrink": 1,
-                "fontSize": 16,
-                "fontWeight": "600",
-                "marginLeft": 5,
-                "minHeight": 48,
-              }
+              [
+                {
+                  "fontSize": 17,
+                  "fontWeight": "400",
+                  "letterSpacing": -0.41,
+                  "lineHeight": 22,
+                },
+                {
+                  "color": "#18bd18",
+                },
+              ]
             }
-            value=""
-          />
+          >
+            Paste
+          </Text>
         </View>
       </View>
     </View>
     <View
       style={
         {
-          "alignItems": "center",
-          "justifyContent": "center",
-          "marginTop": "auto",
-          "paddingBottom": 20,
-          "paddingHorizontal": 15,
-          "paddingTop": 10,
+          "flex": 1,
+          "gap": 12,
+          "paddingHorizontal": 16,
+          "paddingTop": 16,
         }
       }
     >
-      <div
-        accessibilityRole="button"
+      <View
         accessibilityState={
           {
             "busy": undefined,
             "checked": undefined,
-            "disabled": true,
+            "disabled": false,
             "expanded": undefined,
             "selected": undefined,
           }
         }
-        accessible={true}
-        colorScheme="system"
-        effect="clear"
-        focusable={false}
-        interactive={false}
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={false}
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
         onClick={[Function]}
+        onFocus={[Function]}
         onResponderGrant={[Function]}
         onResponderMove={[Function]}
         onResponderRelease={[Function]}
         onResponderTerminate={[Function]}
         onResponderTerminationRequest={[Function]}
         onStartShouldSetResponder={[Function]}
+      >
+        <View
+          style={
+            [
+              {
+                "borderRadius": 16,
+                "borderWidth": 1,
+                "flexShrink": 1,
+                "minHeight": 124,
+              },
+              {
+                "backgroundColor": "#222223",
+                "borderColor": "#222223",
+              },
+            ]
+          }
+        >
+          <RCTScrollView
+            contentContainerStyle={
+              {
+                "flexGrow": 0,
+              }
+            }
+            keyboardShouldPersistTaps="handled"
+            onContentSizeChange={[Function]}
+            showsVerticalScrollIndicator={false}
+            style={
+              {
+                "flexGrow": 0,
+                "flexShrink": 1,
+              }
+            }
+          >
+            <View>
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "flexDirection": "row",
+                    "flexWrap": "wrap",
+                    "gap": 8,
+                    "padding": 12,
+                  }
+                }
+              >
+                <TextInput
+                  accessibilityLabel="Word 1 of 24"
+                  autoCapitalize="none"
+                  autoComplete="off"
+                  autoCorrect={false}
+                  autoFocus={true}
+                  editable={true}
+                  importantForAutofill="no"
+                  keyboardType="default"
+                  onBlur={[Function]}
+                  onChangeText={[Function]}
+                  onFocus={[Function]}
+                  onKeyPress={[Function]}
+                  onSubmitEditing={[Function]}
+                  placeholderTextColor="#ffffff"
+                  returnKeyType="next"
+                  selectionColor="#888888"
+                  spellCheck={false}
+                  style={
+                    [
+                      {
+                        "flexGrow": 1,
+                        "fontSize": 17,
+                        "fontWeight": "500",
+                        "height": 34,
+                        "letterSpacing": -0.41,
+                        "lineHeight": 22,
+                        "minWidth": 96,
+                        "paddingHorizontal": 4,
+                        "paddingVertical": 0,
+                      },
+                      false,
+                      {
+                        "color": "#c3c3c3",
+                      },
+                    ]
+                  }
+                  submitBehavior="submit"
+                  testID="import.seedinput"
+                  textContentType="none"
+                  value=""
+                />
+              </View>
+            </View>
+          </RCTScrollView>
+        </View>
+      </View>
+      <View
         style={
           [
             {
               "alignItems": "center",
-              "borderRadius": 30,
-              "justifyContent": "center",
-              "minWidth": 160,
-              "paddingHorizontal": 20,
-              "paddingVertical": 14,
-              "shadowColor": "#000",
-              "shadowOffset": {
-                "height": 10,
-                "width": 0,
-              },
-              "shadowOpacity": 0.35,
-              "shadowRadius": 16,
+              "borderRadius": 14,
+              "flexDirection": "row",
+              "gap": 12,
+              "height": 50,
+              "paddingHorizontal": 16,
             },
             {
-              "alignSelf": "stretch",
-            },
-            {
-              "opacity": 0.5,
+              "backgroundColor": "#222223",
             },
           ]
         }
@@ -370,15 +385,197 @@ exports[`Component ImportUfvk - test ImportUfvk - snapshot 1`] = `
           style={
             [
               {
-                "color": "white",
-                "fontSize": 18,
-                "fontWeight": "600",
+                "fontSize": 17,
+                "fontWeight": "400",
+                "letterSpacing": -0.41,
+                "lineHeight": 22,
               },
-              undefined,
+              {
+                "color": "#888888",
+              },
             ]
           }
+        >
+          Birthday
+        </Text>
+        <TextInput
+          accessibilityLabel=""
+          editable={true}
+          keyboardType="number-pad"
+          onChangeText={[Function]}
+          placeholder="0"
+          placeholderTextColor="#ffffff"
+          selectionColor="#888888"
+          style={
+            [
+              {
+                "flex": 1,
+                "fontSize": 17,
+                "fontVariant": [
+                  "tabular-nums",
+                ],
+                "fontWeight": "400",
+                "letterSpacing": -0.41,
+                "lineHeight": 22,
+                "padding": 0,
+                "textAlign": "right",
+              },
+              {
+                "color": "#c3c3c3",
+              },
+            ]
+          }
+          testID="import.birthdayinput"
+          value=""
         />
-      </div>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "paddingHorizontal": 16,
+            "paddingTop": 8,
+          },
+          {
+            "paddingBottom": NaN,
+          },
+        ]
+      }
+    >
+      <View
+        testID="import.button.ok"
+      >
+        <div
+          accessibilityRole="button"
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": true,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessible={true}
+          colorScheme="system"
+          effect="clear"
+          focusable={false}
+          interactive={false}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 9999,
+                "justifyContent": "center",
+                "minWidth": 160,
+                "paddingHorizontal": 20,
+                "paddingVertical": 14,
+                "shadowColor": "#000",
+                "shadowOffset": {
+                  "height": 10,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.35,
+                "shadowRadius": 16,
+              },
+              {
+                "alignSelf": "stretch",
+              },
+              {
+                "opacity": 0.5,
+              },
+            ]
+          }
+          tintColor="#222223"
+        >
+          <View>
+            <Text
+              numberOfLines={1}
+              style={
+                [
+                  [
+                    {
+                      "color": "white",
+                      "fontSize": 18,
+                      "fontWeight": "600",
+                    },
+                    undefined,
+                  ],
+                  {
+                    "opacity": 1,
+                  },
+                  {
+                    "animationDuration": 350,
+                    "animationName": {
+                      "from": {
+                        "opacity": 0,
+                      },
+                      "to": {
+                        "opacity": 1,
+                      },
+                    },
+                    "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                  },
+                ]
+              }
+            />
+            <Text
+              accessible={false}
+              importantForAccessibility="no-hide-descendants"
+              numberOfLines={1}
+              style={
+                [
+                  [
+                    {
+                      "color": "white",
+                      "fontSize": 18,
+                      "fontWeight": "600",
+                    },
+                    undefined,
+                  ],
+                  {
+                    "bottom": 0,
+                    "color": "transparent",
+                    "left": 0,
+                    "opacity": 0,
+                    "position": "absolute",
+                    "right": 0,
+                    "textShadowOffset": {
+                      "height": 0,
+                      "width": 0,
+                    },
+                    "top": 0,
+                  },
+                  {
+                    "textShadowColor": "white",
+                    "textShadowRadius": 6,
+                  },
+                  {
+                    "animationDuration": 350,
+                    "animationName": {
+                      "from": {
+                        "opacity": 1,
+                      },
+                      "to": {
+                        "opacity": 0,
+                      },
+                    },
+                    "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                  },
+                ]
+              }
+            />
+          </View>
+        </div>
+      </View>
     </View>
   </View>
 </View>

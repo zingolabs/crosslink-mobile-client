@@ -28,7 +28,7 @@ exports[`Component Button - test Button Primary - snapshot 1`] = `
     [
       {
         "alignItems": "center",
-        "borderRadius": 30,
+        "borderRadius": 9999,
         "justifyContent": "center",
         "minWidth": 160,
         "paddingHorizontal": 20,
@@ -47,20 +47,88 @@ exports[`Component Button - test Button Primary - snapshot 1`] = `
   }
   tintColor="#18bd18"
 >
-  <Text
-    style={
-      [
-        {
-          "color": "white",
-          "fontSize": 18,
-          "fontWeight": "600",
-        },
-        undefined,
-      ]
-    }
-  >
-    Primary button
-  </Text>
+  <View>
+    <Text
+      numberOfLines={1}
+      style={
+        [
+          [
+            {
+              "color": "white",
+              "fontSize": 18,
+              "fontWeight": "600",
+            },
+            undefined,
+          ],
+          {
+            "opacity": 1,
+          },
+          {
+            "animationDuration": 350,
+            "animationName": {
+              "from": {
+                "opacity": 0,
+              },
+              "to": {
+                "opacity": 1,
+              },
+            },
+            "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+          },
+        ]
+      }
+    >
+      Primary button
+    </Text>
+    <Text
+      accessible={false}
+      importantForAccessibility="no-hide-descendants"
+      numberOfLines={1}
+      style={
+        [
+          [
+            {
+              "color": "white",
+              "fontSize": 18,
+              "fontWeight": "600",
+            },
+            undefined,
+          ],
+          {
+            "bottom": 0,
+            "color": "transparent",
+            "left": 0,
+            "opacity": 0,
+            "position": "absolute",
+            "right": 0,
+            "textShadowOffset": {
+              "height": 0,
+              "width": 0,
+            },
+            "top": 0,
+          },
+          {
+            "textShadowColor": "white",
+            "textShadowRadius": 6,
+          },
+          {
+            "animationDuration": 350,
+            "animationName": {
+              "from": {
+                "opacity": 1,
+              },
+              "to": {
+                "opacity": 0,
+              },
+            },
+            "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+          },
+        ]
+      }
+    >
+      Primary button
+    </Text>
+  </View>
 </div>
 `;
 
@@ -92,7 +160,7 @@ exports[`Component Button - test Button Secondary - snapshot 1`] = `
     [
       {
         "alignItems": "center",
-        "borderRadius": 30,
+        "borderRadius": 9999,
         "justifyContent": "center",
         "minWidth": 160,
         "paddingHorizontal": 20,
@@ -111,19 +179,87 @@ exports[`Component Button - test Button Secondary - snapshot 1`] = `
   }
   tintColor="#1F1F1F"
 >
-  <Text
-    style={
-      [
-        {
-          "color": "white",
-          "fontSize": 18,
-          "fontWeight": "600",
-        },
-        undefined,
-      ]
-    }
-  >
-    Secondary button
-  </Text>
+  <View>
+    <Text
+      numberOfLines={1}
+      style={
+        [
+          [
+            {
+              "color": "white",
+              "fontSize": 18,
+              "fontWeight": "600",
+            },
+            undefined,
+          ],
+          {
+            "opacity": 1,
+          },
+          {
+            "animationDuration": 350,
+            "animationName": {
+              "from": {
+                "opacity": 0,
+              },
+              "to": {
+                "opacity": 1,
+              },
+            },
+            "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+          },
+        ]
+      }
+    >
+      Secondary button
+    </Text>
+    <Text
+      accessible={false}
+      importantForAccessibility="no-hide-descendants"
+      numberOfLines={1}
+      style={
+        [
+          [
+            {
+              "color": "white",
+              "fontSize": 18,
+              "fontWeight": "600",
+            },
+            undefined,
+          ],
+          {
+            "bottom": 0,
+            "color": "transparent",
+            "left": 0,
+            "opacity": 0,
+            "position": "absolute",
+            "right": 0,
+            "textShadowOffset": {
+              "height": 0,
+              "width": 0,
+            },
+            "top": 0,
+          },
+          {
+            "textShadowColor": "white",
+            "textShadowRadius": 6,
+          },
+          {
+            "animationDuration": 350,
+            "animationName": {
+              "from": {
+                "opacity": 1,
+              },
+              "to": {
+                "opacity": 0,
+              },
+            },
+            "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+          },
+        ]
+      }
+    >
+      Secondary button
+    </Text>
+  </View>
 </div>
 `;

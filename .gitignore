@@ -27,6 +27,7 @@ ios/vendor/
 android/app/src/main/jniLibs
 android/app/release/
 ios/libzingo.a
+ios/Zingolib.xcframework/
 ios/zingo.swift
 ios/zingoFFI.h
 ios/zingoFFI.modulemap
@@ -54,7 +55,6 @@ local.properties
 node_modules/
 npm-debug.log
 yarn-error.log
-yarn.lock
 
 nohup.out
 
@@ -96,3 +96,10 @@ buck-out/
 # Keystore
 /android/app/Zingo.jks
 /android/local.zingo.jks.properties
+# storybook
+storybook-static
+debug-storybook.log
+.rnstorybook/storybook.requires.ts
+.sbtmp
+
+.scratch/

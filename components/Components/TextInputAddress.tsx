@@ -1,16 +1,16 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, TouchableOpacity, TextInput } from 'react-native';
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCheck, faQrcode, faXmark } from '@fortawesome/free-solid-svg-icons';
 
-import { ContextAppLoaded } from '../../app/context';
-import { ThemeType } from '../../app/types';
+import { useAppLoadedActions, useAppLoadedSettings } from '../../app/context';
 import ErrorText from './ErrorText';
 import RegText from './RegText';
 import Utils from '../../app/utils';
 import { RouteEnum, ScreenEnum } from '../../app/AppState';
+import { useTheme } from '../../app/theme';
 
 type TextInputAddressProps = {
   address: string;
@@ -30,9 +30,9 @@ const TextInputAddress: React.FunctionComponent<TextInputAddressProps> = ({
   screenName,
 }) => {
   const navigation: any = useNavigation();
-  const context = useContext(ContextAppLoaded);
-  const { translate, indexerServer } = context;
-  const { colors } = useTheme() as ThemeType;
+  const { translate } = useAppLoadedActions();
+  const { indexerServer } = useAppLoadedSettings();
+  const { colors } = useTheme();
 
   const [validAddress, setValidAddress] = useState<number>(0); // 1 - OK, 0 - Empty, -1 - KO
 
@@ -79,7 +79,7 @@ const TextInputAddress: React.FunctionComponent<TextInputAddressProps> = ({
           >
             <RegText>{translate('send.toaddress') as string}</RegText>
             {validAddress === 1 && (
-              <FontAwesomeIcon icon={faCheck} color={colors.primary} />
+              <FontAwesomeIcon icon={faCheck} color={colors.fgAccent} />
             )}
             {validAddress === -1 && (
               <ErrorText>
@@ -92,7 +92,7 @@ const TextInputAddress: React.FunctionComponent<TextInputAddressProps> = ({
           style={{
             borderWidth: 1,
             borderRadius: 5,
-            borderColor: colors.text,
+            borderColor: colors.fgDefault,
             marginTop: 5,
           }}
         >
@@ -108,9 +108,9 @@ const TextInputAddress: React.FunctionComponent<TextInputAddressProps> = ({
               <TextInput
                 testID="send.addressplaceholder"
                 placeholder={translate('send.addressplaceholder') as string}
-                placeholderTextColor={colors.placeholder}
+                placeholderTextColor={colors.fgSubtle}
                 style={{
-                  color: colors.text,
+                  color: colors.fgDefault,
                   fontWeight: '600',
                   fontSize: 14,
                   marginLeft: 5,
@@ -139,7 +139,7 @@ const TextInputAddress: React.FunctionComponent<TextInputAddressProps> = ({
                     style={{ marginRight: 5 }}
                     size={25}
                     icon={faXmark}
-                    color={colors.primaryDisabled}
+                    color={colors.fgAccentDisabled}
                   />
                 </TouchableOpacity>
               )}
@@ -156,7 +156,7 @@ const TextInputAddress: React.FunctionComponent<TextInputAddressProps> = ({
                   style={{ marginRight: 5 }}
                   size={35}
                   icon={faQrcode}
-                  color={colors.border}
+                  color={colors.fgFaint}
                 />
               </TouchableOpacity>
             </View>

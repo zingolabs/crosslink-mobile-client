@@ -1,15 +1,10 @@
 import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
+import { MainTabParamList } from '../../types';
 import { RouteEnum } from '../../AppState';
-import { useTheme } from '@react-navigation/native';
-import { ThemeType } from '../../types';
 import StakingScreen from '../../../components/Staking/Staking';
 import History from '../../../components/History';
 import { Platform } from 'react-native';
-
-type MainTabParamList = {
-  [RouteEnum.History]: undefined;
-  [RouteEnum.StakingHome]: undefined;
-};
+import { useTheme } from '../../theme';
 
 const Tab = createNativeBottomTabNavigator<MainTabParamList>();
 
@@ -26,15 +21,15 @@ export const MainTabs: React.FunctionComponent<MainTabsProps> = ({
   setScrollToBottom,
   setShieldingAmount,
 }) => {
-  const { colors } = useTheme() as ThemeType;
+  const { colors } = useTheme();
 
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: colors.zingo,
+        tabBarActiveTintColor: colors.fgMuted,
       }}
       tabBarStyle={{
-        backgroundColor: colors.background,
+        backgroundColor: colors.bgCanvas,
       }}
     >
       <Tab.Screen
@@ -46,13 +41,12 @@ export const MainTabs: React.FunctionComponent<MainTabsProps> = ({
               ios: { sfSymbol: 'house' },
               android: require('../../../assets/icons/house.png'),
             }),
-          tabBarActiveTintColor: colors.primary,
+          tabBarActiveTintColor: colors.fgAccent,
         }}
       >
         {props => (
           <History
             {...props}
-            toggleMenuDrawer={() => {}}
             setShieldingAmount={setShieldingAmount}
             setScrollToTop={setScrollToTop}
             scrollToTop={scrollToTop}
@@ -71,7 +65,7 @@ export const MainTabs: React.FunctionComponent<MainTabsProps> = ({
               ios: { sfSymbol: 'square.stack.3d.up.fill' },
               android: require('../../../assets/icons/layers.png'),
             }),
-          tabBarActiveTintColor: colors.primary,
+          tabBarActiveTintColor: colors.fgAccent,
         }}
       />
     </Tab.Navigator>
