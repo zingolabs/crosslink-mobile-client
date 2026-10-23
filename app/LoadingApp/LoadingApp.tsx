@@ -31,6 +31,7 @@ import {
   CurrencyEnum,
   SelectServerEnum,
   ChainNameEnum,
+  IndexerNetworkEnum,
   SnackbarDurationEnum,
   SettingsNameEnum,
   RouteEnum,
@@ -75,7 +76,7 @@ import ChooseIndexer from './components/ChooseIndexer';
 import ListedIndexers from './components/ListedIndexers';
 import CustomIndexer from './components/CustomIndexer';
 import ScheduledActionsFileImpl from '../../components/ScheduledActions/ScheduledActionsFileImpl';
-import { discoverIndexers, probeIndexer } from '../indexers';
+import { discoverIndexers, probeIndexer, selectBestIndexer } from '../indexers';
 import notifee from '@notifee/react-native';
 import { useTheme, AppTheme } from '../theme';
 import { LoadingAppEntryEnum } from '../AppState/enums/LoadingAppEntryEnum';
@@ -120,6 +121,11 @@ export default function LoadingApp(props: LoadingAppProps) {
     useState<ServerType>(SERVER_DEFAULT_0);
   const [selectIndexerServer, setSelectIndexerServer] =
     useState<SelectServerEnum>(SelectServerEnum.custom);
+  const [indexerNetwork, setIndexerNetwork] = useState<IndexerNetworkEnum>(
+    IndexerNetworkEnum.stable,
+  );
+  const [indexerServerPinned, setIndexerServerPinned] =
+    useState<boolean>(false);
   const [sendAll, setSendAll] = useState<boolean>(true);
   const [donation, setDonation] = useState<boolean>(false);
   const [privacy, setPrivacy] = useState<boolean>(false);
@@ -252,6 +258,28 @@ export default function LoadingApp(props: LoadingAppProps) {
           selectIndexerServer,
         );
       }
+      if (
+        settings.indexerNetwork === IndexerNetworkEnum.stable ||
+        settings.indexerNetwork === IndexerNetworkEnum.nightly
+      ) {
+        setIndexerNetwork(settings.indexerNetwork);
+      } else {
+        await SettingsFileImpl.writeSettings(
+          SettingsNameEnum.indexerNetwork,
+          indexerNetwork,
+        );
+      }
+      if (
+        settings.indexerServerPinned === true ||
+        settings.indexerServerPinned === false
+      ) {
+        setIndexerServerPinned(settings.indexerServerPinned);
+      } else {
+        await SettingsFileImpl.writeSettings(
+          SettingsNameEnum.indexerServerPinned,
+          indexerServerPinned,
+        );
+      }
       if (settings.sendAll === true || settings.sendAll === false) {
         setSendAll(settings.sendAll);
       } else {
@@ -345,6 +373,8 @@ export default function LoadingApp(props: LoadingAppProps) {
         currency={currency}
         indexerServer={indexerServer}
         selectIndexerServer={selectIndexerServer}
+        indexerNetwork={indexerNetwork}
+        indexerServerPinned={indexerServerPinned}
         sendAll={sendAll}
         donation={donation}
         privacy={privacy}
@@ -374,6 +404,8 @@ type LoadingAppClassProps = {
   currency: CurrencyEnum;
   indexerServer: ServerType;
   selectIndexerServer: SelectServerEnum;
+  indexerNetwork: IndexerNetworkEnum;
+  indexerServerPinned: boolean;
   sendAll: boolean;
   donation: boolean;
   privacy: boolean;
@@ -437,6 +469,8 @@ export class LoadingAppClass extends Component<
       // context settings
       indexerServer: props.indexerServer,
       selectIndexerServer: props.selectIndexerServer,
+      indexerNetwork: props.indexerNetwork,
+      indexerServerPinned: props.indexerServerPinned,
       currency: props.currency,
       language: props.language,
       sendAll: props.sendAll,
@@ -587,7 +621,7 @@ export class LoadingAppClass extends Component<
     this.setState({ hasRecoveryWalletInfoSaved: has });
 
     if (!this.state.indexerServer.uri) {
-      const { indexers } = await discoverIndexers();
+      const { indexers } = await discoverIndexers(this.state.indexerNetwork);
       const best = indexers[0];
       if (best) {
         const server: ServerType = {
@@ -653,6 +687,21 @@ export class LoadingAppClass extends Component<
     }
     if (resultJson.error) {
       return { kind: 'error', message: resultJson.error, title };
+    }
+
+    if (!this.state.indexerServerPinned && this.state.netInfo.isConnected) {
+      const best = await selectBestIndexer(this.state.indexerNetwork);
+      if (best && best !== this.state.indexerServer.uri) {
+        const winner: ServerType = {
+          uri: best,
+          chainName: this.state.indexerServer.chainName,
+        };
+        this.setState({ indexerServer: winner });
+        await SettingsFileImpl.writeSettings(
+          SettingsNameEnum.indexerServer,
+          winner,
+        );
+      }
     }
 
     const wallet = await this.readWalletKind();
@@ -769,6 +818,7 @@ export class LoadingAppClass extends Component<
     this.setState({
       indexerServer: fasterServer,
       selectIndexerServer: SelectServerEnum.custom,
+      indexerServerPinned: false,
     });
     await SettingsFileImpl.writeSettings(
       SettingsNameEnum.indexerServer,
@@ -777,6 +827,10 @@ export class LoadingAppClass extends Component<
     await SettingsFileImpl.writeSettings(
       SettingsNameEnum.selectIndexerServer,
       SelectServerEnum.custom,
+    );
+    await SettingsFileImpl.writeSettings(
+      SettingsNameEnum.indexerServerPinned,
+      false,
     );
     if (isEqual(actualServer, fasterServer)) {
       this.addLastSnackbar({
@@ -954,18 +1008,31 @@ export class LoadingAppClass extends Component<
   setIndexerServer = async (
     indexerServerUri: string,
     indexerServerChainName: ChainNameEnum,
+    indexerNetwork?: IndexerNetworkEnum,
   ) => {
     const NewIndexerServer: ServerType = {
       uri: indexerServerUri,
       chainName: indexerServerChainName,
     };
-    this.setState({
+    this.setState(state => ({
       indexerServer: NewIndexerServer,
-    });
+      indexerServerPinned: true,
+      indexerNetwork: indexerNetwork ?? state.indexerNetwork,
+    }));
     await SettingsFileImpl.writeSettings(
       SettingsNameEnum.indexerServer,
       NewIndexerServer,
     );
+    await SettingsFileImpl.writeSettings(
+      SettingsNameEnum.indexerServerPinned,
+      true,
+    );
+    if (indexerNetwork) {
+      await SettingsFileImpl.writeSettings(
+        SettingsNameEnum.indexerNetwork,
+        indexerNetwork,
+      );
+    }
     await SettingsFileImpl.writeSettings(
       SettingsNameEnum.selectIndexerServer,
       SelectServerEnum.custom,

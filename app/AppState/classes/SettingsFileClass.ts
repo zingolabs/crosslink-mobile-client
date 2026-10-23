@@ -1,5 +1,6 @@
 import { RPCPerformanceLevelEnum } from '../../rpc/enums/RPCPerformanceLevelEnum';
 import { CurrencyEnum } from '../enums/CurrencyEnum';
+import { IndexerNetworkEnum } from '../enums/IndexerNetworkEnum';
 import { LanguageEnum } from '../enums/LanguageEnum';
 import { SelectServerEnum } from '../enums/SelectServerEnum';
 import SecurityType from '../types/SecurityType';
@@ -8,6 +9,8 @@ import ServerType from '../types/ServerType';
 export default class SettingsFileClass {
   indexerServer: ServerType;
   selectIndexerServer: SelectServerEnum;
+  indexerNetwork: IndexerNetworkEnum;
+  indexerServerPinned: boolean;
   currency: CurrencyEnum;
   language: LanguageEnum;
   sendAll: boolean;
@@ -28,6 +31,8 @@ export default class SettingsFileClass {
   constructor(
     indexerServer: ServerType,
     selectIndexerServer: SelectServerEnum,
+    indexerNetwork: IndexerNetworkEnum,
+    indexerServerPinned: boolean,
     currency: CurrencyEnum,
     language: LanguageEnum,
     sendAll: boolean,
@@ -43,6 +48,8 @@ export default class SettingsFileClass {
   ) {
     this.indexerServer = indexerServer;
     this.selectIndexerServer = selectIndexerServer;
+    this.indexerNetwork = indexerNetwork;
+    this.indexerServerPinned = indexerServerPinned;
     this.currency = currency;
     this.language = language;
     this.sendAll = sendAll;

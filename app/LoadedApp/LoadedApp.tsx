@@ -1540,6 +1540,10 @@ export class LoadedAppClass extends Component<
               SettingsNameEnum.selectIndexerServer,
               selectServer,
             );
+            await SettingsFileImpl.writeSettings(
+              SettingsNameEnum.indexerServerPinned,
+              true,
+            );
             this.setState({
               indexerServer: value,
               selectIndexerServer: selectServer,

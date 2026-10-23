@@ -2,6 +2,8 @@ export enum SettingsNameEnum {
   // screen
   indexerServer = 'indexerServer',
   selectIndexerServer = 'selectIndexerServer',
+  indexerNetwork = 'indexerNetwork',
+  indexerServerPinned = 'indexerServerPinned',
   currency = 'currency',
   language = 'language',
   sendAll = 'sendAll',

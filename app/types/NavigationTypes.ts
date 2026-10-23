@@ -2,6 +2,7 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 import type { IndexerReport } from '../indexers';
 import {
   AddressKindEnum,
+  IndexerNetworkEnum,
   LaunchingModeEnum,
   LoadingAppEntryEnum,
   RouteEnum,
@@ -32,7 +33,9 @@ export type AppStackParamList = {
 export type LoadingAppStackParamList = {
   [RouteEnum.StartMenu]: undefined;
   [RouteEnum.ChooseIndexer]: undefined;
-  [RouteEnum.ListedIndexers]: { report?: IndexerReport } | undefined;
+  [RouteEnum.ListedIndexers]:
+    | { report?: IndexerReport; network?: IndexerNetworkEnum }
+    | undefined;
   [RouteEnum.CustomIndexer]: undefined;
   [RouteEnum.Import]: undefined;
 };
