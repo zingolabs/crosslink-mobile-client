@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   ScrollView,
@@ -13,29 +13,36 @@ import {
   NativeSyntheticEvent,
 } from 'react-native';
 
-import { AppDrawerParamList } from '../../app/types';
-import { ContextAppLoaded } from '../../app/context';
+import { LoadedAppStackParamList } from '../../app/types';
+import {
+  useAppLoadedActions,
+  useAppLoadedWallet,
+  useAppLoadedUi,
+} from '../../app/context';
 import { Header } from '../Header';
 import { GlobalConst, RouteEnum, ScreenEnum } from '../../app/AppState';
 import FadeText from '../Components/FadeText';
 import Utils from '../../app/utils';
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { XIcon } from '../Components/Icons/XIcon';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
 import { useTheme } from '../../app/theme';
 
-type MemoProps = DrawerScreenProps<AppDrawerParamList, RouteEnum.Memo>;
+type MemoProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
+  RouteEnum.Memo
+>;
 
 const Memo: React.FunctionComponent<MemoProps> = ({ navigation, route }) => {
   const setMessage =
     !!route.params && route.params.setMessage !== undefined
       ? route.params.setMessage
       : () => {};
-  const context = useContext(ContextAppLoaded);
-  const { translate, defaultUnifiedAddress, snackbars, removeFirstSnackbar } =
-    context;
+  const { translate, removeFirstSnackbar } = useAppLoadedActions();
+  const { defaultUnifiedAddress } = useAppLoadedWallet();
+  const { snackbars } = useAppLoadedUi();
   const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.Memo;

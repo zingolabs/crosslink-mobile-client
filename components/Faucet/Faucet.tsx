@@ -1,18 +1,21 @@
-import React, { useContext } from 'react';
+import React from 'react';
 
-import { AppDrawerParamList } from '../../app/types';
-import { ContextAppLoaded } from '../../app/context';
+import { LoadedAppStackParamList } from '../../app/types';
+import { useAppLoadedActions, useAppLoadedUi } from '../../app/context';
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { RouteEnum, ScreenEnum } from '../../app/AppState';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HeaderTitle } from '../Header';
 
-type FaucetProps = DrawerScreenProps<AppDrawerParamList, RouteEnum.Faucet>;
+type FaucetProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
+  RouteEnum.Faucet
+>;
 
 const Faucet: React.FunctionComponent<FaucetProps> = ({ navigation }) => {
-  const context = useContext(ContextAppLoaded);
-  const { snackbars, removeFirstSnackbar } = context;
+  const { removeFirstSnackbar } = useAppLoadedActions();
+  const { snackbars } = useAppLoadedUi();
   const { clear } = useToast();
   const screenName = ScreenEnum.About;
 

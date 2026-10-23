@@ -10,7 +10,6 @@ const meta = {
   component: History,
   args: {
     ...screenProps(RouteEnum.History),
-    toggleMenuDrawer: () => {},
     setShieldingAmount: () => {},
     setScrollToTop: () => {},
     scrollToTop: false,
@@ -33,7 +32,9 @@ export const NotLoadedYet: Story = {
   parameters: { context: { valueTransfers: null, valueTransfersTotal: null } },
 };
 
-export const SomePending: Story = { parameters: { context: { somePending: true } } };
+export const SomePending: Story = {
+  parameters: { context: { somePending: true } },
+};
 
 export const PrivacyOn: Story = { parameters: { context: { privacy: true } } };
 

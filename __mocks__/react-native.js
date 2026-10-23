@@ -3,6 +3,8 @@ jest.mock('react-native', () => {
 
   RN.NativeModules.RPCModule = {
     getLatestBlockServerInfo: jest.fn(() => '{}'),
+    discoverIndexers: jest.fn(() => '{"indexers":[],"errors":[]}'),
+    probeIndexer: jest.fn(() => '{"indexers":[],"errors":[]}'),
     getLatestBlockWalletInfo: jest.fn(() => '{}'),
     walletExists: jest.fn(() => 'false'),
     getValueTransfersList: jest.fn(

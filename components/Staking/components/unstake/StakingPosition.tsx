@@ -4,8 +4,7 @@ import { CurrencyNameEnum, WalletBondsType } from '../../../../app/AppState';
 import { WalletBondsStatusEnum } from '../../../../app/AppState/enums/WalletBondsStatusEnum';
 import { RefreshCcw } from 'lucide-react-native';
 import ZecAmount from '../../../Components/ZecAmount';
-import { useContext } from 'react';
-import { ContextAppLoaded } from '../../../../app/context';
+import { useAppLoadedWallet } from '../../../../app/context';
 import { useTheme } from '../../../../app/theme';
 
 type StakingPositionProps = {
@@ -15,8 +14,7 @@ type StakingPositionProps = {
 
 export function StakingPosition({ item, selected }: StakingPositionProps) {
   const { colors } = useTheme();
-  const context = useContext(ContextAppLoaded);
-  const { valueTransfers } = context;
+  const { valueTransfers } = useAppLoadedWallet();
 
   let confirmations =
     valueTransfers &&

@@ -9,7 +9,6 @@ const meta = {
   component: Send,
   args: {
     ...screenProps(RouteEnum.Send),
-    toggleMenuDrawer: () => {},
     setShieldingAmount: () => {},
     setScrollToTop: () => {},
     setScrollToBottom: () => {},

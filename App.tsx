@@ -16,6 +16,7 @@ import { LoadingApp } from './app/LoadingApp';
 import { AppStackParamList } from './app/types';
 import { ThemeProvider, navigationTheme, useTheme } from './app/theme';
 import { RouteEnum } from './app/AppState';
+import ReactScanGate from './app/devtools/ReactScan';
 
 LogBox.ignoreLogs([
   '[Reanimated] Reduced motion setting is enabled on this device.',
@@ -84,11 +85,13 @@ const AppContent: React.FunctionComponent = () => {
 };
 
 const App: React.FunctionComponent = () => (
-  <GestureHandlerRootView style={{ flex: 1 }}>
-    <ThemeProvider>
-      <AppContent />
-    </ThemeProvider>
-  </GestureHandlerRootView>
+  <ReactScanGate>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
+    </GestureHandlerRootView>
+  </ReactScanGate>
 );
 
 export default App;

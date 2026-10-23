@@ -1,14 +1,10 @@
 import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
+import { MainTabParamList } from '../../types';
 import { RouteEnum } from '../../AppState';
 import StakingScreen from '../../../components/Staking/Staking';
 import History from '../../../components/History';
 import { Platform } from 'react-native';
 import { useTheme } from '../../theme';
-
-type MainTabParamList = {
-  [RouteEnum.History]: undefined;
-  [RouteEnum.StakingHome]: undefined;
-};
 
 const Tab = createNativeBottomTabNavigator<MainTabParamList>();
 
@@ -51,7 +47,6 @@ export const MainTabs: React.FunctionComponent<MainTabsProps> = ({
         {props => (
           <History
             {...props}
-            toggleMenuDrawer={() => {}}
             setShieldingAmount={setShieldingAmount}
             setScrollToTop={setScrollToTop}
             scrollToTop={scrollToTop}

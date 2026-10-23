@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext } from 'react';
+import React from 'react';
 import { View, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
@@ -8,7 +8,7 @@ import FadeText from '../../Components/FadeText';
 import PaperPlane from '../../../assets/icons/paper-plane.svg';
 import QrCode from '../../../assets/icons/qr.svg';
 import FaucetIcon from '../../../assets/icons/faucet.svg';
-import { ContextAppLoaded } from '../../../app/context';
+import { useAppLoadedActions, useAppLoadedWallet } from '../../../app/context';
 
 const ActionButton = ({
   icon,
@@ -53,8 +53,8 @@ const ActionButton = ({
 const QuickActionsRow: React.FC = () => {
   const navigation: any = useNavigation();
 
-  const { defaultUnifiedAddress, requestFaucetFunds } =
-    useContext(ContextAppLoaded);
+  const { requestFaucetFunds } = useAppLoadedActions();
+  const { defaultUnifiedAddress } = useAppLoadedWallet();
 
   return (
     <View

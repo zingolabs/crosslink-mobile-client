@@ -1,11 +1,6 @@
-import { ChainNameEnum, ServerType, ServerUrisType } from '../../app/AppState';
-import { serverUris } from '../../app/uris';
+import { ChainNameEnum, ServerType } from '../../app/AppState';
 
 export const mockIndexerServer: ServerType = {
-  uri: serverUris().filter(
-    (s: ServerUrisType) => s.chainName === ChainNameEnum.testChainName,
-  )[0].uri,
-  chainName: serverUris().filter(
-    (s: ServerUrisType) => s.chainName === ChainNameEnum.testChainName,
-  )[0].chainName,
+  uri: 'http://88.198.67.189:18234',
+  chainName: ChainNameEnum.testChainName,
 };

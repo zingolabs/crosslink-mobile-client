@@ -1,6 +1,7 @@
 export type {
+  MainTabParamList,
   AppStackParamList,
-  AppDrawerParamList,
+  LoadedAppStackParamList,
   LoadingAppNavigationState,
   LoadingAppStackParamList,
   LoadedAppNavigationState,

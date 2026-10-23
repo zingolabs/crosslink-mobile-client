@@ -1,84 +1,46 @@
-# Zingo Delegator Android and iOS apps
-App Store: [TestFlight link App](https://testflight.apple.com/join/DsT9zcBD)
-Google Play: [Beta Android App](https://play.google.com/store/apps/details?id=org.ZingoLabs.ZingoDelegator)
+# Zingo Delegator
 
-# Security Vulnerability Disclosure
+Zcash Crosslink wallet for Android and iOS.
 
-If you believe you have discovered a security issue, please contact us at:
+- iOS: [TestFlight](https://testflight.apple.com/join/DsT9zcBD)
+- Android: [Google Play beta](https://play.google.com/store/apps/details?id=org.ZingoLabs.ZingoDelegator)
 
-zingodisclosure@proton.me
+## Security
 
-## Building The App
+Report security issues to zingodisclosure@proton.me.
 
- Please see the platform specific [iOS](./docs/ios_developer_quickstart.md) and [Android](./docs/android_developer_quickstart.md) "quickstart" documentation.
+## Setup
 
-## Testing
-### Prerequisites
-Integration tests and end-to-end tests require a regtest server. On linux hosts, these may be run
-locally by installing the lightwalletd, zcashd and zcash-cli binaries
-(https://github.com/zingolabs/zingolib#regtest). From the `rust/android/regtest/bin/` directory run: <br />
-`ln -s path/to/lightwalletd/binary path/to/zcashd/binary path/to/zcash-cli/binary ./` <br />
-From the `rust/android/lightwalletd_bin` directory run: <br />
-`ln -s path/to/lightwalletd/binary ./`
+See the [iOS](./docs/ios_developer_quickstart.md) and [Android](./docs/android_developer_quickstart.md) quickstarts.
 
-Alternatively, integration tests and end-to-end tests can be run on non-linux hosts with Regchest
-(https://github.com/zingolabs/zingo-regchest). Regchest manages the zcash/lightwalletd regtest
-network in a docker container. Before running tests, pull the latest Regchest image from docker: <br />
-`docker pull zingodevops/regchest:013`
+```sh
+yarn install
+yarn build:ios
+yarn build:android
+```
 
-### Yarn Tests
-1. From the root directory, run: <br />
-   `yarn test`
+## Run
 
-### Integration Tests
-1. Create quick-boot snapshots to speed up AVD launch times. From the root directory, run: <br />
-   `./scripts/android_integration_tests.sh -a x86_64 -s` <br />
-   `./scripts/android_integration_tests.sh -a x86 -s` <br />
-   By default, this uses default API 29 system images. Other images may be used for testing
-   by specifying the api level and target. However, using other images with the cargo test runner
-   is still under development.
-2. To run the integration tests. From the `rust` directory, run: <br />
-   `cargo nextest run android_integration` <br />
-   Specify to run specific ABI: <br />
-   `cargo nextest run android_integration::x86_64` <br />
-   `cargo nextest run android_integration::x86_32` <br />
-   `cargo nextest run android_integration::arm64` <br />
-   `cargo nextest run android_integration::arm32` <br />
-   Specify to run a specific test on all ABIs: <br />
-   `cargo nextest run test_name` <br />
-   Specify to run a specific ABI and test: <br />
-   `cargo nextest run android_integration::x86_64::test_name`
+```sh
+yarn start
+yarn ios
+yarn android
+```
 
-To run tests with Regchest, add the `--features regchest` flag, for example: <br />
-`cargo nextest run android_integration --features regchest`
+## Storybook
 
-For more information on running integration tests on non-default AVDs, run: <br />
-`./scripts/android_integration_tests.sh -h` <br />
-Without the cargo test runner these emulated android devices will not be able to connect to a
-lightwalletd/zcashd regtest network. Therefore, only tests in the "Offline Testsuite" may be tested.
+```sh
+yarn storybook
+yarn storybook:ios
+```
 
-### End-to-End Tests
-0. Note there needs to be a lightwalletd in rust/android/lightwalletd_bin
-1. Launch the emulated AVD by clicking the 'play' icon in Android Studio's `Device Manager`.
-   Alternatively, connect to a physical device. See previous section 'Launching the app' for more
-   details.
-2. In a terminal, run: <br />
-   `yarn start`
-3. Create quick-boot snapshots to speed up AVD launch times. From the root directory, run: <br />
-   `./scripts/e2e_tests.sh -a x86_64 -s` <br />
-   `./scripts/e2e_tests.sh -a x86 -s` <br />
-   By default, this uses default API 29 system images. Other images may be used for testing
-   by specifying the api level and target. However, using other images with the cargo test runner
-   is still under development.
-4. In a separate terminal, from the `rust` directory, run all tests: <br />
-   `cargo nextest run e2e`
-   Specify to run specific ABI: <br />
-   `cargo nextest run e2e::x86_64` <br />
-   `cargo nextest run e2e::x86_32` <br />
-   `cargo nextest run e2e::arm64` <br />
-   `cargo nextest run e2e::arm32` <br />
-   Specify to run a specific ABI and test: <br />
-   `cargo nextest run e2e::x86_64::test_name`
+## Test
 
-# Troubleshooting
-For notes on known issues and problems, see the [trouble-shooting notes](./TROUBLESHOOTING.md).
+```sh
+yarn test
+yarn lint
+```
+
+## Troubleshooting
+
+See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md).

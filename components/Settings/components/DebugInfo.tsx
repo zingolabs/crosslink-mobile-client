@@ -1,13 +1,18 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext } from 'react';
+import React from 'react';
 import { View, ScrollView } from 'react-native';
 
-import { AppDrawerParamList } from '../../../app/types';
-import { ContextAppLoaded } from '../../../app/context';
+import { LoadedAppStackParamList } from '../../../app/types';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedWallet,
+  useAppLoadedUi,
+} from '../../../app/context';
 import Snackbars from '../../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { RouteEnum, ScreenEnum } from '../../../app/AppState';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FadeText from '../../Components/FadeText';
 import { createAlert } from '../../../app/createAlert';
@@ -16,22 +21,21 @@ import { HeaderTitle } from '../../Header';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
 import { useTheme } from '../../../app/theme';
 
-type DebugInfoProps = DrawerScreenProps<
-  AppDrawerParamList,
+type DebugInfoProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
   RouteEnum.DebugInfo
 >;
 
 const DebugInfo: React.FunctionComponent<DebugInfoProps> = ({ navigation }) => {
-  const context = useContext(ContextAppLoaded);
   const {
-    snackbars,
     removeFirstSnackbar,
-    lastError,
     setBackgroundError,
     addLastSnackbar,
     translate,
-    zingolibVersion,
-  } = context;
+  } = useAppLoadedActions();
+  const { zingolibVersion } = useAppLoadedSettings();
+  const { lastError } = useAppLoadedWallet();
+  const { snackbars } = useAppLoadedUi();
   const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.DebugInfo;

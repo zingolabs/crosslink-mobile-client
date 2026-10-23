@@ -15,14 +15,17 @@ import { mockTranslate } from '../__mocks__/dataMocks/mockTranslate';
 import { mockInfo } from '../__mocks__/dataMocks/mockInfo';
 import { mockTotalBalance } from '../__mocks__/dataMocks/mockTotalBalance';
 import { mockValueTransfers } from '../__mocks__/dataMocks/mockValueTransfers';
-import { DrawerScreenProps } from '@react-navigation/drawer';
-import { AppDrawerParamList } from '../app/types';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { LoadedAppStackParamList } from '../app/types';
 import { RouteEnum } from '../app/AppState';
 import mockNavigation from '../__mocks__/dataMocks/mockNavigation';
 
 function makeDrawerProps(
   i: number,
-): DrawerScreenProps<AppDrawerParamList, RouteEnum.ValueTransferDetail> {
+): NativeStackScreenProps<
+  LoadedAppStackParamList,
+  RouteEnum.ValueTransferDetail
+> {
   return {
     navigation: mockNavigation,
     route: {

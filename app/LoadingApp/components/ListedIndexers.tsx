@@ -19,8 +19,8 @@ import { ToastProvider, useToast } from 'react-native-toastier';
 import { ChainNameEnum, RouteEnum, ScreenEnum } from '../../AppState';
 import { ContextAppLoading } from '../../context';
 import { LoadingAppStackParamList } from '../../types';
-import { Indexer, IndexerList } from '../../utils/Utils';
-import { Probe, useIndexerProbes } from '../hooks/useIndexerProbes';
+import { Discover, Indexer, hostOf } from '../../indexers';
+import { useIndexerDiscovery } from '../hooks/useIndexerDiscovery';
 import Snackbars from '../../../components/Components/Snackbars';
 import { HeaderTitle } from '../../../components/Header';
 import BlurInText from '../../../components/Components/BlurInText';
@@ -30,10 +30,9 @@ import { radiusPill, text, useTheme } from '../../theme';
 
 export type ListedIndexersProps = {
   setIndexerServer: (u: string, c: ChainNameEnum) => Promise<void>;
-  indexerList: IndexerList;
   closeServers: () => void;
   previousServer?: string;
-  pingServer?: (uri: string) => Promise<number | null>;
+  discover?: Discover;
 };
 
 const EASE_OUT = cubicBezier(0.23, 1, 0.32, 1);
@@ -41,30 +40,15 @@ const ROW_LAYOUT = LinearTransition.duration(350)
   .easing(Easing.bezier(0.77, 0, 0.175, 1))
   .reduceMotion(ReduceMotion.System);
 
-const hostOf = (url: string) => {
-  try {
-    return new URL(url.includes('://') ? url : `http://${url}`).hostname;
-  } catch {
-    return url;
-  }
-};
-
 type IndexerRowProps = {
   item: Indexer;
-  probe: Probe;
   selected: boolean;
   onPress: () => void;
 };
 
-const IndexerRow: React.FC<IndexerRowProps> = ({
-  item,
-  probe,
-  selected,
-  onPress,
-}) => {
+const IndexerRow: React.FC<IndexerRowProps> = ({ item, selected, onPress }) => {
   const { colors } = useTheme();
   const reducedMotion = useReducedMotion();
-  const offline = probe.state === 'offline';
 
   const check: CSSTransitionProperties = {
     transitionProperty: ['transform', 'opacity'],
@@ -72,19 +56,13 @@ const IndexerRow: React.FC<IndexerRowProps> = ({
     transitionTimingFunction: EASE_OUT,
   };
 
-  const detail =
-    probe.state === 'online'
-      ? `${probe.latency} ms`
-      : probe.state === 'offline'
-        ? 'Unreachable'
-        : '';
+  const detail = `${item.latencyMs} ms`;
 
   return (
     <Pressable
       accessibilityRole="radio"
-      accessibilityLabel={`${hostOf(item.url)}${detail ? `, ${detail}` : ''}`}
-      accessibilityState={{ selected, disabled: offline }}
-      disabled={offline}
+      accessibilityLabel={`${hostOf(item.uri)}, ${detail}`}
+      accessibilityState={{ selected }}
       onPress={onPress}
       pressRetentionOffset={16}
     >
@@ -94,7 +72,6 @@ const IndexerRow: React.FC<IndexerRowProps> = ({
             styles.row,
             { backgroundColor: colors.bgSurface },
             pressed && styles.rowPressed,
-            offline && styles.rowOffline,
           ]}
         >
           <Text
@@ -102,25 +79,16 @@ const IndexerRow: React.FC<IndexerRowProps> = ({
             numberOfLines={1}
             maxFontSizeMultiplier={1.6}
           >
-            {hostOf(item.url)}
+            {hostOf(item.uri)}
           </Text>
 
-          {probe.state === 'checking' ? (
-            <View style={styles.rowValue}>
-              <JellyLoader size={20} />
-            </View>
-          ) : (
-            <BlurInText
-              style={[
-                styles.rowValue,
-                { color: offline ? colors.fgDanger : colors.fgSubtle },
-              ]}
-              numberOfLines={1}
-              maxFontSizeMultiplier={1.6}
-            >
-              {detail}
-            </BlurInText>
-          )}
+          <BlurInText
+            style={[styles.rowValue, { color: colors.fgSubtle }]}
+            numberOfLines={1}
+            maxFontSizeMultiplier={1.6}
+          >
+            {detail}
+          </BlurInText>
 
           <Animated.View
             style={[
@@ -156,10 +124,9 @@ const Separator = () => {
 
 const ListedIndexers: React.FC<ListedIndexersProps> = ({
   setIndexerServer,
-  indexerList,
   closeServers,
   previousServer,
-  pingServer,
+  discover,
 }) => {
   const { snackbars, removeFirstSnackbar } = useContext(ContextAppLoading);
   const { colors } = useTheme();
@@ -172,20 +139,20 @@ const ListedIndexers: React.FC<ListedIndexersProps> = ({
     useRoute<RouteProp<LoadingAppStackParamList, RouteEnum.ListedIndexers>>();
   const screenName = ScreenEnum.Servers;
 
-  const { probes, ordered, online, settled, fastest, probeAll } =
-    useIndexerProbes(indexerList, pingServer, route.params?.probes);
-  const [selectedUrl, setSelectedUrl] = useState<string | null>(
-    indexerList.some(i => i.url === previousServer) ? previousServer! : null,
+  const { indexers, discovering, refresh } = useIndexerDiscovery(
+    discover,
+    route.params?.report,
   );
+  const [selectedUri, setSelectedUri] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
 
   useEffect(() => {
-    const current = selectedUrl ? probes[selectedUrl] : undefined;
-    const keep = !!selectedUrl && (!current || current.state !== 'offline');
-    if (!keep && fastest !== selectedUrl) {
-      setSelectedUrl(fastest);
+    if (selectedUri && indexers.some(i => i.uri === selectedUri)) {
+      return;
     }
-  }, [probes, selectedUrl, fastest]);
+    const previous = indexers.find(i => i.uri === previousServer);
+    setSelectedUri(previous?.uri ?? indexers[0]?.uri ?? null);
+  }, [indexers, previousServer, selectedUri]);
 
   const goBack = () => {
     clear();
@@ -197,19 +164,17 @@ const ListedIndexers: React.FC<ListedIndexersProps> = ({
   };
 
   const onConnect = async () => {
-    if (!selectedUrl || connecting) {
+    if (!selectedUri || connecting) {
       return;
     }
     setConnecting(true);
     clear();
-    await setIndexerServer(selectedUrl, ChainNameEnum.testChainName);
+    await setIndexerServer(selectedUri, ChainNameEnum.testChainName);
     closeServers();
   };
 
-  const selectedOnline =
-    !!selectedUrl && probes[selectedUrl]?.state === 'online';
-  const nothingResponded = settled && online.length === 0;
-  const showAction = selectedOnline || nothingResponded;
+  const nothingResponded = !discovering && indexers.length === 0;
+  const showAction = !discovering;
 
   const materialize: CSSAnimationProperties = {
     animationName: {
@@ -229,29 +194,40 @@ const ListedIndexers: React.FC<ListedIndexersProps> = ({
       />
 
       <View style={[styles.screen, { backgroundColor: colors.bgCanvas }]}>
-        <HeaderTitle title="Listed indexers" goBack={goBack} />
+        <HeaderTitle title="Discovered indexers" goBack={goBack} />
 
-        <View style={[styles.group, { backgroundColor: colors.bgSurface }]}>
-          <Animated.FlatList
-            data={ordered}
-            keyExtractor={item => item.url}
-            bounces={false}
-            itemLayoutAnimation={ROW_LAYOUT}
-            ItemSeparatorComponent={Separator}
-            renderItem={({ item }) => (
-              <IndexerRow
-                item={item}
-                probe={probes[item.url] ?? { state: 'checking' }}
-                selected={selectedUrl === item.url}
-                onPress={() => setSelectedUrl(item.url)}
-              />
-            )}
-          />
-        </View>
+        {discovering ? (
+          <View style={styles.loader}>
+            <JellyLoader size={28} />
+            <Text
+              style={[styles.caption, { color: colors.fgSubtle }]}
+              maxFontSizeMultiplier={1.6}
+            >
+              Asking the network for indexers.
+            </Text>
+          </View>
+        ) : (
+          <View style={[styles.group, { backgroundColor: colors.bgSurface }]}>
+            <Animated.FlatList
+              data={indexers}
+              keyExtractor={item => item.uri}
+              bounces={false}
+              itemLayoutAnimation={ROW_LAYOUT}
+              ItemSeparatorComponent={Separator}
+              renderItem={({ item }) => (
+                <IndexerRow
+                  item={item}
+                  selected={selectedUri === item.uri}
+                  onPress={() => setSelectedUri(item.uri)}
+                />
+              )}
+            />
+          </View>
+        )}
 
-        {indexerList.length === 0 && (
+        {nothingResponded && (
           <Text style={[styles.caption, { color: colors.fgSubtle }]}>
-            The indexer list could not be loaded.
+            No indexer on this chain answered.
           </Text>
         )}
 
@@ -269,13 +245,13 @@ const ListedIndexers: React.FC<ListedIndexersProps> = ({
               {nothingResponded ? (
                 <LiquidPrimaryButton
                   title="Check again"
-                  onPress={probeAll}
+                  onPress={refresh}
                   style={styles.stretch}
                 />
               ) : (
                 <LiquidPrimaryButton
                   title="Continue"
-                  disabled={connecting}
+                  disabled={connecting || !selectedUri}
                   onPress={onConnect}
                   style={styles.stretch}
                 />
@@ -300,6 +276,11 @@ const styles = StyleSheet.create({
     borderCurve: 'continuous',
     overflow: 'hidden',
   },
+  loader: {
+    marginTop: 48,
+    alignItems: 'center',
+    gap: 16,
+  },
   row: {
     minHeight: 52,
     paddingHorizontal: 16,
@@ -309,9 +290,6 @@ const styles = StyleSheet.create({
   },
   rowPressed: {
     backgroundColor: '#2C2C2E',
-  },
-  rowOffline: {
-    opacity: 0.45,
   },
   rowTitle: {
     ...text.body,
@@ -353,6 +331,7 @@ const styles = StyleSheet.create({
     ...text.footnote,
     marginTop: 8,
     marginHorizontal: 36,
+    textAlign: 'center',
   },
   actions: {
     marginTop: 'auto',

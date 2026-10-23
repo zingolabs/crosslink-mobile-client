@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useContext, useRef } from 'react';
 
 import {
   InfoType,
@@ -91,7 +91,189 @@ export const defaultAppContextLoaded: AppContextLoaded = {
   getUfvk: async () => '',
 };
 
-export const ContextAppLoaded = React.createContext(defaultAppContextLoaded);
+export type AppLoadedActions = Pick<
+  AppContextLoaded,
+  | 'translate'
+  | 'setSendPageState'
+  | 'getUfvk'
+  | 'setBackgroundError'
+  | 'addLastSnackbar'
+  | 'removeFirstSnackbar'
+  | 'doRefresh'
+  | 'setZecPrice'
+  | 'setPrivacyOption'
+  | 'requestFaucetFunds'
+  | 'setScheduledActions'
+>;
+
+export type AppLoadedSettings = Pick<
+  AppContextLoaded,
+  | 'indexerServer'
+  | 'selectIndexerServer'
+  | 'currency'
+  | 'language'
+  | 'sendAll'
+  | 'donation'
+  | 'privacy'
+  | 'security'
+  | 'rescanMenu'
+  | 'recoveryWalletInfoOnDevice'
+  | 'performanceLevel'
+  | 'readOnly'
+  | 'orchardPool'
+  | 'saplingPool'
+  | 'transparentPool'
+  | 'zenniesDonationAddress'
+  | 'zingolibVersion'
+  | 'wallet'
+>;
+
+export type AppLoadedWallet = Pick<
+  AppContextLoaded,
+  | 'netInfo'
+  | 'totalBalance'
+  | 'staked'
+  | 'globalStaked'
+  | 'walletBonds'
+  | 'addresses'
+  | 'valueTransfers'
+  | 'valueTransfersTotal'
+  | 'messages'
+  | 'messagesTotal'
+  | 'info'
+  | 'syncingStatus'
+  | 'defaultUnifiedAddress'
+  | 'zecPrice'
+  | 'background'
+  | 'lastError'
+  | 'somePending'
+  | 'shieldingAmount'
+  | 'stakingDay'
+  | 'timeToStakingDaySeconds'
+  | 'timeLeftStakingDaySeconds'
+  | 'blocksToStakingDay'
+  | 'blocksLeftStakingDay'
+  | 'blocksTotalStakingDay'
+  | 'scheduledActions'
+>;
+
+export type AppLoadedUi = Pick<
+  AppContextLoaded,
+  'sendPageState' | 'backgroundError' | 'snackbars' | 'showSwipeableIcons'
+>;
+
+const ACTION_KEYS: (keyof AppLoadedActions)[] = [
+  'translate',
+  'setSendPageState',
+  'getUfvk',
+  'setBackgroundError',
+  'addLastSnackbar',
+  'removeFirstSnackbar',
+  'doRefresh',
+  'setZecPrice',
+  'setPrivacyOption',
+  'requestFaucetFunds',
+  'setScheduledActions',
+];
+
+const SETTINGS_KEYS: (keyof AppLoadedSettings)[] = [
+  'indexerServer',
+  'selectIndexerServer',
+  'currency',
+  'language',
+  'sendAll',
+  'donation',
+  'privacy',
+  'security',
+  'rescanMenu',
+  'recoveryWalletInfoOnDevice',
+  'performanceLevel',
+  'readOnly',
+  'orchardPool',
+  'saplingPool',
+  'transparentPool',
+  'zenniesDonationAddress',
+  'zingolibVersion',
+  'wallet',
+];
+
+const WALLET_KEYS: (keyof AppLoadedWallet)[] = [
+  'netInfo',
+  'totalBalance',
+  'staked',
+  'globalStaked',
+  'walletBonds',
+  'addresses',
+  'valueTransfers',
+  'valueTransfersTotal',
+  'messages',
+  'messagesTotal',
+  'info',
+  'syncingStatus',
+  'defaultUnifiedAddress',
+  'zecPrice',
+  'background',
+  'lastError',
+  'somePending',
+  'shieldingAmount',
+  'stakingDay',
+  'timeToStakingDaySeconds',
+  'timeLeftStakingDaySeconds',
+  'blocksToStakingDay',
+  'blocksLeftStakingDay',
+  'blocksTotalStakingDay',
+  'scheduledActions',
+];
+
+const UI_KEYS: (keyof AppLoadedUi)[] = [
+  'sendPageState',
+  'backgroundError',
+  'snackbars',
+  'showSwipeableIcons',
+];
+
+function pick<K extends keyof AppContextLoaded>(
+  value: AppContextLoaded,
+  keys: K[],
+): Pick<AppContextLoaded, K> {
+  const out = {} as Pick<AppContextLoaded, K>;
+  keys.forEach(k => {
+    out[k] = value[k];
+  });
+  return out;
+}
+
+function useSlice<K extends keyof AppContextLoaded>(
+  value: AppContextLoaded,
+  keys: K[],
+): Pick<AppContextLoaded, K> {
+  const ref = useRef<Pick<AppContextLoaded, K> | null>(null);
+  const prev = ref.current;
+  if (prev && keys.every(k => Object.is(prev[k], value[k]))) {
+    return prev;
+  }
+  const next = pick(value, keys);
+  ref.current = next;
+  return next;
+}
+
+const ContextAppLoadedActions = React.createContext<AppLoadedActions>(
+  pick(defaultAppContextLoaded, ACTION_KEYS),
+);
+const ContextAppLoadedSettings = React.createContext<AppLoadedSettings>(
+  pick(defaultAppContextLoaded, SETTINGS_KEYS),
+);
+const ContextAppLoadedWallet = React.createContext<AppLoadedWallet>(
+  pick(defaultAppContextLoaded, WALLET_KEYS),
+);
+const ContextAppLoadedUi = React.createContext<AppLoadedUi>(
+  pick(defaultAppContextLoaded, UI_KEYS),
+);
+
+export const useAppLoadedActions = () => useContext(ContextAppLoadedActions);
+export const useAppLoadedSettings = () => useContext(ContextAppLoadedSettings);
+export const useAppLoadedWallet = () => useContext(ContextAppLoadedWallet);
+export const useAppLoadedUi = () => useContext(ContextAppLoadedUi);
 
 type ContextProviderProps = {
   children: ReactNode;
@@ -102,9 +284,19 @@ export const ContextAppLoadedProvider = ({
   children,
   value,
 }: ContextProviderProps) => {
+  const actions = useSlice(value, ACTION_KEYS);
+  const settings = useSlice(value, SETTINGS_KEYS);
+  const wallet = useSlice(value, WALLET_KEYS);
+  const ui = useSlice(value, UI_KEYS);
   return (
-    <ContextAppLoaded.Provider value={value}>
-      {children}
-    </ContextAppLoaded.Provider>
+    <ContextAppLoadedActions.Provider value={actions}>
+      <ContextAppLoadedSettings.Provider value={settings}>
+        <ContextAppLoadedWallet.Provider value={wallet}>
+          <ContextAppLoadedUi.Provider value={ui}>
+            {children}
+          </ContextAppLoadedUi.Provider>
+        </ContextAppLoadedWallet.Provider>
+      </ContextAppLoadedSettings.Provider>
+    </ContextAppLoadedActions.Provider>
   );
 };

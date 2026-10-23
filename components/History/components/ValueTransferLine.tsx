@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import {
@@ -18,7 +18,11 @@ import {
   ScreenEnum,
 } from '../../../app/AppState';
 
-import { ContextAppLoaded } from '../../../app/context';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedWallet,
+} from '../../../app/context';
 import { RPCValueTransferStatusEnum } from '../../../app/rpc/enums/RPCValueTransferStatusEnum';
 import Utils from '../../../app/utils';
 import RegText from '../../Components/RegText';
@@ -46,8 +50,9 @@ const ValueTransferLine: React.FunctionComponent<ValueTransferLineProps> = ({
   setValueTransferDetailModalShow,
   closeAllSwipeables,
 }) => {
-  const context = useContext(ContextAppLoaded);
-  const { translate, language, privacy, info } = context;
+  const { translate } = useAppLoadedActions();
+  const { language, privacy } = useAppLoadedSettings();
+  const { info } = useAppLoadedWallet();
   const { colors } = useTheme();
 
   //const [messagesAddress, setMessagesAddress] = useState<boolean>(false);

@@ -501,6 +501,74 @@ class RPCModule: NSObject {
       }
   }
 
+  func fnDiscoverIndexers(_ dict: [AnyHashable: Any]) {
+    if let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
+      do {
+        let resp = try discoverIndexers()
+        let respStr = String(resp)
+        DispatchQueue.main.async {
+          resolve(respStr)
+        }
+      } catch {
+        let err = "Error: [Native] Discover indexers. \(error.localizedDescription)"
+        NSLog(err)
+        DispatchQueue.main.async {
+          resolve(err)
+        }
+      }
+    } else {
+      let err = "Error: [Native] Discover indexers. Argument problem."
+      NSLog(err)
+    }
+  }
+
+  @objc(discoverIndexers:reject:)
+  func discoverIndexersInfo(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+      let dict: [String: Any] = ["resolve": resolve]
+      DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+          if let self = self {
+              self.fnDiscoverIndexers(dict)
+          }
+      }
+  }
+
+  func fnProbeIndexer(_ dict: [AnyHashable: Any]) {
+    if let serveruri = dict["serveruri"] as? String,
+       let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
+      do {
+        let resp = try probeIndexer(serverUri: serveruri)
+        let respStr = String(resp)
+        DispatchQueue.main.async {
+          resolve(respStr)
+        }
+      } catch {
+        let err = "Error: [Native] Probe indexer. \(error.localizedDescription)"
+        NSLog(err)
+        DispatchQueue.main.async {
+          resolve(err)
+        }
+      }
+    } else {
+      let err = "Error: [Native] Probe indexer. Argument problem."
+      NSLog(err)
+      if let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
+          DispatchQueue.main.async {
+            resolve(err)
+          }
+      }
+    }
+  }
+
+  @objc(probeIndexer:resolve:reject:)
+  func probeIndexerInfo(_ serveruri: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+      let dict: [String: Any] = ["serveruri": serveruri, "resolve": resolve]
+      DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+          if let self = self {
+              self.fnProbeIndexer(dict)
+          }
+      }
+  }
+
   func fnGetLatestBlockWalletInfo(_ dict: [AnyHashable: Any]) {
     if let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
         do {

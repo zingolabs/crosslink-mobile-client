@@ -1,8 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
-import { useContext } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
-import { ContextAppLoaded } from '../../../app/context';
+import { useAppLoadedActions } from '../../../app/context';
 import { TriangleAlert } from '../../Components/Icons/TriangleAlert';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
@@ -21,7 +20,7 @@ const TransparentWarning = ({
   setHeightLayout,
 }: TransparentWarningProps) => {
   const { colors } = useTheme();
-  const { translate } = useContext(ContextAppLoaded);
+  const { translate } = useAppLoadedActions();
 
   return (
     <View
@@ -61,10 +60,14 @@ const TransparentWarning = ({
         }}
       >
         <View>
-          <Text style={{ color: colors.fgMuted, fontSize: 16, marginBottom: 12 }}>
+          <Text
+            style={{ color: colors.fgMuted, fontSize: 16, marginBottom: 12 }}
+          >
             {translate('receive.modal-transparent.message') as string}
           </Text>
-          <Text style={{ color: colors.fgMuted, fontSize: 16, marginBottom: 16 }}>
+          <Text
+            style={{ color: colors.fgMuted, fontSize: 16, marginBottom: 16 }}
+          >
             {translate('receive.modal-transparent.recommendation') as string}
           </Text>
           <TouchableOpacity

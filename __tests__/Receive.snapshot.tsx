@@ -15,13 +15,13 @@ import { mockAddresses } from '../__mocks__/dataMocks/mockAddresses';
 import { mockTranslate } from '../__mocks__/dataMocks/mockTranslate';
 import { mockInfo } from '../__mocks__/dataMocks/mockInfo';
 import { mockTotalBalance } from '../__mocks__/dataMocks/mockTotalBalance';
-import { DrawerScreenProps } from '@react-navigation/drawer';
-import { AppDrawerParamList } from '../app/types';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { LoadedAppStackParamList } from '../app/types';
 import { RouteEnum } from '../app/AppState';
 import mockNavigation from '../__mocks__/dataMocks/mockNavigation';
 
-function makeDrawerProps(): DrawerScreenProps<
-  AppDrawerParamList,
+function makeDrawerProps(): NativeStackScreenProps<
+  LoadedAppStackParamList,
   RouteEnum.Receive
 > {
   return {
@@ -46,11 +46,7 @@ describe('Component Receive - test', () => {
     const props = makeDrawerProps();
     const receive = render(
       <ContextAppLoadedProvider value={state}>
-        <Receive
-          {...props}
-          toggleMenuDrawer={onFunction}
-          setSecurityOption={onFunction}
-        />
+        <Receive {...props} setSecurityOption={onFunction} />
       </ContextAppLoadedProvider>,
     );
     expect(receive.toJSON()).toMatchSnapshot();

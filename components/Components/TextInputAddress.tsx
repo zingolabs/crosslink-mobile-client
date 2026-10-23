@@ -1,11 +1,11 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, TouchableOpacity, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCheck, faQrcode, faXmark } from '@fortawesome/free-solid-svg-icons';
 
-import { ContextAppLoaded } from '../../app/context';
+import { useAppLoadedActions, useAppLoadedSettings } from '../../app/context';
 import ErrorText from './ErrorText';
 import RegText from './RegText';
 import Utils from '../../app/utils';
@@ -30,8 +30,8 @@ const TextInputAddress: React.FunctionComponent<TextInputAddressProps> = ({
   screenName,
 }) => {
   const navigation: any = useNavigation();
-  const context = useContext(ContextAppLoaded);
-  const { translate, indexerServer } = context;
+  const { translate } = useAppLoadedActions();
+  const { indexerServer } = useAppLoadedSettings();
   const { colors } = useTheme();
 
   const [validAddress, setValidAddress] = useState<number>(0); // 1 - OK, 0 - Empty, -1 - KO
