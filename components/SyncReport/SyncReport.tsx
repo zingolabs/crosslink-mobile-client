@@ -1,10 +1,15 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, ScrollView, Text, ActivityIndicator } from 'react-native';
 
-import { AppDrawerParamList } from '../../app/types';
+import { LoadedAppStackParamList } from '../../app/types';
 import DetailLine from '../Components/DetailLine';
-import { ContextAppLoaded } from '../../app/context';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedWallet,
+  useAppLoadedUi,
+} from '../../app/context';
 import moment from 'moment';
 
 import { Header } from '../Header';
@@ -19,36 +24,30 @@ import { RPCSyncStatusType } from '../../app/rpc/types/RPCSyncStatusType';
 import { RPCSyncScanRangeStatusType } from '../../app/rpc/types/RPCSyncScanRangeStatusType';
 import { RPCSyncScanRangePriorityStatusEnum } from '../../app/rpc/enums/RPCSyncScanRangePriorityStatusEnum';
 import { RouteEnum, ScreenEnum } from '../../app/AppState';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { createAlert } from '../../app/createAlert';
 import { sendEmail } from '../../app/sendEmail';
 import Utils from '../../app/utils';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
 import { useTheme } from '../../app/theme';
 
-type SyncReportProps = DrawerScreenProps<
-  AppDrawerParamList,
+type SyncReportProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
   RouteEnum.SyncReport
 >;
 
 const SyncReport: React.FunctionComponent<SyncReportProps> = ({
   navigation,
 }) => {
-  const context = useContext(ContextAppLoaded);
   const {
-    syncingStatus,
-    wallet,
     translate,
-    background,
-    language,
-    netInfo,
-    snackbars,
     removeFirstSnackbar,
-    info,
-    zingolibVersion,
     setBackgroundError,
     addLastSnackbar,
-  } = context;
+  } = useAppLoadedActions();
+  const { wallet, language, zingolibVersion } = useAppLoadedSettings();
+  const { syncingStatus, background, netInfo, info } = useAppLoadedWallet();
+  const { snackbars } = useAppLoadedUi();
   const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.SyncReport;
@@ -614,7 +613,9 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
                               margin: 5,
                             }}
                           />
-                          <Text style={{ color: colors.fgDefault, marginRight: 10 }}>
+                          <Text
+                            style={{ color: colors.fgDefault, marginRight: 10 }}
+                          >
                             {translate('report.scanned') as string}
                           </Text>
                         </View>
@@ -636,7 +637,9 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
                               margin: 5,
                             }}
                           />
-                          <Text style={{ color: colors.fgDefault, marginRight: 10 }}>
+                          <Text
+                            style={{ color: colors.fgDefault, marginRight: 10 }}
+                          >
                             {translate('report.scanning') as string}
                           </Text>
                         </View>
@@ -658,7 +661,9 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
                               margin: 5,
                             }}
                           />
-                          <Text style={{ color: colors.fgDefault, marginRight: 10 }}>
+                          <Text
+                            style={{ color: colors.fgDefault, marginRight: 10 }}
+                          >
                             {translate('report.lowpriority') as string}
                           </Text>
                         </View>
@@ -680,7 +685,9 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
                               margin: 5,
                             }}
                           />
-                          <Text style={{ color: colors.fgDefault, marginRight: 10 }}>
+                          <Text
+                            style={{ color: colors.fgDefault, marginRight: 10 }}
+                          >
                             {translate('report.highpriority') as string}
                           </Text>
                         </View>

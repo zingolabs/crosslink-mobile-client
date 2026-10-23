@@ -39,7 +39,6 @@ import { RPCSpendablebalanceType } from './types/RPCSpendablebalanceType';
 import { RPCConfigWalletPerformanceType } from './types/RPCConfigWalletPerformanceType';
 import { RPCPerformanceLevelEnum } from './enums/RPCPerformanceLevelEnum';
 import { RPCWalletVersionType } from './types/RPCWalletVersionType';
-import { LoadingAppNavigationState } from '../types';
 import { StakeJsonToTypeType } from '../AppState/types/ValueTransferType';
 import RPCWalletBondsType from './types/RPCWalletBondsType';
 import { RPCStakedType } from './types/RPCStakedType';
@@ -63,7 +62,7 @@ export default class RPC {
   fnSetZingolib: (zingolib: string) => void;
   fnSetWallet: (wallet: WalletType) => void;
   fnSetLastError: (error: string) => void;
-  fnOnClickOKChangeWallet: (state: LoadingAppNavigationState) => Promise<void>;
+  fnRecoverWallet: (seed: string, birthday: number) => Promise<void>;
 
   updateTimerID?: NodeJS.Timeout;
 
@@ -117,9 +116,7 @@ export default class RPC {
     fnSetZingolib: (zingolib: string) => void,
     fnSetWallet: (wallet: WalletType) => void,
     fnSetLastError: (error: string) => void,
-    fnOnClickOKChangeWallet: (
-      state: LoadingAppNavigationState,
-    ) => Promise<void>,
+    fnRecoverWallet: (seed: string, birthday: number) => Promise<void>,
     readOnly: boolean,
     indexerServer: ServerType,
     performanceLevel: RPCPerformanceLevelEnum,
@@ -138,7 +135,7 @@ export default class RPC {
     this.fnSetZingolib = fnSetZingolib;
     this.fnSetWallet = fnSetWallet;
     this.fnSetLastError = fnSetLastError;
-    this.fnOnClickOKChangeWallet = fnOnClickOKChangeWallet;
+    this.fnRecoverWallet = fnRecoverWallet;
 
     this.lastWalletBlockHeight = 0;
     this.lastServerBlockHeight = 0;
@@ -763,15 +760,12 @@ export default class RPC {
           this.walletSeed,
         );
         if (this.walletSeed) {
-          this.fnOnClickOKChangeWallet({
-            screen: 0,
-            startingApp: false,
-            walletSeed: this.walletSeed,
-            walletBirthday:
-              this.walletBirthday > this.lastServerBlockHeight
-                ? 1
-                : this.walletBirthday,
-          });
+          this.fnRecoverWallet(
+            this.walletSeed,
+            this.walletBirthday > this.lastServerBlockHeight
+              ? 1
+              : this.walletBirthday,
+          );
         } else {
           let result: string = await RPCModule.loadExistingWallet(
             this.indexerServer.uri,
@@ -1090,7 +1084,7 @@ export default class RPC {
         walletBondsJSON.bonds ?? []
       ).map(m => ({
         txid: m.created_in_txid,
-        pubKey: m.pub_key,
+        pubKey: m.bond_key,
         amount: (m.amount_zats || 0) / 10 ** 8,
         status:
           m.status === 0
@@ -1489,15 +1483,15 @@ export default class RPC {
       const valueTransfersJSON: RPCValueTransfersType =
         await JSON.parse(valueTransfersStr);
 
-      //console.log(valueTransfersJSON.value_transfers);
+      //console.log(valueTransfersJSON.wallet_events);
 
       let vtList: ValueTransferType[] = [];
 
       // oscar idea and I think it is the correct way to build the history of
       // value transfers.
       valueTransfersJSON &&
-        valueTransfersJSON.value_transfers &&
-        valueTransfersJSON.value_transfers.forEach(
+        valueTransfersJSON.wallet_events &&
+        valueTransfersJSON.wallet_events.forEach(
           (vt: RPCValueTransferType) => {
             const currentValueTransferList: ValueTransferType =
               {} as ValueTransferType;
@@ -1656,8 +1650,8 @@ export default class RPC {
       // oscar idea and I think it is the correct way to build the history of
       // value transfers.
       messagesJSON &&
-        messagesJSON.value_transfers &&
-        messagesJSON.value_transfers.forEach((m: RPCValueTransferType) => {
+        messagesJSON.wallet_events &&
+        messagesJSON.wallet_events.forEach((m: RPCValueTransferType) => {
           const currentMessageList: ValueTransferType = {} as ValueTransferType;
 
           currentMessageList.txid = m.txid;

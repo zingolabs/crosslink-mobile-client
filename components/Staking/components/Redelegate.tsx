@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -31,9 +31,9 @@ import {
   StakingActionKindEnum,
   WalletBondsType,
 } from '../../../app/AppState';
-import { AppDrawerParamList } from '../../../app/types';
-import { DrawerScreenProps } from '@react-navigation/drawer';
-import { ContextAppLoaded } from '../../../app/context';
+import { LoadedAppStackParamList } from '../../../app/types';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useAppLoadedSettings, useAppLoadedWallet } from '../../../app/context';
 import { HeaderTitle } from '../../Header';
 import { ChevronDown } from '../../Components/Icons/Chevron';
 import FadeText from '../../Components/FadeText';
@@ -46,8 +46,8 @@ import { useTheme } from '../../../app/theme';
 
 type ModalState = 'idle' | 'sending' | 'success';
 
-type RedelegateProps = DrawerScreenProps<
-  AppDrawerParamList,
+type RedelegateProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
   RouteEnum.Redelegate
 >;
 
@@ -79,9 +79,9 @@ const Redelegate: React.FC<RedelegateProps> = ({ route }) => {
 
   const modalVisible = modalState !== 'idle';
 
-  const context = useContext(ContextAppLoaded);
-  const { walletBonds, valueTransfers, staked, globalStaked, info, privacy } =
-    context;
+  const { privacy } = useAppLoadedSettings();
+  const { walletBonds, valueTransfers, staked, globalStaked, info } =
+    useAppLoadedWallet();
 
   const movements = useMemo(() => {
     return walletBonds
@@ -448,7 +448,11 @@ const Redelegate: React.FC<RedelegateProps> = ({ route }) => {
               alignSelf: 'center',
             }}
           >
-            <FontAwesomeIcon icon={faArrowDown} size={25} color={colors.fgDefault} />
+            <FontAwesomeIcon
+              icon={faArrowDown}
+              size={25}
+              color={colors.fgDefault}
+            />
           </View>
         </View>
 

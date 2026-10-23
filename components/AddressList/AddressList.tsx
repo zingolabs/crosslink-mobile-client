@@ -1,6 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {
-  useContext,
   useState,
   useEffect,
   useCallback,
@@ -24,22 +23,26 @@ import {
   TransparentAddressClass,
   UnifiedAddressClass,
 } from '../../app/AppState';
-import { AppDrawerParamList } from '../../app/types';
+import { LoadedAppStackParamList } from '../../app/types';
 import FadeText from '../Components/FadeText';
 import AlSummaryLine from './components/AlSummaryLine';
-import { ContextAppLoaded } from '../../app/context';
+import {
+  useAppLoadedActions,
+  useAppLoadedWallet,
+  useAppLoadedUi,
+} from '../../app/context';
 import { Header } from '../Header';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faAngleUp } from '@fortawesome/free-solid-svg-icons';
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { RPCAddressScopeEnum } from '../../app/rpc/enums/RPCAddressScopeEnum';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
 import { useTheme } from '../../app/theme';
 
-type AddressListProps = DrawerScreenProps<
-  AppDrawerParamList,
+type AddressListProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
   RouteEnum.AddressList
 >;
 
@@ -51,8 +54,9 @@ const AddressList: React.FunctionComponent<AddressListProps> = ({
     !!route.params && route.params.setIndex !== undefined
       ? route.params.setIndex
       : () => {};
-  const context = useContext(ContextAppLoaded);
-  const { translate, addresses, snackbars, removeFirstSnackbar } = context;
+  const { translate, removeFirstSnackbar } = useAppLoadedActions();
+  const { addresses } = useAppLoadedWallet();
+  const { snackbars } = useAppLoadedUi();
   const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.AddressList;

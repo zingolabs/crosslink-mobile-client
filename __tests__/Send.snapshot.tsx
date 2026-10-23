@@ -19,12 +19,12 @@ import { mockInfo } from '../__mocks__/dataMocks/mockInfo';
 import { mockZecPrice } from '../__mocks__/dataMocks/mockZecPrice';
 import { mockTotalBalance } from '../__mocks__/dataMocks/mockTotalBalance';
 import mockSendPageState from '../__mocks__/dataMocks/mockSendPageState';
-import { DrawerScreenProps } from '@react-navigation/drawer';
-import { AppDrawerParamList } from '../app/types';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { LoadedAppStackParamList } from '../app/types';
 import mockNavigation from '../__mocks__/dataMocks/mockNavigation';
 
-function makeDrawerProps(): DrawerScreenProps<
-  AppDrawerParamList,
+function makeDrawerProps(): NativeStackScreenProps<
+  LoadedAppStackParamList,
   RouteEnum.Send
 > {
   return {
@@ -61,7 +61,6 @@ describe('Component Send - test', () => {
           {...props}
           sendTransaction={onFunction}
           clearToAddr={onFunction}
-          toggleMenuDrawer={onFunction}
           setShieldingAmount={onFunction}
           setScrollToTop={onFunction}
           setScrollToBottom={onFunction}
@@ -85,7 +84,6 @@ describe('Component Send - test', () => {
           {...props}
           sendTransaction={onFunction}
           clearToAddr={onFunction}
-          toggleMenuDrawer={onFunction}
           setShieldingAmount={onFunction}
           setScrollToTop={onFunction}
           setScrollToBottom={onFunction}

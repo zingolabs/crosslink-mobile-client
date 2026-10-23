@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { View, TouchableOpacity, Keyboard } from 'react-native';
 
 import {
@@ -7,7 +7,10 @@ import {
   ScreenEnum,
   SnackbarDurationEnum,
 } from '../../../app/AppState';
-import { ContextAppLoaded } from '../../../app/context';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+} from '../../../app/context';
 import { useToast } from 'react-native-toastier';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
@@ -32,8 +35,8 @@ const VerifyAddress: React.FunctionComponent<VerifyAddressProps> = ({
   screenName,
   setHeightLayout,
 }) => {
-  const context = useContext(ContextAppLoaded);
-  const { translate, addLastSnackbar, indexerServer } = context;
+  const { translate, addLastSnackbar } = useAppLoadedActions();
+  const { indexerServer } = useAppLoadedSettings();
   const { colors } = useTheme();
   const { clear } = useToast();
 

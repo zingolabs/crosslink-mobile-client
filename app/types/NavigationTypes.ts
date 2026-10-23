@@ -1,9 +1,9 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
-import type { Probes } from '../LoadingApp/hooks/useIndexerProbes';
+import type { IndexerReport } from '../indexers';
 import {
   AddressKindEnum,
-  ChainNameEnum,
   LaunchingModeEnum,
+  LoadingAppEntryEnum,
   RouteEnum,
   ScheduledActionType,
   SeedActionEnum,
@@ -17,7 +17,7 @@ import { RPCParseAddressType } from '../rpc/types/RPCParseAddressType';
 
 export type LoadedAppRouteParams =
   | LoadedAppNavigationState
-  | (LoadedAppNavigationState & NavigatorScreenParams<AppDrawerParamList>);
+  | (LoadedAppNavigationState & NavigatorScreenParams<LoadedAppStackParamList>);
 
 /**
  * Root navigation parameter list for the main stack navigator
@@ -32,8 +32,8 @@ export type AppStackParamList = {
 export type LoadingAppStackParamList = {
   [RouteEnum.StartMenu]: undefined;
   [RouteEnum.ChooseIndexer]: undefined;
-  [RouteEnum.ListedIndexers]: { probes?: Probes } | undefined;
-  [RouteEnum.CustomIndexer]: { network?: ChainNameEnum } | undefined;
+  [RouteEnum.ListedIndexers]: { report?: IndexerReport } | undefined;
+  [RouteEnum.CustomIndexer]: undefined;
   [RouteEnum.Import]: undefined;
 };
 
@@ -42,7 +42,7 @@ export type LoadingAppStackParamList = {
  * Used for methods like navigateToLoadingApp and onClickOKChangeWallet
  */
 export type LoadingAppNavigationState = {
-  screen?: number;
+  entry?: LoadingAppEntryEnum;
   startingApp?: boolean;
   biometricsFailed?: boolean;
   walletSeed?: string;
@@ -65,14 +65,9 @@ export type MainTabParamList = {
   [RouteEnum.StakingHome]: StakingHomeNavigationState | undefined;
 };
 
-/**
- * Root drawer parameter list for the main stack navigator
- * This defines the structure of parameters passed between main app screens
- */
-export type AppDrawerParamList = {
+export type LoadedAppStackParamList = {
   [RouteEnum.MainTabs]: NavigatorScreenParams<MainTabParamList> | undefined;
 
-  // Drawer no params
   [RouteEnum.Send]: undefined;
   [RouteEnum.Receive]: undefined;
   [RouteEnum.Messages]: undefined;
@@ -92,8 +87,11 @@ export type AppDrawerParamList = {
   [RouteEnum.SyncReport]: undefined;
   [RouteEnum.Pools]: undefined;
   [RouteEnum.ContactList]: undefined;
+  [RouteEnum.SettingsStack]:
+    | NavigatorScreenParams<SettingsStackParamList>
+    | undefined;
+  [RouteEnum.Notes]: undefined;
 
-  // Drawer with params
   [RouteEnum.AddressList]: AddressListNavigationState | undefined;
   [RouteEnum.ScannerAddress]: ScannerAddressNavigationState | undefined;
   [RouteEnum.ValueTransferDetail]:
@@ -116,6 +114,15 @@ export type AppDrawerParamList = {
   [RouteEnum.ScheduledActionDetail]:
     | ScheduledActionDetailNavigationState
     | undefined;
+};
+
+export type SettingsStackParamList = {
+  [RouteEnum.Settings]: undefined;
+  [RouteEnum.SettingsMenu]: undefined;
+  [RouteEnum.Seed]: SeedNavigationState | undefined;
+  [RouteEnum.SettingsServers]: undefined;
+  [RouteEnum.DebugInfo]: undefined;
+  [RouteEnum.Notes]: undefined;
 };
 
 export type AddressListNavigationState = {

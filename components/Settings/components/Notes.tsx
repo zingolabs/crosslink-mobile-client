@@ -1,10 +1,10 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext } from 'react';
+import React from 'react';
 import { View, ScrollView } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 
-import { ContextAppLoaded } from '../../../app/context';
+import {} from '../../../app/context';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FadeText from '../../Components/FadeText';
@@ -13,8 +13,7 @@ import { useTheme } from '../../../app/theme';
 
 export const Notes: React.FunctionComponent = () => {
   const navigation = useNavigation();
-  const context = useContext(ContextAppLoaded);
-  const {} = context;
+
   const { colors } = useTheme();
   const { clear } = useToast();
 

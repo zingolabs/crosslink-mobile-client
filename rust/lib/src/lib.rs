@@ -11,10 +11,10 @@ use android_logger::{Config, FilterBuilder};
 use hex::FromHex;
 #[cfg(target_os = "android")]
 use log::Level;
-use zcash_protocol::local_consensus::LocalNetwork;
 use zcash_protocol::memo::MemoBytes;
+use zingo_netutils::discovery;
 use zingo_netutils::get_client;
-use zingolib::{AccountId, ConfiguredActivationHeights};
+use zingolib::AccountId;
 
 use std::any::Any;
 use std::backtrace::Backtrace;
@@ -35,7 +35,7 @@ use rustls::crypto::{CryptoProvider, ring::default_provider};
 use zcash_address::unified::{Container, Encoding, Ufvk};
 use zcash_keys::address::Address;
 use zcash_keys::keys::UnifiedFullViewingKey;
-use zcash_protocol::consensus::{BlockHeight, NetworkType, TEST_NETWORK};
+use zcash_protocol::consensus::{BlockHeight, NetworkType};
 
 use pepper_sync::config::{PerformanceLevel, SyncConfig, TransparentAddressDiscovery};
 use pepper_sync::keys::transparent;
@@ -43,7 +43,7 @@ use pepper_sync::wallet::{KeyIdInterface, SyncMode};
 use tokio::runtime::Runtime;
 use zcash_address::ZcashAddress;
 use zcash_protocol::value::Zatoshis;
-use zingolib::config::{ChainType, ZingoConfig, construct_lightwalletd_uri};
+use zingolib::config::{ChainType, ZingoConfig, chain_from_str, construct_lightwalletd_uri};
 use zingolib::data::PollReport;
 use zingolib::data::proposal::total_fee;
 use zingolib::data::receivers::Receivers;
@@ -54,18 +54,9 @@ use zingolib::wallet::keys::{
     WalletAddressRef,
     unified::{ReceiverSelection, UnifiedKeyStore},
 };
-use zingolib::wallet::{LightWallet, WalletBase, WalletSettings};
-
-const REGTEST_NETWORK: LocalNetwork = LocalNetwork {
-    overwinter: Some(zcash_protocol::consensus::BlockHeight(1)),
-    sapling: Some(zcash_protocol::consensus::BlockHeight(1)),
-    blossom: Some(zcash_protocol::consensus::BlockHeight(1)),
-    heartwood: Some(zcash_protocol::consensus::BlockHeight(1)),
-    canopy: Some(zcash_protocol::consensus::BlockHeight(1)),
-    nu5: Some(zcash_protocol::consensus::BlockHeight(1)),
-    nu6: Some(zcash_protocol::consensus::BlockHeight(1)),
-    nu6_1: None,
-};
+use zingolib::crosslink::{FinalizerAddress, parse_finalizer_address};
+use zingolib::perspective::sync_progress::{SessionReport, SyncProgress};
+use zingolib::wallet::{LightWallet, SeedDerivation, WalletBase, WalletSettings};
 
 #[derive(Debug, thiserror::Error, uniffi::Error)]
 pub enum ZingolibError {
@@ -336,33 +327,12 @@ fn construct_uri_load_config(
     let lightwalletd_uri = construct_lightwalletd_uri(Some(uri));
 
     let chaintype = match chain_hint.as_str() {
-        "main" => ChainType::Mainnet,
-        "test" => ChainType::Testnet(ConfiguredActivationHeights {
-            before_overwinter: Some(1),
-            overwinter: Some(1),
-            sapling: Some(1),
-            blossom: Some(1),
-            heartwood: Some(1),
-            canopy: Some(1),
-            nu5: Some(1),
-            nu6: Some(1),
-            nu6_1: None,
-            nu7: None,
-        }),
-        "regtest" => ChainType::Regtest(ConfiguredActivationHeights {
-            before_overwinter: Some(1),
-            overwinter: Some(1),
-            sapling: Some(1),
-            blossom: Some(1),
-            heartwood: Some(1),
-            canopy: Some(1),
-            nu5: Some(1),
-            nu6: Some(1),
-            nu6_1: None,
-            nu7: None,
-        }),
+        "main" => chain_from_str("mainnet"),
+        "test" => chain_from_str("testnet"),
+        "regtest" => chain_from_str("regtest"),
         _ => return Err("Error: Not a valid chain hint!".to_string()),
-    };
+    }
+    .map_err(|e| format!("Error: {e}"))?;
     let performancetype = match performance_level.as_str() {
         "Maximum" => PerformanceLevel::Maximum,
         "High" => PerformanceLevel::High,
@@ -435,7 +405,17 @@ pub fn init_new(
             Ok(h) => h,
             Err(e) => return Ok(format!("Error: {e}")),
         };
-        let lightclient = match LightClient::new(config, chain_height - 100, false) {
+        let birthday = match RT.block_on(LightClient::fresh_wallet_birthday(&config, chain_height))
+        {
+            Ok(birthday) => birthday,
+            Err(e) => return Ok(format!("Error: {e}")),
+        };
+        let lightclient = match LightClient::new_with_birthday(
+            config,
+            birthday,
+            false,
+            SeedDerivation::Zip32Standard,
+        ) {
             Ok(l) => l,
             Err(e) => return Ok(format!("Error: {e}")),
         };
@@ -475,6 +455,7 @@ pub fn init_from_seed(
             WalletBase::Mnemonic {
                 mnemonic,
                 no_of_accounts: config.no_of_accounts,
+                seed_derivation: SeedDerivation::Zip32Standard,
             },
             BlockHeight::from_u32(birthday),
             config.wallet_settings.clone(),
@@ -653,6 +634,124 @@ pub fn get_latest_block_server(server_uri: String) -> Result<String, ZingolibErr
     })
 }
 
+fn stable_chain() -> ChainType {
+    chain_from_str("testnet").expect("a known chain name")
+}
+
+fn discovery_config() -> discovery::DiscoveryConfig {
+    let chain = stable_chain();
+    discovery::DiscoveryConfig::crosslink_stable().with_branch_rule(discovery::BranchRule::new(
+        move |height| {
+            let height = BlockHeight::from_u32(u32::try_from(height).unwrap_or(u32::MAX));
+            u32::from(zcash_protocol::consensus::BranchId::for_height(&chain, height))
+        },
+    ))
+}
+
+async fn fingerprint_of(lightclient: &LightClient) -> Option<discovery::ChainFingerprint> {
+    let wallet = lightclient.wallet.read().await;
+    wallet
+        .wallet_blocks
+        .last_key_value()
+        .map(|(height, block)| discovery::ChainFingerprint {
+            height: u32::from(*height),
+            hash: block.block_hash().0,
+        })
+}
+
+fn wallet_fingerprint() -> Option<discovery::ChainFingerprint> {
+    let guard = LIGHTCLIENT.read().ok()?;
+    let lightclient = guard.as_ref()?;
+    RT.block_on(fingerprint_of(lightclient))
+}
+
+async fn faucet_at(uri: http::Uri, address: &str) -> Result<u64, String> {
+    use zcash_client_backend::proto::service::FaucetRequest;
+    let mut client = get_client(uri)
+        .await
+        .map_err(|e| format!("cannot reach the indexer: {e}"))?;
+    let answer = client
+        .request_faucet_donation(FaucetRequest {
+            address: address.to_string(),
+        })
+        .await
+        .map_err(|e| e.message().to_string())?;
+    Ok(answer.into_inner().amount)
+}
+
+async fn faucet_anywhere(lightclient: &LightClient, address: &str) -> Result<u64, String> {
+    let current = lightclient.indexer_uri();
+    let mut refusals = Vec::new();
+    match faucet_at(current.clone(), address).await {
+        Ok(amount) => return Ok(amount),
+        Err(e) => refusals.push(format!("{current}: {e}")),
+    }
+    let current_key = discovery::indexer_key(&current.to_string());
+    let fingerprint = fingerprint_of(lightclient).await;
+    let report = discovery::discover(&discovery_config(), fingerprint).await;
+    for indexer in report.ranking.iter().filter(|i| i.tip_height.is_some()) {
+        if discovery::indexer_key(&indexer.uri) == current_key {
+            continue;
+        }
+        let Ok(uri) = indexer.uri.parse::<http::Uri>() else {
+            continue;
+        };
+        match faucet_at(uri, address).await {
+            Ok(amount) => return Ok(amount),
+            Err(e) => refusals.push(format!("{}: {e}", indexer.uri)),
+        }
+    }
+    Err(format!("no indexer served the faucet: {}", refusals.join("; ")))
+}
+
+fn report_json(report: discovery::IndexerReport) -> String {
+    let indexers: Vec<JsonValue> = report
+        .ranking
+        .iter()
+        .filter(|indexer| indexer.tip_height.is_some())
+        .map(|indexer| {
+            object! {
+                "uri" => indexer.uri.clone(),
+                "latency_ms" => u64::try_from(indexer.latency.as_millis()).unwrap_or(u64::MAX),
+                "tip_height" => indexer.tip_height,
+                "tip_age_secs" => indexer.tip_age_secs,
+                "source" => match indexer.source {
+                    discovery::Source::PeerExchange => "peer",
+                    discovery::Source::DnsSeed => "dns",
+                    discovery::Source::Builtin => "builtin",
+                },
+            }
+        })
+        .collect();
+    object! {
+        "indexers" => indexers,
+        "errors" => report.errors,
+    }
+    .dump()
+}
+
+#[uniffi::export]
+pub fn discover_indexers() -> Result<String, ZingolibError> {
+    with_panic_guard(|| {
+        let config = discovery_config();
+        let fingerprint = wallet_fingerprint();
+        let report = RT.block_on(async move { discovery::discover(&config, fingerprint).await });
+        Ok(report_json(report))
+    })
+}
+
+#[uniffi::export]
+pub fn probe_indexer(server_uri: String) -> Result<String, ZingolibError> {
+    with_panic_guard(|| {
+        let config = discovery_config();
+        let fingerprint = wallet_fingerprint();
+        let uris = vec![(server_uri, discovery::Source::Builtin)];
+        let report =
+            RT.block_on(async move { discovery::health_check(&config, uris, fingerprint).await });
+        Ok(report_json(report))
+    })
+}
+
 #[uniffi::export]
 pub fn get_latest_block_wallet() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
@@ -675,8 +774,8 @@ pub fn get_value_transfers() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         with_lightclient_read(|lightclient| {
             Ok(RT.block_on(async move {
-                match lightclient.value_transfers(true).await {
-                    Ok(value_transfers) => json::JsonValue::from(value_transfers).pretty(2),
+                match lightclient.wallet_events(true).await {
+                    Ok(wallet_events) => json::JsonValue::from(wallet_events).pretty(2),
                     Err(e) => format!("Error: {e}"),
                 }
             }))
@@ -696,8 +795,10 @@ pub fn poll_sync() -> Result<String, ZingolibError> {
                 PollReport::NotReady => "Sync task is not complete.".to_string(),
                 PollReport::Ready(result) => match result {
                     Ok(sync_result) => {
-                        json::object! { "sync_complete" => json::JsonValue::from(sync_result) }
-                            .pretty(2)
+                        json::object! {
+                            "sync_complete" => json::JsonValue::from(SessionReport::from(sync_result))
+                        }
+                        .pretty(2)
                     }
                     Err(e) => format!("Error: {e}"),
                 },
@@ -759,7 +860,7 @@ pub fn status_sync() -> Result<String, ZingolibError> {
             Ok(RT.block_on(async {
                 let wallet = lightclient.wallet.read().await;
                 match pepper_sync::sync_status(&*wallet).await {
-                    Ok(status) => json::JsonValue::from(status).pretty(2),
+                    Ok(status) => json::JsonValue::from(SyncProgress::from(status)).pretty(2),
                     Err(e) => format!("Error: {e}"),
                 }
             }))
@@ -822,11 +923,9 @@ pub fn request_faucet_funds(address: String) -> Result<String, ZingolibError> {
 
         if let Some(lightclient) = &mut *guard {
             Ok(RT.block_on(async move {
-                match lightclient.request_faucet_funds(address).await {
-                    Ok(faucet_info) => JsonValue::from(faucet_info).pretty(2).to_string(),
-                    Err(e) => {
-                        format!("Error: {e}")
-                    }
+                match faucet_anywhere(lightclient, &address).await {
+                    Ok(amount) => JsonValue::from(amount.to_string()).pretty(2),
+                    Err(e) => format!("Error: {e}"),
                 }
             }))
         } else {
@@ -888,12 +987,12 @@ pub fn change_server(server_uri: String) -> Result<String, ZingolibError> {
             .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             if server_uri.is_empty() {
-                lightclient.set_server(http::Uri::default());
+                lightclient.set_indexer(http::Uri::default());
                 Ok("server set (default)".to_string())
             } else {
                 match http::Uri::from_str(&server_uri) {
                     Ok(uri) => {
-                        lightclient.set_server(uri);
+                        lightclient.set_indexer(uri);
                         Ok("server set".to_string())
                     }
                     Err(_) => Ok("Error: invalid server uri".to_string()),
@@ -956,31 +1055,9 @@ fn make_decoded_chain_pair(
     address: &str,
 ) -> Option<(zcash_client_backend::address::Address, ChainType)> {
     [
-        ChainType::Mainnet,
-        ChainType::Testnet(ConfiguredActivationHeights {
-            before_overwinter: Some(1),
-            overwinter: Some(1),
-            sapling: Some(1),
-            blossom: Some(1),
-            heartwood: Some(1),
-            canopy: Some(1),
-            nu5: Some(1),
-            nu6: Some(1),
-            nu6_1: None,
-            nu7: None,
-        }),
-        ChainType::Regtest(ConfiguredActivationHeights {
-            before_overwinter: Some(1),
-            overwinter: Some(1),
-            sapling: Some(1),
-            blossom: Some(1),
-            heartwood: Some(1),
-            canopy: Some(1),
-            nu5: Some(1),
-            nu6: Some(1),
-            nu6_1: Some(1),
-            nu7: None,
-        }),
+        chain_from_str("mainnet").expect("a known chain name"),
+        chain_from_str("testnet").expect("a known chain name"),
+        chain_from_str("regtest").expect("a known chain name"),
     ]
     .iter()
     .find_map(|chain| Address::decode(chain, address).zip(Some(*chain)))
@@ -1123,7 +1200,7 @@ pub fn get_messages(address: String) -> Result<String, ZingolibError> {
                     .messages_containing(Some(address.as_str()))
                     .await
                 {
-                    Ok(value_transfers) => json::JsonValue::from(value_transfers).pretty(2),
+                    Ok(wallet_events) => json::JsonValue::from(wallet_events).pretty(2),
                     Err(e) => format!("Error: {e}"),
                 }
             }))
@@ -1717,17 +1794,15 @@ pub fn stake(stake_json: String) -> Result<String, ZingolibError> {
                 };
 
                 let finalizer_address = match json_args["finalizer_address"].as_str() {
-                    Some(addr) => parse_hex_32(addr).unwrap(),
+                    Some(addr) => match resolve_finalizer_address(lightclient, addr).await {
+                        Ok(address) => address,
+                        Err(e) => return e,
+                    },
                     None => return "Error: Missing address".to_string(),
                 };
 
-                let request = match transaction_request_from_receivers(vec![]) {
-                    Ok(request) => request,
-                    Err(e) => return format!("Error: Request Error: {e}"),
-                };
-
                 match lightclient
-                    .propose_stake(request, amount, finalizer_address, AccountId::ZERO)
+                    .propose_stake(amount, finalizer_address, AccountId::ZERO)
                     .await
                 {
                     Ok(proposal) => {
@@ -1786,29 +1861,9 @@ pub fn withdraw_stake(withdraw_stake_json: String) -> Result<String, ZingolibErr
                     None => return object! { "error" => "tx not found" }.pretty(2),
                 };
 
-                let sa = found_tx.staking_action.as_ref().unwrap();
+                let bond_key = found_tx.staking_action.as_ref().unwrap().bond_key();
 
-                let bond_key: [u8; 32] = sa.arg32_0;
-
-                let mut client = match get_client(lightclient.server_uri()).await {
-                    Ok(c) => c,
-                    Err(e) => return object! { "error" => format!("grpc client: {e}") }.pretty(2),
-                };
-
-                let mut wallet = lightclient.wallet.write().await;
-
-                let res = match lightclient.config().chain {
-                    ChainType::Regtest(_) => {
-                        wallet
-                            .withdraw_bond_using_orchard(&REGTEST_NETWORK, &mut client, &bond_key)
-                            .await
-                    }
-                    ChainType::Testnet(_) | ChainType::Mainnet => {
-                        wallet
-                            .withdraw_bond_using_orchard(&TEST_NETWORK, &mut client, &bond_key)
-                            .await
-                    }
-                };
+                let res = lightclient.withdraw_bond(bond_key, AccountId::ZERO).await;
                 match res {
                     Ok(txid) => object! { "txid" => txid.to_string() }.pretty(2),
                     Err(e) => object! { "error" => e.to_string() }.pretty(2),
@@ -1848,15 +1903,10 @@ pub fn begin_unstake(begin_unstake_json: String) -> Result<String, ZingolibError
                     .find(|tx| tx.txid.to_string() == hex::encode(txid))
                     .unwrap();
 
-                let pubkey = found_tx.staking_action.as_ref().unwrap().arg32_0;
-
-                let request = match transaction_request_from_receivers(vec![]) {
-                    Ok(request) => request,
-                    Err(e) => return format!("Error: Request Error: {e}"),
-                };
+                let bond_key = found_tx.staking_action.as_ref().unwrap().bond_key();
 
                 match lightclient
-                    .propose_begin_unstake(request, [0u8; 32], pubkey, AccountId::ZERO)
+                    .propose_begin_unstake(bond_key, AccountId::ZERO)
                     .await
                 {
                     Ok(proposal) => {
@@ -1895,22 +1945,16 @@ pub fn retarget_bond(retarget_bond_json: String) -> Result<String, ZingolibError
 
                 let bond_key = parse_hex_32(json_args["bond_key"].as_str().unwrap()).unwrap();
 
-                // This should be reversed by now!!!
-                let new_finalizer_address =
-                    parse_hex_32(json_args["new_finalizer"].as_str().unwrap()).unwrap();
-
-                let request = match transaction_request_from_receivers(vec![]) {
-                    Ok(request) => request,
-                    Err(e) => return format!("Error: Request Error: {e}"),
+                let new_finalizer_address = match json_args["new_finalizer"].as_str() {
+                    Some(addr) => match resolve_finalizer_address(lightclient, addr).await {
+                        Ok(address) => address,
+                        Err(e) => return e,
+                    },
+                    None => return "Error: Missing new finalizer".to_string(),
                 };
 
                 match lightclient
-                    .propose_retarget_bond(
-                        request,
-                        new_finalizer_address,
-                        bond_key,
-                        AccountId::ZERO,
-                    )
+                    .propose_retarget_bond(bond_key, new_finalizer_address, AccountId::ZERO)
                     .await
                 {
                     Ok(proposal) => {
@@ -1927,6 +1971,26 @@ pub fn retarget_bond(retarget_bond_json: String) -> Result<String, ZingolibError
             Err(ZingolibError::LightclientNotInitialized)
         }
     })
+}
+
+async fn resolve_finalizer_address(
+    lightclient: &LightClient,
+    encoded: &str,
+) -> Result<FinalizerAddress, String> {
+    if let Ok(address) = parse_finalizer_address(encoded) {
+        return Ok(address);
+    }
+    let pub_key = parse_hex_32(encoded)?;
+    let roster = lightclient
+        .get_roster_info()
+        .await
+        .map_err(|e| format!("Error: {e}"))?;
+    roster
+        .members
+        .into_iter()
+        .find(|member| member.pub_key == pub_key)
+        .and_then(|member| member.finalizer_address)
+        .ok_or_else(|| "Error: the roster carries no address for this finalizer".to_string())
 }
 
 fn parse_hex_32(s: &str) -> Result<[u8; 32], String> {
@@ -2086,6 +2150,51 @@ mod tests {
             value["receivers_available"].len() >= 1,
             "expected at least one receiver in receivers_available"
         );
+    }
+
+    #[test]
+    #[ignore = "needs the network"]
+    fn discovery_ranks_live_featurenet_indexers() {
+        reset_lightclient();
+        let report = json::parse(&discover_indexers().unwrap()).unwrap();
+        println!("{}", report.pretty(2));
+        assert!(!report["indexers"].is_empty(), "no indexer answered");
+        let first = report["indexers"][0]["uri"].as_str().unwrap().to_string();
+        let probe = json::parse(&probe_indexer(first.clone()).unwrap()).unwrap();
+        println!("{}", probe.pretty(2));
+        assert_eq!(probe["indexers"][0]["uri"].as_str(), Some(first.as_str()));
+    }
+
+    #[test]
+    #[ignore = "needs the network"]
+    fn a_fresh_wallet_syncs_on_the_live_featurenet() {
+        let dir = std::env::temp_dir().join(format!("delegator-sync-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let _ = set_crypto_default_provider_to_ring();
+        let seed = init_new(
+            "http://88.198.67.189:18234".to_string(),
+            "test".to_string(),
+            "Medium".to_string(),
+            1,
+        )
+        .unwrap();
+        println!("init: {seed}");
+        assert!(!seed.to_lowercase().starts_with("error"), "{seed}");
+        println!("sync: {}", run_sync().unwrap());
+        for _ in 0..18 {
+            std::thread::sleep(std::time::Duration::from_secs(5));
+            let status = status_sync().unwrap();
+            let json = json::parse(&status).unwrap_or(json::JsonValue::Null);
+            println!(
+                "status: ranges={} blocks={}% outputs={}% poll={}",
+                json["scan_ranges"].len(),
+                json["percentage_total_blocks_scanned"],
+                json["percentage_total_outputs_scanned"],
+                poll_sync().unwrap()
+            );
+        }
+        println!("{}", get_latest_block_wallet().unwrap());
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]

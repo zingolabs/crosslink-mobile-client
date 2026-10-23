@@ -1,8 +1,8 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, TouchableOpacity, View } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
-import { ContextAppLoaded } from '../../app/context';
+import { useAppLoadedActions, useAppLoadedSettings } from '../../app/context';
 import RegText from './RegText';
 import Utils from '../../app/utils';
 import {
@@ -39,15 +39,9 @@ const AddressItem: React.FunctionComponent<AddressItemProps> = ({
   ufvk,
 }) => {
   const navigation: any = useNavigation();
-  const context = useContext(ContextAppLoaded);
-  const {
-    translate,
-    addLastSnackbar,
-    privacy,
-    readOnly,
-    selectIndexerServer,
-    setSendPageState,
-  } = context;
+  const { translate, addLastSnackbar, setSendPageState } =
+    useAppLoadedActions();
+  const { privacy, readOnly, selectIndexerServer } = useAppLoadedSettings();
   const { colors } = useTheme();
 
   const [expandAddress, setExpandAddress] = useState<boolean>(false);

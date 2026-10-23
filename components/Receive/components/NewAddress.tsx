@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   TextInput,
@@ -17,7 +17,7 @@ import {
   SnackbarDurationEnum,
 } from '../../../app/AppState';
 import RegText from '../../Components/RegText';
-import { ContextAppLoaded } from '../../../app/context';
+import { useAppLoadedActions } from '../../../app/context';
 import { useToast } from 'react-native-toastier';
 import { AddressUnifiedTypeEnum } from '../../../app/AppState';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -41,8 +41,7 @@ const NewAddress: React.FunctionComponent<NewAddressProps> = ({
   screenName,
   setHeightLayout,
 }) => {
-  const context = useContext(ContextAppLoaded);
-  const { translate, addLastSnackbar } = context;
+  const { translate, addLastSnackbar } = useAppLoadedActions();
   const { colors } = useTheme();
   const { clear } = useToast();
 

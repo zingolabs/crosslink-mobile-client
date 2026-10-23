@@ -5,9 +5,9 @@ import { View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import RegText from '../../../components/Components/RegText';
-import { AppDrawerParamList } from '../../types';
+import { LoadedAppStackParamList } from '../../types';
 import { RouteEnum } from '../../AppState';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 //import { ContextAppLoaded } from '../../context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
@@ -15,8 +15,8 @@ import FadeText from '../../../components/Components/FadeText';
 import LiquidPrimaryButton from '../../../components/Components/LiquidButton/LiquidPrimaryButton';
 import { useTheme } from '../../theme';
 
-type ComputingErrorProps = DrawerScreenProps<
-  AppDrawerParamList,
+type ComputingErrorProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
   RouteEnum.ComputingError
 >;
 

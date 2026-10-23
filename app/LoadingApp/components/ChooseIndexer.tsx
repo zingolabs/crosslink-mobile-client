@@ -8,8 +8,8 @@ import { ToastProvider, useToast } from 'react-native-toastier';
 import { RouteEnum, ScreenEnum } from '../../AppState';
 import { ContextAppLoading } from '../../context';
 import { LoadingAppStackParamList } from '../../types';
-import { IndexerList } from '../../utils/Utils';
-import { useIndexerProbes } from '../hooks/useIndexerProbes';
+import { Discover } from '../../indexers';
+import { useIndexerDiscovery } from '../hooks/useIndexerDiscovery';
 import Snackbars from '../../../components/Components/Snackbars';
 import BlurInText from '../../../components/Components/BlurInText';
 import JellyLoader from '../../../components/Components/Icons/JellyLoader';
@@ -18,14 +18,10 @@ import { HeaderTitle } from '../../../components/Header';
 import { text, useTheme } from '../../theme';
 
 export type ChooseIndexerProps = {
-  indexerList: IndexerList;
-  pingServer?: (uri: string) => Promise<number | null>;
+  discover?: Discover;
 };
 
-const ChooseIndexer: React.FC<ChooseIndexerProps> = ({
-  indexerList,
-  pingServer,
-}) => {
+const ChooseIndexer: React.FC<ChooseIndexerProps> = ({ discover }) => {
   const { snackbars, removeFirstSnackbar } = useContext(ContextAppLoading);
   const { colors } = useTheme();
   const { clear } = useToast();
@@ -33,24 +29,15 @@ const ChooseIndexer: React.FC<ChooseIndexerProps> = ({
     useNavigation<NativeStackNavigationProp<LoadingAppStackParamList>>();
   const screenName = ScreenEnum.Servers;
 
-  const { probes, online, settled, fastest } = useIndexerProbes(
-    indexerList,
-    pingServer,
-  );
+  const { report, indexers, discovering } = useIndexerDiscovery(discover);
 
-  const summary =
-    indexerList.length === 0
-      ? 'The list could not be loaded'
-      : !settled
-        ? ''
-        : fastest
-          ? `${online.length} of ${indexerList.length} online`
-          : 'None reachable right now';
+  const summary = discovering
+    ? ''
+    : indexers.length > 0
+      ? `${indexers.length} reachable`
+      : 'None reachable right now';
   const summaryColor =
-    indexerList.length === 0 || (settled && !fastest)
-      ? colors.fgDanger
-      : colors.fgSubtle;
-  const checking = indexerList.length > 0 && !settled;
+    !discovering && indexers.length === 0 ? colors.fgDanger : colors.fgSubtle;
 
   const goBack = () => {
     clear();
@@ -78,12 +65,11 @@ const ChooseIndexer: React.FC<ChooseIndexerProps> = ({
 
           <View>
             <OptionCard
-              title="Listed indexers"
+              title="Discovered indexers"
               icon={faServer}
               tint="accent"
-              disabled={indexerList.length === 0}
               detail={
-                checking ? (
+                discovering ? (
                   <View style={styles.loader}>
                     <JellyLoader size={16} />
                   </View>
@@ -98,7 +84,9 @@ const ChooseIndexer: React.FC<ChooseIndexerProps> = ({
                 )
               }
               onPress={() =>
-                navigation.navigate(RouteEnum.ListedIndexers, { probes })
+                navigation.navigate(RouteEnum.ListedIndexers, {
+                  report: report ?? undefined,
+                })
               }
             />
             <OptionCard

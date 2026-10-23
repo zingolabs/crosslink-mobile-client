@@ -1,11 +1,11 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext } from 'react';
+import React from 'react';
 import { View, TouchableOpacity, Alert } from 'react-native';
 
 import { LoadingAppNavigationState } from '../../app/types';
-import { ContextAppLoaded } from '../../app/context';
+import { useAppLoadedActions } from '../../app/context';
 import { ToastProvider, useToast } from 'react-native-toastier';
-import { RouteEnum } from '../../app/AppState';
+import { LoadingAppEntryEnum, RouteEnum } from '../../app/AppState';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import {
   faChevronRight,
@@ -34,8 +34,7 @@ const SettingsMenu: React.FunctionComponent<SettingsMenuProps> = ({
   onClickOKChangeWallet,
   navigation,
 }) => {
-  const context = useContext(ContextAppLoaded);
-  const { translate } = context;
+  const { translate } = useAppLoadedActions();
   const { colors } = useTheme();
   const { clear } = useToast();
 
@@ -49,7 +48,10 @@ const SettingsMenu: React.FunctionComponent<SettingsMenuProps> = ({
         {
           text: translate('confirm') as string,
           onPress: () =>
-            onClickOKChangeWallet({ screen: 3, startingApp: false }),
+            onClickOKChangeWallet({
+              entry: LoadingAppEntryEnum.menu,
+              startingApp: false,
+            }),
         },
         { text: translate('cancel') as string, style: 'cancel' },
       ],

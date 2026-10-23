@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   ScrollView,
@@ -16,8 +16,13 @@ import Clipboard from '@react-native-clipboard/clipboard';
 
 import RegText from '../Components/RegText';
 import ZecAmount from '../Components/ZecAmount';
-import { AppDrawerParamList } from '../../app/types';
-import { ContextAppLoaded } from '../../app/context';
+import { LoadedAppStackParamList } from '../../app/types';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedWallet,
+  useAppLoadedUi,
+} from '../../app/context';
 import Utils from '../../app/utils';
 import FadeText from '../Components/FadeText';
 import { HeaderTitle } from '../Header';
@@ -31,7 +36,7 @@ import {
 } from '../../app/AppState';
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTheme } from '../../app/theme';
 
 type DataType = {
@@ -54,25 +59,19 @@ const getPercent = (percent: number) => {
   );
 };
 
-type DistributionProps = DrawerScreenProps<
-  AppDrawerParamList,
+type DistributionProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
   RouteEnum.Distribution
 >;
 
 const Distribution: React.FunctionComponent<DistributionProps> = ({
   navigation,
 }) => {
-  const context = useContext(ContextAppLoaded);
-  const {
-    info,
-    translate,
-    privacy,
-    addLastSnackbar,
-    snackbars,
-    removeFirstSnackbar,
-    staked,
-    globalStaked,
-  } = context;
+  const { translate, addLastSnackbar, removeFirstSnackbar } =
+    useAppLoadedActions();
+  const { privacy } = useAppLoadedSettings();
+  const { info, staked, globalStaked } = useAppLoadedWallet();
+  const { snackbars } = useAppLoadedUi();
   const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.Insight;

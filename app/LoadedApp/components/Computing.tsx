@@ -1,26 +1,26 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext } from 'react';
+import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
 import RegText from '../../../components/Components/RegText';
-import { AppDrawerParamList } from '../../types';
+import { LoadedAppStackParamList } from '../../types';
 import { RouteEnum, SendPageStateClass } from '../../AppState';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Utils from '../../utils';
 import ZecAmount from '../../../components/Components/ZecAmount';
-import { ContextAppLoaded } from '../../context';
+import { useAppLoadedSettings, useAppLoadedWallet } from '../../context';
 import { faPaperPlane } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useTheme } from '../../theme';
 
-type ComputingProps = DrawerScreenProps<
-  AppDrawerParamList,
+type ComputingProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
   RouteEnum.Computing
 >;
 
 const Computing: React.FunctionComponent<ComputingProps> = ({ route }) => {
-  const context = useContext(ContextAppLoaded);
-  const { info, privacy } = context;
+  const { privacy } = useAppLoadedSettings();
+  const { info } = useAppLoadedWallet();
   const { colors } = useTheme();
 
   const sendPageStatePar =

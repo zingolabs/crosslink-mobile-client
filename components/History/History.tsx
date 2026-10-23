@@ -1,6 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {
-  useContext,
   useState,
   useEffect,
   useCallback,
@@ -28,7 +27,11 @@ import {
 } from '../../app/AppState';
 import FadeText from '../Components/FadeText';
 import ValueTransferLine from './components/ValueTransferLine';
-import { ContextAppLoaded } from '../../app/context';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedWallet,
+} from '../../app/context';
 import Utils from '../../app/utils';
 import {
   DataProvider,
@@ -39,7 +42,7 @@ import {
 import { ScrollEvent } from 'recyclerlistview/dist/reactnative/core/scrollcomponent/BaseScrollView';
 import { isEqual } from 'lodash';
 import { RecyclerListViewState } from 'recyclerlistview/dist/reactnative/core/RecyclerListView';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WalletSummaryHeader from './components/WalletSummaryHeader';
 import QuickActionsRow from './components/QuickActionsRow';
 import SettingsButton from './components/SettingsButton';
@@ -59,9 +62,11 @@ const ViewTypes = {
   WITHOUT_MONTH_ADDRESS: 3,
 };
 
-type HistoryProps = DrawerScreenProps<MainTabParamList, RouteEnum.History> & {
+type HistoryProps = NativeStackScreenProps<
+  MainTabParamList,
+  RouteEnum.History
+> & {
   // side menu
-  toggleMenuDrawer: () => void;
   // privacy
   // addLastSnackbar from context
   // shielding / sending
@@ -88,15 +93,10 @@ const History: React.FunctionComponent<HistoryProps> = ({
   //setServerOption,
 }) => {
   const navigation: any = useNavigation();
-  const context = useContext(ContextAppLoaded);
-  const {
-    translate,
-    valueTransfers,
-    language,
-    indexerServer,
-    doRefresh,
-    zenniesDonationAddress,
-  } = context;
+  const { translate, doRefresh } = useAppLoadedActions();
+  const { language, indexerServer, zenniesDonationAddress } =
+    useAppLoadedSettings();
+  const { valueTransfers } = useAppLoadedWallet();
   const { colors } = useTheme();
   const screenName = ScreenEnum.History;
 
@@ -516,7 +516,11 @@ const History: React.FunctionComponent<HistoryProps> = ({
                     borderStyle: 'solid',
                   }}
                 >
-                  <EmptyList width={100} height={100} color={colors.fgDefault} />
+                  <EmptyList
+                    width={100}
+                    height={100}
+                    color={colors.fgDefault}
+                  />
                   <FadeText style={{ color: colors.fgDefault }}>
                     {'There are no transactions yet.'}
                   </FadeText>

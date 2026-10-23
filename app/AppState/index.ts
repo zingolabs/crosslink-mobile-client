@@ -16,7 +16,6 @@ export { default as SettingsFileClass } from './classes/SettingsFileClass';
 export { default as ToAddrClass } from './classes/ToAddrClass';
 export { default as TotalBalanceClass } from './classes/TotalBalanceClass';
 
-export { MenuItemEnum } from './enums/MenuItemEnum';
 export { LanguageEnum } from './enums/LanguageEnum';
 export { CurrencyEnum } from './enums/CurrencyEnum';
 export { SelectServerEnum } from './enums/SelectServerEnum';
@@ -44,6 +43,7 @@ export { AddressUnifiedTypeEnum } from './enums/AddressUnifiedTypeEnum';
 export { ZcashUriFieldEnum } from './enums/ZcashUriFieldEnum';
 export { ScreenEnum } from './enums/ScreenEnum';
 export { LaunchingModeEnum } from './enums/LaunchingModeEnum';
+export { LoadingAppEntryEnum } from './enums/LoadingAppEntryEnum';
 export { StakingActionKindEnum } from './enums/StakingActionKindEnum';
 
 export { GlobalConst } from './const/GlobalConst';
@@ -65,7 +65,6 @@ export type { default as NetInfoType } from './types/NetInfoType';
 export type { default as ServerType } from './types/ServerType';
 export type { default as SnackbarType } from './types/SnackbarType';
 export type { default as SecurityType } from './types/SecurityType';
-export type { default as ServerUrisType } from './types/ServerUrisType';
 export type { default as ValueTransferType } from './types/ValueTransferType';
 export type { default as ContactType } from './types/ContactType';
 export type { default as TransactionType } from './types/TransactionType';

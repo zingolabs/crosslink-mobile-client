@@ -12,8 +12,23 @@ const defaultConfig = getDefaultConfig(__dirname);
 const { assetExts, sourceExts } = defaultConfig.resolver;
 
 const storybookEnabled = process.env.STORYBOOK_ENABLED === 'true';
+const reactScanEnabled = process.env.REACT_SCAN === 'true';
 
 const storybookStubs = ['@react-native-community/datetimepicker'];
+
+const resolveRequest = (context, moduleName, platform) => {
+  if (storybookEnabled && storybookStubs.includes(moduleName)) {
+    return { type: 'empty' };
+  }
+  if (
+    reactScanEnabled &&
+    context.dev &&
+    moduleName.endsWith('/devtools/ReactScan')
+  ) {
+    return context.resolveRequest(context, `${moduleName}.on`, platform);
+  }
+  return context.resolveRequest(context, moduleName, platform);
+};
 
 const config = {
   transformer: {
@@ -22,12 +37,7 @@ const config = {
   resolver: {
     assetExts: assetExts.filter(ext => ext !== 'svg'),
     sourceExts: [...sourceExts, 'svg'],
-    ...(storybookEnabled && {
-      resolveRequest: (context, moduleName, platform) =>
-        storybookStubs.includes(moduleName)
-          ? { type: 'empty' }
-          : context.resolveRequest(context, moduleName, platform),
-    }),
+    resolveRequest,
   },
 };
 

@@ -1,9 +1,9 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 
 import RegText from '../../Components/RegText';
-import { ContextAppLoaded } from '../../../app/context';
+import { useAppLoadedWallet } from '../../../app/context';
 import ClockActiveWithCheck from '../../../assets/icons/clock-active-with-check.svg';
 import TriangleYellow from '../../../assets/icons/triangle-yellow.svg';
 import { formatSeconds } from '../../../app/utils/Utils';
@@ -15,12 +15,11 @@ const COLLAPSED_WIDTH = 52;
 const EXPANDED_WIDTH = 210;
 
 const StakingDayStatusBar: React.FC<StakingDayStatusBarProps> = () => {
-  const context = useContext(ContextAppLoaded);
   const {
     stakingDay,
     timeToStakingDaySeconds: timeToStakingDay,
     timeLeftStakingDaySeconds: timeLeftStakingDay,
-  } = context;
+  } = useAppLoadedWallet();
 
   const [expanded, setExpanded] = useState(false);
 

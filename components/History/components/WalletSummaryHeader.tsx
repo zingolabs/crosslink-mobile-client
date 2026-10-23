@@ -1,10 +1,14 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Animated, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { isEqual } from 'lodash';
 
-import { ContextAppLoaded } from '../../../app/context';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedWallet,
+} from '../../../app/context';
 import { RouteEnum, SelectServerEnum } from '../../../app/AppState';
 import { RPCSyncStatusType } from '../../../app/rpc/types/RPCSyncStatusType';
 import ZecAmount from '../../Components/ZecAmount';
@@ -21,15 +25,9 @@ const WalletSummaryHeader: React.FC<WalletSummaryHeaderProps> = ({
   const navigation: any = useNavigation();
   const { colors } = useTheme();
 
-  const {
-    totalBalance,
-    info,
-    syncingStatus,
-    netInfo,
-    translate,
-    selectIndexerServer,
-    privacy,
-  } = useContext(ContextAppLoaded);
+  const { translate } = useAppLoadedActions();
+  const { selectIndexerServer, privacy } = useAppLoadedSettings();
+  const { totalBalance, info, syncingStatus, netInfo } = useAppLoadedWallet();
 
   const [percentageOutputsScanned, setPercentageOutputsScanned] =
     useState<number>(0);

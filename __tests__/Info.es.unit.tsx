@@ -14,8 +14,8 @@ import {
 import { CurrencyEnum, RouteEnum } from '../app/AppState';
 import { mockInfo } from '../__mocks__/dataMocks/mockInfo';
 import { mockZecPrice } from '../__mocks__/dataMocks/mockZecPrice';
-import { DrawerScreenProps } from '@react-navigation/drawer';
-import { AppDrawerParamList } from '../app/types';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { LoadedAppStackParamList } from '../app/types';
 import mockNavigation from '../__mocks__/dataMocks/mockNavigation';
 
 // don't delete -> mocking in Spanish.
@@ -28,8 +28,8 @@ jest.mock('react-native-localize', () => ({
   },
 }));
 
-function makeDrawerProps(): DrawerScreenProps<
-  AppDrawerParamList,
+function makeDrawerProps(): NativeStackScreenProps<
+  LoadedAppStackParamList,
   RouteEnum.Info
 > {
   return {

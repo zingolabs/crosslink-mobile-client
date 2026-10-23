@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext } from 'react';
+import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import {
@@ -18,7 +18,7 @@ import {
   ScreenEnum,
 } from '../../../app/AppState';
 import Utils from '../../../app/utils';
-import { ContextAppLoaded } from '../../../app/context';
+import { useAppLoadedActions } from '../../../app/context';
 import { useTheme } from '../../../app/theme';
 
 type AlSummaryLineProps = {
@@ -35,8 +35,7 @@ const AlSummaryLine: React.FunctionComponent<AlSummaryLineProps> = ({
   closeScreen,
   screenName,
 }) => {
-  const context = useContext(ContextAppLoaded);
-  const { translate, addLastSnackbar } = context;
+  const { translate, addLastSnackbar } = useAppLoadedActions();
   const { colors } = useTheme();
 
   const displayAddress: string = item.address
@@ -134,7 +133,11 @@ const AlSummaryLine: React.FunctionComponent<AlSummaryLineProps> = ({
               doQr();
             }}
           >
-            <FontAwesomeIcon size={30} icon={faQrcode} color={colors.fgDefault} />
+            <FontAwesomeIcon
+              size={30}
+              icon={faQrcode}
+              color={colors.fgDefault}
+            />
           </TouchableOpacity>
         </View>
       </View>

@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   TouchableOpacity,
   View,
@@ -10,7 +10,11 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faRefresh } from '@fortawesome/free-solid-svg-icons';
 import FadeText from './FadeText';
-import { ContextAppLoaded } from '../../app/context';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedWallet,
+} from '../../app/context';
 import moment from 'moment';
 import WalletSession from '../../app/rpc';
 import RegText from './RegText';
@@ -29,8 +33,9 @@ const PriceFetcher: React.FunctionComponent<PriceFetcherProps> = ({
   screenName,
   textBefore,
 }) => {
-  const context = useContext(ContextAppLoaded);
-  const { translate, zecPrice, addLastSnackbar, language, currency } = context;
+  const { translate, addLastSnackbar } = useAppLoadedActions();
+  const { language, currency } = useAppLoadedSettings();
+  const { zecPrice } = useAppLoadedWallet();
   const { colors } = useTheme();
 
   const [refreshMinutes, setRefreshMinutes] = useState<number>(0);
@@ -193,7 +198,9 @@ const PriceFetcher: React.FunctionComponent<PriceFetcherProps> = ({
             }}
           >
             {textBefore && (
-              <RegText style={{ color: colors.fgDefault }}>{textBefore}</RegText>
+              <RegText style={{ color: colors.fgDefault }}>
+                {textBefore}
+              </RegText>
             )}
             <FontAwesomeIcon
               icon={faRefresh}

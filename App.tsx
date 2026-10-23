@@ -9,20 +9,20 @@ import {
   NavigationContainer,
   ParamListBase,
 } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { LoadedApp } from './app/LoadedApp';
 import { LoadingApp } from './app/LoadingApp';
 import { AppStackParamList } from './app/types';
 import { ThemeProvider, navigationTheme, useTheme } from './app/theme';
 import { RouteEnum } from './app/AppState';
-import { BackdropHost } from './app/Backdrop';
+import ReactScanGate from './app/devtools/ReactScan';
 
 LogBox.ignoreLogs([
   '[Reanimated] Reduced motion setting is enabled on this device.',
 ]);
 
-const Stack = createStackNavigator<AppStackParamList>();
+const Stack = createNativeStackNavigator<AppStackParamList>();
 
 const navigationRef = createNavigationContainerRef<AppStackParamList>();
 
@@ -64,35 +64,34 @@ const AppContent: React.FunctionComponent = () => {
     <SafeAreaProvider>
       <StatusBar backgroundColor={colors.bgCanvas} />
       <NavigationContainer ref={navigationRef} theme={theme} linking={linking}>
-        <BackdropHost>
-          <SafeAreaView style={{ flex: 1 }}>
-            <Stack.Navigator
-              initialRouteName={RouteEnum.LoadingApp}
-              screenOptions={{ headerShown: false, animation: 'none' }}
-            >
-              <Stack.Screen
-                name={RouteEnum.LoadingApp}
-                options={{ cardStyle: { backgroundColor: 'transparent' } }}
-              >
-                {props => <LoadingApp {...props} />}
-              </Stack.Screen>
-              <Stack.Screen name={RouteEnum.LoadedApp}>
-                {props => <LoadedApp {...props} />}
-              </Stack.Screen>
-            </Stack.Navigator>
-          </SafeAreaView>
-        </BackdropHost>
+        <Stack.Navigator
+          initialRouteName={RouteEnum.LoadingApp}
+          screenOptions={{ headerShown: false, animation: 'fade' }}
+        >
+          <Stack.Screen name={RouteEnum.LoadingApp}>
+            {props => <LoadingApp {...props} />}
+          </Stack.Screen>
+          <Stack.Screen name={RouteEnum.LoadedApp}>
+            {props => (
+              <SafeAreaView style={{ flex: 1 }}>
+                <LoadedApp {...props} />
+              </SafeAreaView>
+            )}
+          </Stack.Screen>
+        </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
   );
 };
 
 const App: React.FunctionComponent = () => (
-  <GestureHandlerRootView style={{ flex: 1 }}>
-    <ThemeProvider>
-      <AppContent />
-    </ThemeProvider>
-  </GestureHandlerRootView>
+  <ReactScanGate>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
+    </GestureHandlerRootView>
+  </ReactScanGate>
 );
 
 export default App;

@@ -1,11 +1,11 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import moment from 'moment';
 import { Eye, EyeOff, QrCode, Send } from 'lucide-react-native';
 
 import { ValueTransferType } from '../../app/AppState';
-import { ContextAppLoaded } from '../../app/context';
+import { useAppLoadedWallet } from '../../app/context';
 import { useTheme } from '../../app/theme';
 import { Sparkline } from './charts';
 import {
@@ -82,7 +82,7 @@ const Glance: React.FC<VariantActions & { insetTop: number }> = ({
   onShield,
 }) => {
   const { colors } = useTheme();
-  const { info } = useContext(ContextAppLoaded);
+  const { info } = useAppLoadedWallet();
   const transfers = useTransfers();
   const { hidden, toggle } = usePrivacy();
   const [selected, setSelected] = useState<string | null>(null);

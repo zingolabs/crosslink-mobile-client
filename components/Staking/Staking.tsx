@@ -1,7 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -23,7 +22,7 @@ import {
   Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import {
   GlobalConst,
@@ -37,7 +36,12 @@ import {
 import WalletSummaryHeader from '../History/components/WalletSummaryHeader';
 import SettingsButton from '../History/components/SettingsButton';
 import StakingActions from './StakingActions';
-import { ContextAppLoaded } from '../../app/context';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedWallet,
+  useAppLoadedUi,
+} from '../../app/context';
 import Stake from '../../assets/icons/stake-white.svg';
 import Unstake from '../../assets/icons/unstake-white.svg';
 import RegText from '../Components/RegText';
@@ -79,7 +83,10 @@ type Finalizer = {
 //   }); // "Oct 10, 4:30 PM"
 // };
 
-type StakingProps = DrawerScreenProps<MainTabParamList, RouteEnum.StakingHome>;
+type StakingProps = NativeStackScreenProps<
+  MainTabParamList,
+  RouteEnum.StakingHome
+>;
 
 const Staking: React.FC<StakingProps> = ({ route }) => {
   const tabParam =
@@ -88,13 +95,11 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
       : 'active';
 
   const navigation: any = useNavigation();
-  const context = useContext(ContextAppLoaded);
+  const { removeFirstSnackbar } = useAppLoadedActions();
+  const { privacy } = useAppLoadedSettings();
   const {
-    snackbars,
-    removeFirstSnackbar,
     staked,
     info,
-    privacy,
     stakingDay,
     timeToStakingDaySeconds: timeToStakingDay,
     timeLeftStakingDaySeconds: timeLeftStakingDay,
@@ -102,7 +107,8 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
     walletBonds,
     blocksToStakingDay,
     blocksTotalStakingDay,
-  } = context;
+  } = useAppLoadedWallet();
+  const { snackbars } = useAppLoadedUi();
 
   const screenName = ScreenEnum.StakingHome;
 

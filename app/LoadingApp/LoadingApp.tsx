@@ -1,23 +1,20 @@
 import React, { Component, useState, useMemo, useEffect } from 'react';
 import {
   Alert,
-  Modal,
   I18nManager,
-  EmitterSubscription,
   AppState,
-  NativeEventSubscription,
+  AppStateStatus,
   Platform,
 } from 'react-native';
 
 import Clipboard from '@react-native-clipboard/clipboard';
 import { I18n } from 'i18n-js';
-import { StackScreenProps } from '@react-navigation/stack';
 import {
   NativeStackNavigationProp,
+  NativeStackScreenProps,
   createNativeStackNavigator,
 } from '@react-navigation/native-stack';
 import NetInfo, {
-  NetInfoSubscription,
   NetInfoState,
 } from '@react-native-community/netinfo/src/index';
 
@@ -30,7 +27,6 @@ import {
   NetInfoType,
   ServerType,
   SecurityType,
-  ServerUrisType,
   LanguageEnum,
   CurrencyEnum,
   SelectServerEnum,
@@ -48,7 +44,6 @@ import {
   ScreenEnum,
   LaunchingModeEnum,
 } from '../AppState';
-import { serverUris } from '../uris';
 import SettingsFileImpl from '../../components/Settings/SettingsFileImpl';
 import RPC from '../rpc';
 import { ContextAppLoadingProvider } from '../context';
@@ -60,7 +55,6 @@ import Snackbars from '../../components/Components/Snackbars';
 import { RPCSeedType } from '../rpc/types/RPCSeedType';
 import Launching from './components/Launching';
 import simpleBiometrics from '../simpleBiometrics';
-import selectingServer from '../selectingServer';
 import { isEqual } from 'lodash';
 import {
   createUpdateRecoveryWalletInfo,
@@ -76,16 +70,17 @@ import StartMenu from './components/StartMenu';
 import { ToastProvider } from 'react-native-toastier';
 import { RPCUfvkType } from '../rpc/types/RPCUfvkType';
 import { RPCPerformanceLevelEnum } from '../rpc/enums/RPCPerformanceLevelEnum';
-import NewSeed from './components/NewSeed';
 import { AppStackParamList, LoadingAppStackParamList } from '../types';
 import ChooseIndexer from './components/ChooseIndexer';
 import ListedIndexers from './components/ListedIndexers';
-import { fastestIndexer } from './hooks/useIndexerProbes';
 import CustomIndexer from './components/CustomIndexer';
 import ScheduledActionsFileImpl from '../../components/ScheduledActions/ScheduledActionsFileImpl';
-import { getIndexerList, IndexerList } from '../utils/Utils';
+import { discoverIndexers, probeIndexer } from '../indexers';
 import notifee from '@notifee/react-native';
 import { useTheme, AppTheme } from '../theme';
+import { LoadingAppEntryEnum } from '../AppState/enums/LoadingAppEntryEnum';
+import { BackdropHost } from '../Backdrop';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const en = require('../translations/en.json');
 const es = require('../translations/es.json');
@@ -97,11 +92,14 @@ const tr = require('../translations/tr.json');
 //const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 type LoadingAppProps = {
-  navigation: StackScreenProps<
+  navigation: NativeStackScreenProps<
     AppStackParamList,
     RouteEnum.LoadingApp
   >['navigation'];
-  route: StackScreenProps<AppStackParamList, RouteEnum.LoadingApp>['route'];
+  route: NativeStackScreenProps<
+    AppStackParamList,
+    RouteEnum.LoadingApp
+  >['route'];
 };
 
 const LoadingStack = createNativeStackNavigator<LoadingAppStackParamList>();
@@ -233,22 +231,7 @@ export default function LoadingApp(props: LoadingAppProps) {
           currency,
         );
       }
-      // lightwallet server
       if (settings.indexerServer) {
-        // check the server info, just in case...
-        if (
-          serverUris().filter(s => s.uri === settings.indexerServer.uri)
-            .length > 0
-        ) {
-          settings.indexerServer.chainName = serverUris().filter(
-            s => s.uri === settings.indexerServer.uri,
-          )[0].chainName;
-          // if chain name changed store it in settings.
-          await SettingsFileImpl.writeSettings(
-            SettingsNameEnum.indexerServer,
-            settings.indexerServer,
-          );
-        }
         setIndexerServer(settings.indexerServer);
       } else {
         await SettingsFileImpl.writeSettings(
@@ -378,11 +361,14 @@ export default function LoadingApp(props: LoadingAppProps) {
 }
 
 type LoadingAppClassProps = {
-  navigationApp: StackScreenProps<
+  navigationApp: NativeStackScreenProps<
     AppStackParamList,
     RouteEnum.LoadingApp
   >['navigation'];
-  route: StackScreenProps<AppStackParamList, RouteEnum.LoadingApp>['route'];
+  route: NativeStackScreenProps<
+    AppStackParamList,
+    RouteEnum.LoadingApp
+  >['route'];
   translate: (key: string) => TranslateType;
   theme: AppTheme;
   language: LanguageEnum;
@@ -402,13 +388,26 @@ type LoadingAppClassProps = {
 
 type LoadingAppClassState = AppStateLoading & AppContextLoading;
 
+type WalletKind = {
+  readOnly: boolean;
+  orchardPool: boolean;
+  saplingPool: boolean;
+  transparentPool: boolean;
+};
+
+type BootResult =
+  | { kind: 'biometricsFailed' }
+  | { kind: 'opened'; wallet: WalletKind }
+  | { kind: 'noWallet' }
+  | { kind: 'menu' }
+  | { kind: 'restore'; seed: string; birthday: number }
+  | { kind: 'error'; message: string; title: string };
+
 export class LoadingAppClass extends Component<
   LoadingAppClassProps,
   LoadingAppClassState
 > {
-  dim: EmitterSubscription;
-  appstate: NativeEventSubscription;
-  unsubscribeNetInfo: NetInfoSubscription;
+  subscriptions: (() => void)[] = [];
   screenName = ScreenEnum.LoadingApp;
   coldStart: boolean;
 
@@ -418,7 +417,6 @@ export class LoadingAppClass extends Component<
     this.coldStart = props.route.params?.startingApp ?? true;
 
     this.state = {
-      indexerList: [] as IndexerList,
       // context
       netInfo: {} as NetInfoType,
       wallet: {} as WalletType,
@@ -452,12 +450,12 @@ export class LoadingAppClass extends Component<
 
       // state
       appStateStatus: AppState.currentState,
-      screen:
-        !!props.route.params && props.route.params.screen !== undefined
-          ? props.route.params.screen
-          : 0,
-      actionButtonsDisabled: false,
+      entry: props.route.params?.entry ?? LoadingAppEntryEnum.boot,
+      // Start until boot() proves otherwise, so a wallet switch (entry: menu)
+      // never shows enabled buttons while netInfo is still empty.
+      actionButtonsDisabled: true,
       walletExists: false,
+      openWalletFailed: false,
       biometricsFailed:
         !!props.route.params &&
         props.route.params.biometricsFailed !== undefined
@@ -479,13 +477,85 @@ export class LoadingAppClass extends Component<
           ? props.route.params.walletBirthday
           : 0,
     };
-
-    this.dim = {} as EmitterSubscription;
-    this.appstate = {} as NativeEventSubscription;
-    this.unsubscribeNetInfo = {} as NetInfoSubscription;
   }
 
   componentDidMount = async () => {
+    this.subscribe();
+    await this.runBoot();
+  };
+
+  componentWillUnmount = () => {
+    this.unsubscribe();
+  };
+
+  subscribe = () => {
+    const appState = AppState.addEventListener(
+      EventListenerEnum.change,
+      this.handleAppStateChange,
+    );
+    const netInfo = NetInfo.addEventListener(this.handleNetInfoChange);
+    this.subscriptions = [() => appState?.remove?.(), netInfo];
+  };
+
+  unsubscribe = () => {
+    this.subscriptions.forEach(off => typeof off === 'function' && off());
+    this.subscriptions = [];
+  };
+
+  handleAppStateChange = async (nextAppState: AppStateStatus) => {
+    const priorAppState = this.state.appStateStatus;
+    this.setState({ appStateStatus: nextAppState });
+    if (
+      (priorAppState === AppStateStatusEnum.inactive ||
+        priorAppState === AppStateStatusEnum.background) &&
+      nextAppState === AppStateStatusEnum.active
+    ) {
+      this.fetchBackgroundSyncing();
+      await AsyncStorage.setItem(GlobalConst.background, GlobalConst.no);
+      if (
+        this.state.backgroundError &&
+        (this.state.backgroundError.title || this.state.backgroundError.error)
+      ) {
+        Alert.alert(
+          this.state.backgroundError.title,
+          this.state.backgroundError.error,
+        );
+        this.setBackgroundError('', '');
+      }
+    }
+    if (
+      (nextAppState === AppStateStatusEnum.inactive ||
+        nextAppState === AppStateStatusEnum.background) &&
+      priorAppState === AppStateStatusEnum.active
+    ) {
+      await AsyncStorage.setItem(GlobalConst.background, GlobalConst.yes);
+    }
+  };
+
+  handleNetInfoChange = (state: NetInfoState) => {
+    const { isConnected, type, isConnectionExpensive } = this.state.netInfo;
+    if (
+      isConnected !== state.isConnected ||
+      type !== state.type ||
+      isConnectionExpensive !== state.details?.isConnectionExpensive
+    ) {
+      this.setState({
+        netInfo: {
+          isConnected: state.isConnected,
+          type: state.type,
+          isConnectionExpensive:
+            state.details && state.details.isConnectionExpensive,
+        },
+      });
+    }
+  };
+
+  runBoot = async () => {
+    const result = await this.boot();
+    await this.applyBootResult(result);
+  };
+
+  boot = async (): Promise<BootResult> => {
     const netInfoState = await NetInfo.fetch();
     this.setState({
       netInfo: {
@@ -494,322 +564,209 @@ export class LoadingAppClass extends Component<
         isConnectionExpensive:
           netInfoState.details && netInfoState.details.isConnectionExpensive,
       },
-      //actionButtonsDisabled: !netInfoState.isConnected ? true : false,
     });
-
-    const indexerList = await getIndexerList();
-
-    this.setState({ indexerList: indexerList });
 
     this.fetchZingolibVersion();
 
-    //console.log('DID MOUNT APPLOADING...');
-
-    // to start the App the first time in this session
-    // the user have to pass the security of the device
     if (this.state.startingApp) {
-      if (!this.state.biometricsFailed) {
-        // (PIN or TouchID or FaceID)
-        this.setState({ biometricsFailed: false });
-        const resultBio = this.state.security.startApp
-          ? await simpleBiometrics({ translate: this.state.translate })
-          : true;
-        // can be:
-        // - true      -> the user do pass the authentication
-        // - false     -> the user do NOT pass the authentication
-        // - undefined -> no biometric authentication available -> Passcode.
-        //console.log('BIOMETRIC --------> ', resultBio);
-        if (resultBio === false) {
-          this.setState({ biometricsFailed: true });
-          return;
-        } else {
-          this.setState({ biometricsFailed: false });
-        }
-      } else {
-        // if there is a biometric Fail, likely from the foreground check
-        // keep the App in the first screen because the user needs to try again.
-        return;
+      if (this.state.biometricsFailed) {
+        return { kind: 'biometricsFailed' };
+      }
+      const resultBio = this.state.security.startApp
+        ? await simpleBiometrics({ translate: this.state.translate })
+        : true;
+      if (resultBio === false) {
+        return { kind: 'biometricsFailed' };
       }
     }
 
     this.setState({ actionButtonsDisabled: true });
 
-    // The App needs to set the crypto Provider by default to ring
-    // before anything...
-    const r = await RPCModule.setCryptoDefaultProvider();
-    console.log('crypto provider result', r);
+    await RPCModule.setCryptoDefaultProvider();
 
-    // has the device the Wallet Keys stored?
     const has = await hasRecoveryWalletInfo();
     this.setState({ hasRecoveryWalletInfoSaved: has });
 
     if (!this.state.indexerServer.uri) {
-      const fastest = await fastestIndexer(indexerList);
-      const first = serverUris()[0];
-      const server: ServerType = fastest
-        ? { uri: fastest, chainName: ChainNameEnum.testChainName }
-        : { uri: first.uri, chainName: first.chainName };
-      this.setState({ indexerServer: server });
-      await SettingsFileImpl.writeSettings(
-        SettingsNameEnum.indexerServer,
-        server,
-      );
+      const { indexers } = await discoverIndexers();
+      const best = indexers[0];
+      if (best) {
+        const server: ServerType = {
+          uri: best.uri,
+          chainName: ChainNameEnum.testChainName,
+        };
+        this.setState({ indexerServer: server });
+        await SettingsFileImpl.writeSettings(
+          SettingsNameEnum.indexerServer,
+          server,
+        );
+      } else {
+        this.addLastSnackbar({
+          message: this.state.translate('loadingapp.noservers') as string,
+          screenName: [this.screenName],
+        });
+      }
     }
 
-    // Second, check if a wallet exists. Do it async so the basic screen has time to render
     await AsyncStorage.setItem(GlobalConst.background, GlobalConst.no);
-    //console.log('&&&&& background no in storage &&&&&');
     const exists = await RPCModule.walletExists();
-    //console.log('Wallet Exists result', this.state.screen, exists);
 
-    if (exists && exists !== GlobalConst.false) {
-      this.setState({ walletExists: true });
-      let result: string = await RPCModule.loadExistingWallet(
-        this.state.indexerServer.uri,
-        this.state.indexerServer.chainName,
-        // 'regtest',
-        this.state.performanceLevel,
-        GlobalConst.minConfirmations.toString(),
-      );
-      //let result = 'Error: pepe es guapo';
-
-      // for testing
-      //await delay(5000);
-
-      //console.log('Load Wallet Exists result', result);
-      let error = false;
-      let errorText = '';
-      if (result && !result.toLowerCase().startsWith(GlobalConst.error)) {
-        try {
-          // here result can have an `error` field for watch-only which is actually OK.
-          const resultJson: RPCSeedType & RPCUfvkType =
-            await JSON.parse(result);
-          //console.log('Load Wallet Exists result JSON', resultJson);
-          if (!resultJson.error) {
-            // Load the wallet and navigate to the vts screen
-            let readOnly: boolean = false;
-            let orchardPool: boolean = false;
-            let saplingPool: boolean = false;
-            let transparentPool: boolean = false;
-            const walletKindStr: string = await RPCModule.walletKindInfo();
-            //console.log('KIND...', walletKindStr);
-            try {
-              const walletKindJSON: RPCWalletKindType =
-                await JSON.parse(walletKindStr);
-              console.log('KIND... JSON', walletKindJSON);
-              // there are 4 kinds:
-              // 1. seed
-              // 2. USK
-              // 3. UFVK - watch-only wallet
-              // 4. No keys - watch-only wallet (possibly an error)
-
-              if (
-                walletKindJSON.kind ===
-                  RPCWalletKindEnum.LoadedFromUnifiedFullViewingKey ||
-                walletKindJSON.kind === RPCWalletKindEnum.NoKeysFound
-              ) {
-                readOnly = true;
-              } else {
-                readOnly = false;
-              }
-              orchardPool = walletKindJSON.orchard;
-              saplingPool = walletKindJSON.sapling;
-              transparentPool = walletKindJSON.transparent;
-              // if the seed & birthday are not stored in Keychain/Keystore, do it now.
-              if (this.state.recoveryWalletInfoOnDevice) {
-                const wallet: WalletType = await RPC.rpcFetchWallet(readOnly);
-                await createUpdateRecoveryWalletInfo(wallet);
-              } else {
-                // needs to delete the seed from the Keychain/Keystore, do it now.
-                if (this.state.hasRecoveryWalletInfoSaved) {
-                  await removeRecoveryWalletInfo();
-                }
-              }
-              this.setState({
-                readOnly,
-                orchardPool,
-                saplingPool,
-                transparentPool,
-                actionButtonsDisabled: false,
-              });
-            } catch (e) {
-              //console.log('CATCH ERROR', walletKindStr);
-              this.setState({
-                readOnly,
-                orchardPool,
-                saplingPool,
-                transparentPool,
-                actionButtonsDisabled: false,
-              });
-              this.addLastSnackbar({
-                message: walletKindStr,
-                screenName: [this.screenName],
-              });
-            }
-            // creating tor cliente if needed
-            if (
-              this.state.currency === CurrencyEnum.USDTORCurrency ||
-              this.state.currency === CurrencyEnum.USDCurrency
-            ) {
-              await RPCModule.createTorClientProcess();
-            }
-            // if the App is restoring another wallet backup...
-            // needs to recalculate the Address Book.
-            this.navigateToLoadedApp(
-              readOnly,
-              orchardPool,
-              saplingPool,
-              transparentPool,
-              this.state.firstLaunchingMessage,
-            );
-            //console.log('navigate to LoadedApp');
-          } else {
-            error = true;
-            errorText = resultJson.error;
-          }
-        } catch (e: unknown) {
-          error = true;
-          errorText = e instanceof Error ? e.message : String(e);
-        }
-      } else {
-        error = true;
-        errorText = result;
-      }
-      if (error) {
-        await this.walletErrorHandle(
-          errorText,
-          this.state.translate('loadingapp.readingwallet-label') as string,
-          1,
-          true,
-        );
-      }
-    } else {
-      // Go to initial menu
+    if (!exists || exists === GlobalConst.false) {
       await SettingsFileImpl.writeSettings(
         SettingsNameEnum.basicFirstViewSeed,
         true,
       );
-      // walletSeed/walletBirthday have value
-      // go directly to run restore...
       if (!this.state.startingApp && !!this.state.walletSeed) {
-        this.doRestore(this.state.walletSeed, this.state.walletBirthday);
-      } else {
+        return {
+          kind: 'restore',
+          seed: this.state.walletSeed,
+          birthday: this.state.walletBirthday,
+        };
+      }
+      return { kind: 'noWallet' };
+    }
+
+    this.setState({ walletExists: true });
+    if (this.state.entry === LoadingAppEntryEnum.menu) {
+      return { kind: 'menu' };
+    }
+    const result: string = await RPCModule.loadExistingWallet(
+      this.state.indexerServer.uri,
+      this.state.indexerServer.chainName,
+      this.state.performanceLevel,
+      GlobalConst.minConfirmations.toString(),
+    );
+    const title = this.state.translate(
+      'loadingapp.readingwallet-label',
+    ) as string;
+    if (!result || result.toLowerCase().startsWith(GlobalConst.error)) {
+      return { kind: 'error', message: result, title };
+    }
+    let resultJson: RPCSeedType & RPCUfvkType;
+    try {
+      resultJson = await JSON.parse(result);
+    } catch (e: unknown) {
+      return {
+        kind: 'error',
+        message: e instanceof Error ? e.message : String(e),
+        title,
+      };
+    }
+    if (resultJson.error) {
+      return { kind: 'error', message: resultJson.error, title };
+    }
+
+    const wallet = await this.readWalletKind();
+    await this.ensureTorClient();
+    return { kind: 'opened', wallet };
+  };
+
+  applyBootResult = async (result: BootResult) => {
+    switch (result.kind) {
+      case 'biometricsFailed':
+        this.setState({ biometricsFailed: true });
+        return;
+      case 'opened':
+        this.navigateToLoadedApp(
+          result.wallet.readOnly,
+          result.wallet.orchardPool,
+          result.wallet.saplingPool,
+          result.wallet.transparentPool,
+          this.state.firstLaunchingMessage,
+        );
+        return;
+      case 'menu':
+        this.setState({
+          entry: LoadingAppEntryEnum.menu,
+          walletExists: true,
+          openWalletFailed: false,
+          actionButtonsDisabled: false,
+        });
+        return;
+      case 'noWallet':
         this.setState(state => ({
-          screen: state.screen === 3 ? 3 : 1,
+          entry:
+            state.entry === LoadingAppEntryEnum.import
+              ? LoadingAppEntryEnum.import
+              : LoadingAppEntryEnum.menu,
           walletExists: false,
           actionButtonsDisabled: false,
         }));
-      }
+        return;
+      case 'restore':
+        await this.doRestore(result.seed, result.birthday);
+        return;
+      case 'error':
+        this.setState({ openWalletFailed: true });
+        await this.walletErrorHandle(
+          result.message,
+          result.title,
+          LoadingAppEntryEnum.menu,
+          true,
+        );
+        return;
     }
-
-    this.appstate = AppState.addEventListener(
-      EventListenerEnum.change,
-      async nextAppState => {
-        //console.log('LOADING', 'prior', this.state.appStateStatus, 'next', nextAppState);
-        // let's catch the prior value
-        const priorAppState = this.state.appStateStatus;
-        this.setState({ appStateStatus: nextAppState });
-        if (
-          (priorAppState === AppStateStatusEnum.inactive ||
-            priorAppState === AppStateStatusEnum.background) &&
-          nextAppState === AppStateStatusEnum.active
-        ) {
-          //console.log('App LOADING has come to the foreground!');
-          // reading background task info
-          this.fetchBackgroundSyncing();
-          // setting value for background task Android
-          await AsyncStorage.setItem(GlobalConst.background, GlobalConst.no);
-          //console.log('&&&&& background no in storage &&&&&');
-          if (
-            this.state.backgroundError &&
-            (this.state.backgroundError.title ||
-              this.state.backgroundError.error)
-          ) {
-            Alert.alert(
-              this.state.backgroundError.title,
-              this.state.backgroundError.error,
-            );
-            this.setBackgroundError('', '');
-          }
-        }
-        if (
-          (nextAppState === AppStateStatusEnum.inactive ||
-            nextAppState === AppStateStatusEnum.background) &&
-          priorAppState === AppStateStatusEnum.active
-        ) {
-          console.log('App LOADING is gone to the background!');
-          // setting value for background task Android
-          await AsyncStorage.setItem(GlobalConst.background, GlobalConst.yes);
-          //console.log('&&&&& background yes in storage &&&&&');
-        }
-      },
-    );
-
-    this.unsubscribeNetInfo = NetInfo.addEventListener(
-      (state: NetInfoState) => {
-        const { screen } = this.state;
-        const { isConnected, type, isConnectionExpensive } = this.state.netInfo;
-        if (
-          isConnected !== state.isConnected ||
-          type !== state.type ||
-          isConnectionExpensive !== state.details?.isConnectionExpensive
-        ) {
-          this.setState({
-            netInfo: {
-              isConnected: state.isConnected,
-              type: state.type,
-              isConnectionExpensive:
-                state.details && state.details.isConnectionExpensive,
-            },
-            screen: screen === 3 ? 3 : screen !== 0 ? 1 : 0,
-            //actionButtonsDisabled: true,
-          });
-          if (isConnected !== state.isConnected) {
-            if (state.isConnected) {
-              if (screen !== 0) {
-                this.setState({
-                  screen: screen === 3 ? 3 : screen !== 0 ? 1 : 0,
-                });
-              }
-            }
-          }
-        }
-      },
-    );
   };
 
-  componentWillUnmount = () => {
-    this.dim && typeof this.dim.remove === 'function' && this.dim.remove();
-    this.appstate &&
-      typeof this.appstate.remove === 'function' &&
-      this.appstate.remove();
-    this.unsubscribeNetInfo &&
-      typeof this.unsubscribeNetInfo === 'function' &&
-      this.unsubscribeNetInfo();
+  readWalletKind = async (): Promise<WalletKind> => {
+    const kind: WalletKind = {
+      readOnly: false,
+      orchardPool: false,
+      saplingPool: false,
+      transparentPool: false,
+    };
+    const walletKindStr: string = await RPCModule.walletKindInfo();
+    try {
+      const walletKindJSON: RPCWalletKindType = await JSON.parse(walletKindStr);
+      kind.readOnly =
+        walletKindJSON.kind ===
+          RPCWalletKindEnum.LoadedFromUnifiedFullViewingKey ||
+        walletKindJSON.kind === RPCWalletKindEnum.NoKeysFound;
+      kind.orchardPool = walletKindJSON.orchard;
+      kind.saplingPool = walletKindJSON.sapling;
+      kind.transparentPool = walletKindJSON.transparent;
+      await this.syncRecoveryWalletInfo(kind.readOnly);
+    } catch (e) {
+      this.addLastSnackbar({
+        message: walletKindStr,
+        screenName: [this.screenName],
+      });
+    }
+    this.setState({ ...kind, actionButtonsDisabled: false });
+    return kind;
+  };
+
+  syncRecoveryWalletInfo = async (readOnly: boolean) => {
+    if (this.state.recoveryWalletInfoOnDevice) {
+      const wallet: WalletType = await RPC.rpcFetchWallet(readOnly);
+      await createUpdateRecoveryWalletInfo(wallet);
+    } else if (this.state.hasRecoveryWalletInfoSaved) {
+      await removeRecoveryWalletInfo();
+    }
+  };
+
+  ensureTorClient = async () => {
+    if (
+      this.state.currency === CurrencyEnum.USDTORCurrency ||
+      this.state.currency === CurrencyEnum.USDCurrency
+    ) {
+      await RPCModule.createTorClientProcess();
+    }
   };
 
   selectTheBestServer = async (aDifferentOne: boolean): Promise<boolean> => {
-    // avoiding obsolete ones
-    let someServerIsWorking: boolean = true;
     const actualServer = this.state.indexerServer;
-    const server = await selectingServer(
-      serverUris().filter(
-        (s: ServerUrisType) =>
-          !s.obsolete && s.uri !== (aDifferentOne ? actualServer.uri : ''),
-      ),
+    const { indexers } = await discoverIndexers();
+    const best = indexers.find(
+      i => !aDifferentOne || i.uri !== actualServer.uri,
     );
-    let fasterServer: ServerType = {} as ServerType;
-    if (server && server.latency) {
-      fasterServer = { uri: server.uri, chainName: server.chainName };
-    } else {
-      fasterServer = actualServer;
-      // likely here there is a internet/wifi conection problem
-      // all of the servers return an error because they are unreachable probably.
-      // the 30 seconds timout was fired.
-      someServerIsWorking = false;
+    if (!best) {
+      return false;
     }
-    //console.log(server);
-    console.log(fasterServer);
+    const fasterServer: ServerType = {
+      uri: best.uri,
+      chainName: ChainNameEnum.testChainName,
+    };
     this.setState({
       indexerServer: fasterServer,
       selectIndexerServer: SelectServerEnum.custom,
@@ -822,53 +779,34 @@ export class LoadingAppClass extends Component<
       SettingsNameEnum.selectIndexerServer,
       SelectServerEnum.custom,
     );
-    // message with the result only for advanced users
-    if (someServerIsWorking) {
-      if (isEqual(actualServer, fasterServer)) {
-        this.addLastSnackbar({
-          message: this.state.translate(
-            'loadedapp.selectingserversame',
-          ) as string,
-          duration: SnackbarDurationEnum.long,
-          screenName: [this.screenName],
-        });
-      } else {
-        this.addLastSnackbar({
-          message:
-            (this.state.translate('loadedapp.selectingserverbest') as string) +
-            ' ' +
-            fasterServer.uri,
-          duration: SnackbarDurationEnum.long,
-          screenName: [this.screenName],
-        });
-      }
+    if (isEqual(actualServer, fasterServer)) {
+      this.addLastSnackbar({
+        message: this.state.translate(
+          'loadedapp.selectingserversame',
+        ) as string,
+        duration: SnackbarDurationEnum.long,
+        screenName: [this.screenName],
+      });
+    } else {
+      this.addLastSnackbar({
+        message:
+          (this.state.translate('loadedapp.selectingserverbest') as string) +
+          ' ' +
+          fasterServer.uri,
+        duration: SnackbarDurationEnum.long,
+        screenName: [this.screenName],
+      });
     }
-    return someServerIsWorking;
+    return true;
   };
 
-  checkServer: (s: ServerType) => Promise<boolean> = async (
-    server: ServerType,
-  ) => {
-    const s = {
-      uri: server.uri,
-      chainName: server.chainName,
-      region: '',
-      default: false,
-      latency: null,
-      obsolete: false,
-    } as ServerUrisType;
-    const serverChecked = await selectingServer([s]);
-    if (serverChecked && serverChecked.latency) {
-      return true;
-    } else {
-      return false;
-    }
-  };
+  checkServer = async (server: ServerType): Promise<boolean> =>
+    (await probeIndexer(server.uri)) !== null;
 
   walletErrorHandle = async (
     result: string,
     title: string,
-    screen: number,
+    entry: LoadingAppEntryEnum,
     start: boolean,
   ) => {
     // first check the actual server
@@ -902,7 +840,7 @@ export class LoadingAppClass extends Component<
       this.setState({
         actionButtonsDisabled: false,
         serverErrorTries: 0,
-        screen,
+        entry,
       });
     } else {
       const workingServer = await this.checkServer(this.state.indexerServer);
@@ -920,13 +858,13 @@ export class LoadingAppClass extends Component<
         this.setState({
           actionButtonsDisabled: false,
           serverErrorTries: 0,
-          screen,
+          entry,
         });
       } else {
         // let's change to another server
         if (this.state.serverErrorTries === 0) {
           // first try
-          this.setState({ screen, actionButtonsDisabled: true });
+          this.setState({ entry, actionButtonsDisabled: true });
           this.addLastSnackbar({
             message: this.state.translate(
               'loadingapp.serverfirsttry',
@@ -938,12 +876,14 @@ export class LoadingAppClass extends Component<
           const someServerIsWorking = await this.selectTheBestServer(true);
           if (someServerIsWorking) {
             if (start) {
-              this.setState({
-                startingApp: false,
-                serverErrorTries: 1,
-                screen,
-              });
-              this.componentDidMount();
+              this.setState(
+                {
+                  startingApp: false,
+                  serverErrorTries: 1,
+                  entry,
+                },
+                () => this.runBoot(),
+              );
             } else {
               createAlert(
                 this.setBackgroundError,
@@ -957,7 +897,7 @@ export class LoadingAppClass extends Component<
               this.setState({
                 actionButtonsDisabled: false,
                 serverErrorTries: 0,
-                screen,
+                entry,
               });
             }
           } else {
@@ -973,7 +913,7 @@ export class LoadingAppClass extends Component<
             this.setState({
               actionButtonsDisabled: false,
               serverErrorTries: 0,
-              screen,
+              entry,
             });
           }
         } else {
@@ -998,7 +938,7 @@ export class LoadingAppClass extends Component<
             this.setState({
               actionButtonsDisabled: false,
               serverErrorTries: 0,
-              screen,
+              entry,
             });
           }, 1 * 1000);
         }
@@ -1124,18 +1064,8 @@ export class LoadingAppClass extends Component<
           await removeRecoveryWalletInfo();
         }
       }
-      this.setState({
-        wallet,
-        actionButtonsDisabled: false,
-        walletExists: true,
-      });
-      // creating tor cliente if needed
-      if (
-        this.state.currency === CurrencyEnum.USDTORCurrency ||
-        this.state.currency === CurrencyEnum.USDCurrency
-      ) {
-        await RPCModule.createTorClientProcess();
-      }
+      this.setState({ wallet, actionButtonsDisabled: false });
+      await this.ensureTorClient();
 
       await ScheduledActionsFileImpl.resetSA();
       await notifee.cancelAllNotifications();
@@ -1151,7 +1081,7 @@ export class LoadingAppClass extends Component<
       this.walletErrorHandle(
         seed,
         this.state.translate('loadingapp.creatingwallet-label') as string,
-        1,
+        LoadingAppEntryEnum.menu,
         false,
       );
     }
@@ -1191,147 +1121,70 @@ export class LoadingAppClass extends Component<
     }
 
     this.setState({ actionButtonsDisabled: true });
-    let walletBirthday = birthday.toString() || '0';
-    if (parseInt(walletBirthday, 10) < 0) {
-      walletBirthday = '0';
-    }
-    if (isNaN(parseInt(walletBirthday, 10))) {
-      walletBirthday = '0';
-    }
+    const parsedBirthday = parseInt(birthday.toString(), 10);
+    const walletBirthday =
+      isNaN(parsedBirthday) || parsedBirthday < 0
+        ? '0'
+        : String(parsedBirthday);
 
     const result: string = await RPCModule.restoreWalletFromSeed(
       seed.toLowerCase(),
-      walletBirthday || '0',
+      walletBirthday,
       this.state.indexerServer.uri,
       this.state.indexerServer.chainName,
       this.state.performanceLevel,
       GlobalConst.minConfirmations.toString(),
     );
 
-    //console.log(seed);
-    //console.log(result);
-    let error = false;
-    let errorText = '';
-    if (result && !result.toLowerCase().startsWith(GlobalConst.error)) {
-      try {
-        // here result can have an `error` field for watch-only which is actually OK.
-        const resultJson: RPCSeedType & RPCUfvkType = await JSON.parse(result);
-        if (!resultJson.error) {
-          // storing the seed/ufvk & birthday in KeyChain/KeyStore
-          if (this.state.recoveryWalletInfoOnDevice) {
-            const walletSeed: WalletType = {
-              seed: seed.toLowerCase(),
-              birthday: Number(walletBirthday),
-            };
-            await createUpdateRecoveryWalletInfo(walletSeed);
-          } else {
-            if (this.state.hasRecoveryWalletInfoSaved) {
-              await removeRecoveryWalletInfo();
-            }
-          }
-          // when restore a wallet never the user needs that the seed screen shows up with the first funds received.
-          await SettingsFileImpl.writeSettings(
-            SettingsNameEnum.basicFirstViewSeed,
-            true,
-          );
-          // Load the wallet and navigate to the vts screen
-          let readOnly: boolean = false;
-          let orchardPool: boolean = false;
-          let saplingPool: boolean = false;
-          let transparentPool: boolean = false;
-          const walletKindStr: string = await RPCModule.walletKindInfo();
-          console.log('KIND...', walletKindStr);
-          try {
-            const walletKindJSON: RPCWalletKindType =
-              await JSON.parse(walletKindStr);
-            //console.log('KIND... JSON', walletKindJSON);
-            // there are 4 kinds:
-            // 1. seed
-            // 2. USK
-            // 3. UFVK - watch-only wallet
-            // 4. No keys - watch-only wallet (possibly an error)
-
-            if (
-              walletKindJSON.kind ===
-                RPCWalletKindEnum.LoadedFromUnifiedFullViewingKey ||
-              walletKindJSON.kind === RPCWalletKindEnum.NoKeysFound
-            ) {
-              readOnly = true;
-            } else {
-              readOnly = false;
-            }
-            orchardPool = walletKindJSON.orchard;
-            saplingPool = walletKindJSON.sapling;
-            transparentPool = walletKindJSON.transparent;
-            // if the seed & birthday are not stored in Keychain/Keystore, do it now.
-            if (this.state.recoveryWalletInfoOnDevice) {
-              const wallet: WalletType = await RPC.rpcFetchWallet(readOnly);
-              await createUpdateRecoveryWalletInfo(wallet);
-            } else {
-              // needs to delete the seed from the Keychain/Keystore, do it now.
-              if (this.state.hasRecoveryWalletInfoSaved) {
-                await removeRecoveryWalletInfo();
-              }
-            }
-            this.setState({
-              readOnly,
-              orchardPool,
-              saplingPool,
-              transparentPool,
-              actionButtonsDisabled: false,
-            });
-          } catch (e) {
-            //console.log('CATCH ERROR', walletKindStr);
-            this.setState({
-              readOnly,
-              orchardPool,
-              saplingPool,
-              transparentPool,
-              actionButtonsDisabled: false,
-            });
-            this.addLastSnackbar({
-              message: walletKindStr,
-              screenName: [this.screenName],
-            });
-          }
-          // creating tor cliente if needed
-          if (
-            this.state.currency === CurrencyEnum.USDTORCurrency ||
-            this.state.currency === CurrencyEnum.USDCurrency
-          ) {
-            await RPCModule.createTorClientProcess();
-          }
-
-          await ScheduledActionsFileImpl.resetSA();
-          await notifee.cancelAllNotifications();
-
-          this.navigateToLoadedApp(
-            readOnly,
-            orchardPool,
-            saplingPool,
-            transparentPool,
-            this.state.firstLaunchingMessage,
-          );
-        } else {
-          error = true;
-          errorText = resultJson.error;
-        }
-      } catch (e: unknown) {
-        error = true;
-        errorText = e instanceof Error ? e.message : String(e);
-      }
-    } else {
-      error = true;
-      errorText = result;
-    }
-    if (error) {
+    const fail = (message: string) =>
       this.walletErrorHandle(
-        errorText,
+        message,
         this.state.translate('loadingapp.readingwallet-label') as string,
-        3,
+        LoadingAppEntryEnum.import,
         false,
       );
+
+    if (!result || result.toLowerCase().startsWith(GlobalConst.error)) {
+      await fail(result);
+      return;
     }
+    let resultJson: RPCSeedType & RPCUfvkType;
+    try {
+      resultJson = await JSON.parse(result);
+    } catch (e: unknown) {
+      await fail(e instanceof Error ? e.message : String(e));
+      return;
+    }
+    if (resultJson.error) {
+      await fail(resultJson.error);
+      return;
+    }
+
+    if (this.state.recoveryWalletInfoOnDevice) {
+      await createUpdateRecoveryWalletInfo({
+        seed: seed.toLowerCase(),
+        birthday: Number(walletBirthday),
+      });
+    } else if (this.state.hasRecoveryWalletInfoSaved) {
+      await removeRecoveryWalletInfo();
+    }
+    await SettingsFileImpl.writeSettings(
+      SettingsNameEnum.basicFirstViewSeed,
+      true,
+    );
+
+    const wallet = await this.readWalletKind();
+    await this.ensureTorClient();
+    await ScheduledActionsFileImpl.resetSA();
+    await notifee.cancelAllNotifications();
+
+    this.navigateToLoadedApp(
+      wallet.readOnly,
+      wallet.orchardPool,
+      wallet.saplingPool,
+      wallet.transparentPool,
+      this.state.firstLaunchingMessage,
+    );
   };
 
   setPrivacyOption = async (value: boolean): Promise<void> => {
@@ -1346,22 +1199,17 @@ export class LoadingAppClass extends Component<
   };
 
   addLastSnackbar = (snackbar: SnackbarType) => {
-    const newSnackbars = this.state.snackbars;
-    // if the last one is the same don't do anything.
-    if (
-      newSnackbars.length > 0 &&
-      newSnackbars[newSnackbars.length - 1].message === snackbar.message
-    ) {
-      return;
-    }
-    newSnackbars.push(snackbar);
-    this.setState({ snackbars: newSnackbars });
+    this.setState(({ snackbars }) => {
+      const last = snackbars[snackbars.length - 1];
+      if (last && last.message === snackbar.message) {
+        return null;
+      }
+      return { snackbars: [...snackbars, snackbar] };
+    });
   };
 
   removeFirstSnackbar = () => {
-    const newSnackbars = this.state.snackbars;
-    newSnackbars.shift();
-    this.setState({ snackbars: newSnackbars });
+    this.setState(({ snackbars }) => ({ snackbars: snackbars.slice(1) }));
   };
 
   recoverRecoveryWalletInfo = async (security: boolean) => {
@@ -1407,11 +1255,10 @@ export class LoadingAppClass extends Component<
   };
 
   openCurrentWallet = () => {
-    // to avoid the biometric security
-    this.setState({
-      startingApp: false,
-    });
-    this.componentDidMount();
+    this.setState(
+      { startingApp: false, entry: LoadingAppEntryEnum.boot },
+      () => this.runBoot(),
+    );
   };
 
   async fetchZingolibVersion(): Promise<void> {
@@ -1447,24 +1294,19 @@ export class LoadingAppClass extends Component<
 
   render() {
     const {
-      screen,
-      wallet,
+      entry,
       actionButtonsDisabled,
       walletExists,
+      openWalletFailed,
       snackbars,
       firstLaunchingMessage,
       biometricsFailed,
       translate,
-      readOnly,
-      orchardPool,
-      saplingPool,
-      transparentPool,
     } = this.state;
 
     //console.log('render loadingAppClass - 3', this.state.privacy);
 
     const context = {
-      indexerList: this.state.indexerList,
       // context
       netInfo: this.state.netInfo,
       wallet: this.state.wallet,
@@ -1498,127 +1340,106 @@ export class LoadingAppClass extends Component<
     };
 
     return (
-      <ToastProvider>
-        <Snackbars
-          snackbars={snackbars}
-          removeFirstSnackbar={this.removeFirstSnackbar}
-          screenName={this.screenName}
-        />
-
-        <ContextAppLoadingProvider value={context}>
-          {screen === 0 && (
-            <Launching
-              empty={true}
-              translate={translate}
-              firstLaunchingMessage={firstLaunchingMessage}
-              biometricsFailed={biometricsFailed}
-              tryAgain={() => {
-                this.setState({ biometricsFailed: false }, () =>
-                  this.componentDidMount(),
-                );
-              }}
+      <BackdropHost>
+        <SafeAreaView style={{ flex: 1 }}>
+          <ToastProvider>
+            <Snackbars
+              snackbars={snackbars}
+              removeFirstSnackbar={this.removeFirstSnackbar}
+              screenName={this.screenName}
             />
-          )}
-          {(screen === 1 || screen === 3) && (
-            <LoadingStack.Navigator
-              initialRouteName={
-                screen === 3 ? RouteEnum.Import : RouteEnum.StartMenu
-              }
-              screenOptions={{ headerShown: false }}
-            >
-              <LoadingStack.Screen
-                name={RouteEnum.StartMenu}
-                options={{ contentStyle: { backgroundColor: 'transparent' } }}
-              >
-                {({ navigation }) => (
-                  <StartMenu
-                    actionButtonsDisabled={actionButtonsDisabled}
-                    walletExists={walletExists}
-                    playIntro={this.coldStart && !walletExists}
-                    openCurrentWallet={this.openCurrentWallet}
-                    createNewWallet={this.createNewWallet}
-                    getwalletToRestore={() => {
-                      this.getwalletToRestore();
-                      navigation.navigate(RouteEnum.Import);
+
+            <ContextAppLoadingProvider value={context}>
+              {entry === LoadingAppEntryEnum.boot && (
+                <Launching
+                  empty={true}
+                  translate={translate}
+                  firstLaunchingMessage={firstLaunchingMessage}
+                  biometricsFailed={biometricsFailed}
+                  tryAgain={() => {
+                    this.setState({ biometricsFailed: false }, () =>
+                      this.runBoot(),
+                    );
+                  }}
+                />
+              )}
+              {entry !== LoadingAppEntryEnum.boot && (
+                <LoadingStack.Navigator
+                  initialRouteName={
+                    entry === LoadingAppEntryEnum.import
+                      ? RouteEnum.Import
+                      : RouteEnum.StartMenu
+                  }
+                  screenOptions={{ headerShown: false }}
+                >
+                  <LoadingStack.Screen
+                    name={RouteEnum.StartMenu}
+                    options={{
+                      contentStyle: { backgroundColor: 'transparent' },
                     }}
-                    openServers={() =>
-                      navigation.navigate(RouteEnum.ChooseIndexer)
-                    }
-                  />
-                )}
-              </LoadingStack.Screen>
-              <LoadingStack.Screen name={RouteEnum.Import}>
-                {({ navigation }) => (
-                  <Import
-                    actionButtonsDisabled={actionButtonsDisabled}
-                    onClickOK={(s: string, b: number) => this.doRestore(s, b)}
-                    onClickCancel={() => {
-                      if (navigation.canGoBack()) {
-                        navigation.goBack();
-                        return;
-                      }
-                      this.setState({ screen: 1 });
-                      navigation.replace(RouteEnum.StartMenu);
-                    }}
-                  />
-                )}
-              </LoadingStack.Screen>
-              <LoadingStack.Screen name={RouteEnum.ChooseIndexer}>
-                {() => <ChooseIndexer indexerList={this.state.indexerList} />}
-              </LoadingStack.Screen>
-              <LoadingStack.Screen name={RouteEnum.ListedIndexers}>
-                {({ navigation }) => (
-                  <ListedIndexers
-                    indexerList={this.state.indexerList}
-                    setIndexerServer={this.setIndexerServer}
-                    closeServers={() => this.closeServers(navigation)}
-                    previousServer={this.state.indexerServer.uri}
-                  />
-                )}
-              </LoadingStack.Screen>
-              <LoadingStack.Screen
-                name={RouteEnum.CustomIndexer}
-                initialParams={{ network: ChainNameEnum.testChainName }}
-              >
-                {({ navigation }) => (
-                  <CustomIndexer
-                    setIndexerServer={this.setIndexerServer}
-                    closeServers={() => this.closeServers(navigation)}
-                  />
-                )}
-              </LoadingStack.Screen>
-            </LoadingStack.Navigator>
-          )}
-          {screen === 2 && wallet && (
-            <Modal
-              animationType="slide"
-              transparent={true}
-              visible={screen === 2}
-              onRequestClose={() =>
-                this.navigateToLoadedApp(
-                  readOnly,
-                  orchardPool,
-                  saplingPool,
-                  transparentPool,
-                  firstLaunchingMessage,
-                )
-              }
-            >
-              <NewSeed
-                onClickOK={() =>
-                  this.navigateToLoadedApp(
-                    readOnly,
-                    orchardPool,
-                    saplingPool,
-                    transparentPool,
-                    firstLaunchingMessage,
-                  )
-                }
-              />
-            </Modal>
-          )}
-        </ContextAppLoadingProvider>
-      </ToastProvider>
+                  >
+                    {({ navigation }) => (
+                      <StartMenu
+                        actionButtonsDisabled={actionButtonsDisabled}
+                        walletExists={walletExists}
+                        openWalletFailed={openWalletFailed}
+                        playIntro={this.coldStart && !walletExists}
+                        openCurrentWallet={this.openCurrentWallet}
+                        createNewWallet={this.createNewWallet}
+                        getwalletToRestore={() => {
+                          this.getwalletToRestore();
+                          navigation.navigate(RouteEnum.Import);
+                        }}
+                        openServers={() =>
+                          navigation.navigate(RouteEnum.ChooseIndexer)
+                        }
+                      />
+                    )}
+                  </LoadingStack.Screen>
+                  <LoadingStack.Screen name={RouteEnum.Import}>
+                    {({ navigation }) => (
+                      <Import
+                        actionButtonsDisabled={actionButtonsDisabled}
+                        onClickOK={(s: string, b: number) =>
+                          this.doRestore(s, b)
+                        }
+                        onClickCancel={() => {
+                          if (navigation.canGoBack()) {
+                            navigation.goBack();
+                            return;
+                          }
+                          this.setState({ entry: LoadingAppEntryEnum.menu });
+                          navigation.replace(RouteEnum.StartMenu);
+                        }}
+                      />
+                    )}
+                  </LoadingStack.Screen>
+                  <LoadingStack.Screen name={RouteEnum.ChooseIndexer}>
+                    {() => <ChooseIndexer />}
+                  </LoadingStack.Screen>
+                  <LoadingStack.Screen name={RouteEnum.ListedIndexers}>
+                    {({ navigation }) => (
+                      <ListedIndexers
+                        setIndexerServer={this.setIndexerServer}
+                        closeServers={() => this.closeServers(navigation)}
+                        previousServer={this.state.indexerServer.uri}
+                      />
+                    )}
+                  </LoadingStack.Screen>
+                  <LoadingStack.Screen name={RouteEnum.CustomIndexer}>
+                    {({ navigation }) => (
+                      <CustomIndexer
+                        setIndexerServer={this.setIndexerServer}
+                        closeServers={() => this.closeServers(navigation)}
+                      />
+                    )}
+                  </LoadingStack.Screen>
+                </LoadingStack.Navigator>
+              )}
+            </ContextAppLoadingProvider>
+          </ToastProvider>
+        </SafeAreaView>
+      </BackdropHost>
     );
   }
 }

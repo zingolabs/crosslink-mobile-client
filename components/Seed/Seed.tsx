@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   ScrollView,
@@ -13,8 +13,12 @@ import Clipboard from '@react-native-clipboard/clipboard';
 
 import RegText from '../Components/RegText';
 import FadeText from '../Components/FadeText';
-import { AppDrawerParamList } from '../../app/types';
-import { ContextAppLoaded } from '../../app/context';
+import { LoadedAppStackParamList } from '../../app/types';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedUi,
+} from '../../app/context';
 import {
   SnackbarDurationEnum,
   ScreenEnum,
@@ -24,26 +28,23 @@ import {
 import Utils from '../../app/utils';
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../Header';
 import { BlurView } from '@react-native-community/blur';
 import { useTheme } from '../../app/theme';
 
-type SeedProps = DrawerScreenProps<AppDrawerParamList, RouteEnum.Seed>;
+type SeedProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
+  RouteEnum.Seed
+>;
 
 const Seed: React.FunctionComponent<SeedProps> = ({}) => {
   const navigation: any = useNavigation();
-  const context = useContext(ContextAppLoaded);
-  const {
-    wallet,
-    translate,
-    privacy,
-    addLastSnackbar,
-    snackbars,
-    removeFirstSnackbar,
-    getUfvk,
-  } = context;
+  const { translate, addLastSnackbar, removeFirstSnackbar, getUfvk } =
+    useAppLoadedActions();
+  const { wallet, privacy } = useAppLoadedSettings();
+  const { snackbars } = useAppLoadedUi();
   const { colors } = useTheme();
   // when this screen is open from LoadingApp (new wallet)
   // is using the standard modal from react-native
@@ -404,7 +405,10 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                   }
                 }}
               >
-                <RegText color={colors.fgDefault} style={{ textAlign: 'center' }}>
+                <RegText
+                  color={colors.fgDefault}
+                  style={{ textAlign: 'center' }}
+                >
                   {!expandBirthday
                     ? Utils.trimToSmall(birthdayNumber, 1)
                     : birthdayNumber}
@@ -453,7 +457,10 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                   }
                 }}
               >
-                <RegText color={colors.fgDefault} style={{ textAlign: 'center' }}>
+                <RegText
+                  color={colors.fgDefault}
+                  style={{ textAlign: 'center' }}
+                >
                   {Utils.trimToSmall(ufvk, 12)}
                 </RegText>
               </TouchableOpacity>

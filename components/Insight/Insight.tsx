@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   ScrollView,
@@ -16,8 +16,13 @@ import Clipboard from '@react-native-clipboard/clipboard';
 
 import RegText from '../Components/RegText';
 import ZecAmount from '../Components/ZecAmount';
-import { AppDrawerParamList } from '../../app/types';
-import { ContextAppLoaded } from '../../app/context';
+import { LoadedAppStackParamList } from '../../app/types';
+import {
+  useAppLoadedActions,
+  useAppLoadedSettings,
+  useAppLoadedWallet,
+  useAppLoadedUi,
+} from '../../app/context';
 import Utils from '../../app/utils';
 import FadeText from '../Components/FadeText';
 import { Header } from '../Header';
@@ -30,7 +35,7 @@ import {
 } from '../../app/AppState';
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
-import { DrawerScreenProps } from '@react-navigation/drawer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTheme } from '../../app/theme';
 
 type DataType = {
@@ -53,19 +58,17 @@ const getPercent = (percent: number) => {
   );
 };
 
-type InsightProps = DrawerScreenProps<AppDrawerParamList, RouteEnum.Insight>;
+type InsightProps = NativeStackScreenProps<
+  LoadedAppStackParamList,
+  RouteEnum.Insight
+>;
 
 const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
-  const context = useContext(ContextAppLoaded);
-  const {
-    info,
-    translate,
-    privacy,
-    addLastSnackbar,
-    snackbars,
-    removeFirstSnackbar,
-    setPrivacyOption,
-  } = context;
+  const { translate, addLastSnackbar, removeFirstSnackbar, setPrivacyOption } =
+    useAppLoadedActions();
+  const { privacy } = useAppLoadedSettings();
+  const { info } = useAppLoadedWallet();
+  const { snackbars } = useAppLoadedUi();
   const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.Insight;
@@ -131,9 +134,11 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
             address: item.address,
             tag: item.tag,
             svg: {
-              fill: item.address === 'fee' ? colors.fgMuted : randomColors[index],
+              fill:
+                item.address === 'fee' ? colors.fgMuted : randomColors[index],
             },
-            color: item.address === 'fee' ? colors.fgMuted : randomColors[index],
+            color:
+              item.address === 'fee' ? colors.fgMuted : randomColors[index],
             labelLineConfig: {
               color:
                 item.address === 'fee' ? colors.fgMuted : randomColors[index],
@@ -403,7 +408,8 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
               <RegText
                 style={{
                   fontSize: 11,
-                  color: tab === 'memobytes' ? colors.fgAccent : colors.fgDefault,
+                  color:
+                    tab === 'memobytes' ? colors.fgAccent : colors.fgDefault,
                 }}
               >
                 ({translate('insight.memobytes-text') as string})
