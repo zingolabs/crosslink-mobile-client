@@ -14,12 +14,16 @@ exports[`Component About - test About - snapshot 1`] = `
   <View />
   <View
     style={
-      {
-        "height": 48,
-        "justifyContent": "center",
-        "marginTop": 10,
-        "paddingHorizontal": 16,
-      }
+      [
+        {
+          "height": 48,
+          "justifyContent": "center",
+          "paddingHorizontal": 16,
+        },
+        {
+          "marginTop": 10,
+        },
+      ]
     }
   >
     <View
@@ -155,9 +159,9 @@ exports[`Component About - test About - snapshot 1`] = `
     contentContainerStyle={
       {
         "flexGrow": 1,
-        "paddingBottom": NaN,
+        "paddingBottom": 8,
         "paddingHorizontal": 16,
-        "paddingTop": NaN,
+        "paddingTop": 8,
       }
     }
     keyboardShouldPersistTaps="handled"

@@ -311,7 +311,7 @@ const Redelegate: React.FC<RedelegateProps> = ({ route }) => {
         }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={
-          Platform.OS === 'ios' ? insets.top : kbOpen ? insets.top : 0
+          Platform.OS === 'ios' ? 0 : kbOpen ? insets.top : 0
         }
       >
         <HeaderTitle
@@ -628,7 +628,7 @@ const Redelegate: React.FC<RedelegateProps> = ({ route }) => {
             alignItems: 'center',
             justifyContent: 'center',
             paddingTop: 10,
-            paddingBottom: 20,
+            paddingBottom: insets.bottom + 20,
             paddingHorizontal: 24,
           }}
         >

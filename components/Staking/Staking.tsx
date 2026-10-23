@@ -33,9 +33,8 @@ import {
   StakingActionKindEnum,
   WalletBondsType,
 } from '../../app/AppState';
-import WalletSummaryHeader from '../History/components/WalletSummaryHeader';
-import SettingsButton from '../History/components/SettingsButton';
-import StakingActions from './StakingActions';
+import StakingSummary from './components/StakingSummary';
+import EmptyState from '../Components/EmptyState';
 import {
   useAppLoadedActions,
   useAppLoadedSettings,
@@ -55,7 +54,6 @@ import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import { lifehashDataUrlFromStringSync } from '../../app/utils/lifehash';
 import ZecAmount from '../Components/ZecAmount';
 import { WalletBondsStatusEnum } from '../../app/AppState/enums/WalletBondsStatusEnum';
-import StakingDayStatusBar from './components/StakingDayStatusBar';
 import LinearGradient from 'react-native-linear-gradient';
 import Button from '../Components/Button';
 import { formatSeconds } from '../../app/utils/Utils';
@@ -331,30 +329,7 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
           backgroundColor: colors.bgCanvas,
         }}
       >
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            zIndex: 999,
-          }}
-        >
-          <StakingDayStatusBar />
-          <SettingsButton screenName={screenName} />
-        </View>
-
-        {/* Header + quick actions */}
-        <View
-          style={{
-            backgroundColor: colors.bgCanvas,
-            paddingTop: 10,
-            paddingBottom: 10,
-          }}
-        >
-          <WalletSummaryHeader show_staked={true} />
-
-          <StakingActions />
-        </View>
+        <StakingSummary />
 
         <View
           style={{
@@ -468,75 +443,24 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
 
             {/* TODO: Use Router */}
             {!loading && !hasScheduledActions && tab === 'scheduled' && (
-              <View style={styles.centerContent}>
-                <View
-                  style={{
-                    width: 64,
-                    height: 64,
-                    borderRadius: 32,
-                    borderWidth: 2,
-                    borderStyle: 'dashed',
-                    borderColor: colors.borderSubtle,
-                  }}
-                />
-                <Text
-                  style={{
-                    color: colors.fgSubtle,
-                    fontSize: 14,
-                    marginTop: 10,
-                  }}
-                >
-                  There are no scheduled actions yet.
-                </Text>
-              </View>
+              <EmptyState
+                art="pair"
+                title="There are no scheduled actions yet."
+              />
             )}
 
             {!loading && !hasMovements && tab === 'active' && (
-              <View style={styles.centerContent}>
-                <View
-                  style={{
-                    width: 64,
-                    height: 64,
-                    borderRadius: 32,
-                    borderWidth: 2,
-                    borderStyle: 'dashed',
-                    borderColor: colors.borderSubtle,
-                  }}
-                />
-                <Text
-                  style={{
-                    color: colors.fgSubtle,
-                    fontSize: 14,
-                    marginTop: 10,
-                  }}
-                >
-                  There are no active staking positions yet.
-                </Text>
-              </View>
+              <EmptyState
+                art="pair"
+                title="There are no active staking positions yet."
+              />
             )}
 
             {!loading && !hasStaked && tab === 'my' && (
-              <View style={styles.centerContent}>
-                <View
-                  style={{
-                    width: 64,
-                    height: 64,
-                    borderRadius: 32,
-                    borderWidth: 2,
-                    borderStyle: 'dashed',
-                    borderColor: colors.borderSubtle,
-                  }}
-                />
-                <Text
-                  style={{
-                    color: colors.fgSubtle,
-                    fontSize: 14,
-                    marginTop: 10,
-                  }}
-                >
-                  There are no active finalizers yet.
-                </Text>
-              </View>
+              <EmptyState
+                art="pair"
+                title="There are no active finalizers yet."
+              />
             )}
 
             {!loading && hasScheduledActions && tab === 'scheduled' && (

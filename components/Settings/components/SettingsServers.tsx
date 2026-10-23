@@ -22,6 +22,7 @@ import RegText from '../../Components/RegText';
 import FadeText from '../../Components/FadeText';
 import { HeaderTitle } from '../../Header';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../../app/theme';
 import { LoadingAppEntryEnum } from '../../../app/AppState';
 
@@ -41,6 +42,7 @@ const SettingsServers: React.FunctionComponent<SettingsServersProps> = ({
   const { info } = useAppLoadedWallet();
   const { snackbars } = useAppLoadedUi();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const { clear } = useToast();
   const screenName = ScreenEnum.SettingsServers;
 
@@ -230,7 +232,7 @@ const SettingsServers: React.FunctionComponent<SettingsServersProps> = ({
           alignItems: 'center',
           justifyContent: 'center',
           paddingTop: 10,
-          paddingBottom: 20,
+          paddingBottom: insets.bottom + 20,
           paddingHorizontal: 20,
         }}
       >

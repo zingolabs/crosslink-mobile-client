@@ -32,12 +32,16 @@ exports[`Component Import - test Import - snapshot 1`] = `
   >
     <View
       style={
-        {
-          "height": 48,
-          "justifyContent": "center",
-          "marginTop": 10,
-          "paddingHorizontal": 16,
-        }
+        [
+          {
+            "height": 48,
+            "justifyContent": "center",
+            "paddingHorizontal": 16,
+          },
+          {
+            "marginTop": 10,
+          },
+        ]
       }
     >
       <View
@@ -438,7 +442,7 @@ exports[`Component Import - test Import - snapshot 1`] = `
             "paddingTop": 8,
           },
           {
-            "paddingBottom": NaN,
+            "paddingBottom": 12,
           },
         ]
       }

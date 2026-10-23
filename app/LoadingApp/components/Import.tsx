@@ -225,7 +225,7 @@ const Import: React.FunctionComponent<ImportProps> = ({
       <KeyboardAvoidingView
         style={[styles.screen, { backgroundColor: colors.bgCanvas }]}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
+        keyboardVerticalOffset={0}
       >
         <HeaderTitle
           title="Import wallet"

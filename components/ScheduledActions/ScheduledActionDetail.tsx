@@ -248,7 +248,7 @@ const ScheduledActionDetail: React.FC<ScheduledActionDetailProps> = ({
         }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={
-          Platform.OS === 'ios' ? insets.top : kbOpen ? insets.top : 0
+          Platform.OS === 'ios' ? 0 : kbOpen ? insets.top : 0
         }
       >
         <HeaderTitle
@@ -512,7 +512,7 @@ const ScheduledActionDetail: React.FC<ScheduledActionDetailProps> = ({
               alignItems: 'center',
               justifyContent: 'center',
               paddingTop: 10,
-              paddingBottom: 20,
+              paddingBottom: insets.bottom + 20,
               paddingHorizontal: 24,
               gap: 10,
               width: '100%',
@@ -545,7 +545,7 @@ const ScheduledActionDetail: React.FC<ScheduledActionDetailProps> = ({
               alignItems: 'center',
               justifyContent: 'center',
               paddingTop: 10,
-              paddingBottom: 20,
+              paddingBottom: insets.bottom + 20,
               paddingHorizontal: 24,
               gap: 10,
               width: '100%',

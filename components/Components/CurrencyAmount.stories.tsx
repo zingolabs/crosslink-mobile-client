@@ -18,6 +18,8 @@ export const Default: Story = {};
 export const PrivacyOn: Story = { args: { privacy: true } };
 
 /** No currency selected — the component should render nothing visible. */
-export const NoCurrency: Story = { args: { currency: CurrencyEnum.noCurrency } };
+export const NoCurrency: Story = {
+  args: { currency: CurrencyEnum.noCurrency },
+};
 
 export const NoPriceYet: Story = { args: { price: 0 } };

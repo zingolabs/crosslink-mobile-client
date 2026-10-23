@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { useEffect, useMemo } from 'react';
 import { BackHandler, LogBox, StatusBar } from 'react-native';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
   createNavigationContainerRef,
@@ -72,11 +72,7 @@ const AppContent: React.FunctionComponent = () => {
             {props => <LoadingApp {...props} />}
           </Stack.Screen>
           <Stack.Screen name={RouteEnum.LoadedApp}>
-            {props => (
-              <SafeAreaView style={{ flex: 1 }}>
-                <LoadedApp {...props} />
-              </SafeAreaView>
-            )}
+            {props => <LoadedApp {...props} />}
           </Stack.Screen>
         </Stack.Navigator>
       </NavigationContainer>

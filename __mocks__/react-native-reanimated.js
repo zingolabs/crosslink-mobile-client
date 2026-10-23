@@ -28,6 +28,7 @@ const cancelAnimation = jest.fn();
 const useAnimatedGestureHandler = jest.fn(() => ({}));
 const useReducedMotion = jest.fn(() => false);
 const cubicBezier = (a, b, c, d) => `cubic-bezier(${a}, ${b}, ${c}, ${d})`;
+const steps = n => `steps(${n})`;
 const withTiming = jest.fn(v => v);
 const withSpring = jest.fn(v => v);
 const layoutStub = () => {
@@ -75,6 +76,7 @@ export {
   useAnimatedGestureHandler,
   useReducedMotion,
   cubicBezier,
+  steps,
   withTiming,
   withSpring,
   FadeIn,

@@ -372,6 +372,7 @@ exports[`Component Memo - test Memo - snapshot 1`] = `
                 "left": 0,
                 "padding": 11.5,
                 "position": "absolute",
+                "top": 0,
               }
             }
           >
@@ -392,6 +393,7 @@ exports[`Component Memo - test Memo - snapshot 1`] = `
               "padding": 13,
               "position": "absolute",
               "right": 0,
+              "top": 0,
             }
           }
         >

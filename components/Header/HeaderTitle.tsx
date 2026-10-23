@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { faChevronLeft, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { text, useTheme } from '../../app/theme';
 import HeaderIconButton from './HeaderIconButton';
@@ -17,9 +18,10 @@ const HeaderTitle: React.FC<HeaderTitleProps> = ({
   ExtraComponent,
 }) => {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
-    <View style={styles.header}>
+    <View style={[styles.header, { marginTop: insets.top + 10 }]}>
       <View style={styles.side}>
         <HeaderIconButton
           icon={bottomSheet ? faXmark : faChevronLeft}
@@ -45,7 +47,6 @@ const HeaderTitle: React.FC<HeaderTitleProps> = ({
 const styles = StyleSheet.create({
   header: {
     height: 48,
-    marginTop: 10,
     paddingHorizontal: 16,
     justifyContent: 'center',
   },

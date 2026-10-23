@@ -59,7 +59,7 @@ const About: React.FunctionComponent<AboutProps> = ({ navigation }) => {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
           flexGrow: 1,
-          paddingTop: insets.top + 8,
+          paddingTop: 8,
           paddingBottom: insets.bottom + 8,
           paddingHorizontal: 16,
         }}

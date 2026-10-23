@@ -28,12 +28,16 @@ exports[`Component Send - test Send currency USD, privacy high & mode advanced -
   >
     <View
       style={
-        {
-          "height": 48,
-          "justifyContent": "center",
-          "marginTop": 10,
-          "paddingHorizontal": 16,
-        }
+        [
+          {
+            "height": 48,
+            "justifyContent": "center",
+            "paddingHorizontal": 16,
+          },
+          {
+            "marginTop": 10,
+          },
+        ]
       }
     >
       <View
@@ -169,9 +173,9 @@ exports[`Component Send - test Send currency USD, privacy high & mode advanced -
       contentContainerStyle={
         {
           "flexGrow": 1,
-          "paddingBottom": NaN,
+          "paddingBottom": 8,
           "paddingHorizontal": 16,
-          "paddingTop": undefined,
+          "paddingTop": 8,
         }
       }
       keyboardShouldPersistTaps="handled"
@@ -592,12 +596,16 @@ exports[`Component Send - test Send no currency, privacy normal & mode basic - s
   >
     <View
       style={
-        {
-          "height": 48,
-          "justifyContent": "center",
-          "marginTop": 10,
-          "paddingHorizontal": 16,
-        }
+        [
+          {
+            "height": 48,
+            "justifyContent": "center",
+            "paddingHorizontal": 16,
+          },
+          {
+            "marginTop": 10,
+          },
+        ]
       }
     >
       <View
@@ -733,9 +741,9 @@ exports[`Component Send - test Send no currency, privacy normal & mode basic - s
       contentContainerStyle={
         {
           "flexGrow": 1,
-          "paddingBottom": NaN,
+          "paddingBottom": 8,
           "paddingHorizontal": 16,
-          "paddingTop": undefined,
+          "paddingTop": 8,
         }
       }
       keyboardShouldPersistTaps="handled"

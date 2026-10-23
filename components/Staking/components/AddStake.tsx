@@ -188,7 +188,7 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
         }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={
-          Platform.OS === 'ios' ? insets.top : kbOpen ? insets.top : 0
+          Platform.OS === 'ios' ? 0 : kbOpen ? insets.top : 0
         }
       >
         <HeaderTitle
