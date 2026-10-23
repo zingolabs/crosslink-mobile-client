@@ -67,11 +67,17 @@ RCT_EXTERN_METHOD(getLatestBlockServerInfo:
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(discoverIndexers:
-    (RCTPromiseResolveBlock)resolve
+    (NSString)network
+                  network:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(probeIndexer:
-    (NSString)serveruri 
+    (NSString)serveruri
+                  network:(NSString)network
                   resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(selectBestIndexer:
+    (NSString)network
+                  network:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(getLatestBlockWalletInfo:
     (RCTPromiseResolveBlock)resolve

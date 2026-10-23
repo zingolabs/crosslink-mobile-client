@@ -598,7 +598,7 @@ class RPCModule: NSObject {
     }
   }
 
-  @objc(selectBestIndexer:reject:)
+  @objc(selectBestIndexer:network:reject:)
   func selectBestIndexerInfo(_ network: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
       let dict: [String: Any] = ["network": network, "resolve": resolve]
       DispatchQueue.global(qos: .userInitiated).async { [weak self] in
