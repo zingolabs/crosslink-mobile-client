@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   emptyState: {
-    paddingBottom: 108,
+    paddingBottom: 30,
   },
   spinner: {
     marginTop: SUMMARY_RADIUS + 20,

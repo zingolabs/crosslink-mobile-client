@@ -8,7 +8,6 @@ import Animated, {
 
 import { text, useTheme } from '../../app/theme';
 import ChalkLoop, { ChalkLoopName } from './ChalkLoop';
-import { SUMMARY_RADIUS } from './SummaryPanel';
 
 const EASE_OUT = cubicBezier(0.23, 1, 0.32, 1);
 
@@ -58,8 +57,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 40,
-    paddingTop: SUMMARY_RADIUS,
-    paddingBottom: SUMMARY_RADIUS,
   },
   title: {
     marginTop: 4,
