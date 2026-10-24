@@ -1,10 +1,9 @@
-/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import { Text, View, ActivityIndicator } from 'react-native';
+import { Text, View, ActivityIndicator, StyleSheet } from 'react-native';
 
 import { LaunchingModeEnum, TranslateType } from '../../AppState';
 import LiquidPrimaryButton from '../../../components/Components/LiquidButton/LiquidPrimaryButton';
-import { useTheme } from '../../theme';
+import { space, text, useTheme } from '../../theme';
 
 type LaunchingProps = {
   empty: boolean;
@@ -20,73 +19,28 @@ const Launching: React.FunctionComponent<LaunchingProps> = props => {
 
   if (props.empty && !props.biometricsFailed) {
     return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: colors.bgCanvas,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      />
+      <View style={[styles.screen, { backgroundColor: colors.bgCanvas }]} />
     );
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: colors.bgCanvas,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <View
-        style={{
-          flex: 1,
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '95%',
-        }}
-      >
-        <View
-          style={{
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            width: '80%',
-            height: '40%',
-            marginTop: 20,
-            padding: 10,
-          }}
-        >
-          <Text
-            style={{ color: colors.fgMuted, fontSize: 40, fontWeight: 'bold' }}
-          >
+    <View style={[styles.screen, { backgroundColor: colors.bgCanvas }]}>
+      <View style={styles.topHalf}>
+        <View style={styles.titleBlock}>
+          <Text style={[text.largeTitle, { color: colors.fgMuted }]}>
             {props.translate('zingodelegator') as string}
           </Text>
-          <Text style={{ color: colors.fgMuted, fontSize: 15 }}>
+          <Text style={[text.subheadline, { color: colors.fgMuted }]}>
             {props.translate('version') as string}
           </Text>
         </View>
-        <View
-          style={{
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'flex-start',
-            width: '80%',
-            height: '60%',
-            marginTop: 20,
-            padding: 10,
-          }}
-        >
+        <View style={styles.bodyBlock}>
           {!!props.message && (
             <Text
-              style={{
-                color: colors.fgAccentDisabled,
-                fontSize: 15,
-                marginTop: 10,
-              }}
+              style={[
+                text.subheadline,
+                { color: colors.fgAccentDisabled, marginTop: space.md },
+              ]}
               selectable
             >
               {props.message}
@@ -95,36 +49,35 @@ const Launching: React.FunctionComponent<LaunchingProps> = props => {
           {props.biometricsFailed ? (
             <>
               <Text
-                style={{
-                  color: colors.fgDefault,
-                  fontSize: 20,
-                  fontWeight: 'bold',
-                  marginTop: 10,
-                  textAlign: 'center',
-                }}
+                style={[
+                  text.title3,
+                  styles.centerText,
+                  { color: colors.fgDefault, marginTop: space.md },
+                ]}
                 selectable
               >
                 {props.translate('biometricsfailed-title') as string}
               </Text>
               <Text
-                style={{
-                  color: colors.fgDefault,
-                  fontSize: 15,
-                  marginTop: 10,
-                  textAlign: 'center',
-                }}
+                style={[
+                  text.subheadline,
+                  styles.centerText,
+                  { color: colors.fgDefault, marginTop: space.md },
+                ]}
                 selectable
               >
                 {props.translate('biometricsfailed-body') as string}
               </Text>
               <Text
-                style={{
-                  color: colors.fgDefault,
-                  fontSize: 15,
-                  marginTop: 10,
-                  marginBottom: 10,
-                  textAlign: 'center',
-                }}
+                style={[
+                  text.subheadline,
+                  styles.centerText,
+                  {
+                    color: colors.fgDefault,
+                    marginTop: space.md,
+                    marginBottom: space.md,
+                  },
+                ]}
                 selectable
               >
                 {props.translate('biometricsfailed-footer') as string}
@@ -132,7 +85,7 @@ const Launching: React.FunctionComponent<LaunchingProps> = props => {
               <LiquidPrimaryButton
                 title={props.translate('biometricsfailed-button') as string}
                 onPress={() => props.tryAgain && props.tryAgain()}
-                style={{ marginBottom: 10, marginTop: 10 }}
+                style={styles.buttonGap}
               />
             </>
           ) : (
@@ -146,18 +99,19 @@ const Launching: React.FunctionComponent<LaunchingProps> = props => {
                 }
               />
               <Text
-                style={{
-                  color: colors.fgDefault,
-                  fontSize: 20,
-                  fontWeight: 'bold',
-                  marginTop: 10,
-                  opacity:
-                    props.firstLaunchingMessage ===
-                      LaunchingModeEnum.updating && !props.biometricsFailed
-                      ? 1
-                      : 0,
-                  textAlign: 'center',
-                }}
+                style={[
+                  text.title3,
+                  styles.centerText,
+                  {
+                    color: colors.fgDefault,
+                    marginTop: space.md,
+                    opacity:
+                      props.firstLaunchingMessage ===
+                        LaunchingModeEnum.updating && !props.biometricsFailed
+                        ? 1
+                        : 0,
+                  },
+                ]}
                 selectable
               >
                 {props.firstLaunchingMessage === LaunchingModeEnum.updating ||
@@ -170,17 +124,19 @@ const Launching: React.FunctionComponent<LaunchingProps> = props => {
                     ) as string)}
               </Text>
               <Text
-                style={{
-                  color: colors.fgDefault,
-                  fontSize: 15,
-                  marginTop: 10,
-                  opacity:
-                    props.firstLaunchingMessage ===
-                      LaunchingModeEnum.updating && !props.biometricsFailed
-                      ? 1
-                      : 0,
-                  textAlign: 'center',
-                }}
+                style={[
+                  text.subheadline,
+                  styles.centerText,
+                  {
+                    color: colors.fgDefault,
+                    marginTop: space.md,
+                    opacity:
+                      props.firstLaunchingMessage ===
+                        LaunchingModeEnum.updating && !props.biometricsFailed
+                        ? 1
+                        : 0,
+                  },
+                ]}
                 selectable
               >
                 {props.firstLaunchingMessage === LaunchingModeEnum.updating ||
@@ -193,18 +149,20 @@ const Launching: React.FunctionComponent<LaunchingProps> = props => {
                     ) as string)}
               </Text>
               <Text
-                style={{
-                  color: colors.fgDefault,
-                  fontSize: 15,
-                  marginTop: 10,
-                  marginBottom: 10,
-                  opacity:
-                    props.firstLaunchingMessage ===
-                      LaunchingModeEnum.updating && !props.biometricsFailed
-                      ? 1
-                      : 0,
-                  textAlign: 'center',
-                }}
+                style={[
+                  text.subheadline,
+                  styles.centerText,
+                  {
+                    color: colors.fgDefault,
+                    marginTop: space.md,
+                    marginBottom: space.md,
+                    opacity:
+                      props.firstLaunchingMessage ===
+                        LaunchingModeEnum.updating && !props.biometricsFailed
+                        ? 1
+                        : 0,
+                  },
+                ]}
                 selectable
               >
                 {props.firstLaunchingMessage === LaunchingModeEnum.updating ||
@@ -223,5 +181,45 @@ const Launching: React.FunctionComponent<LaunchingProps> = props => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  topHalf: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '95%',
+  },
+  titleBlock: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    width: '80%',
+    height: '40%',
+    marginTop: space.xl,
+    padding: space.md,
+  },
+  bodyBlock: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    width: '80%',
+    height: '60%',
+    marginTop: space.xl,
+    padding: space.md,
+  },
+  centerText: {
+    textAlign: 'center',
+  },
+  buttonGap: {
+    marginBottom: space.md,
+    marginTop: space.md,
+  },
+});
 
 export default Launching;

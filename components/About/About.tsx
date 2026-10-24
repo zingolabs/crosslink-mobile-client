@@ -1,6 +1,5 @@
-/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import { View, ScrollView } from 'react-native';
+import { View, ScrollView, StyleSheet } from 'react-native';
 
 import FadeText from '../Components/FadeText';
 import { LoadedAppStackParamList } from '../../app/types';
@@ -16,6 +15,7 @@ import { RouteEnum, ScreenEnum } from '../../app/AppState';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../Header';
+import { space } from '../../app/theme';
 
 type AboutProps = NativeStackScreenProps<
   LoadedAppStackParamList,
@@ -57,21 +57,13 @@ const About: React.FunctionComponent<AboutProps> = ({ navigation }) => {
 
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{
-          flexGrow: 1,
-          paddingTop: 8,
-          paddingBottom: insets.bottom + 8,
-          paddingHorizontal: 16,
-        }}
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: insets.bottom + space.sm },
+        ]}
       >
-        <View
-          style={{
-            flexGrow: 1,
-            alignItems: 'flex-start',
-            justifyContent: 'center',
-          }}
-        >
-          <FadeText style={{ marginTop: 20 }}>{arrayTxt[0]}</FadeText>
+        <View style={styles.center}>
+          <FadeText style={styles.paraFirst}>{arrayTxt[0]}</FadeText>
           <DetailLine
             label={'Zingo Delegator Version'}
             value={translate('version') as string}
@@ -82,12 +74,10 @@ const About: React.FunctionComponent<AboutProps> = ({ navigation }) => {
             value={zingolibVersion}
             screenName={screenName}
           />
-          <View style={{ marginTop: 20 }}>
+          <View style={styles.copyright}>
             {arrayTxt.map((txt: string, ind: number) => (
               <View key={txt.substring(0, 10)}>
-                {ind !== 0 && (
-                  <FadeText style={{ marginBottom: 20 }}>{txt}</FadeText>
-                )}
+                {ind !== 0 && <FadeText style={styles.para}>{txt}</FadeText>}
               </View>
             ))}
           </View>
@@ -96,5 +86,27 @@ const About: React.FunctionComponent<AboutProps> = ({ navigation }) => {
     </ToastProvider>
   );
 };
+
+const styles = StyleSheet.create({
+  content: {
+    flexGrow: 1,
+    paddingTop: space.sm,
+    paddingHorizontal: space.lg,
+  },
+  center: {
+    flexGrow: 1,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+  },
+  paraFirst: {
+    marginTop: space.xl,
+  },
+  copyright: {
+    marginTop: space.xl,
+  },
+  para: {
+    marginBottom: space.xl,
+  },
+});
 
 export default About;

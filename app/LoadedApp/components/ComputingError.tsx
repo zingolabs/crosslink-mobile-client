@@ -1,19 +1,16 @@
-/* eslint-disable react-native/no-inline-styles */
-//import React, { useContext, useState } from 'react';
 import React, { useState } from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import RegText from '../../../components/Components/RegText';
 import { LoadedAppStackParamList } from '../../types';
 import { RouteEnum } from '../../AppState';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-//import { ContextAppLoaded } from '../../context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import FadeText from '../../../components/Components/FadeText';
 import LiquidPrimaryButton from '../../../components/Components/LiquidButton/LiquidPrimaryButton';
-import { useTheme } from '../../theme';
+import { radiusCard, radiusPill, space, text, useTheme } from '../../theme';
 
 type ComputingErrorProps = NativeStackScreenProps<
   LoadedAppStackParamList,
@@ -24,8 +21,6 @@ const ComputingError: React.FunctionComponent<ComputingErrorProps> = ({
   route,
 }) => {
   const navigation: any = useNavigation();
-  //const context = useContext(ContextAppLoaded);
-  //const { valueTransfers } = context;
   const { colors } = useTheme();
 
   const [showDetails, setShowDetails] = useState<boolean>(false);
@@ -36,61 +31,29 @@ const ComputingError: React.FunctionComponent<ComputingErrorProps> = ({
       : '';
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: colors.bgCanvas,
-      }}
-    >
-      <View
-        style={{
-          flexGrow: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <View
-          style={{
-            backgroundColor: colors.bgSurface,
-            paddingHorizontal: 20,
-            paddingVertical: 40,
-            width: '90%',
-            borderRadius: 50,
-          }}
-        >
-          <View
-            style={{
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginHorizontal: 8,
-            }}
-          >
+    <View style={[styles.screen, { backgroundColor: colors.bgCanvas }]}>
+      <View style={styles.center}>
+        <View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
+          <View style={styles.iconWrap}>
+            {/* No dangerTint token: a low-alpha fill derived from the token. */}
             <View
-              style={{
-                borderRadius: 50,
-                backgroundColor: '#FF383C33',
-                padding: 20,
-                margin: 10,
-              }}
+              style={[
+                styles.iconDisc,
+                { backgroundColor: colors.bgDangerTint },
+              ]}
             >
-              <FontAwesomeIcon icon={faXmark} color="#FF383C" size={50} />
+              <FontAwesomeIcon
+                icon={faXmark}
+                color={colors.fgDanger}
+                size={50}
+              />
             </View>
           </View>
-          <RegText style={{ fontSize: 30, alignSelf: 'center' }}>
+          <RegText style={[text.title1, styles.centerSelf]}>
             {'An error\noccurred'}
           </RegText>
 
-          <View
-            style={{
-              marginTop: 50,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              paddingTop: 10,
-              paddingBottom: 20,
-              gap: 10,
-            }}
-          >
+          <View style={styles.actions}>
             <LiquidPrimaryButton
               tintColor={colors.bgSurface}
               title={'Details'}
@@ -108,11 +71,53 @@ const ComputingError: React.FunctionComponent<ComputingErrorProps> = ({
             />
           </View>
 
-          {showDetails && <FadeText style={{ opacity: 1 }}>{error}</FadeText>}
+          {showDetails && <FadeText style={styles.details}>{error}</FadeText>}
         </View>
       </View>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+  center: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  card: {
+    paddingHorizontal: space.xl,
+    paddingVertical: space.xxxl,
+    width: '90%',
+    borderRadius: radiusCard,
+  },
+  iconWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: space.sm,
+  },
+  iconDisc: {
+    borderRadius: radiusPill,
+    padding: space.xl,
+    margin: space.md,
+  },
+  centerSelf: {
+    alignSelf: 'center',
+  },
+  actions: {
+    marginTop: space.xxxl,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: space.md,
+    paddingBottom: space.xl,
+    gap: space.md,
+  },
+  details: {
+    opacity: 1,
+  },
+});
 
 export default ComputingError;

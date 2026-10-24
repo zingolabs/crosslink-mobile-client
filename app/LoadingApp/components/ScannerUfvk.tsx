@@ -1,10 +1,9 @@
-/* eslint-disable react-native/no-inline-styles */
 import React, { useContext } from 'react';
 import { ContextAppLoading } from '../../context';
 import Scanner from '../../../components/Scanner';
 import { Header } from '../../../components/Header';
 
-import { View } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import Snackbars from '../../../components/Components/Snackbars';
 import { ToastProvider } from 'react-native-toastier';
 import { ScreenEnum } from '../../AppState';
@@ -38,12 +37,7 @@ const ScannerUfvk: React.FunctionComponent<ScannerUfvkProps> = ({
         screenName={screenName}
       />
 
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: colors.bgCanvas,
-        }}
-      >
+      <View style={[styles.screen, { backgroundColor: colors.bgCanvas }]}>
         <Header
           title={translate('scanner.text') as string}
           screenName={screenName}
@@ -59,5 +53,11 @@ const ScannerUfvk: React.FunctionComponent<ScannerUfvkProps> = ({
     </ToastProvider>
   );
 };
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+});
 
 export default ScannerUfvk;

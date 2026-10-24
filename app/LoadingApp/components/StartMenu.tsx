@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
@@ -7,6 +6,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   LayoutChangeEvent,
+  StyleSheet,
   useWindowDimensions,
 } from 'react-native';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
@@ -23,7 +23,7 @@ import LiquidPrimaryButton from '../../../components/Components/LiquidButton/Liq
 import Button from '../../../components/Components/Button';
 import ChalkBackground from '../../../components/Chalk/ChalkBackground';
 import { useChalkIntro } from '../../../components/Chalk/useChalkIntro';
-import { useTheme } from '../../theme';
+import { space, text, useTheme } from '../../theme';
 import { useBackdropSetter } from '../../Backdrop';
 
 type StartMenuProps = {
@@ -119,28 +119,21 @@ const StartMenu: React.FunctionComponent<StartMenuProps> = ({
 
       <View
         ref={rootRef}
-        style={{
-          flex: 1,
-          backgroundColor: setBackdrop ? 'transparent' : colors.bgCanvas,
-        }}
+        style={[
+          styles.root,
+          { backgroundColor: setBackdrop ? 'transparent' : colors.bgCanvas },
+        ]}
         onLayout={onRootLayout}
       >
         {!setBackdrop && background}
 
         <KeyboardAvoidingView
-          style={{ flex: 1 }}
+          style={styles.fill}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           keyboardVerticalOffset={0}
         >
           <View
-            style={{
-              height: 48,
-              marginTop: insets.top + 10,
-              paddingHorizontal: 16,
-              flexDirection: 'row',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-            }}
+            style={[styles.headerRow, { marginTop: insets.top + space.md }]}
           >
             <Animated.View style={enter}>
               <Animated.View style={glass}>
@@ -160,31 +153,23 @@ const StartMenu: React.FunctionComponent<StartMenuProps> = ({
         </KeyboardAvoidingView>
 
         <View
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            alignItems: 'center',
-            paddingHorizontal: 20,
-            paddingBottom: insets.bottom + 12,
-          }}
+          style={[styles.actions, { paddingBottom: insets.bottom + space.md }]}
           onLayout={e => setActionsHeight(e.nativeEvent.layout.height)}
         >
           {walletExists && (
             <>
               {openWalletFailed && (
                 <View
-                  style={{
-                    borderColor: colors.borderAccent,
-                    borderWidth: 1,
-                    borderRadius: 5,
-                    padding: 5,
-                    marginBottom: 20,
-                  }}
+                  style={[
+                    styles.failedBox,
+                    { borderColor: colors.borderAccent },
+                  ]}
                 >
                   <BoldText
-                    style={{ fontSize: 15, color: colors.fgAccentDisabled }}
+                    style={{
+                      ...text.subheadline,
+                      color: colors.fgAccentDisabled,
+                    }}
                   >
                     {translate('loadingapp.noopenwallet-message') as string}
                   </BoldText>
@@ -194,12 +179,12 @@ const StartMenu: React.FunctionComponent<StartMenuProps> = ({
                 title={translate('loadingapp.opencurrentwallet') as string}
                 disabled={actionButtonsDisabled}
                 onPress={() => openCurrentWallet()}
-                style={{ marginBottom: 20 }}
+                style={styles.gapBottom}
               />
             </>
           )}
 
-          <Animated.View style={[{ marginBottom: 8 }, enterSecondary]}>
+          <Animated.View style={[styles.gapSm, enterSecondary]}>
             <Button
               testID="loadingapp.restorewallet"
               variant="ghost"
@@ -209,7 +194,7 @@ const StartMenu: React.FunctionComponent<StartMenuProps> = ({
             />
           </Animated.View>
 
-          <View style={{ width: '100%' }}>
+          <View style={styles.fill}>
             <Animated.View style={enter}>
               <Animated.View style={glass}>
                 <LiquidPrimaryButton
@@ -236,7 +221,7 @@ const StartMenu: React.FunctionComponent<StartMenuProps> = ({
                       createNewWallet();
                     }
                   }}
-                  style={{ width: '100%' }}
+                  style={styles.fullWidth}
                 />
               </Animated.View>
             </Animated.View>
@@ -246,5 +231,44 @@ const StartMenu: React.FunctionComponent<StartMenuProps> = ({
     </ToastProvider>
   );
 };
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  fill: {
+    flex: 1,
+  },
+  headerRow: {
+    height: 48,
+    paddingHorizontal: space.lg,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  actions: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    paddingHorizontal: space.xl,
+  },
+  failedBox: {
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: space.xs,
+    marginBottom: space.xl,
+  },
+  gapBottom: {
+    marginBottom: space.xl,
+  },
+  gapSm: {
+    marginBottom: space.sm,
+  },
+  fullWidth: {
+    width: '100%',
+  },
+});
 
 export default StartMenu;
