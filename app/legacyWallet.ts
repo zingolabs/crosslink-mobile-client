@@ -36,8 +36,9 @@ const isLegacy = (r: InspectResponse) =>
  * The two platforms also keep the file in different shapes: Android stores
  * the decoded wallet binary, iOS its base64 text. When the file arrives in
  * the other shape, it is valid — inspect answers the bytes to write back and
- * this rewrites the file in place instead of quarantining it, so a wallet
- * moved between devices keeps working.
+ * this rewrites the file in place, so a wallet moved between devices keeps
+ * working. A chain mismatch outranks the shape: a wallet from another network
+ * is quarantined even when this platform could read its file.
  */
 export const quarantineLegacyWalletIfNeeded = async (
   serverUri: string,
@@ -55,22 +56,25 @@ export const quarantineLegacyWalletIfNeeded = async (
     const resp: InspectResponse = await JSON.parse(
       await RPCModule.inspectWallet(data, serverUri, platform),
     );
+    console.log('legacy wallet inspect:', JSON.stringify(resp));
+    // the chain mismatch wins over the shape: a wallet whose blocks belong to
+    // another network must never be loaded, even when its shape is one this
+    // platform could read.
+    if (isLegacy(resp)) {
+      await RNFS.moveFile(
+        path,
+        `${RNFS.DocumentDirectoryPath}/${LEGACY_WALLET_FILE}`,
+      );
+      return true;
+    }
     if (resp.normalize_to) {
       await RNFS.writeFile(
         path,
         resp.normalize_to,
         platform === 'android' ? 'base64' : 'utf8',
       );
-      return false;
     }
-    if (!isLegacy(resp)) {
-      return false;
-    }
-    await RNFS.moveFile(
-      path,
-      `${RNFS.DocumentDirectoryPath}/${LEGACY_WALLET_FILE}`,
-    );
-    return true;
+    return false;
   } catch (e) {
     console.log(
       `legacy wallet check: ${e instanceof Error ? e.message : String(e)}`,

@@ -40,6 +40,13 @@ const READABLE_MISMATCH = JSON.stringify({
   chain_match: false,
   normalize_to: null,
 });
+const READABLE_MISMATCH_NORMALIZABLE = JSON.stringify({
+  readable: true,
+  format_version: 40,
+  newest_height: 4534722,
+  chain_match: false,
+  normalize_to: 'd2FsbGV0',
+});
 const READABLE_NORMALIZABLE = JSON.stringify({
   readable: true,
   format_version: 40,
@@ -74,6 +81,15 @@ describe('Legacy wallet quarantine - test', () => {
       'android',
     );
     expect(mocked.moveFile).toHaveBeenCalledWith(path, legacyPath);
+  });
+
+  test('the chain mismatch outranks the shape', async () => {
+    inspect(READABLE_MISMATCH_NORMALIZABLE);
+    expect(
+      await quarantineLegacyWalletIfNeeded('http://indexer:18234', 'android'),
+    ).toBe(true);
+    expect(mocked.moveFile).toHaveBeenCalledWith(path, legacyPath);
+    expect(mocked.writeFile).not.toHaveBeenCalled();
   });
 
   test('quarantines an unreadable wallet file immediately', async () => {
@@ -116,7 +132,9 @@ describe('Legacy wallet quarantine - test', () => {
         normalize_to: null,
       }),
     );
-    expect(await quarantineLegacyWalletIfNeeded('', 'android')).toBe(false);
+    expect(
+      await quarantineLegacyWalletIfNeeded('http://indexer:18234', 'android'),
+    ).toBe(false);
     expect(mocked.moveFile).not.toHaveBeenCalled();
   });
 
