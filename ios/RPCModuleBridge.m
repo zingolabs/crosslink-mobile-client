@@ -79,6 +79,11 @@ RCT_EXTERN_METHOD(selectBestIndexer:
     (NSString)network
                   network:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(inspectWallet:
+    (NSString)walletb64
+                  serveruri:(NSString)serveruri
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(getLatestBlockWalletInfo:
     (RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)

@@ -797,6 +797,131 @@ pub fn select_best_indexer(network: String) -> Result<String, ZingolibError> {
     })
 }
 
+/// Reads the wallet file format version from the raw wallet bytes.
+fn wallet_format_version(decoded: &[u8]) -> u64 {
+    if decoded.len() >= 8 {
+        u64::from_le_bytes(decoded[0..8].try_into().expect("8 bytes into u64"))
+    } else {
+        0
+    }
+}
+
+/// Whether the indexer's chain contains the block at `height` and its hash matches.
+///
+/// A wallet claiming a block beyond the served tip is on another chain. Unreachable
+/// indexers answer `None` — unknown, not mismatched.
+async fn indexer_has_block(server_uri: http::Uri, height: u32, hash: [u8; 32]) -> Option<bool> {
+    use zcash_client_backend::proto::service::BlockId;
+
+    let tip = match tokio::time::timeout(
+        std::time::Duration::from_secs(20),
+        zingolib::grpc_connector::get_latest_block(server_uri.clone()),
+    )
+    .await
+    {
+        Ok(Ok(tip)) => u32::try_from(tip.height).ok()?,
+        _ => return None,
+    };
+    if height > tip {
+        return Some(false);
+    }
+    let mut client = match tokio::time::timeout(
+        std::time::Duration::from_secs(20),
+        get_client(server_uri),
+    )
+    .await
+    {
+        Ok(Ok(client)) => client,
+        _ => return None,
+    };
+    let answer = match tokio::time::timeout(
+        std::time::Duration::from_secs(20),
+        client.get_block(BlockId {
+            height: u64::from(height),
+            hash: Vec::new(),
+        }),
+    )
+    .await
+    {
+        Ok(Ok(answer)) => answer.into_inner(),
+        Ok(Err(status)) => {
+            let message = status.message().to_ascii_lowercase();
+            return if message.contains("not found") {
+                Some(false)
+            } else {
+                None
+            };
+        }
+        Err(_) => return None,
+    };
+    Some(answer.hash.as_slice() == hash.as_slice())
+}
+
+/// Classifies a wallet file without touching the stored one: whether the current reader can
+/// parse it, and — when it can and the wallet has synced blocks — whether those blocks belong
+/// to the chain the indexer serves. A wallet from the previous network reads fine (the chain
+/// names coincide) but its blocks do not, so the hash comparison is the only real test.
+#[uniffi::export]
+pub fn inspect_wallet(base64_data: String, server_uri: String) -> Result<String, ZingolibError> {
+    with_panic_guard(|| {
+        let decoded = match STANDARD.decode(&base64_data) {
+            Ok(decoded) => decoded,
+            Err(e) => {
+                return Ok(object! {
+                    "readable" => false,
+                    "format_version" => 0,
+                    "chain_match" => json::JsonValue::Null,
+                    "reason" => format!("base64 decode: {e}"),
+                }
+                .dump());
+            }
+        };
+        let format_version = wallet_format_version(&decoded);
+        let wallet = match LightWallet::read(&decoded[..], stable_chain()) {
+            Ok(wallet) => wallet,
+            Err(e) => {
+                return Ok(object! {
+                    "readable" => false,
+                    "format_version" => format_version,
+                    "chain_match" => json::JsonValue::Null,
+                    "reason" => e.to_string(),
+                }
+                .dump());
+            }
+        };
+        let newest = wallet
+            .wallet_blocks
+            .iter()
+            .next_back()
+            .map(|(height, block)| (u32::from(*height), block.block_hash().0));
+        let (newest_height, chain_match) = match newest {
+            None => (json::JsonValue::Null, json::JsonValue::Null),
+            Some((height, hash)) => {
+                let answer = if server_uri.is_empty() {
+                    None
+                } else {
+                    match server_uri.parse::<http::Uri>() {
+                        Ok(uri) => RT.block_on(indexer_has_block(uri, height, hash)),
+                        Err(_) => None,
+                    }
+                };
+                let chain_match = match answer {
+                    Some(m) => json::JsonValue::from(m),
+                    None => json::JsonValue::Null,
+                };
+                (json::JsonValue::from(height), chain_match)
+            }
+        };
+        Ok(object! {
+            "readable" => true,
+            "format_version" => format_version,
+            "newest_height" => newest_height,
+            "chain_match" => chain_match,
+        }
+        .dump())
+    })
+}
+
 #[uniffi::export]
 pub fn get_latest_block_wallet() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
@@ -2326,6 +2451,50 @@ mod tests {
         );
         assert!(stable.expected_branch.is_some());
         assert!(nightly.expected_branch.is_some());
+    }
+
+    #[test]
+    #[ignore = "needs the network"]
+    fn inspect_wallet_tells_the_chains_apart() {
+        let _ = set_crypto_default_provider_to_ring();
+        let seed = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about".to_string();
+        init_from_seed(
+            seed.clone(),
+            1,
+            "http://88.198.67.189:18234".to_string(),
+            "test".to_string(),
+            "Medium".to_string(),
+            1,
+        )
+        .unwrap();
+        run_sync().unwrap();
+        for _ in 0..60 {
+            let status = status_sync().unwrap();
+            let json = json::parse(&status).unwrap_or(json::JsonValue::Null);
+            let scanned = json["percentage_total_blocks_scanned"]
+                .as_f64()
+                .unwrap_or(0.0);
+            if scanned > 0.0 {
+                break;
+            }
+            std::thread::sleep(std::time::Duration::from_secs(5));
+        }
+        let b64 = save_to_b64().unwrap();
+        let stable = json::parse(
+            &inspect_wallet(b64.clone(), "http://88.198.67.189:18234".to_string()).unwrap(),
+        )
+        .unwrap();
+        let nightly =
+            json::parse(&inspect_wallet(b64, "http://45.32.186.234:18234".to_string()).unwrap())
+                .unwrap();
+        println!("stable: {stable}");
+        println!("nightly: {nightly}");
+        assert_eq!(stable["readable"], true);
+        assert_ne!(stable["chain_match"], false, "stable blocks must match");
+        assert_eq!(
+            nightly["chain_match"], false,
+            "stable blocks must not be on nightly"
+        );
     }
 
     #[test]

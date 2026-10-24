@@ -608,6 +608,44 @@ class RPCModule: NSObject {
       }
   }
 
+  func fnInspectWallet(_ dict: [AnyHashable: Any]) {
+    if let walletb64 = dict["walletb64"] as? String,
+       let serveruri = dict["serveruri"] as? String,
+       let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
+      do {
+        let resp = try inspectWallet(base64Data: walletb64, serverUri: serveruri)
+        let respStr = String(resp)
+        DispatchQueue.main.async {
+          resolve(respStr)
+        }
+      } catch {
+        let err = "Error: [Native] Inspect wallet. \(error.localizedDescription)"
+        NSLog(err)
+        DispatchQueue.main.async {
+          resolve(err)
+        }
+      }
+    } else {
+      let err = "Error: [Native] Inspect wallet. Argument problem."
+      NSLog(err)
+      if let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
+          DispatchQueue.main.async {
+            resolve(err)
+          }
+      }
+    }
+  }
+
+  @objc(inspectWallet:serveruri:reject:)
+  func inspectWalletInfo(_ walletb64: String, serveruri: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+      let dict: [String: Any] = ["walletb64": walletb64, "serveruri": serveruri, "resolve": resolve]
+      DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+          if let self = self {
+              self.fnInspectWallet(dict)
+          }
+      }
+  }
+
   func fnGetLatestBlockWalletInfo(_ dict: [AnyHashable: Any]) {
     if let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
         do {

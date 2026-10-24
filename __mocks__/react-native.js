@@ -6,6 +6,8 @@ jest.mock('react-native', () => {
     discoverIndexers: jest.fn(() => '{"indexers":[],"errors":[]}'),
     probeIndexer: jest.fn(() => '{"indexers":[],"errors":[]}'),
     selectBestIndexer: jest.fn(() => 'Error: no indexer answered the probe'),
+    inspectWallet: jest.fn(() => '{"readable":true,"chain_match":true}'),
+    selectBestIndexer: jest.fn(() => 'Error: no indexer answered the probe'),
     getLatestBlockWalletInfo: jest.fn(() => '{}'),
     walletExists: jest.fn(() => 'false'),
     getValueTransfersList: jest.fn(

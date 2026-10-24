@@ -77,6 +77,7 @@ import ListedIndexers from './components/ListedIndexers';
 import CustomIndexer from './components/CustomIndexer';
 import ScheduledActionsFileImpl from '../../components/ScheduledActions/ScheduledActionsFileImpl';
 import { discoverIndexers, probeIndexer, selectBestIndexer } from '../indexers';
+import { quarantineLegacyWallet as quarantineLegacyWalletIfNeeded } from '../legacyWallet';
 import notifee from '@notifee/react-native';
 import { useTheme, AppTheme } from '../theme';
 import { LoadingAppEntryEnum } from '../AppState/enums/LoadingAppEntryEnum';
@@ -643,6 +644,33 @@ export class LoadingAppClass extends Component<
 
     await AsyncStorage.setItem(GlobalConst.background, GlobalConst.no);
     const exists = await RPCModule.walletExists();
+
+    // a wallet from the previous network can no longer be used: move it aside
+    // and start clean — the seed stays recoverable through Import.
+    if (
+      exists &&
+      exists !== GlobalConst.false &&
+      this.state.netInfo.isConnected &&
+      this.state.selectIndexerServer !== SelectServerEnum.offline
+    ) {
+      const quarantined = await quarantineLegacyWalletIfNeeded(
+        this.state.indexerServer.uri,
+      );
+      if (quarantined) {
+        await SettingsFileImpl.writeSettings(
+          SettingsNameEnum.basicFirstViewSeed,
+          true,
+        );
+        if (!this.state.startingApp && !!this.state.walletSeed) {
+          return {
+            kind: 'restore',
+            seed: this.state.walletSeed,
+            birthday: this.state.walletBirthday,
+          };
+        }
+        return { kind: 'noWallet' };
+      }
+    }
 
     if (!exists || exists === GlobalConst.false) {
       await SettingsFileImpl.writeSettings(
