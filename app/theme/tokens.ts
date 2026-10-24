@@ -7,6 +7,8 @@ export type ThemeColors = {
   bgCanvas: string;
   bgSurface: string;
   bgChrome: string;
+  /** Momentary press state on rows and cards. */
+  bgPress: string;
 
   fgDefault: string;
 
@@ -48,6 +50,7 @@ export const tokens: ThemeColors = {
   bgCanvas: '#0b0b0b',
   bgSurface: '#222223',
   bgChrome: '#0f0f0f',
+  bgPress: 'rgba(255, 255, 255, 0.06)',
 
   fgDefault: '#ffffff',
 

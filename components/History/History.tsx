@@ -38,15 +38,15 @@ import {
 import Utils from '../../app/utils';
 import { RPCValueTransferStatusEnum } from '../../app/rpc/enums/RPCValueTransferStatusEnum';
 import { MainTabParamList } from '../../app/types/NavigationTypes';
-import { text, useTheme } from '../../app/theme';
+import { text, curve, duration, useTheme } from '../../app/theme';
 import EmptyState from '../Components/EmptyState';
 import HomeSummary, { SUMMARY_RADIUS } from './components/HomeSummary';
 import TxRow, { TX_ROW_HEIGHT } from './components/TxRow';
 
 const PAGE = 50;
 const FRESH_FOR = 2400;
-const ROWS_LAYOUT = LinearTransition.duration(260).easing(
-  Easing.bezier(0.23, 1, 0.32, 1),
+const ROWS_LAYOUT = LinearTransition.duration(duration.list).easing(
+  Easing.bezier(curve[0], curve[1], curve[2], curve[3]),
 );
 
 type HistoryProps = NativeStackScreenProps<

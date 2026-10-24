@@ -31,15 +31,15 @@ import {
   useAppLoadedActions,
   useAppLoadedSettings,
 } from '../../../app/context';
-import { text, useTheme } from '../../../app/theme';
+import { text, curve, duration, useTheme } from '../../../app/theme';
 import Utils from '../../../app/utils';
 import JellyLoader from '../../Components/Icons/JellyLoader';
 import { formatBalance } from '../../Components/SummaryPanel';
 
 export const TX_ROW_HEIGHT = 60;
 
-const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
-const CSS_EASE_OUT = cubicBezier(0.23, 1, 0.32, 1);
+const EASE_OUT = Easing.bezier(curve[0], curve[1], curve[2], curve[3]);
+const CSS_EASE_OUT = cubicBezier(curve[0], curve[1], curve[2], curve[3]);
 
 export const isIncoming = (vt: ValueTransferType) =>
   vt.kind === K.Received || vt.kind === K.WithdrawBond;
@@ -49,11 +49,12 @@ const isOutgoing = (vt: ValueTransferType) =>
 
 export const isPendingTx = (vt: ValueTransferType) => vt.confirmations === 0;
 
-export const KindIcon: React.FC<{ vt: ValueTransferType; color: string }> = ({
-  vt,
-  color,
-}) => {
-  const props = { size: 18, color, strokeWidth: 2 };
+export const KindIcon: React.FC<{
+  vt: ValueTransferType;
+  color: string;
+  size?: number;
+}> = ({ vt, color, size = 18 }) => {
+  const props = { size, color, strokeWidth: 2 };
   switch (vt.kind) {
     case K.Received:
       return <ArrowDownLeft {...props} />;
@@ -78,7 +79,7 @@ export const KindIcon: React.FC<{ vt: ValueTransferType; color: string }> = ({
   }
 };
 
-const ENTER = FadeInDown.duration(280)
+const ENTER = FadeInDown.duration(duration.enter)
   .easing(EASE_OUT)
   .withInitialValues({
     opacity: 0,
@@ -114,7 +115,7 @@ const TxRow: React.FC<TxRowProps> = ({ vt, fresh, last, onPress, testID }) => {
 
   const press: CSSTransitionProperties = {
     transitionProperty: ['backgroundColor'],
-    transitionDuration: reduced ? '0ms' : '120ms',
+    transitionDuration: reduced ? '0ms' : `${duration.press}ms`,
     transitionTimingFunction: CSS_EASE_OUT,
   };
   const highlight: CSSAnimationProperties = useMemo(
@@ -124,7 +125,7 @@ const TxRow: React.FC<TxRowProps> = ({ vt, fresh, last, onPress, testID }) => {
         '35%': { backgroundColor: colors.bgAccentTint },
         to: { backgroundColor: 'transparent' },
       },
-      animationDuration: 1600,
+      animationDuration: duration.highlight,
       animationTimingFunction: 'ease-out',
       animationFillMode: 'both',
     }),
@@ -147,7 +148,9 @@ const TxRow: React.FC<TxRowProps> = ({ vt, fresh, last, onPress, testID }) => {
         <Animated.View
           style={[
             styles.row,
-            pressed ? styles.rowPressed : styles.rowIdle,
+            pressed
+              ? [styles.rowIdle, { backgroundColor: colors.bgPress }]
+              : styles.rowIdle,
             press,
             fresh && highlight,
           ]}
@@ -175,7 +178,7 @@ const TxRow: React.FC<TxRowProps> = ({ vt, fresh, last, onPress, testID }) => {
           <Text
             numberOfLines={1}
             style={[
-              styles.amount,
+              text.numeral,
               { color: incoming ? colors.fgSuccess : colors.fgDefault },
             ]}
           >
@@ -203,9 +206,6 @@ const styles = StyleSheet.create({
   rowIdle: {
     backgroundColor: 'transparent',
   },
-  rowPressed: {
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-  },
   disc: {
     width: 36,
     height: 36,
@@ -219,13 +219,6 @@ const styles = StyleSheet.create({
   loader: {
     height: 18,
     justifyContent: 'center',
-  },
-  amount: {
-    fontSize: 17,
-    lineHeight: 22,
-    fontWeight: '600',
-    letterSpacing: -0.41,
-    fontVariant: ['tabular-nums'],
   },
   hairline: {
     height: StyleSheet.hairlineWidth,

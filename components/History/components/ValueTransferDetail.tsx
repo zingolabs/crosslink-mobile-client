@@ -1,12 +1,19 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
+  Text,
   KeyboardAvoidingView,
   Platform,
+  StyleSheet,
 } from 'react-native';
+import Animated, {
+  CSSTransitionProperties,
+  cubicBezier,
+  useReducedMotion,
+} from 'react-native-reanimated';
 
 import Clipboard from '@react-native-clipboard/clipboard';
 import moment from 'moment';
@@ -22,9 +29,7 @@ import {
   ScreenEnum,
 } from '../../../app/AppState';
 import Utils from '../../../app/utils';
-import RegText from '../../Components/RegText';
 import ZecAmount from '../../Components/ZecAmount';
-import FadeText from '../../Components/FadeText';
 import { LoadedAppStackParamList } from '../../../app/types';
 import {
   useAppLoadedActions,
@@ -32,26 +37,94 @@ import {
   useAppLoadedWallet,
   useAppLoadedUi,
 } from '../../../app/context';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import Stake from '../../../assets/icons/stake-white.svg';
-import Unstake from '../../../assets/icons/unstake-white.svg';
-import {
-  faRefresh,
-  faArrowDown,
-  faArrowUp,
-} from '@fortawesome/free-solid-svg-icons';
+import { KindIcon, isIncoming } from './TxRow';
+import { Copy as CopyIcon } from 'lucide-react-native';
 import { RPCValueTransferStatusEnum } from '../../../app/rpc/enums/RPCValueTransferStatusEnum';
 import Snackbars from '../../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../../Header';
-import { useTheme } from '../../../app/theme';
+import {
+  curve,
+  duration,
+  mono,
+  radiusCard,
+  radiusPill,
+  space,
+  text,
+  useTheme,
+} from '../../../app/theme';
 
 type ValueTransferDetailProps = NativeStackScreenProps<
   LoadedAppStackParamList,
   RouteEnum.ValueTransferDetail
 >;
+
+/**
+ * A tappable area that answers the press with a quiet tint. Same
+ * duration, curve and color as the rows on the home screen.
+ */
+const PressFeedback: React.FC<{
+  onPress: () => void;
+  accessibilityLabel: string;
+  children: React.ReactNode;
+}> = ({ onPress, accessibilityLabel, children }) => {
+  const { colors } = useTheme();
+  const reduced = useReducedMotion();
+  const [pressed, setPressed] = useState(false);
+  const press: CSSTransitionProperties = {
+    transitionProperty: ['backgroundColor'],
+    transitionDuration: reduced ? '0ms' : `${duration.press}ms`,
+    transitionTimingFunction: cubicBezier(
+      curve[0],
+      curve[1],
+      curve[2],
+      curve[3],
+    ),
+  };
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      onPress={onPress}
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
+    >
+      <Animated.View
+        style={[
+          styles.feedbackBody,
+          press,
+          { backgroundColor: pressed ? colors.bgPress : 'transparent' },
+        ]}
+      >
+        {children}
+      </Animated.View>
+    </Pressable>
+  );
+};
+
+/** A value that can be copied, marked by a small glyph. */
+const CopyValue: React.FC<{ children: string; monoFace?: boolean }> = ({
+  children,
+  monoFace,
+}) => {
+  const { colors } = useTheme();
+  return (
+    <View style={styles.copyValue}>
+      <Text
+        numberOfLines={1}
+        style={[
+          monoFace ? styles.monoValue : styles.value,
+          { color: colors.fgDefault },
+        ]}
+      >
+        {children}
+      </Text>
+      <CopyIcon size={14} strokeWidth={2} color={colors.fgSubtle} />
+    </View>
+  );
+};
 
 const ValueTransferDetail: React.FunctionComponent<
   ValueTransferDetailProps
@@ -83,17 +156,12 @@ const ValueTransferDetail: React.FunctionComponent<
 
   const memo = valueTransfer.memos;
 
-  const iconColor = Utils.valueTransferKindColor(
-    colors.fgDefault,
-    valueTransfer,
-  );
-
-  const icon =
-    valueTransfer.kind === ValueTransferKindEnum.Received ||
-    valueTransfer.kind === ValueTransferKindEnum.Shield ||
-    valueTransfer.kind === ValueTransferKindEnum.WithdrawBond
-      ? faArrowDown
-      : faArrowUp;
+  const pending =
+    valueTransfer.confirmations >= 0 &&
+    valueTransfer.confirmations < GlobalConst.minConfirmations;
+  const incoming = isIncoming(valueTransfer);
+  const accent = incoming ? colors.fgSuccess : colors.fgDefault;
+  const kindLabel = Utils.valueTransferKindText(translate, valueTransfer);
 
   useEffect(() => {
     Utils.setMomentLocale(language);
@@ -126,12 +194,183 @@ const ValueTransferDetail: React.FunctionComponent<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalLength]);
 
-  //console.log('render History Detail', valueTransferIndex, valueTransfer);
+  const copy = (value: string, message: string) => {
+    Clipboard.setString(value);
+    addLastSnackbar({
+      message,
+      duration: SnackbarDurationEnum.short,
+      screenName: [screenName],
+    });
+  };
 
-  //if (valueTransfer.status === RPCValueTransferStatusEnum.calculated || valueTransfer.status === RPCValueTransferStatusEnum.transmitted) {
-  //  console.log('server', info.latestBlock, 'VT', valueTransfer.blockheight, 'expire', GlobalConst.expireBlocks);
-  //  console.log(info.latestBlock - valueTransfer.blockheight < GlobalConst.expireBlocks);
-  //}
+  // The hero amount keeps the list's sign convention: money that arrived
+  // reads positive, money that left reads negative.
+  const amtZec =
+    valueTransfer.kind === ValueTransferKindEnum.Received ||
+    valueTransfer.kind === ValueTransferKindEnum.Shield ||
+    valueTransfer.kind === ValueTransferKindEnum.WithdrawBond
+      ? valueTransfer.amount
+      : Number(
+            Utils.splitZecAmountIntoBigSmall(valueTransfer.amount).bigPart,
+          ) === 0
+        ? valueTransfer.amount
+        : valueTransfer.amount * -1;
+
+  const pendingText =
+    valueTransfer.status === RPCValueTransferStatusEnum.confirmed
+      ? (translate(`history.${valueTransfer.status}`) as string) +
+        ' - ' +
+        (translate('history.waiting') as string) +
+        ' (' +
+        GlobalConst.minConfirmations.toString() +
+        ')'
+      : (translate(`history.${valueTransfer.status}`) as string) +
+        ' - ' +
+        (translate('history.not-confirmed') as string);
+
+  type Row = {
+    key: string;
+    label: string;
+    value: React.ReactNode;
+    copyValue?: string;
+    copyMessage?: string;
+    monoFace?: boolean;
+    last?: boolean;
+  };
+
+  const rows = useMemo(() => {
+    const out: Row[] = [];
+    const fee = valueTransfer.fee;
+    const hasFee = !!fee && fee > 0;
+    const lastOf = (key: string) => {
+      if (key === 'fee') return true;
+      if (key === 'pool') return !hasFee;
+      if (key === 'block') return !hasFee && !valueTransfer.poolType;
+      return false;
+    };
+
+    if (
+      valueTransfer.kind === ValueTransferKindEnum.CreateBond ||
+      valueTransfer.kind === ValueTransferKindEnum.RetargetDelegationBond
+    ) {
+      const target = valueTransfer.stakingAction?.target ?? '';
+      out.push({
+        key: 'target',
+        label: 'Target',
+        value: <CopyValue monoFace>{Utils.trimToSmall(target, 10)}</CopyValue>,
+        copyValue: target,
+        copyMessage: translate('history.addresscopied') as string,
+      });
+    }
+
+    out.push({
+      key: 'status',
+      label: 'Status',
+      value: (
+        <Text style={[styles.value, { color: colors.fgDefault }]}>
+          {valueTransfer.status}
+        </Text>
+      ),
+    });
+    out.push({
+      key: 'confirmations',
+      label: translate('history.confirmations') as string,
+      value: (
+        <Text style={[styles.value, { color: colors.fgDefault }]}>
+          {valueTransfer.confirmations >= 0
+            ? valueTransfer.confirmations.toString()
+            : '-'}
+        </Text>
+      ),
+    });
+
+    if (valueTransfer.address) {
+      out.push({
+        key: 'address',
+        label: 'Receiver',
+        value: (
+          <CopyValue monoFace>
+            {Utils.trimToSmall(valueTransfer.address, 10)}
+          </CopyValue>
+        ),
+        copyValue: valueTransfer.address,
+        copyMessage: translate('history.addresscopied') as string,
+      });
+    }
+
+    if (valueTransfer.txid) {
+      out.push({
+        key: 'txid',
+        label: 'TXID',
+        value: (
+          <CopyValue monoFace>
+            {Utils.trimToSmall(valueTransfer.txid, 10)}
+          </CopyValue>
+        ),
+        copyValue: valueTransfer.txid,
+        copyMessage: translate('history.txcopied') as string,
+      });
+    }
+
+    out.push({
+      key: 'time',
+      label: translate('history.time') as string,
+      value: (
+        <Text style={[styles.value, { color: colors.fgDefault }]}>
+          {valueTransfer.time
+            ? moment(valueTransfer.time * 1000).format('LLL')
+            : '--'}
+        </Text>
+      ),
+    });
+
+    out.push({
+      key: 'block',
+      label: 'Block height',
+      value: (
+        <Text style={[styles.value, { color: colors.fgDefault }]}>
+          {valueTransfer.blockheight.toString()}
+        </Text>
+      ),
+      last: lastOf('block'),
+    });
+
+    if (valueTransfer.poolType) {
+      out.push({
+        key: 'pool',
+        label: 'Receiver type',
+        value: (
+          <Text style={[styles.value, { color: colors.fgDefault }]}>
+            {valueTransfer.poolType}
+          </Text>
+        ),
+        last: lastOf('pool'),
+      });
+    }
+
+    if (hasFee) {
+      out.push({
+        key: 'fee',
+        label: translate('history.txfee') as string,
+        value: (
+          <ZecAmount
+            amtZec={
+              valueTransfer.kind === ValueTransferKindEnum.CreateBond
+                ? fee - valueTransfer.amount
+                : fee
+            }
+            size={16}
+            color={colors.fgDefault}
+            currencyName={info.currencyName}
+            privacy={privacy}
+          />
+        ),
+        last: true,
+      });
+    }
+
+    return out;
+  }, [valueTransfer, colors.fgDefault, info.currencyName, privacy, translate]);
 
   return (
     <ToastProvider>
@@ -161,406 +400,110 @@ const ValueTransferDetail: React.FunctionComponent<
 
         <ScrollView
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{
-            flexGrow: 1,
-            paddingTop: 8,
-            paddingBottom: insets.bottom + 8,
-            paddingHorizontal: 10,
-          }}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[
+            styles.content,
+            { paddingBottom: insets.bottom + space.xl },
+          ]}
         >
-          <View
-            style={{
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: 15,
-              padding: 10,
-              borderRadius: 30,
-              backgroundColor: colors.bgSurface,
-              paddingBottom: 40,
-            }}
-          >
-            <View
-              style={{
-                padding: 15,
-                backgroundColor: colors.bgCanvas,
-                borderRadius: 50,
-                marginTop: -60,
-              }}
-            >
-              <View
-                style={{
-                  padding: 20,
-                  backgroundColor: Utils.valueTransferKindColor(
-                    colors.bgSurface,
-                    valueTransfer,
-                  ),
-                  borderRadius: 50,
-                }}
-              >
-                {valueTransfer.confirmations >= 0 &&
-                valueTransfer.confirmations < GlobalConst.minConfirmations ? (
-                  <FontAwesomeIcon
-                    style={{
-                      marginLeft: 5,
-                      marginRight: 5,
-                      marginTop: 0,
-                      transform: [{ rotate: '45deg' }],
-                    }}
-                    size={30}
-                    icon={faRefresh}
-                    color={iconColor}
-                  />
-                ) : (
-                  <>
-                    {valueTransfer.kind === ValueTransferKindEnum.CreateBond ? (
-                      <Stake width={30} height={30} />
-                    ) : valueTransfer.kind ===
-                        ValueTransferKindEnum.BeginUnbond ||
-                      valueTransfer.kind ===
-                        ValueTransferKindEnum.RetargetDelegationBond ? (
-                      <Unstake width={30} height={30} />
-                    ) : (
-                      <FontAwesomeIcon
-                        style={{
-                          marginLeft: 5,
-                          marginRight: 5,
-                          marginTop: 0,
-                          transform: [{ rotate: '45deg' }],
-                        }}
-                        size={30}
-                        icon={icon}
-                        color={iconColor}
-                      />
-                    )}
-                  </>
-                )}
-              </View>
+          <View style={styles.hero}>
+            <View style={[styles.disc, { backgroundColor: colors.bgSurface }]}>
+              <KindIcon vt={valueTransfer} color={accent} size={28} />
             </View>
-
             <ZecAmount
               currencyName={info.currencyName}
-              size={45}
-              amtZec={
-                valueTransfer.kind === ValueTransferKindEnum.Received ||
-                valueTransfer.kind === ValueTransferKindEnum.Shield ||
-                valueTransfer.kind === ValueTransferKindEnum.WithdrawBond
-                  ? valueTransfer.amount
-                  : Number(
-                        Utils.splitZecAmountIntoBigSmall(valueTransfer.amount)
-                          .bigPart,
-                      ) === 0
-                    ? valueTransfer.amount
-                    : valueTransfer.amount * -1
-              }
+              size={48}
+              amtZec={amtZec}
+              color={accent}
               privacy={privacy}
               smallPrefix={true}
             />
+            <Text style={[text.footnote, { color: colors.fgSubtle }]}>
+              {kindLabel}
+            </Text>
           </View>
 
-          {valueTransfer.confirmations >= 0 &&
-            valueTransfer.confirmations < GlobalConst.minConfirmations && (
-              <View
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                {(valueTransfer.status ===
-                  RPCValueTransferStatusEnum.transmitted ||
-                  valueTransfer.status ===
-                    RPCValueTransferStatusEnum.calculated ||
-                  valueTransfer.status === RPCValueTransferStatusEnum.mempool ||
-                  valueTransfer.status ===
-                    RPCValueTransferStatusEnum.failed) && (
-                  <FadeText
-                    style={{
-                      color: colors.fgDefault,
-                      fontSize: 12,
-                      opacity: 1,
-                      fontWeight: '700',
-                      textAlign: 'center',
-                    }}
+          {pending && (
+            <View
+              style={[
+                styles.pendingPill,
+                {
+                  backgroundColor: colors.bgWarning,
+                  borderColor: colors.borderWarning,
+                },
+              ]}
+            >
+              <Text style={[styles.pendingText, { color: colors.fgWarning }]}>
+                {pendingText}
+              </Text>
+            </View>
+          )}
+
+          <View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
+            {rows.map(row => (
+              <View key={row.key}>
+                {row.copyValue ? (
+                  <PressFeedback
+                    accessibilityLabel={`Copy ${row.label}`}
+                    onPress={() => copy(row.copyValue!, row.copyMessage ?? '')}
                   >
-                    {(translate(`history.${valueTransfer.status}`) as string) +
-                      ' - ' +
-                      (translate('history.not-confirmed') as string)}
-                  </FadeText>
+                    <View style={styles.row}>
+                      <Text
+                        style={[styles.rowLabel, { color: colors.fgMuted }]}
+                      >
+                        {row.label}
+                      </Text>
+                      <View style={styles.rowValue}>{row.value}</View>
+                    </View>
+                  </PressFeedback>
+                ) : (
+                  <View style={styles.row}>
+                    <Text style={[styles.rowLabel, { color: colors.fgMuted }]}>
+                      {row.label}
+                    </Text>
+                    <View style={styles.rowValue}>{row.value}</View>
+                  </View>
                 )}
-                {valueTransfer.status ===
-                  RPCValueTransferStatusEnum.confirmed &&
-                  valueTransfer.confirmations >= 0 &&
-                  valueTransfer.confirmations <
-                    GlobalConst.minConfirmations && (
-                    <FadeText
-                      style={{
-                        color: colors.fgDefault,
-                        fontSize: 12,
-                        opacity: 1,
-                        fontWeight: '700',
-                        textAlign: 'left',
-                        textDecorationLine: 'none',
-                      }}
-                    >
-                      {(translate(
-                        `history.${valueTransfer.status}`,
-                      ) as string) +
-                        ' - ' +
-                        (translate('history.waiting') as string) +
-                        ' (' +
-                        GlobalConst.minConfirmations.toString() +
-                        ')'}
-                    </FadeText>
-                  )}
-              </View>
-            )}
-
-          <View
-            style={{
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: 15,
-              padding: 10,
-              borderRadius: 30,
-              backgroundColor: colors.bgSurface,
-            }}
-          >
-            {(valueTransfer.kind === ValueTransferKindEnum.CreateBond ||
-              valueTransfer.kind ===
-                ValueTransferKindEnum.RetargetDelegationBond) && (
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: 10,
-                  width: '100%',
-                  borderBottomColor: colors.borderMuted,
-                  borderBottomWidth: 1,
-                }}
-              >
-                <FadeText>{'Target'}</FadeText>
-                <TouchableOpacity
-                  onPress={() => {
-                    if (valueTransfer.stakingAction?.target) {
-                      Clipboard.setString(valueTransfer.stakingAction.target);
-                      addLastSnackbar({
-                        message: translate('history.addresscopied') as string,
-                        duration: SnackbarDurationEnum.short,
-                        screenName: [screenName],
-                      });
-                    }
-                  }}
-                >
-                  <RegText>
-                    {Utils.trimToSmall(
-                      valueTransfer.stakingAction
-                        ? valueTransfer.stakingAction.target
-                        : '',
-                      10,
-                    )}
-                  </RegText>
-                </TouchableOpacity>
-              </View>
-            )}
-
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: 10,
-                width: '100%',
-                borderBottomColor: colors.borderMuted,
-                borderBottomWidth: 1,
-              }}
-            >
-              <FadeText>{'Status'}</FadeText>
-              <RegText>{valueTransfer.status}</RegText>
-            </View>
-
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: 10,
-                width: '100%',
-                borderBottomColor: colors.borderMuted,
-                borderBottomWidth: 1,
-              }}
-            >
-              <FadeText>
-                {translate('history.confirmations') as string}
-              </FadeText>
-              <RegText>
-                {valueTransfer.confirmations >= 0
-                  ? valueTransfer.confirmations.toString()
-                  : '-'}
-              </RegText>
-            </View>
-
-            {!!valueTransfer.address && (
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  padding: 10,
-                  width: '100%',
-                  borderBottomColor: colors.borderMuted,
-                  borderBottomWidth: 1,
-                }}
-              >
-                <FadeText>{'Receiver'}</FadeText>
-                <TouchableOpacity
-                  onPress={() => {
-                    if (valueTransfer.address) {
-                      Clipboard.setString(valueTransfer.address);
-                      addLastSnackbar({
-                        message: translate('history.addresscopied') as string,
-                        duration: SnackbarDurationEnum.short,
-                        screenName: [screenName],
-                      });
-                    }
-                  }}
-                >
-                  {!valueTransfer.address && <RegText>{'Unknown'}</RegText>}
-                  {!!valueTransfer.address && (
-                    <RegText>
-                      {Utils.trimToSmall(valueTransfer.address, 10)}
-                    </RegText>
-                  )}
-                </TouchableOpacity>
-              </View>
-            )}
-
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                padding: 10,
-                width: '100%',
-                borderBottomColor: colors.borderMuted,
-                borderBottomWidth: 1,
-              }}
-            >
-              <FadeText>{'TXID'}</FadeText>
-              <TouchableOpacity
-                onPress={() => {
-                  if (valueTransfer.txid) {
-                    Clipboard.setString(valueTransfer.txid);
-                    addLastSnackbar({
-                      message: translate('history.txcopied') as string,
-                      duration: SnackbarDurationEnum.short,
-                      screenName: [screenName],
-                    });
-                  }
-                }}
-              >
-                {!valueTransfer.txid && <RegText>{'Unknown'}</RegText>}
-                {!!valueTransfer.txid && (
-                  <RegText>{Utils.trimToSmall(valueTransfer.txid, 10)}</RegText>
+                {!row.last && (
+                  <View
+                    style={[
+                      styles.hairline,
+                      { backgroundColor: colors.borderFaint },
+                    ]}
+                  />
                 )}
-              </TouchableOpacity>
-            </View>
-
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: 10,
-                width: '100%',
-                borderBottomColor: colors.borderMuted,
-                borderBottomWidth: 1,
-              }}
-            >
-              <FadeText>{translate('history.time') as string}</FadeText>
-              <RegText>
-                {false
-                  ? moment((valueTransfer.time || 0) * 1000).format(
-                      'MMM D h:mm a',
-                    )
-                  : '--'}
-              </RegText>
-            </View>
-
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: 10,
-                width: '100%',
-                borderBottomColor: colors.borderMuted,
-                borderBottomWidth: 1,
-              }}
-            >
-              <FadeText>{'Block height'}</FadeText>
-              <RegText>{valueTransfer.blockheight.toString()}</RegText>
-            </View>
-
-            {!!valueTransfer.poolType && (
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: 10,
-                  width: '100%',
-                  borderBottomColor: colors.borderMuted,
-                  borderBottomWidth: 1,
-                }}
-              >
-                <FadeText>{'Receiver type'}</FadeText>
-                <RegText>{valueTransfer.poolType}</RegText>
               </View>
-            )}
-
-            {!!valueTransfer.fee && valueTransfer.fee > 0 && (
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: 10,
-                  width: '100%',
-                }}
-              >
-                <FadeText>{translate('history.txfee') as string}</FadeText>
-                <ZecAmount
-                  amtZec={
-                    valueTransfer.kind === ValueTransferKindEnum.CreateBond
-                      ? valueTransfer.fee - valueTransfer.amount
-                      : valueTransfer.fee
-                  }
-                  size={18}
-                  currencyName={info.currencyName}
-                  privacy={privacy}
-                />
-              </View>
-            )}
+            ))}
 
             {!!memo && (
-              <View style={{ marginTop: 10 }}>
-                <FadeText>{translate('history.memo') as string}</FadeText>
-                {!!memo && (
-                  <TouchableOpacity
-                    onPress={() => {
-                      Clipboard.setString(memo.join(' '));
-                      addLastSnackbar({
-                        message: translate('history.memocopied') as string,
-                        duration: SnackbarDurationEnum.short,
-                        screenName: [screenName],
-                      });
-                    }}
-                  >
-                    <RegText selectable={true}>{memo}</RegText>
-                  </TouchableOpacity>
-                )}
+              <View
+                style={[styles.memo, { borderTopColor: colors.borderFaint }]}
+              >
+                <Text style={[styles.rowLabel, { color: colors.fgMuted }]}>
+                  {translate('history.memo') as string}
+                </Text>
+                <PressFeedback
+                  accessibilityLabel="Copy memo"
+                  onPress={() =>
+                    copy(
+                      memo.join(' '),
+                      translate('history.memocopied') as string,
+                    )
+                  }
+                >
+                  <View style={styles.memoBody}>
+                    <Text
+                      selectable={true}
+                      style={[
+                        styles.value,
+                        styles.memoText,
+                        { color: colors.fgDefault },
+                      ]}
+                    >
+                      {memo.join(' ')}
+                    </Text>
+                  </View>
+                </PressFeedback>
               </View>
             )}
           </View>
@@ -569,5 +512,98 @@ const ValueTransferDetail: React.FunctionComponent<
     </ToastProvider>
   );
 };
+
+const styles = StyleSheet.create({
+  content: {
+    flexGrow: 1,
+    paddingTop: space.sm,
+    paddingHorizontal: space.xl,
+  },
+  hero: {
+    alignItems: 'center',
+    paddingTop: space.lg,
+    paddingBottom: space.xl,
+    gap: space.sm,
+  },
+  disc: {
+    width: 64,
+    height: 64,
+    borderRadius: radiusPill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pendingPill: {
+    alignSelf: 'center',
+    borderRadius: radiusPill,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: space.md,
+    paddingVertical: space.xs,
+    marginBottom: space.lg,
+  },
+  pendingText: {
+    ...text.caption,
+    fontWeight: '600',
+  },
+  card: {
+    borderRadius: radiusCard,
+    borderCurve: 'continuous',
+    paddingVertical: space.xs,
+    overflow: 'hidden',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: space.md,
+    paddingHorizontal: space.lg,
+    paddingVertical: space.md,
+  },
+  rowLabel: {
+    ...text.caption,
+    flexShrink: 0,
+  },
+  rowValue: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
+  value: {
+    ...text.body,
+    textAlign: 'right',
+  },
+  monoValue: {
+    ...mono,
+    fontSize: 14,
+    lineHeight: 18,
+    textAlign: 'right',
+  },
+  copyValue: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.xs,
+    flexShrink: 1,
+  },
+  feedbackBody: {
+    backgroundColor: 'transparent',
+  },
+  hairline: {
+    height: StyleSheet.hairlineWidth,
+    marginLeft: space.lg,
+  },
+  memo: {
+    marginTop: space.xs,
+    paddingTop: space.sm,
+    paddingHorizontal: space.lg,
+    paddingBottom: space.md,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    gap: space.xs,
+  },
+  memoBody: {
+    borderRadius: space.sm,
+    padding: space.xs,
+  },
+  memoText: {
+    textAlign: 'left',
+  },
+});
 
 export default ValueTransferDetail;
