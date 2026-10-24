@@ -14,30 +14,39 @@ exports[`Component Insight - test Insight - snapshot 1`] = `
   <View />
   <View
     style={
-      {
-        "backgroundColor": "#011401",
-        "flex": 1,
-      }
+      [
+        {
+          "flex": 1,
+        },
+        {
+          "backgroundColor": "#011401",
+        },
+      ]
     }
   >
     <View>
       <View
         style={
-          {
-            "alignItems": "center",
-            "backgroundColor": "#011401",
-            "display": "flex",
-            "minHeight": 25,
-            "paddingBottom": 0,
-            "paddingTop": 10,
-          }
+          [
+            {
+              "alignItems": "center",
+              "display": "flex",
+              "paddingBottom": 0,
+            },
+            {
+              "minHeight": 25,
+            },
+            {
+              "backgroundColor": "#011401",
+              "paddingTop": 10,
+            },
+          ]
         }
         testID="header"
       >
         <View
           style={
             {
-              "borderRadius": 3,
               "display": "flex",
               "height": 5,
               "justifyContent": "flex-start",
@@ -119,12 +128,16 @@ exports[`Component Insight - test Insight - snapshot 1`] = `
             >
               <View
                 style={
-                  {
-                    "backgroundColor": "#222223",
-                    "borderRadius": 35,
-                    "margin": 10,
-                    "padding": 20,
-                  }
+                  [
+                    {
+                      "borderRadius": 9999,
+                      "margin": 10,
+                      "padding": 20,
+                    },
+                    {
+                      "backgroundColor": "#222223",
+                    },
+                  ]
                 }
               >
                 <
@@ -224,12 +237,16 @@ exports[`Component Insight - test Insight - snapshot 1`] = `
             >
               <View
                 style={
-                  {
-                    "backgroundColor": "#222223",
-                    "borderRadius": 35,
-                    "margin": 10,
-                    "padding": 20,
-                  }
+                  [
+                    {
+                      "borderRadius": 9999,
+                      "margin": 10,
+                      "padding": 20,
+                    },
+                    {
+                      "backgroundColor": "#222223",
+                    },
+                  ]
                 }
               >
                 <
@@ -329,12 +346,16 @@ exports[`Component Insight - test Insight - snapshot 1`] = `
             >
               <View
                 style={
-                  {
-                    "backgroundColor": "#222223",
-                    "borderRadius": 35,
-                    "margin": 10,
-                    "padding": 20,
-                  }
+                  [
+                    {
+                      "borderRadius": 9999,
+                      "margin": 10,
+                      "padding": 20,
+                    },
+                    {
+                      "backgroundColor": "#222223",
+                    },
+                  ]
                 }
               >
                 <
@@ -378,12 +399,16 @@ exports[`Component Insight - test Insight - snapshot 1`] = `
         </View>
         <View
           style={
-            {
-              "left": 0,
-              "padding": 11.5,
-              "position": "absolute",
-              "top": 0,
-            }
+            [
+              {
+                "left": 0,
+                "padding": 11.5,
+                "position": "absolute",
+              },
+              {
+                "top": 0,
+              },
+            ]
           }
         >
           <View
@@ -399,12 +424,16 @@ exports[`Component Insight - test Insight - snapshot 1`] = `
       </View>
       <View
         style={
-          {
-            "padding": 13,
-            "position": "absolute",
-            "right": 0,
-            "top": 0,
-          }
+          [
+            {
+              "padding": 13,
+              "position": "absolute",
+              "right": 0,
+            },
+            {
+              "top": 0,
+            },
+          ]
         }
       >
         <View
@@ -455,7 +484,7 @@ exports[`Component Insight - test Insight - snapshot 1`] = `
       style={
         {
           "flexDirection": "row",
-          "marginTop": 10,
+          "marginTop": 8,
           "width": "100%",
         }
       }
@@ -491,18 +520,24 @@ exports[`Component Insight - test Insight - snapshot 1`] = `
         style={
           {
             "opacity": 1,
+            "width": 243.33333333333334,
           }
         }
       >
         <View
           style={
-            {
-              "alignItems": "center",
-              "borderBottomColor": "#18bd18",
-              "borderBottomWidth": 2,
-              "paddingBottom": 10,
-              "width": 243.33333333333334,
-            }
+            [
+              {
+                "alignItems": "center",
+                "paddingBottom": 8,
+              },
+              {
+                "borderBottomWidth": 2,
+              },
+              {
+                "borderBottomColor": "#18bd18",
+              },
+            ]
           }
         >
           <Text
@@ -517,11 +552,20 @@ exports[`Component Insight - test Insight - snapshot 1`] = `
                 {
                   "color": "#c3c3c3",
                 },
-                {
-                  "color": "#c3c3c3",
-                  "fontSize": 15,
-                  "fontWeight": "bold",
-                },
+                [
+                  {
+                    "fontSize": 15,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.24,
+                    "lineHeight": 20,
+                  },
+                  {
+                    "fontWeight": "bold",
+                  },
+                  {
+                    "color": "#c3c3c3",
+                  },
+                ],
               ]
             }
           >
@@ -539,10 +583,17 @@ exports[`Component Insight - test Insight - snapshot 1`] = `
                 {
                   "color": "#c3c3c3",
                 },
-                {
-                  "color": "#18bd18",
-                  "fontSize": 11,
-                },
+                [
+                  {
+                    "fontSize": 11,
+                    "fontWeight": "400",
+                    "letterSpacing": 0.07,
+                    "lineHeight": 13,
+                  },
+                  {
+                    "color": "#18bd18",
+                  },
+                ],
               ]
             }
           >
@@ -583,18 +634,22 @@ exports[`Component Insight - test Insight - snapshot 1`] = `
         style={
           {
             "opacity": 1,
+            "width": 243.33333333333334,
           }
         }
       >
         <View
           style={
-            {
-              "alignItems": "center",
-              "borderBottomColor": "#18bd18",
-              "borderBottomWidth": 0,
-              "paddingBottom": 10,
-              "width": 243.33333333333334,
-            }
+            [
+              {
+                "alignItems": "center",
+                "paddingBottom": 8,
+              },
+              null,
+              {
+                "borderBottomColor": "#18bd18",
+              },
+            ]
           }
         >
           <Text
@@ -609,11 +664,18 @@ exports[`Component Insight - test Insight - snapshot 1`] = `
                 {
                   "color": "#c3c3c3",
                 },
-                {
-                  "color": "#c3c3c3",
-                  "fontSize": 14,
-                  "fontWeight": "normal",
-                },
+                [
+                  {
+                    "fontSize": 13,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.08,
+                    "lineHeight": 18,
+                  },
+                  false,
+                  {
+                    "color": "#c3c3c3",
+                  },
+                ],
               ]
             }
           >
@@ -631,10 +693,17 @@ exports[`Component Insight - test Insight - snapshot 1`] = `
                 {
                   "color": "#c3c3c3",
                 },
-                {
-                  "color": "#c3c3c3",
-                  "fontSize": 11,
-                },
+                [
+                  {
+                    "fontSize": 11,
+                    "fontWeight": "400",
+                    "letterSpacing": 0.07,
+                    "lineHeight": 13,
+                  },
+                  {
+                    "color": "#c3c3c3",
+                  },
+                ],
               ]
             }
           >
@@ -675,18 +744,22 @@ exports[`Component Insight - test Insight - snapshot 1`] = `
         style={
           {
             "opacity": 1,
+            "width": 243.33333333333334,
           }
         }
       >
         <View
           style={
-            {
-              "alignItems": "center",
-              "borderBottomColor": "#18bd18",
-              "borderBottomWidth": 0,
-              "paddingBottom": 10,
-              "width": 243.33333333333334,
-            }
+            [
+              {
+                "alignItems": "center",
+                "paddingBottom": 8,
+              },
+              null,
+              {
+                "borderBottomColor": "#18bd18",
+              },
+            ]
           }
         >
           <Text
@@ -701,11 +774,18 @@ exports[`Component Insight - test Insight - snapshot 1`] = `
                 {
                   "color": "#c3c3c3",
                 },
-                {
-                  "color": "#c3c3c3",
-                  "fontSize": 14,
-                  "fontWeight": "normal",
-                },
+                [
+                  {
+                    "fontSize": 13,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.08,
+                    "lineHeight": 18,
+                  },
+                  false,
+                  {
+                    "color": "#c3c3c3",
+                  },
+                ],
               ]
             }
           >
@@ -723,10 +803,17 @@ exports[`Component Insight - test Insight - snapshot 1`] = `
                 {
                   "color": "#c3c3c3",
                 },
-                {
-                  "color": "#c3c3c3",
-                  "fontSize": 11,
-                },
+                [
+                  {
+                    "fontSize": 11,
+                    "fontWeight": "400",
+                    "letterSpacing": 0.07,
+                    "lineHeight": 13,
+                  },
+                  {
+                    "color": "#c3c3c3",
+                  },
+                ],
               ]
             }
           >
@@ -772,7 +859,7 @@ exports[`Component Insight - test Insight - snapshot 1`] = `
             {
               "alignItems": "center",
               "display": "flex",
-              "marginHorizontal": 5,
+              "marginHorizontal": 4,
               "padding": 0,
             }
           }

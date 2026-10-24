@@ -157,12 +157,16 @@ exports[`Component About - test About - snapshot 1`] = `
   </View>
   <RCTScrollView
     contentContainerStyle={
-      {
-        "flexGrow": 1,
-        "paddingBottom": 8,
-        "paddingHorizontal": 16,
-        "paddingTop": 8,
-      }
+      [
+        {
+          "flexGrow": 1,
+          "paddingHorizontal": 16,
+          "paddingTop": 8,
+        },
+        {
+          "paddingBottom": 8,
+        },
+      ]
     }
     keyboardShouldPersistTaps="handled"
   >

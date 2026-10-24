@@ -1528,30 +1528,39 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
   <View />
   <View
     style={
-      {
-        "backgroundColor": "#011401",
-        "flex": 1,
-      }
+      [
+        {
+          "flex": 1,
+        },
+        {
+          "backgroundColor": "#011401",
+        },
+      ]
     }
   >
     <View>
       <View
         style={
-          {
-            "alignItems": "center",
-            "backgroundColor": "#011401",
-            "display": "flex",
-            "minHeight": 25,
-            "paddingBottom": 0,
-            "paddingTop": 10,
-          }
+          [
+            {
+              "alignItems": "center",
+              "display": "flex",
+              "paddingBottom": 0,
+            },
+            {
+              "minHeight": 25,
+            },
+            {
+              "backgroundColor": "#011401",
+              "paddingTop": 10,
+            },
+          ]
         }
         testID="header"
       >
         <View
           style={
             {
-              "borderRadius": 3,
               "display": "flex",
               "height": 5,
               "justifyContent": "flex-start",
@@ -1633,12 +1642,16 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
             >
               <View
                 style={
-                  {
-                    "backgroundColor": "#222223",
-                    "borderRadius": 35,
-                    "margin": 10,
-                    "padding": 20,
-                  }
+                  [
+                    {
+                      "borderRadius": 9999,
+                      "margin": 10,
+                      "padding": 20,
+                    },
+                    {
+                      "backgroundColor": "#222223",
+                    },
+                  ]
                 }
               >
                 <
@@ -1738,12 +1751,16 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
             >
               <View
                 style={
-                  {
-                    "backgroundColor": "#222223",
-                    "borderRadius": 35,
-                    "margin": 10,
-                    "padding": 20,
-                  }
+                  [
+                    {
+                      "borderRadius": 9999,
+                      "margin": 10,
+                      "padding": 20,
+                    },
+                    {
+                      "backgroundColor": "#222223",
+                    },
+                  ]
                 }
               >
                 <
@@ -1843,12 +1860,16 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
             >
               <View
                 style={
-                  {
-                    "backgroundColor": "#222223",
-                    "borderRadius": 35,
-                    "margin": 10,
-                    "padding": 20,
-                  }
+                  [
+                    {
+                      "borderRadius": 9999,
+                      "margin": 10,
+                      "padding": 20,
+                    },
+                    {
+                      "backgroundColor": "#222223",
+                    },
+                  ]
                 }
               >
                 <
@@ -1892,12 +1913,16 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
         </View>
         <View
           style={
-            {
-              "left": 0,
-              "padding": 11.5,
-              "position": "absolute",
-              "top": 0,
-            }
+            [
+              {
+                "left": 0,
+                "padding": 11.5,
+                "position": "absolute",
+              },
+              {
+                "top": 0,
+              },
+            ]
           }
         >
           <View
@@ -1913,12 +1938,16 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
       </View>
       <View
         style={
-          {
-            "padding": 13,
-            "position": "absolute",
-            "right": 0,
-            "top": 0,
-          }
+          [
+            {
+              "padding": 13,
+              "position": "absolute",
+              "right": 0,
+            },
+            {
+              "top": 0,
+            },
+          ]
         }
       >
         <View
@@ -2007,14 +2036,18 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
         </Text>
         <View
           style={
-            {
-              "borderColor": "#c3c3c3",
-              "borderRadius": 10,
-              "borderWidth": 1,
-              "margin": 10,
-              "maxHeight": "45%",
-              "padding": 10,
-            }
+            [
+              {
+                "borderRadius": 10,
+                "borderWidth": 1,
+                "margin": 12,
+                "maxHeight": "45%",
+                "padding": 12,
+              },
+              {
+                "borderColor": "#c3c3c3",
+              },
+            ]
           }
         >
           <View
@@ -2117,14 +2150,18 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
             >
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "marginTop": 0,
-                    "minHeight": 48,
-                    "padding": 10,
-                    "textAlign": "center",
-                    "textDecorationLine": "underline",
-                  }
+                  [
+                    {
+                      "marginTop": 0,
+                      "minHeight": 48,
+                      "padding": 12,
+                      "textAlign": "center",
+                      "textDecorationLine": "underline",
+                    },
+                    {
+                      "color": "#c3c3c3",
+                    },
+                  ]
                 }
               >
                 text translated
@@ -2137,7 +2174,7 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
           style={
             {
               "alignItems": "center",
-              "marginTop": 10,
+              "marginTop": 12,
             }
           }
         >
@@ -2220,7 +2257,7 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
         <View
           style={
             {
-              "marginBottom": 30,
+              "marginBottom": 32,
             }
           }
         />
@@ -2233,8 +2270,8 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
           "justifyContent": "center",
           "marginTop": "auto",
           "paddingBottom": 20,
-          "paddingHorizontal": 15,
-          "paddingTop": 10,
+          "paddingHorizontal": 16,
+          "paddingTop": 12,
         }
       }
     >

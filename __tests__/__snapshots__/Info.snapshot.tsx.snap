@@ -157,12 +157,16 @@ exports[`Component Info - test Info - snapshot 1`] = `
   </View>
   <RCTScrollView
     contentContainerStyle={
-      {
-        "flexGrow": 1,
-        "paddingBottom": 8,
-        "paddingHorizontal": 16,
-        "paddingTop": 8,
-      }
+      [
+        {
+          "flexGrow": 1,
+          "paddingHorizontal": 16,
+          "paddingTop": 8,
+        },
+        {
+          "paddingBottom": 8,
+        },
+      ]
     }
     keyboardShouldPersistTaps="handled"
   >
@@ -686,7 +690,7 @@ exports[`Component Info - test Info - snapshot 1`] = `
             <View
               style={
                 {
-                  "marginLeft": 5,
+                  "marginLeft": 4,
                 }
               }
             >

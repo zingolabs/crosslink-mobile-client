@@ -4,14 +4,20 @@ exports[`Component Header - test Header Complex - snapshot 1`] = `
 <View>
   <View
     style={
-      {
-        "alignItems": "center",
-        "backgroundColor": "#011401",
-        "display": "flex",
-        "minHeight": 60,
-        "paddingBottom": 0,
-        "paddingTop": 10,
-      }
+      [
+        {
+          "alignItems": "center",
+          "display": "flex",
+          "paddingBottom": 0,
+        },
+        {
+          "minHeight": 60,
+        },
+        {
+          "backgroundColor": "#011401",
+          "paddingTop": 10,
+        },
+      ]
     }
     testID="header"
   >
@@ -176,7 +182,6 @@ exports[`Component Header - test Header Complex - snapshot 1`] = `
     <View
       style={
         {
-          "borderRadius": 3,
           "display": "flex",
           "height": 5,
           "justifyContent": "flex-start",
@@ -267,12 +272,16 @@ exports[`Component Header - test Header Complex - snapshot 1`] = `
         >
           <View
             style={
-              {
-                "backgroundColor": "#222223",
-                "borderRadius": 35,
-                "margin": 10,
-                "padding": 20,
-              }
+              [
+                {
+                  "borderRadius": 9999,
+                  "margin": 10,
+                  "padding": 20,
+                },
+                {
+                  "backgroundColor": "#222223",
+                },
+              ]
             }
           >
             <
@@ -372,12 +381,16 @@ exports[`Component Header - test Header Complex - snapshot 1`] = `
         >
           <View
             style={
-              {
-                "backgroundColor": "#222223",
-                "borderRadius": 35,
-                "margin": 10,
-                "padding": 20,
-              }
+              [
+                {
+                  "borderRadius": 9999,
+                  "margin": 10,
+                  "padding": 20,
+                },
+                {
+                  "backgroundColor": "#222223",
+                },
+              ]
             }
           >
             <
@@ -477,12 +490,16 @@ exports[`Component Header - test Header Complex - snapshot 1`] = `
         >
           <View
             style={
-              {
-                "backgroundColor": "#222223",
-                "borderRadius": 35,
-                "margin": 10,
-                "padding": 20,
-              }
+              [
+                {
+                  "borderRadius": 9999,
+                  "margin": 10,
+                  "padding": 20,
+                },
+                {
+                  "backgroundColor": "#222223",
+                },
+              ]
             }
           >
             <
@@ -526,12 +543,16 @@ exports[`Component Header - test Header Complex - snapshot 1`] = `
     </View>
     <View
       style={
-        {
-          "left": 0,
-          "padding": 11.5,
-          "position": "absolute",
-          "top": 0,
-        }
+        [
+          {
+            "left": 0,
+            "padding": 11.5,
+            "position": "absolute",
+          },
+          {
+            "top": 0,
+          },
+        ]
       }
     >
       <View
@@ -605,12 +626,16 @@ exports[`Component Header - test Header Complex - snapshot 1`] = `
   </View>
   <View
     style={
-      {
-        "padding": 13,
-        "position": "absolute",
-        "right": 0,
-        "top": 0,
-      }
+      [
+        {
+          "padding": 13,
+          "position": "absolute",
+          "right": 0,
+        },
+        {
+          "top": 0,
+        },
+      ]
     }
   >
     <View
@@ -663,21 +688,26 @@ exports[`Component Header - test Header Simple - snapshot 1`] = `
 <View>
   <View
     style={
-      {
-        "alignItems": "center",
-        "backgroundColor": "#011401",
-        "display": "flex",
-        "minHeight": 25,
-        "paddingBottom": 0,
-        "paddingTop": 10,
-      }
+      [
+        {
+          "alignItems": "center",
+          "display": "flex",
+          "paddingBottom": 0,
+        },
+        {
+          "minHeight": 25,
+        },
+        {
+          "backgroundColor": "#011401",
+          "paddingTop": 10,
+        },
+      ]
     }
     testID="header"
   >
     <View
       style={
         {
-          "borderRadius": 3,
           "display": "flex",
           "height": 5,
           "justifyContent": "flex-start",
@@ -759,12 +789,16 @@ exports[`Component Header - test Header Simple - snapshot 1`] = `
         >
           <View
             style={
-              {
-                "backgroundColor": "#222223",
-                "borderRadius": 35,
-                "margin": 10,
-                "padding": 20,
-              }
+              [
+                {
+                  "borderRadius": 9999,
+                  "margin": 10,
+                  "padding": 20,
+                },
+                {
+                  "backgroundColor": "#222223",
+                },
+              ]
             }
           >
             <
@@ -864,12 +898,16 @@ exports[`Component Header - test Header Simple - snapshot 1`] = `
         >
           <View
             style={
-              {
-                "backgroundColor": "#222223",
-                "borderRadius": 35,
-                "margin": 10,
-                "padding": 20,
-              }
+              [
+                {
+                  "borderRadius": 9999,
+                  "margin": 10,
+                  "padding": 20,
+                },
+                {
+                  "backgroundColor": "#222223",
+                },
+              ]
             }
           >
             <
@@ -969,12 +1007,16 @@ exports[`Component Header - test Header Simple - snapshot 1`] = `
         >
           <View
             style={
-              {
-                "backgroundColor": "#222223",
-                "borderRadius": 35,
-                "margin": 10,
-                "padding": 20,
-              }
+              [
+                {
+                  "borderRadius": 9999,
+                  "margin": 10,
+                  "padding": 20,
+                },
+                {
+                  "backgroundColor": "#222223",
+                },
+              ]
             }
           >
             <
@@ -1018,12 +1060,16 @@ exports[`Component Header - test Header Simple - snapshot 1`] = `
     </View>
     <View
       style={
-        {
-          "left": 0,
-          "padding": 11.5,
-          "position": "absolute",
-          "top": 0,
-        }
+        [
+          {
+            "left": 0,
+            "padding": 11.5,
+            "position": "absolute",
+          },
+          {
+            "top": 0,
+          },
+        ]
       }
     >
       <View
@@ -1039,12 +1085,16 @@ exports[`Component Header - test Header Simple - snapshot 1`] = `
   </View>
   <View
     style={
-      {
-        "padding": 13,
-        "position": "absolute",
-        "right": 0,
-        "top": 0,
-      }
+      [
+        {
+          "padding": 13,
+          "position": "absolute",
+          "right": 0,
+        },
+        {
+          "top": 0,
+        },
+      ]
     }
   >
     <View
