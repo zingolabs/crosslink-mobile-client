@@ -477,7 +477,14 @@ export class LoadedAppClass extends Component<
       sendPageState: new SendPageStateClass(new ToAddrClass(0)),
       setSendPageState: this.setSendPageState,
       getUfvk: this.getUfvk,
-      info: {} as InfoType,
+      info: {
+        currencyName:
+          props.indexerServer.chainName === ChainNameEnum.mainChainName
+            ? CurrencyNameEnum.ZEC
+            : CurrencyNameEnum.cTAZ,
+        chainName: props.indexerServer.chainName,
+        serverUri: props.indexerServer.uri,
+      } as InfoType,
       syncingStatus: {} as RPCSyncStatusType,
       wallet: {} as WalletType,
       defaultUnifiedAddress: '',
@@ -1539,6 +1546,10 @@ export class LoadedAppClass extends Component<
             await SettingsFileImpl.writeSettings(
               SettingsNameEnum.selectIndexerServer,
               selectServer,
+            );
+            await SettingsFileImpl.writeSettings(
+              SettingsNameEnum.indexerServerPinned,
+              true,
             );
             this.setState({
               indexerServer: value,

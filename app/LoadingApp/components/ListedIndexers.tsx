@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
@@ -16,10 +16,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import { ToastProvider, useToast } from 'react-native-toastier';
 
-import { ChainNameEnum, RouteEnum, ScreenEnum } from '../../AppState';
+import {
+  ChainNameEnum,
+  IndexerNetworkEnum,
+  RouteEnum,
+  ScreenEnum,
+} from '../../AppState';
 import { ContextAppLoading } from '../../context';
 import { LoadingAppStackParamList } from '../../types';
-import { Discover, Indexer, hostOf } from '../../indexers';
+import { Discover, Indexer, discoverIndexers, hostOf } from '../../indexers';
 import { useIndexerDiscovery } from '../hooks/useIndexerDiscovery';
 import Snackbars from '../../../components/Components/Snackbars';
 import { HeaderTitle } from '../../../components/Header';
@@ -29,7 +34,11 @@ import LiquidPrimaryButton from '../../../components/Components/LiquidButton/Liq
 import { radiusPill, text, useTheme } from '../../theme';
 
 export type ListedIndexersProps = {
-  setIndexerServer: (u: string, c: ChainNameEnum) => Promise<void>;
+  setIndexerServer: (
+    u: string,
+    c: ChainNameEnum,
+    n?: IndexerNetworkEnum,
+  ) => Promise<void>;
   closeServers: () => void;
   previousServer?: string;
   discover?: Discover;
@@ -139,8 +148,13 @@ const ListedIndexers: React.FC<ListedIndexersProps> = ({
     useRoute<RouteProp<LoadingAppStackParamList, RouteEnum.ListedIndexers>>();
   const screenName = ScreenEnum.Servers;
 
+  const network = route.params?.network ?? IndexerNetworkEnum.stable;
+  const discoverOnNetwork = useMemo(
+    () => discover ?? ((n = network) => discoverIndexers(n)),
+    [discover, network],
+  );
   const { indexers, discovering, refresh } = useIndexerDiscovery(
-    discover,
+    discoverOnNetwork,
     route.params?.report,
   );
   const [selectedUri, setSelectedUri] = useState<string | null>(null);
@@ -169,7 +183,7 @@ const ListedIndexers: React.FC<ListedIndexersProps> = ({
     }
     setConnecting(true);
     clear();
-    await setIndexerServer(selectedUri, ChainNameEnum.testChainName);
+    await setIndexerServer(selectedUri, ChainNameEnum.testChainName, network);
     closeServers();
   };
 

@@ -445,21 +445,24 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
             {!loading && !hasScheduledActions && tab === 'scheduled' && (
               <EmptyState
                 art="pair"
-                title="There are no scheduled actions yet."
+                title="No scheduled actions yet."
+                style={styles.emptyState}
               />
             )}
 
             {!loading && !hasMovements && tab === 'active' && (
               <EmptyState
                 art="pair"
-                title="There are no active staking positions yet."
+                title="No staking positions yet."
+                style={styles.emptyState}
               />
             )}
 
             {!loading && !hasStaked && tab === 'my' && (
               <EmptyState
                 art="pair"
-                title="There are no active finalizers yet."
+                title="No active finalizers yet."
+                style={styles.emptyState}
               />
             )}
 
@@ -1071,6 +1074,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  emptyState: {
+    paddingBottom: 96,
   },
 });
 

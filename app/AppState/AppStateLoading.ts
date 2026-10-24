@@ -1,4 +1,5 @@
 import { AppStateStatus } from 'react-native';
+import { IndexerNetworkEnum } from './enums/IndexerNetworkEnum';
 import { LaunchingModeEnum } from './enums/LaunchingModeEnum';
 import { LoadingAppEntryEnum } from './enums/LoadingAppEntryEnum';
 
@@ -15,4 +16,6 @@ export default interface AppStateLoading {
   hasRecoveryWalletInfoSaved: boolean;
   walletSeed: string;
   walletBirthday: number;
+  indexerNetwork: IndexerNetworkEnum;
+  indexerServerPinned: boolean;
 }

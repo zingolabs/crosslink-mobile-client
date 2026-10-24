@@ -502,9 +502,10 @@ class RPCModule: NSObject {
   }
 
   func fnDiscoverIndexers(_ dict: [AnyHashable: Any]) {
-    if let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
+    if let network = dict["network"] as? String,
+       let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
       do {
-        let resp = try discoverIndexers()
+        let resp = try discoverIndexers(network: network)
         let respStr = String(resp)
         DispatchQueue.main.async {
           resolve(respStr)
@@ -522,9 +523,9 @@ class RPCModule: NSObject {
     }
   }
 
-  @objc(discoverIndexers:reject:)
-  func discoverIndexersInfo(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-      let dict: [String: Any] = ["resolve": resolve]
+  @objc(discoverIndexers:network:reject:)
+  func discoverIndexersInfo(_ network: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+      let dict: [String: Any] = ["network": network, "resolve": resolve]
       DispatchQueue.global(qos: .userInitiated).async { [weak self] in
           if let self = self {
               self.fnDiscoverIndexers(dict)
@@ -534,9 +535,10 @@ class RPCModule: NSObject {
 
   func fnProbeIndexer(_ dict: [AnyHashable: Any]) {
     if let serveruri = dict["serveruri"] as? String,
+       let network = dict["network"] as? String,
        let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
       do {
-        let resp = try probeIndexer(serverUri: serveruri)
+        let resp = try probeIndexer(serverUri: serveruri, network: network)
         let respStr = String(resp)
         DispatchQueue.main.async {
           resolve(respStr)
@@ -559,12 +561,88 @@ class RPCModule: NSObject {
     }
   }
 
-  @objc(probeIndexer:resolve:reject:)
-  func probeIndexerInfo(_ serveruri: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-      let dict: [String: Any] = ["serveruri": serveruri, "resolve": resolve]
+  @objc(probeIndexer:network:resolve:reject:)
+  func probeIndexerInfo(_ serveruri: String, network: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+      let dict: [String: Any] = ["serveruri": serveruri, "network": network, "resolve": resolve]
       DispatchQueue.global(qos: .userInitiated).async { [weak self] in
           if let self = self {
               self.fnProbeIndexer(dict)
+          }
+      }
+  }
+
+  func fnSelectBestIndexer(_ dict: [AnyHashable: Any]) {
+    if let network = dict["network"] as? String,
+       let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
+      do {
+        let resp = try selectBestIndexer(network: network)
+        let respStr = String(resp)
+        DispatchQueue.main.async {
+          resolve(respStr)
+        }
+      } catch {
+        let err = "Error: [Native] Select best indexer. \(error.localizedDescription)"
+        NSLog(err)
+        DispatchQueue.main.async {
+          resolve(err)
+        }
+      }
+    } else {
+      let err = "Error: [Native] Select best indexer. Argument problem."
+      NSLog(err)
+      if let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
+          DispatchQueue.main.async {
+            resolve(err)
+          }
+      }
+    }
+  }
+
+  @objc(selectBestIndexer:network:reject:)
+  func selectBestIndexerInfo(_ network: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+      let dict: [String: Any] = ["network": network, "resolve": resolve]
+      DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+          if let self = self {
+              self.fnSelectBestIndexer(dict)
+          }
+      }
+  }
+
+  func fnInspectWallet(_ dict: [AnyHashable: Any]) {
+    if let walletb64 = dict["walletb64"] as? String,
+       let serveruri = dict["serveruri"] as? String,
+       let platform = dict["platform"] as? String,
+       let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
+      do {
+        let resp = try inspectWallet(base64Data: walletb64, serverUri: serveruri, platform: platform)
+        let respStr = String(resp)
+        DispatchQueue.main.async {
+          resolve(respStr)
+        }
+      } catch {
+        let err = "Error: [Native] Inspect wallet. \(error.localizedDescription)"
+        NSLog(err)
+        DispatchQueue.main.async {
+          resolve(err)
+        }
+      }
+    } else {
+      let err = "Error: [Native] Inspect wallet. Argument problem."
+      NSLog(err)
+      if let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
+          DispatchQueue.main.async {
+            resolve(err)
+          }
+      }
+    }
+  }
+
+  @objc(inspectWallet:serveruri:platform:reject:)
+  func inspectWalletInfo(_ walletb64: String, serveruri: String, platform: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+      let dict: [String: Any] = ["walletb64": walletb64, "serveruri": serveruri, "platform": platform, "resolve": resolve]
+      DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+          if let self = self {
+              self.fnInspectWallet(dict)
           }
       }
   }

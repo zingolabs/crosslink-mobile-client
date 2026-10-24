@@ -1,21 +1,41 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleProp, StyleSheet, Text, ViewStyle } from 'react-native';
+import Animated, {
+  CSSAnimationProperties,
+  cubicBezier,
+  useReducedMotion,
+} from 'react-native-reanimated';
 
 import { text, useTheme } from '../../app/theme';
 import ChalkLoop, { ChalkLoopName } from './ChalkLoop';
-import { SUMMARY_RADIUS } from './SummaryPanel';
+
+const EASE_OUT = cubicBezier(0.23, 1, 0.32, 1);
 
 type EmptyStateProps = {
   art: ChalkLoopName;
   title: string;
   body?: string;
+  style?: StyleProp<ViewStyle>;
 };
 
 /** Centered chalk loop with a headline and one optional line under it. */
-const EmptyState: React.FC<EmptyStateProps> = ({ art, title, body }) => {
+const EmptyState: React.FC<EmptyStateProps> = ({ art, title, body, style }) => {
   const { colors } = useTheme();
+  const reducedMotion = useReducedMotion();
+
+  const appear: CSSAnimationProperties = {
+    animationName: reducedMotion
+      ? { from: { opacity: 0 }, to: { opacity: 1 } }
+      : {
+          from: { opacity: 0, transform: [{ translateY: 12 }] },
+          to: { opacity: 1, transform: [{ translateY: 0 }] },
+        },
+    animationDuration: reducedMotion ? 200 : 450,
+    animationTimingFunction: EASE_OUT,
+  };
+
   return (
-    <View style={styles.root}>
+    <Animated.View style={[styles.root, style, appear]}>
       <ChalkLoop name={art} />
       <Text style={[text.headline, styles.title, { color: colors.fgDefault }]}>
         {title}
@@ -27,7 +47,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({ art, title, body }) => {
           {body}
         </Text>
       )}
-    </View>
+    </Animated.View>
   );
 };
 
@@ -37,8 +57,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 40,
-    paddingTop: SUMMARY_RADIUS,
-    paddingBottom: 80,
   },
   title: {
     marginTop: 4,

@@ -1,0 +1,104 @@
+name: Android Release APK
+
+on:
+  push:
+    tags: ['release-*']
+  workflow_dispatch:
+
+jobs:
+  create-cache-key:
+    uses: ./.github/workflows/create-cache-key.yaml
+
+  android-build:
+    strategy:
+      matrix:
+        arch: [x86_64, x86, arm64-v8a, armeabi-v7a]
+    uses: ./.github/workflows/android-build.yaml
+    needs: create-cache-key
+    with:
+      cache-key: ${{ needs.create-cache-key.outputs.cache-key }}
+      arch: ${{ matrix.arch }}
+
+  android-release-apk:
+    name: Build release APK
+    needs: [create-cache-key, android-build]
+    runs-on: ubuntu-24.04
+    env:
+      CACHE-KEY: ${{ needs.create-cache-key.outputs.cache-key }}
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Gradle setup cache (read-only)
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: wrapper
+          cache-write-only: false
+          cache-read-only: true
+
+      - name: Restore native rust for x86_64
+        uses: actions/cache/restore@v4
+        with:
+          path: android/app/src/main/jniLibs/x86_64
+          key: native-android-uniffi-x86_64-${{ env.CACHE-KEY }}
+          fail-on-cache-miss: true
+
+      - name: Restore native rust for x86
+        uses: actions/cache/restore@v4
+        with:
+          path: android/app/src/main/jniLibs/x86
+          key: native-android-uniffi-x86-${{ env.CACHE-KEY }}
+          fail-on-cache-miss: true
+
+      - name: Restore native rust for arm64-v8a
+        uses: actions/cache/restore@v4
+        with:
+          path: android/app/src/main/jniLibs/arm64-v8a
+          key: native-android-uniffi-arm64-v8a-${{ env.CACHE-KEY }}
+          fail-on-cache-miss: true
+
+      - name: Restore native rust for armeabi-v7a
+        uses: actions/cache/restore@v4
+        with:
+          path: android/app/src/main/jniLibs/armeabi-v7a
+          key: native-android-uniffi-armeabi-v7a-${{ env.CACHE-KEY }}
+          fail-on-cache-miss: true
+
+      - name: Restore kotlin uniffi
+        uses: actions/cache/restore@v4
+        with:
+          path: android/app/build/generated/source/uniffi/release/java/uniffi/zingo
+          key: kotlin-android-uniffi-arm64-v8a-${{ env.CACHE-KEY }}
+          fail-on-cache-miss: true
+
+      - name: Yarn install
+        run: yarn
+
+      - name: Build release APK
+        working-directory: android
+        run: ./gradlew assembleRelease
+
+      - name: Rename APK
+        run: |
+          mv android/app/build/outputs/apk/release/app-release.apk \
+            "ZingoDelegator-${{ github.ref_name }}.apk"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZingoDelegator-${{ github.ref_name }}-apk
+          path: ZingoDelegator-${{ github.ref_name }}.apk
+
+      - name: Attach APK to release
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ZingoDelegator-${{ github.ref_name }}.apk

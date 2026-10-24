@@ -1,5 +1,7 @@
-import { GlobalConst } from './AppState';
+import { GlobalConst, IndexerNetworkEnum } from './AppState';
 import RPCModule from './RPCModule';
+
+export { IndexerNetworkEnum };
 
 export type Indexer = {
   uri: string;
@@ -14,8 +16,14 @@ export type IndexerReport = {
   errors: string[];
 };
 
-export type Discover = () => Promise<IndexerReport>;
-export type Probe = (uri: string) => Promise<Indexer | null>;
+export type Discover = (network?: IndexerNetworkEnum) => Promise<IndexerReport>;
+export type Probe = (
+  uri: string,
+  network?: IndexerNetworkEnum,
+) => Promise<Indexer | null>;
+export type SelectBest = (
+  network?: IndexerNetworkEnum,
+) => Promise<string | null>;
 
 type RawIndexer = {
   uri: string;
@@ -46,15 +54,33 @@ export const parseIndexerReport = (resp: string): IndexerReport => {
     const raw = JSON.parse(resp) as RawReport;
     return { indexers: raw.indexers.map(fromRaw), errors: raw.errors };
   } catch (e) {
-    return { indexers: [], errors: [e instanceof Error ? e.message : String(e)] };
+    return {
+      indexers: [],
+      errors: [e instanceof Error ? e.message : String(e)],
+    };
   }
 };
 
-export const discoverIndexers: Discover = async () =>
-  parseIndexerReport(await RPCModule.discoverIndexers());
+export const discoverIndexers: Discover = async (
+  network = IndexerNetworkEnum.stable,
+) => parseIndexerReport(await RPCModule.discoverIndexers(network));
 
-export const probeIndexer: Probe = async uri =>
-  parseIndexerReport(await RPCModule.probeIndexer(uri)).indexers[0] ?? null;
+export const probeIndexer: Probe = async (
+  uri,
+  network = IndexerNetworkEnum.stable,
+) =>
+  parseIndexerReport(await RPCModule.probeIndexer(uri, network)).indexers[0] ??
+  null;
+
+export const selectBestIndexer: SelectBest = async (
+  network = IndexerNetworkEnum.stable,
+) => {
+  const uri: string = await RPCModule.selectBestIndexer(network);
+  if (!uri || uri.toLowerCase().startsWith(GlobalConst.error)) {
+    return null;
+  }
+  return uri;
+};
 
 export const hostOf = (uri: string) => {
   try {

@@ -2,10 +2,14 @@ import React, { useContext } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { faServer, faSliders } from '@fortawesome/free-solid-svg-icons';
+import {
+  faServer,
+  faSliders,
+  faFlask,
+} from '@fortawesome/free-solid-svg-icons';
 import { ToastProvider, useToast } from 'react-native-toastier';
 
-import { RouteEnum, ScreenEnum } from '../../AppState';
+import { RouteEnum, ScreenEnum, IndexerNetworkEnum } from '../../AppState';
 import { ContextAppLoading } from '../../context';
 import { LoadingAppStackParamList } from '../../types';
 import { Discover } from '../../indexers';
@@ -93,6 +97,16 @@ const ChooseIndexer: React.FC<ChooseIndexerProps> = ({ discover }) => {
               title="Custom indexer"
               icon={faSliders}
               onPress={() => navigation.navigate(RouteEnum.CustomIndexer)}
+            />
+            <OptionCard
+              title="Nightly chain"
+              icon={faFlask}
+              detail="Experimental crosslink nightly indexers"
+              onPress={() =>
+                navigation.navigate(RouteEnum.ListedIndexers, {
+                  network: IndexerNetworkEnum.nightly,
+                })
+              }
             />
           </View>
         </View>

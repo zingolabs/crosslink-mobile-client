@@ -20,6 +20,7 @@ export { LanguageEnum } from './enums/LanguageEnum';
 export { CurrencyEnum } from './enums/CurrencyEnum';
 export { SelectServerEnum } from './enums/SelectServerEnum';
 export { ChainNameEnum } from './enums/ChainNameEnum';
+export { IndexerNetworkEnum } from './enums/IndexerNetworkEnum';
 export { SnackbarDurationEnum } from './enums/SnackbarDurationEnum';
 export { TransactionTypeEnum } from './enums/TransactionTypeEnum';
 export { PoolEnum } from './enums/PoolEnum';

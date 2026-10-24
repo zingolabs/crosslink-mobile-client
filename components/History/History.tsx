@@ -236,7 +236,7 @@ const History: React.FunctionComponent<HistoryProps> = ({
         <EmptyState
           art="orbit"
           title="No transactions yet"
-          body="They show up here as soon as you receive or send funds."
+          style={styles.emptyState}
         />
       ) : (
         <View style={styles.listWrap}>
@@ -297,6 +297,9 @@ const History: React.FunctionComponent<HistoryProps> = ({
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+  },
+  emptyState: {
+    paddingBottom: 30,
   },
   spinner: {
     marginTop: SUMMARY_RADIUS + 20,

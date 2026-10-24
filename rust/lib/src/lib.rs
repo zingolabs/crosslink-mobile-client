@@ -44,18 +44,18 @@ use tokio::runtime::Runtime;
 use zcash_address::ZcashAddress;
 use zcash_protocol::value::Zatoshis;
 use zingolib::config::{ChainType, ZingoConfig, chain_from_str, construct_lightwalletd_uri};
+use zingolib::crosslink::{FinalizerAddress, parse_finalizer_address};
 use zingolib::data::PollReport;
 use zingolib::data::proposal::total_fee;
 use zingolib::data::receivers::Receivers;
 use zingolib::data::receivers::transaction_request_from_receivers;
 use zingolib::lightclient::LightClient;
+use zingolib::perspective::sync_progress::{SessionReport, SyncProgress};
 use zingolib::utils::{conversion::address_from_str, conversion::txid_from_hex_encoded_str};
 use zingolib::wallet::keys::{
     WalletAddressRef,
     unified::{ReceiverSelection, UnifiedKeyStore},
 };
-use zingolib::crosslink::{FinalizerAddress, parse_finalizer_address};
-use zingolib::perspective::sync_progress::{SessionReport, SyncProgress};
 use zingolib::wallet::{LightWallet, SeedDerivation, WalletBase, WalletSettings};
 
 #[derive(Debug, thiserror::Error, uniffi::Error)]
@@ -638,14 +638,18 @@ fn stable_chain() -> ChainType {
     chain_from_str("testnet").expect("a known chain name")
 }
 
-fn discovery_config() -> discovery::DiscoveryConfig {
+fn discovery_config(network: &str) -> discovery::DiscoveryConfig {
+    let config = match network {
+        "nightly" => discovery::DiscoveryConfig::crosslink_nightly(),
+        _ => discovery::DiscoveryConfig::crosslink_stable(),
+    };
     let chain = stable_chain();
-    discovery::DiscoveryConfig::crosslink_stable().with_branch_rule(discovery::BranchRule::new(
-        move |height| {
-            let height = BlockHeight::from_u32(u32::try_from(height).unwrap_or(u32::MAX));
-            u32::from(zcash_protocol::consensus::BranchId::for_height(&chain, height))
-        },
-    ))
+    config.with_branch_rule(discovery::BranchRule::new(move |height| {
+        let height = BlockHeight::from_u32(u32::try_from(height).unwrap_or(u32::MAX));
+        u32::from(zcash_protocol::consensus::BranchId::for_height(
+            &chain, height,
+        ))
+    }))
 }
 
 async fn fingerprint_of(lightclient: &LightClient) -> Option<discovery::ChainFingerprint> {
@@ -688,7 +692,7 @@ async fn faucet_anywhere(lightclient: &LightClient, address: &str) -> Result<u64
     }
     let current_key = discovery::indexer_key(&current.to_string());
     let fingerprint = fingerprint_of(lightclient).await;
-    let report = discovery::discover(&discovery_config(), fingerprint).await;
+    let report = discovery::discover(&discovery_config("stable"), fingerprint).await;
     for indexer in report.ranking.iter().filter(|i| i.tip_height.is_some()) {
         if discovery::indexer_key(&indexer.uri) == current_key {
             continue;
@@ -701,7 +705,10 @@ async fn faucet_anywhere(lightclient: &LightClient, address: &str) -> Result<u64
             Err(e) => refusals.push(format!("{}: {e}", indexer.uri)),
         }
     }
-    Err(format!("no indexer served the faucet: {}", refusals.join("; ")))
+    Err(format!(
+        "no indexer served the faucet: {}",
+        refusals.join("; ")
+    ))
 }
 
 fn report_json(report: discovery::IndexerReport) -> String {
@@ -731,9 +738,9 @@ fn report_json(report: discovery::IndexerReport) -> String {
 }
 
 #[uniffi::export]
-pub fn discover_indexers() -> Result<String, ZingolibError> {
+pub fn discover_indexers(network: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
-        let config = discovery_config();
+        let config = discovery_config(&network);
         let fingerprint = wallet_fingerprint();
         let report = RT.block_on(async move { discovery::discover(&config, fingerprint).await });
         Ok(report_json(report))
@@ -741,14 +748,224 @@ pub fn discover_indexers() -> Result<String, ZingolibError> {
 }
 
 #[uniffi::export]
-pub fn probe_indexer(server_uri: String) -> Result<String, ZingolibError> {
+pub fn probe_indexer(server_uri: String, network: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
-        let config = discovery_config();
+        let config = discovery_config(&network);
         let fingerprint = wallet_fingerprint();
         let uris = vec![(server_uri, discovery::Source::Builtin)];
         let report =
             RT.block_on(async move { discovery::health_check(&config, uris, fingerprint).await });
         Ok(report_json(report))
+    })
+}
+
+/// Probes the network's built-in indexers with the wallet's newest block as the chain check,
+/// and points the wallet at the one reporting the highest tip. The answer is where the wallet
+/// now points, or an error string when no built-in indexer serves this chain. Unknown network
+/// names keep the stable default; only "nightly" selects the nightly list.
+#[uniffi::export]
+pub fn select_best_indexer(network: String) -> Result<String, ZingolibError> {
+    with_panic_guard(|| {
+        let config = discovery_config(&network);
+        let fingerprint = wallet_fingerprint();
+        let uris: Vec<(String, discovery::Source)> = config
+            .seed_uris
+            .iter()
+            .map(|uri| (uri.clone(), discovery::Source::Builtin))
+            .collect();
+        let report =
+            RT.block_on(async move { discovery::health_check(&config, uris, fingerprint).await });
+        let best = match report.ranking.iter().find(|i| i.tip_height.is_some()) {
+            Some(best) => best,
+            None => {
+                for error in &report.errors {
+                    log::warn!("indexer probe: {error}");
+                }
+                return Ok("Error: no indexer answered the probe".to_string());
+            }
+        };
+        let uri = match best.uri.parse::<http::Uri>() {
+            Ok(uri) => uri,
+            Err(e) => return Ok(format!("Error: {e}")),
+        };
+        with_lightclient_read(|lightclient| {
+            if lightclient.indexer_uri() != uri {
+                lightclient.set_indexer(uri.clone());
+            }
+            Ok(uri.to_string())
+        })
+    })
+}
+
+/// Reads the wallet file format version from the raw wallet bytes.
+fn wallet_format_version(decoded: &[u8]) -> u64 {
+    if decoded.len() >= 8 {
+        u64::from_le_bytes(decoded[0..8].try_into().expect("8 bytes into u64"))
+    } else {
+        0
+    }
+}
+
+/// The wallet bytes behind a file's bytes, and whether an extra base64 layer
+/// was needed: Android stores the decoded wallet binary; iOS stores its
+/// base64 text — try both, one layer apart.
+fn wallet_bytes(file_bytes: &[u8]) -> Option<(Vec<u8>, bool)> {
+    let version = wallet_format_version(file_bytes);
+    if (1..=40).contains(&version) {
+        return Some((file_bytes.to_vec(), false));
+    }
+    let decoded = STANDARD.decode(file_bytes).ok()?;
+    let version = wallet_format_version(&decoded);
+    if (1..=40).contains(&version) {
+        return Some((decoded, true));
+    }
+    None
+}
+
+/// Whether the indexer's chain contains the block at `height` and its hash matches.
+///
+/// A wallet claiming a block beyond the served tip is on another chain. Unreachable
+/// indexers answer `None` — unknown, not mismatched.
+async fn indexer_has_block(server_uri: http::Uri, height: u32, hash: [u8; 32]) -> Option<bool> {
+    use zcash_client_backend::proto::service::BlockId;
+
+    let tip = match tokio::time::timeout(
+        std::time::Duration::from_secs(20),
+        zingolib::grpc_connector::get_latest_block(server_uri.clone()),
+    )
+    .await
+    {
+        Ok(Ok(tip)) => u32::try_from(tip.height).ok()?,
+        _ => return None,
+    };
+    if height > tip {
+        return Some(false);
+    }
+    let mut client = match tokio::time::timeout(
+        std::time::Duration::from_secs(20),
+        get_client(server_uri),
+    )
+    .await
+    {
+        Ok(Ok(client)) => client,
+        _ => return None,
+    };
+    let answer = match tokio::time::timeout(
+        std::time::Duration::from_secs(20),
+        client.get_block(BlockId {
+            height: u64::from(height),
+            hash: Vec::new(),
+        }),
+    )
+    .await
+    {
+        Ok(Ok(answer)) => answer.into_inner(),
+        Ok(Err(status)) => {
+            let message = status.message().to_ascii_lowercase();
+            return if message.contains("not found") {
+                Some(false)
+            } else {
+                None
+            };
+        }
+        Err(_) => return None,
+    };
+    Some(answer.hash.as_slice() == hash.as_slice())
+}
+
+/// Classifies a wallet file without touching the stored one: whether the current reader can
+/// parse it, and — when it can and the wallet has synced blocks — whether those blocks belong
+/// to the chain the indexer serves. A wallet from the previous network reads fine (the chain
+/// names coincide) but its blocks do not, so the hash comparison is the only real test.
+///
+/// The platforms keep the file in different shapes: Android stores the decoded binary, iOS
+/// its base64 text. When the file is in the other platform's shape but is otherwise a valid
+/// wallet, `normalize_to` carries the wallet bytes base64-encoded, ready for the caller to
+/// write back in its own platform's shape.
+#[uniffi::export]
+pub fn inspect_wallet(
+    base64_data: String,
+    server_uri: String,
+    platform: String,
+) -> Result<String, ZingolibError> {
+    with_panic_guard(|| {
+        let file_bytes = match STANDARD.decode(&base64_data) {
+            Ok(file_bytes) => file_bytes,
+            Err(e) => {
+                return Ok(object! {
+                    "readable" => false,
+                    "format_version" => 0,
+                    "chain_match" => json::JsonValue::Null,
+                    "normalize_to" => json::JsonValue::Null,
+                    "reason" => format!("base64 decode: {e}"),
+                }
+                .dump());
+            }
+        };
+        let (wallet_bytes, needs_normalizing) = match wallet_bytes(&file_bytes) {
+            Some(pair) => pair,
+            None => {
+                return Ok(object! {
+                    "readable" => false,
+                    "format_version" => wallet_format_version(&file_bytes),
+                    "chain_match" => json::JsonValue::Null,
+                    "normalize_to" => json::JsonValue::Null,
+                    "reason" => "not a wallet file in any known encoding",
+                }
+                .dump());
+            }
+        };
+        let format_version = wallet_format_version(&wallet_bytes);
+        let platform_wants_binary = platform == "android";
+        let normalize_to = if needs_normalizing != platform_wants_binary {
+            json::JsonValue::Null
+        } else {
+            json::JsonValue::from(STANDARD.encode(&wallet_bytes))
+        };
+        let wallet = match LightWallet::read(&wallet_bytes[..], stable_chain()) {
+            Ok(wallet) => wallet,
+            Err(e) => {
+                return Ok(object! {
+                    "readable" => false,
+                    "format_version" => format_version,
+                    "chain_match" => json::JsonValue::Null,
+                    "normalize_to" => normalize_to,
+                    "reason" => e.to_string(),
+                }
+                .dump());
+            }
+        };
+        let newest = wallet
+            .wallet_blocks
+            .iter()
+            .next_back()
+            .map(|(height, block)| (u32::from(*height), block.block_hash().0));
+        let (newest_height, chain_match) = match newest {
+            None => (json::JsonValue::Null, json::JsonValue::Null),
+            Some((height, hash)) => {
+                let answer = if server_uri.is_empty() {
+                    None
+                } else {
+                    match server_uri.parse::<http::Uri>() {
+                        Ok(uri) => RT.block_on(indexer_has_block(uri, height, hash)),
+                        Err(_) => None,
+                    }
+                };
+                let chain_match = match answer {
+                    Some(m) => json::JsonValue::from(m),
+                    None => json::JsonValue::Null,
+                };
+                (json::JsonValue::from(height), chain_match)
+            }
+        };
+        Ok(object! {
+            "readable" => true,
+            "format_version" => format_version,
+            "newest_height" => newest_height,
+            "chain_match" => chain_match,
+            "normalize_to" => normalize_to,
+        }
+        .dump())
     })
 }
 
@@ -794,12 +1011,10 @@ pub fn poll_sync() -> Result<String, ZingolibError> {
                 PollReport::NoHandle => "Sync task has not been launched.".to_string(),
                 PollReport::NotReady => "Sync task is not complete.".to_string(),
                 PollReport::Ready(result) => match result {
-                    Ok(sync_result) => {
-                        json::object! {
-                            "sync_complete" => json::JsonValue::from(SessionReport::from(sync_result))
-                        }
-                        .pretty(2)
+                    Ok(sync_result) => json::object! {
+                        "sync_complete" => json::JsonValue::from(SessionReport::from(sync_result))
                     }
+                    .pretty(2),
                     Err(e) => format!("Error: {e}"),
                 },
             })
@@ -2156,13 +2371,210 @@ mod tests {
     #[ignore = "needs the network"]
     fn discovery_ranks_live_featurenet_indexers() {
         reset_lightclient();
-        let report = json::parse(&discover_indexers().unwrap()).unwrap();
+        let report = json::parse(&discover_indexers("stable".to_string()).unwrap()).unwrap();
         println!("{}", report.pretty(2));
         assert!(!report["indexers"].is_empty(), "no indexer answered");
         let first = report["indexers"][0]["uri"].as_str().unwrap().to_string();
-        let probe = json::parse(&probe_indexer(first.clone()).unwrap()).unwrap();
+        let probe =
+            json::parse(&probe_indexer(first.clone(), "stable".to_string()).unwrap()).unwrap();
         println!("{}", probe.pretty(2));
         assert_eq!(probe["indexers"][0]["uri"].as_str(), Some(first.as_str()));
+    }
+
+    #[test]
+    #[ignore = "needs the network"]
+    fn discovery_on_nightly_needs_the_word_nightly() {
+        reset_lightclient();
+        let stable = json::parse(&discover_indexers("stable".to_string()).unwrap()).unwrap();
+        let nightly = json::parse(&discover_indexers("nightly".to_string()).unwrap()).unwrap();
+        let default = json::parse(&discover_indexers("garbage".to_string()).unwrap()).unwrap();
+        println!("stable {}", stable.pretty(2));
+        println!("nightly {}", nightly.pretty(2));
+        let uris = |report: &json::JsonValue| {
+            report["indexers"]
+                .members()
+                .map(|i| i["uri"].as_str().unwrap().to_string())
+                .collect::<Vec<_>>()
+        };
+        assert!(!uris(&stable).is_empty(), "no stable indexer answered");
+        assert_eq!(
+            uris(&stable),
+            uris(&default),
+            "anything not nightly is stable"
+        );
+        assert!(
+            uris(&stable)
+                .iter()
+                .all(|uri| !uris(&nightly).contains(uri)),
+            "the stable and nightly lists must not mix"
+        );
+        for error in nightly["errors"].members() {
+            println!("nightly error: {error}");
+        }
+    }
+
+    #[test]
+    #[ignore = "needs the network"]
+    fn the_nightly_seed_list_is_probed_and_the_answers_are_visible() {
+        let _ = set_crypto_default_provider_to_ring();
+        let config = discovery_config("nightly");
+        let uris: Vec<(String, discovery::Source)> = config
+            .seed_uris
+            .iter()
+            .map(|uri| (uri.clone(), discovery::Source::Builtin))
+            .collect();
+        let report = RT.block_on(async { discovery::health_check(&config, uris, None).await });
+        for indexer in &report.ranking {
+            println!(
+                "{} answered={} chain={:?} branch={:?} tip={:?} age={:?} in {:?}",
+                indexer.uri,
+                indexer.tip_height.is_some(),
+                indexer.chain_name,
+                indexer.consensus_branch,
+                indexer.tip_height,
+                indexer.tip_age_secs,
+                indexer.latency
+            );
+        }
+        println!("errors: {:?}", report.errors);
+        assert!(
+            !report.ranking.is_empty(),
+            "the nightly seeds must at least be probed"
+        );
+    }
+
+    #[test]
+    #[ignore = "needs the network"]
+    fn select_best_indexer_moves_to_the_highest_tip_on_the_wallets_chain() {
+        let _ = set_crypto_default_provider_to_ring();
+        let init = init_from_seed(
+            "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+                .to_string(),
+            1,
+            "http://45.63.75.9:18234".to_string(),
+            "test".to_string(),
+            "Medium".to_string(),
+            1,
+        );
+        println!("init: {init:?}");
+        let opened = match init {
+            Ok(opened) => opened,
+            Err(e) => {
+                println!("init error: {e:?}");
+                panic!("init_from_seed failed");
+            }
+        };
+        assert!(
+            !opened.to_lowercase().starts_with("error"),
+            "init_from_seed error: {opened}"
+        );
+        let chosen = select_best_indexer("stable".to_string()).unwrap_or_else(|e| {
+            println!("select error: {e:?}");
+            String::new()
+        });
+        println!("chosen: {chosen}");
+        assert!(!chosen.is_empty(), "select_best_indexer failed");
+        assert!(!chosen.to_lowercase().starts_with("error"), "{chosen}");
+        assert_eq!(chosen, "http://88.198.67.189:18234/");
+    }
+
+    #[test]
+    fn the_stable_list_is_the_default_and_nightly_stays_separate() {
+        let stable = discovery_config("stable");
+        let nightly = discovery_config("nightly");
+        let other = discovery_config("mainnet");
+        let empty = discovery_config("");
+        assert!(!stable.seed_uris.is_empty());
+        assert!(!nightly.seed_uris.is_empty());
+        assert_eq!(other.seed_uris, stable.seed_uris);
+        assert_eq!(empty.seed_uris, stable.seed_uris);
+        assert_ne!(stable.seed_uris, nightly.seed_uris);
+        assert!(
+            stable
+                .seed_uris
+                .iter()
+                .all(|uri| !nightly.seed_uris.contains(uri)),
+            "the stable and nightly seed lists must not mix"
+        );
+        assert!(stable.expected_branch.is_some());
+        assert!(nightly.expected_branch.is_some());
+    }
+
+    #[test]
+    #[ignore = "needs the network"]
+    fn inspect_wallet_tells_the_chains_apart() {
+        let _ = set_crypto_default_provider_to_ring();
+        let seed = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about".to_string();
+        init_from_seed(
+            seed.clone(),
+            1,
+            "http://88.198.67.189:18234".to_string(),
+            "test".to_string(),
+            "Medium".to_string(),
+            1,
+        )
+        .unwrap();
+        run_sync().unwrap();
+        for _ in 0..60 {
+            let status = status_sync().unwrap();
+            let json = json::parse(&status).unwrap_or(json::JsonValue::Null);
+            let scanned = json["percentage_total_blocks_scanned"]
+                .as_f64()
+                .unwrap_or(0.0);
+            if scanned > 0.0 {
+                break;
+            }
+            std::thread::sleep(std::time::Duration::from_secs(5));
+        }
+        let b64 = save_to_b64().unwrap();
+        let stable = json::parse(
+            &inspect_wallet(
+                b64.clone(),
+                "http://88.198.67.189:18234".to_string(),
+                "android".to_string(),
+            )
+            .unwrap(),
+        )
+        .unwrap();
+        let nightly = json::parse(
+            &inspect_wallet(
+                b64,
+                "http://45.32.186.234:18234".to_string(),
+                "android".to_string(),
+            )
+            .unwrap(),
+        )
+        .unwrap();
+        println!("stable: {stable}");
+        println!("nightly: {nightly}");
+        assert_eq!(stable["readable"], true);
+        assert_ne!(stable["chain_match"], false, "stable blocks must match");
+        assert_eq!(
+            nightly["chain_match"], false,
+            "stable blocks must not be on nightly"
+        );
+    }
+
+    #[test]
+    fn select_best_indexer_needs_a_wallet_and_reports_a_dead_network_as_error() {
+        reset_lightclient();
+        let no_wallet = select_best_indexer("stable".to_string()).unwrap_err();
+        assert!(
+            matches!(no_wallet, ZingolibError::LightclientNotInitialized),
+            "expected LightclientNotInitialized, got: {no_wallet:?}"
+        );
+    }
+
+    #[test]
+    fn wallet_bytes_takes_both_platform_encodings() {
+        let mut binary = vec![];
+        binary.extend_from_slice(&40u64.to_le_bytes());
+        binary.extend_from_slice(b"wallet bytes go here");
+        assert!(wallet_bytes(&binary).is_some());
+        let as_text = STANDARD.encode(&binary);
+        assert!(wallet_bytes(as_text.as_bytes()).is_some());
+        let garbage = b"this is not a wallet file at all";
+        assert!(wallet_bytes(garbage).is_none());
     }
 
     #[test]
@@ -2282,13 +2694,14 @@ mod tests {
 
         // Real client init, no reload after this.
         let init = init_from_seed(
-        "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about".to_string(),
-        0,
-        "".to_string(),
-        "regtest".to_string(),
-        "Medium".to_string(),
-        1,
-    );
+            "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+                .to_string(),
+            1,
+            "".to_string(),
+            "regtest".to_string(),
+            "Medium".to_string(),
+            1,
+        );
 
         assert!(
             init.is_ok(),
@@ -2325,5 +2738,113 @@ mod tests {
             !seed_json.starts_with("Error:"),
             "expected recovery info, got: {seed_json}"
         );
+    }
+}
+#[cfg(test)]
+mod nightly_wallet_maker {
+    use super::*;
+
+    /// Mints a wallet file whose synced blocks belong to the nightly chain.
+    #[test]
+    #[ignore = "needs the network"]
+    fn make_a_nightly_wallet_file() {
+        let _ = set_crypto_default_provider_to_ring();
+        init_from_seed(
+            "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+                .to_string(),
+            9700,
+            "http://45.32.186.234:18234".to_string(),
+            "test".to_string(),
+            "Medium".to_string(),
+            1,
+        )
+        .unwrap();
+        run_sync().unwrap();
+        for _ in 0..36 {
+            let status = status_sync().unwrap();
+            let json = json::parse(&status).unwrap_or(json::JsonValue::Null);
+            let pct = json["percentage_total_blocks_scanned"]
+                .as_f64()
+                .unwrap_or(0.0);
+            println!("scanned {pct}%");
+            if pct >= 100.0 {
+                break;
+            }
+            std::thread::sleep(std::time::Duration::from_secs(5));
+        }
+        let b64 = save_to_b64().unwrap();
+        std::fs::write("/tmp/nightly_wallet.b64", &b64).unwrap();
+        println!("nightly wallet written: {} bytes", b64.len());
+    }
+}
+#[cfg(test)]
+mod old_chain_probe {
+    use super::*;
+
+    #[test]
+    #[ignore = "needs the network"]
+    fn old_testnet_indexer_is_alive() {
+        let _ = set_crypto_default_provider_to_ring();
+        let uri: http::Uri = "https://testnet.zec.rocks:443".parse().unwrap();
+        let tip = RT
+            .block_on(async move { zingolib::grpc_connector::get_latest_block(uri.clone()).await })
+            .expect("tip");
+        let height = u32::try_from(tip.height).unwrap();
+        let birthday = height.saturating_sub(100);
+        init_from_seed(
+            "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+                .to_string(),
+            birthday,
+            "https://testnet.zec.rocks:443".to_string(),
+            "test".to_string(),
+            "Medium".to_string(),
+            1,
+        )
+        .unwrap();
+        run_sync().unwrap();
+        for _ in 0..36 {
+            let status = status_sync().unwrap();
+            let json = json::parse(&status).unwrap_or(json::JsonValue::Null);
+            let pct = json["percentage_total_blocks_scanned"]
+                .as_f64()
+                .unwrap_or(0.0);
+            println!("scanned {pct}%");
+            if pct >= 100.0 {
+                break;
+            }
+            std::thread::sleep(std::time::Duration::from_secs(5));
+        }
+        let b64 = save_to_b64().unwrap();
+        std::fs::write("/tmp/oldtestnet_wallet.b64", &b64).unwrap();
+        println!(
+            "legacy wallet written: {} bytes, birthday {birthday}, tip {height}",
+            b64.len()
+        );
+        let inspect = inspect_wallet(
+            b64,
+            "http://88.198.67.189:18234".to_string(),
+            "android".to_string(),
+        )
+        .unwrap();
+        println!("inspect vs stable: {inspect}");
+    }
+}
+
+#[cfg(test)]
+mod inspect_probe {
+    use super::*;
+
+    #[test]
+    #[ignore = "needs the network"]
+    fn inspect_the_planted_wallet() {
+        let _ = set_crypto_default_provider_to_ring();
+        let data = std::fs::read_to_string("/tmp/ios_wallet.dat").unwrap();
+        let out = inspect_wallet(
+            data,
+            "http://88.198.67.189:18234".to_string(),
+            "ios".to_string(),
+        )
+        .unwrap();
+        println!("inspect: {out}");
     }
 }

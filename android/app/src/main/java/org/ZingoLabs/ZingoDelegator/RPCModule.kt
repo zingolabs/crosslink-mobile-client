@@ -523,11 +523,11 @@ class RPCModule internal constructor(private val reactContext: ReactApplicationC
     }
 
     @ReactMethod
-    fun discoverIndexers(promise: Promise) {
+    fun discoverIndexers(network: String, promise: Promise) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 uniffi.zingo.initLogging()
-                val resp = uniffi.zingo.discoverIndexers()
+                val resp = uniffi.zingo.discoverIndexers(network)
 
                 withContext(Dispatchers.Main) {
                     promise.resolve(resp)
@@ -544,17 +544,59 @@ class RPCModule internal constructor(private val reactContext: ReactApplicationC
     }
 
     @ReactMethod
-    fun probeIndexer(serveruri: String, promise: Promise) {
+    fun probeIndexer(serveruri: String, network: String, promise: Promise) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 uniffi.zingo.initLogging()
-                val resp = uniffi.zingo.probeIndexer(serveruri)
+                val resp = uniffi.zingo.probeIndexer(serveruri, network)
 
                 withContext(Dispatchers.Main) {
                     promise.resolve(resp)
                 }
             } catch (e: Exception) {
                 val errorMessage = "Error: [Native] probe indexer: ${e.localizedMessage}"
+                Log.e("MAIN", errorMessage, e)
+
+                withContext(Dispatchers.Main) {
+                    promise.resolve(errorMessage)
+                }
+            }
+        }
+    }
+
+    @ReactMethod
+    fun selectBestIndexer(network: String, promise: Promise) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                uniffi.zingo.initLogging()
+                val resp = uniffi.zingo.selectBestIndexer(network)
+
+                withContext(Dispatchers.Main) {
+                    promise.resolve(resp)
+                }
+            } catch (e: Exception) {
+                val errorMessage = "Error: [Native] select best indexer: ${e.localizedMessage}"
+                Log.e("MAIN", errorMessage, e)
+
+                withContext(Dispatchers.Main) {
+                    promise.resolve(errorMessage)
+                }
+            }
+        }
+    }
+
+    @ReactMethod
+    fun inspectWallet(walletb64: String, serveruri: String, platform: String, promise: Promise) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                uniffi.zingo.initLogging()
+                val resp = uniffi.zingo.inspectWallet(walletb64, serveruri, platform)
+
+                withContext(Dispatchers.Main) {
+                    promise.resolve(resp)
+                }
+            } catch (e: Exception) {
+                val errorMessage = "Error: [Native] inspect wallet: ${e.localizedMessage}"
                 Log.e("MAIN", errorMessage, e)
 
                 withContext(Dispatchers.Main) {
