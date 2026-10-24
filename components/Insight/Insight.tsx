@@ -1,6 +1,6 @@
-/* eslint-disable react-native/no-inline-styles */
 import React, { useCallback, useEffect, useState } from 'react';
 import {
+  StyleSheet,
   View,
   ScrollView,
   TouchableOpacity,
@@ -36,7 +36,7 @@ import {
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useTheme } from '../../app/theme';
+import { space, text, useTheme } from '../../app/theme';
 
 type DataType = {
   svg: {
@@ -170,34 +170,25 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
         ? 2
         : item.address.length / (dimensions.width < 500 ? 21 : 30);
     return (
-      <View style={{ width: '100%' }} key={`tag-${index}`}>
+      <View style={styles.row} key={`tag-${index}`}>
         <View
-          style={{
-            width: '100%',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginBottom: 5,
-            borderBottomColor: '#333333',
-            borderBottomWidth: item.address !== 'fee' ? 1 : 0,
-          }}
+          style={[
+            styles.rowInner,
+            item.address !== 'fee' ? styles.rowBordered : null,
+            { borderBottomColor: colors.borderFaint },
+          ]}
         >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
+          <View style={styles.rowLeft}>
             {(!expandAddress[index] || item.address === 'fee') && (
               <FontAwesomeIcon
-                style={{ margin: 5 }}
+                style={styles.rowIcon}
                 size={45}
                 icon={faQrcode}
                 color={item.svg.fill}
               />
             )}
             {!!item.tag && (
-              <FadeText style={{ marginHorizontal: 5 }}>{item.tag}</FadeText>
+              <FadeText style={styles.rowTag}>{item.tag}</FadeText>
             )}
             <TouchableOpacity
               onPress={() => {
@@ -212,13 +203,7 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
                 }
               }}
             >
-              <View
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  flexWrap: 'wrap',
-                }}
-              >
+              <View style={styles.addressCol}>
                 {item.address !== 'fee' && (
                   <AddressItem
                     address={item.address}
@@ -252,14 +237,11 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
             </TouchableOpacity>
           </View>
           <View
-            style={{
-              flexDirection:
-                expandAddress[index] && item.address !== 'fee'
-                  ? 'column-reverse'
-                  : 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
+            style={
+              expandAddress[index] && item.address !== 'fee'
+                ? styles.rowRightStacked
+                : styles.rowRight
+            }
           >
             <RegText>{getPercent(percent)}</RegText>
             {tab === 'sent' ? (
@@ -267,11 +249,11 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
                 currencyName={info.currencyName}
                 size={15}
                 amtZec={item.value}
-                style={{ marginHorizontal: 5 }}
+                style={styles.rowAmount}
                 privacy={privacy}
               />
             ) : (
-              <RegText style={{ marginLeft: 10 }}>
+              <RegText style={styles.rowSends}>
                 {'# ' +
                   item.value.toString() +
                   (tab === 'sends'
@@ -294,6 +276,28 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
     [],
   );
 
+  const tabViews: Array<{
+    key: 'sent' | 'sends' | 'memobytes';
+    title: string;
+    subtitle: string;
+  }> = [
+    {
+      key: 'sent',
+      title: translate('insight.sent') as string,
+      subtitle: translate('insight.sent-text') as string,
+    },
+    {
+      key: 'sends',
+      title: translate('insight.sends') as string,
+      subtitle: translate('insight.sends-text') as string,
+    },
+    {
+      key: 'memobytes',
+      title: translate('insight.memobytes') as string,
+      subtitle: translate('insight.memobytes-text') as string,
+    },
+  ];
+
   //console.log('render insight');
 
   return (
@@ -304,12 +308,7 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
         screenName={screenName}
       />
 
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: colors.bgCanvas,
-        }}
-      >
+      <View style={[styles.screen, { backgroundColor: colors.bgCanvas }]}>
         <Header
           title={translate('insight.title') as string}
           screenName={screenName}
@@ -327,108 +326,53 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
           }}
         />
 
-        <View style={{ width: '100%', flexDirection: 'row', marginTop: 10 }}>
-          <TouchableOpacity onPress={() => setTab('sent')}>
-            <View
-              style={{
-                width: (dimensions.width - 20) / 3,
-                alignItems: 'center',
-                borderBottomColor: colors.borderAccent,
-                borderBottomWidth: tab === 'sent' ? 2 : 0,
-                paddingBottom: 10,
-              }}
+        <View style={styles.tabsRow}>
+          {tabViews.map(t => (
+            <TouchableOpacity
+              key={t.key}
+              onPress={() => setTab(t.key)}
+              style={{ width: (dimensions.width - 20) / 3 }}
             >
-              <RegText
-                style={{
-                  fontWeight: tab === 'sent' ? 'bold' : 'normal',
-                  fontSize: tab === 'sent' ? 15 : 14,
-                  color: colors.fgDefault,
-                }}
+              <View
+                style={[
+                  styles.tab,
+                  tab === t.key ? styles.tabActive : null,
+                  { borderBottomColor: colors.borderAccent },
+                ]}
               >
-                {translate('insight.sent') as string}
-              </RegText>
-              <RegText
-                style={{
-                  fontSize: 11,
-                  color: tab === 'sent' ? colors.fgAccent : colors.fgDefault,
-                }}
-              >
-                ({translate('insight.sent-text') as string})
-              </RegText>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setTab('sends')}>
-            <View
-              style={{
-                width: (dimensions.width - 20) / 3,
-                alignItems: 'center',
-                borderBottomColor: colors.borderAccent,
-                borderBottomWidth: tab === 'sends' ? 2 : 0,
-                paddingBottom: 10,
-              }}
-            >
-              <RegText
-                style={{
-                  fontWeight: tab === 'sends' ? 'bold' : 'normal',
-                  fontSize: tab === 'sends' ? 15 : 14,
-                  color: colors.fgDefault,
-                }}
-              >
-                {translate('insight.sends') as string}
-              </RegText>
-              <RegText
-                style={{
-                  fontSize: 11,
-                  color: tab === 'sends' ? colors.fgAccent : colors.fgDefault,
-                }}
-              >
-                ({translate('insight.sends-text') as string})
-              </RegText>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setTab('memobytes')}>
-            <View
-              style={{
-                width: (dimensions.width - 20) / 3,
-                alignItems: 'center',
-                borderBottomColor: colors.borderAccent,
-                borderBottomWidth: tab === 'memobytes' ? 2 : 0,
-                paddingBottom: 10,
-              }}
-            >
-              <RegText
-                style={{
-                  fontWeight: tab === 'memobytes' ? 'bold' : 'normal',
-                  fontSize: tab === 'memobytes' ? 15 : 14,
-                  color: colors.fgDefault,
-                }}
-              >
-                {translate('insight.memobytes') as string}
-              </RegText>
-              <RegText
-                style={{
-                  fontSize: 11,
-                  color:
-                    tab === 'memobytes' ? colors.fgAccent : colors.fgDefault,
-                }}
-              >
-                ({translate('insight.memobytes-text') as string})
-              </RegText>
-            </View>
-          </TouchableOpacity>
+                <RegText
+                  style={[
+                    tab === t.key ? text.subheadline : text.footnote,
+                    tab === t.key && styles.tabTitleActive,
+                    { color: colors.fgDefault },
+                  ]}
+                >
+                  {t.title}
+                </RegText>
+                <RegText
+                  style={[
+                    text.caption2,
+                    {
+                      color: tab === t.key ? colors.fgAccent : colors.fgDefault,
+                    },
+                  ]}
+                >
+                  ({t.subtitle})
+                </RegText>
+              </View>
+            </TouchableOpacity>
+          ))}
         </View>
         <ScrollView
           showsVerticalScrollIndicator={true}
           persistentScrollbar={true}
           indicatorStyle={'white'}
-          style={{ maxHeight: '90%' }}
+          style={styles.scroll}
           contentContainerStyle={{}}
         >
-          <View style={{ display: 'flex', margin: 20 }}>
+          <View style={styles.content}>
             {!loading && (!pieAmounts || !pieAmounts.length) && (
-              <View
-                style={{ width: '100%', alignItems: 'center', marginTop: 100 }}
-              >
+              <View style={styles.empty}>
                 <RegText>{translate('insight.no-data') as string}</RegText>
               </View>
             )}
@@ -436,16 +380,10 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
               <ActivityIndicator
                 size="large"
                 color={colors.fgAccent}
-                style={{ marginTop: 100 }}
+                style={styles.loader}
               />
             ) : (
-              <View
-                style={{
-                  width: '100%',
-                  alignItems: 'center',
-                  paddingVertical: 10,
-                }}
-              >
+              <View style={styles.pieWrap}>
                 {!!pieAmounts && !!pieAmounts.length && (
                   <PieChart
                     showExternalLabels={true}
@@ -470,15 +408,8 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
               </View>
             )}
           </View>
-          <View
-            style={{
-              display: 'flex',
-              marginHorizontal: 5,
-              padding: 0,
-              alignItems: 'center',
-            }}
-          >
-            <View style={{ width: '100%' }}>
+          <View style={styles.listOuter}>
+            <View style={styles.list}>
               {!loading && !!pieAmounts && !!pieAmounts.length && (
                 <>
                   {pieAmounts
@@ -487,7 +418,10 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
                       return line(item, index);
                     })}
                   <View
-                    style={{ height: 1, backgroundColor: colors.bgAccent }}
+                    style={[
+                      styles.feeSeparator,
+                      { backgroundColor: colors.borderFaint },
+                    ]}
                   />
                   {pieAmounts
                     .filter(item => item.address !== 'fee')
@@ -503,5 +437,102 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
     </ToastProvider>
   );
 };
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+  tabsRow: {
+    width: '100%',
+    flexDirection: 'row',
+    marginTop: space.sm,
+  },
+  tab: {
+    alignItems: 'center',
+    paddingBottom: space.sm,
+  },
+  tabActive: {
+    borderBottomWidth: 2,
+  },
+  tabTitleActive: {
+    fontWeight: 'bold',
+  },
+  scroll: {
+    maxHeight: '90%',
+  },
+  content: {
+    display: 'flex',
+    margin: space.xl,
+  },
+  empty: {
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 100,
+  },
+  loader: {
+    marginTop: 100,
+  },
+  pieWrap: {
+    width: '100%',
+    alignItems: 'center',
+    paddingVertical: space.sm,
+  },
+  listOuter: {
+    display: 'flex',
+    marginHorizontal: space.xs,
+    padding: 0,
+    alignItems: 'center',
+  },
+  list: {
+    width: '100%',
+  },
+  feeSeparator: {
+    height: StyleSheet.hairlineWidth,
+  },
+  row: {
+    width: '100%',
+  },
+  rowInner: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: space.xs,
+  },
+  rowBordered: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  rowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rowIcon: {
+    margin: space.xs,
+  },
+  rowTag: {
+    marginHorizontal: space.xs,
+  },
+  addressCol: {
+    display: 'flex',
+    flexDirection: 'column',
+    flexWrap: 'wrap',
+  },
+  rowRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rowRightStacked: {
+    flexDirection: 'column-reverse',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rowAmount: {
+    marginHorizontal: space.xs,
+  },
+  rowSends: {
+    marginLeft: space.sm,
+  },
+});
 
 export default Insight;

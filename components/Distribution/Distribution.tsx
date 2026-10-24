@@ -1,6 +1,6 @@
-/* eslint-disable react-native/no-inline-styles */
 import React, { useCallback, useEffect, useState } from 'react';
 import {
+  StyleSheet,
   View,
   ScrollView,
   TouchableOpacity,
@@ -37,7 +37,7 @@ import {
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useTheme } from '../../app/theme';
+import { radiusCard, space, text, useTheme } from '../../app/theme';
 
 type DataType = {
   svg: {
@@ -138,6 +138,12 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
     setExpandAddress(newExpandAddress);
   };
 
+  const rowStyle = (last: boolean) => [
+    styles.rowInner,
+    last ? styles.rowLast : styles.rowBordered,
+    { borderBottomColor: colors.borderFaint },
+  ];
+
   const lineMy = (item: DataType, index: number, last: boolean) => {
     const totalValue = pieAmounts
       ? pieAmounts.reduce((acc, curr) => acc + curr.value, 0)
@@ -149,32 +155,17 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
         ? 2
         : item.finalizer.length / (dimensions.width < 500 ? 21 : 30);
     return (
-      <View style={{ width: '100%' }} key={`tag-${index}`}>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginHorizontal: 20,
-            paddingVertical: 15,
-            borderBottomColor: '#333333',
-            borderBottomWidth: last ? 0 : 1,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
+      <View style={styles.row} key={`tag-${index}`}>
+        <View style={rowStyle(last)}>
+          <View style={styles.rowLeft}>
             <FontAwesomeIcon
-              style={{ marginRight: 15 }}
+              style={styles.rowIcon}
               size={15}
               icon={faCircle}
               color={item.svg.fill}
             />
             {!!item.tag && (
-              <FadeText style={{ marginHorizontal: 5 }}>{item.tag}</FadeText>
+              <FadeText style={styles.rowTag}>{item.tag}</FadeText>
             )}
             <TouchableOpacity
               onPress={() => {
@@ -187,13 +178,7 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
                 selectExpandAddress(index);
               }}
             >
-              <View
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  flexWrap: 'wrap',
-                }}
-              >
+              <View style={styles.addressCol}>
                 <AddressItem
                   address={item.finalizer}
                   screenName={screenName}
@@ -222,13 +207,7 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
               </View>
             </TouchableOpacity>
           </View>
-          <View
-            style={{
-              flexDirection: 'column-reverse',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
+          <View style={styles.rowRight}>
             <FadeText>{getPercent(percent)}</FadeText>
           </View>
         </View>
@@ -247,29 +226,14 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
         ? 2
         : item.finalizer.length / (dimensions.width < 500 ? 21 : 30);
     return (
-      <View style={{ width: '100%' }} key={`tag-${index}`}>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginHorizontal: 20,
-            paddingVertical: 15,
-            borderBottomColor: '#333333',
-            borderBottomWidth: last ? 0 : 1,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
+      <View style={styles.row} key={`tag-${index}`}>
+        <View style={rowStyle(last)}>
+          <View style={styles.rowLeft}>
             <FadeText
-              style={{ marginRight: 15 }}
+              style={styles.rowRank}
             >{`#${(index + 1).toString()}`}</FadeText>
             {!!item.tag && (
-              <FadeText style={{ marginHorizontal: 5 }}>{item.tag}</FadeText>
+              <FadeText style={styles.rowTag}>{item.tag}</FadeText>
             )}
             <TouchableOpacity
               onPress={() => {
@@ -282,13 +246,7 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
                 selectExpandAddress(index);
               }}
             >
-              <View
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  flexWrap: 'wrap',
-                }}
-              >
+              <View style={styles.addressCol}>
                 <AddressItem
                   address={item.finalizer}
                   screenName={screenName}
@@ -317,39 +275,15 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
               </View>
             </TouchableOpacity>
           </View>
-          <View
-            style={{
-              marginLeft: 25,
-              flexGrow: 1,
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-            }}
-          >
-            <View
-              style={{
-                justifyContent: 'flex-end',
-                width: '100%',
-                height: 5,
-                marginTop: 10,
-                borderRadius: 3,
-              }}
-            >
+          <View style={styles.barArea}>
+            <View style={styles.barTrack}>
+              <View style={[styles.bar, { backgroundColor: colors.bgMuted }]} />
               <View
-                style={{
-                  height: 5,
-                  width: '100%',
-                  borderRadius: 3,
-                  backgroundColor: '#6C6C71',
-                }}
-              />
-              <View
-                style={{
-                  height: 5,
-                  width: `${percent}%`,
-                  borderRadius: 3,
-                  backgroundColor: item.svg.fill,
-                  marginTop: -5,
-                }}
+                style={[
+                  styles.bar,
+                  styles.barFill,
+                  { backgroundColor: item.svg.fill, width: `${percent}%` },
+                ]}
               />
             </View>
             <FadeText>{getPercent(percent)}</FadeText>
@@ -378,12 +312,7 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
         screenName={screenName}
       />
 
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: colors.bgCanvas,
-        }}
-      >
+      <View style={[styles.screen, { backgroundColor: colors.bgCanvas }]}>
         <HeaderTitle
           title="Distribution"
           goBack={() => {
@@ -394,29 +323,14 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
           }}
         />
 
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginTop: 20,
-            borderRadius: 20,
-            backgroundColor: 'rgba(118, 118, 128, 0.24)',
-            padding: 5,
-            marginHorizontal: 20,
-          }}
-        >
+        <View style={[styles.tabsRow, { backgroundColor: colors.bgSurface }]}>
           <View
-            style={{
-              flexGrow: 1,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 20,
-              backgroundColor: tab === 'my' ? '#6C6C71' : 'transparent',
-              padding: 5,
-              overflow: 'hidden',
-            }}
+            style={[
+              styles.tabPill,
+              tab === 'my'
+                ? { backgroundColor: colors.bgFaint }
+                : styles.tabPillIdle,
+            ]}
           >
             <TouchableOpacity
               onPress={() => {
@@ -426,27 +340,23 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
               }}
             >
               <RegText
-                style={{
-                  fontWeight: tab === 'my' ? 'bold' : 'normal',
-                  fontSize: 15,
-                  color: colors.fgDefault,
-                }}
+                style={[
+                  text.subheadline,
+                  tab === 'my' && styles.tabLabelActive,
+                  { color: tab === 'my' ? colors.fgDefault : colors.fgSubtle },
+                ]}
               >
                 {'My Staking'}
               </RegText>
             </TouchableOpacity>
           </View>
           <View
-            style={{
-              flexGrow: 1,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 20,
-              backgroundColor: tab === 'network' ? '#6C6C71' : 'transparent',
-              padding: 5,
-              overflow: 'hidden',
-            }}
+            style={[
+              styles.tabPill,
+              tab === 'network'
+                ? { backgroundColor: colors.bgFaint }
+                : styles.tabPillIdle,
+            ]}
           >
             <TouchableOpacity
               onPress={() => {
@@ -456,11 +366,14 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
               }}
             >
               <RegText
-                style={{
-                  fontWeight: tab === 'network' ? 'bold' : 'normal',
-                  fontSize: 15,
-                  color: colors.fgDefault,
-                }}
+                style={[
+                  text.subheadline,
+                  tab === 'network' && styles.tabLabelActive,
+                  {
+                    color:
+                      tab === 'network' ? colors.fgDefault : colors.fgSubtle,
+                  },
+                ]}
               >
                 {'Global Network'}
               </RegText>
@@ -471,18 +384,12 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
           showsVerticalScrollIndicator={true}
           persistentScrollbar={true}
           indicatorStyle={'white'}
-          style={{ maxHeight: '90%' }}
+          style={styles.scroll}
           contentContainerStyle={{}}
         >
-          <View style={{ display: 'flex' }}>
+          <View style={styles.listOuter}>
             {!loading && (!pieAmounts || !pieAmounts.length) && (
-              <View
-                style={{
-                  alignItems: 'center',
-                  marginTop: 100,
-                  marginHorizontal: 20,
-                }}
-              >
+              <View style={styles.empty}>
                 <RegText>{translate('insight.no-data') as string}</RegText>
               </View>
             )}
@@ -490,10 +397,10 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
               <ActivityIndicator
                 size="large"
                 color={colors.fgAccent}
-                style={{ marginTop: 100 }}
+                style={styles.loader}
               />
             ) : (
-              <View style={{ width: '100%', alignItems: 'center' }}>
+              <View style={styles.pieArea}>
                 {!!pieAmounts && !!pieAmounts.length && (
                   <>
                     <PieChart
@@ -515,13 +422,7 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
                       data={pieAmounts}
                       innerRadius={dimensions.width * 0.14}
                     />
-                    <View
-                      style={{
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        marginBottom: 30,
-                      }}
-                    >
+                    <View style={styles.totalRow}>
                       <RegText>
                         {tab === 'my' ? 'Total Stake' : 'Total amount Staked'}
                       </RegText>
@@ -532,25 +433,20 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
                           (sum, item) => sum + item.value,
                           0,
                         )}
-                        style={{ marginHorizontal: 5 }}
+                        style={styles.totalAmount}
                         privacy={privacy}
                       />
                     </View>
-                    <RegText style={{ marginHorizontal: 10, marginBottom: 10 }}>
+                    <RegText style={styles.listTitle}>
                       {tab === 'my' ? 'Staking Position' : 'Finalizers'}
                     </RegText>
                     <View
-                      style={{
-                        display: 'flex',
-                        marginHorizontal: 10,
-                        padding: 5,
-                        alignItems: 'flex-start',
-                        backgroundColor: 'rgba(118, 118, 128, 0.24)',
-                        borderRadius: 26,
-                        width: '90%',
-                      }}
+                      style={[
+                        styles.listCard,
+                        { backgroundColor: colors.bgFaint },
+                      ]}
                     >
-                      <View style={{ width: '100%' }}>
+                      <View style={styles.list}>
                         {!loading && !!pieAmounts && !!pieAmounts.length && (
                           <>
                             {pieAmounts.map((item, index) => {
@@ -580,5 +476,136 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
     </ToastProvider>
   );
 };
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+  tabsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: space.xl,
+    borderRadius: 20,
+    padding: space.xs,
+    marginHorizontal: space.xl,
+  },
+  tabPill: {
+    flexGrow: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    padding: space.xs,
+    overflow: 'hidden',
+  },
+  tabPillIdle: {
+    backgroundColor: 'transparent',
+  },
+  tabLabelActive: {
+    fontWeight: 'bold',
+  },
+  scroll: {
+    maxHeight: '90%',
+  },
+  listOuter: {
+    display: 'flex',
+  },
+  empty: {
+    alignItems: 'center',
+    marginTop: 100,
+    marginHorizontal: space.xl,
+  },
+  loader: {
+    marginTop: 100,
+  },
+  pieArea: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  totalRow: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: space.xxxl,
+  },
+  totalAmount: {
+    marginHorizontal: space.xs,
+  },
+  listTitle: {
+    marginHorizontal: space.sm,
+    marginBottom: space.sm,
+  },
+  listCard: {
+    display: 'flex',
+    marginHorizontal: space.sm,
+    padding: space.xs,
+    alignItems: 'flex-start',
+    borderRadius: radiusCard,
+    width: '90%',
+  },
+  list: {
+    width: '100%',
+  },
+  row: {
+    width: '100%',
+  },
+  rowInner: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginHorizontal: space.xl,
+    paddingVertical: space.lg,
+  },
+  rowBordered: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  rowLast: {
+    borderBottomWidth: 0,
+  },
+  rowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rowIcon: {
+    marginRight: space.lg,
+  },
+  rowRank: {
+    marginRight: space.lg,
+  },
+  rowTag: {
+    marginHorizontal: space.xs,
+  },
+  addressCol: {
+    display: 'flex',
+    flexDirection: 'column',
+    flexWrap: 'wrap',
+  },
+  rowRight: {
+    flexDirection: 'column-reverse',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  barArea: {
+    marginLeft: space.xxl,
+    flexGrow: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  barTrack: {
+    justifyContent: 'flex-end',
+    width: '100%',
+    height: 5,
+    marginTop: space.sm,
+    borderRadius: 3,
+  },
+  bar: {
+    height: 5,
+    width: '100%',
+    borderRadius: 3,
+  },
+  barFill: {
+    marginTop: -5,
+  },
+});
 
 export default Distribution;
