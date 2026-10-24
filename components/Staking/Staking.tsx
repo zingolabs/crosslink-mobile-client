@@ -54,11 +54,10 @@ import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import { lifehashDataUrlFromStringSync } from '../../app/utils/lifehash';
 import ZecAmount from '../Components/ZecAmount';
 import { WalletBondsStatusEnum } from '../../app/AppState/enums/WalletBondsStatusEnum';
-import LinearGradient from 'react-native-linear-gradient';
 import Button from '../Components/Button';
 import { formatSeconds } from '../../app/utils/Utils';
 import { MainTabParamList } from '../../app/types/NavigationTypes';
-import { useTheme } from '../../app/theme';
+import { useTheme, text, space, radiusCard, radiusPill } from '../../app/theme';
 
 type Finalizer = {
   svg: {
@@ -228,10 +227,10 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
           style={{
             flexDirection: 'row',
             justifyContent: 'space-between',
-            marginHorizontal: 20,
+            marginHorizontal: space.xl,
             paddingVertical: 15,
-            borderBottomColor: '#333333',
-            borderBottomWidth: last ? 0 : 1,
+            borderBottomColor: colors.borderFaint,
+            borderBottomWidth: last ? 0 : StyleSheet.hairlineWidth,
           }}
         >
           <View
@@ -246,7 +245,7 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
               style={{
                 width: 28,
                 height: 28,
-                marginRight: 10,
+                marginRight: space.sm,
                 borderRadius: 12,
               }}
               resizeMode="contain"
@@ -294,7 +293,7 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
             }}
           >
             <FontAwesomeIcon
-              style={{ marginRight: 10, marginLeft: 15 }}
+              style={{ marginRight: space.sm, marginLeft: 15 }}
               size={15}
               icon={faChevronRight}
               color={colors.fgDefault}
@@ -336,11 +335,11 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginTop: 20,
+            marginTop: space.xl,
             borderRadius: 20,
-            backgroundColor: 'rgba(118, 118, 128, 0.24)',
+            backgroundColor: colors.bgSurface,
             padding: 5,
-            marginHorizontal: 20,
+            marginHorizontal: space.xl,
           }}
         >
           <TouchableOpacity
@@ -350,7 +349,8 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: 20,
-              backgroundColor: tab === 'scheduled' ? '#6C6C71' : 'transparent',
+              backgroundColor:
+                tab === 'scheduled' ? colors.bgFaint : 'transparent',
               padding: 5,
               overflow: 'hidden',
             }}
@@ -359,11 +359,13 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
           >
             <View>
               <RegText
-                style={{
-                  fontWeight: tab === 'scheduled' ? 'bold' : 'normal',
-                  fontSize: 15,
-                  color: colors.fgDefault,
-                }}
+                style={[
+                  text.subheadline,
+                  {
+                    fontWeight: tab === 'scheduled' ? '600' : '400',
+                    color: colors.fgDefault,
+                  },
+                ]}
               >
                 {'Scheduled'}
               </RegText>
@@ -376,7 +378,8 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: 20,
-              backgroundColor: tab === 'active' ? '#6C6C71' : 'transparent',
+              backgroundColor:
+                tab === 'active' ? colors.bgFaint : 'transparent',
               padding: 5,
               overflow: 'hidden',
             }}
@@ -385,11 +388,13 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
           >
             <View>
               <RegText
-                style={{
-                  fontWeight: tab === 'active' ? 'bold' : 'normal',
-                  fontSize: 15,
-                  color: colors.fgDefault,
-                }}
+                style={[
+                  text.subheadline,
+                  {
+                    fontWeight: tab === 'active' ? '600' : '400',
+                    color: colors.fgDefault,
+                  },
+                ]}
               >
                 {'Active Stake'}
               </RegText>
@@ -402,7 +407,7 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: 20,
-              backgroundColor: tab === 'my' ? '#6C6C71' : 'transparent',
+              backgroundColor: tab === 'my' ? colors.bgFaint : 'transparent',
               padding: 5,
               overflow: 'hidden',
             }}
@@ -411,11 +416,13 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
           >
             <View>
               <RegText
-                style={{
-                  fontWeight: tab === 'my' ? 'bold' : 'normal',
-                  fontSize: 15,
-                  color: colors.fgDefault,
-                }}
+                style={[
+                  text.subheadline,
+                  {
+                    fontWeight: tab === 'my' ? '600' : '400',
+                    color: colors.fgDefault,
+                  },
+                ]}
               >
                 {'My Finalizers'}
               </RegText>
@@ -473,29 +480,42 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
                   onScroll={handleScroll}
                   data={scheduledActions}
                   keyExtractor={item => `scheduledActions-${item.id}`}
-                  contentContainerStyle={{ paddingTop: 8, paddingBottom: 4 }}
+                  contentContainerStyle={{
+                    paddingTop: space.sm,
+                    paddingBottom: space.xs,
+                  }}
                   ListHeaderComponent={
                     <View
                       style={{
-                        borderTopLeftRadius: 25,
-                        borderTopRightRadius: 25,
+                        borderTopLeftRadius: radiusCard,
+                        borderTopRightRadius: radiusCard,
                         paddingVertical: 10,
                         paddingHorizontal: 25,
                         paddingTop: 15,
-                        backgroundColor: '#181818',
-                        borderTopColor: stakingDay ? '#004300' : '#594111',
-                        borderLeftColor: stakingDay ? '#004300' : '#594111',
-                        borderRightColor: stakingDay ? '#004300' : '#594111',
+                        backgroundColor: colors.bgSurface,
+                        borderTopColor: stakingDay
+                          ? colors.fgSuccess
+                          : colors.borderWarning,
+                        borderLeftColor: stakingDay
+                          ? colors.fgSuccess
+                          : colors.borderWarning,
+                        borderRightColor: stakingDay
+                          ? colors.fgSuccess
+                          : colors.borderWarning,
                         borderTopWidth: 1,
                         borderLeftWidth: 1,
                         borderRightWidth: 1,
                       }}
                     >
                       <Text
-                        style={{
-                          color: stakingDay ? '#00B800' : '#FFAF02',
-                          fontSize: 12,
-                        }}
+                        style={[
+                          text.caption1,
+                          {
+                            color: stakingDay
+                              ? colors.fgSuccess
+                              : colors.fgWarning,
+                          },
+                        ]}
                       >
                         {'Scheduled'}
                       </Text>
@@ -504,8 +524,8 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
                           <View
                             style={{
                               height: 10,
-                              borderRadius: 100,
-                              backgroundColor: '#00B800',
+                              borderRadius: radiusPill,
+                              backgroundColor: colors.fgSuccess,
                               width: '100%',
                               marginTop: 10,
                             }}
@@ -515,8 +535,8 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
                             <View
                               style={{
                                 height: 10,
-                                borderRadius: 100,
-                                backgroundColor: '#815800',
+                                borderRadius: radiusPill,
+                                backgroundColor: colors.borderWarning,
                                 width: `${((blocksTotalStakingDay - blocksToStakingDay) * 100) / blocksTotalStakingDay}%`,
                                 marginTop: 10,
                               }}
@@ -524,8 +544,8 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
                             <View
                               style={{
                                 height: 10,
-                                borderRadius: 100,
-                                backgroundColor: '#FFAF02',
+                                borderRadius: radiusPill,
+                                backgroundColor: colors.fgWarning,
                                 width: 20,
                                 marginTop: 10,
                                 marginLeft: -10,
@@ -535,8 +555,8 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
                             <View
                               style={{
                                 height: 10,
-                                borderRadius: 100,
-                                backgroundColor: '#2F2F31',
+                                borderRadius: radiusPill,
+                                backgroundColor: colors.bgFaint,
                                 width: `${(blocksToStakingDay * 100) / blocksTotalStakingDay}%`,
                                 marginTop: 10,
                                 marginLeft: -10,
@@ -554,13 +574,19 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
                     <>
                       <View
                         style={{
-                          borderBottomLeftRadius: 25,
-                          borderBottomRightRadius: 25,
+                          borderBottomLeftRadius: radiusCard,
+                          borderBottomRightRadius: radiusCard,
                           paddingBottom: 15,
-                          backgroundColor: '#181818',
-                          borderBottomColor: stakingDay ? '#004300' : '#594111',
-                          borderLeftColor: stakingDay ? '#004300' : '#594111',
-                          borderRightColor: stakingDay ? '#004300' : '#594111',
+                          backgroundColor: colors.bgSurface,
+                          borderBottomColor: stakingDay
+                            ? colors.fgSuccess
+                            : colors.borderWarning,
+                          borderLeftColor: stakingDay
+                            ? colors.fgSuccess
+                            : colors.borderWarning,
+                          borderRightColor: stakingDay
+                            ? colors.fgSuccess
+                            : colors.borderWarning,
                           borderBottomWidth: 1,
                           borderLeftWidth: 1,
                           borderRightWidth: 1,
@@ -645,13 +671,17 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
                     return (
                       <View
                         style={{
-                          backgroundColor: '#181818',
+                          backgroundColor: colors.bgSurface,
                           flexDirection: 'row',
                           alignItems: 'center',
                           paddingVertical: 10,
                           paddingHorizontal: 10,
-                          borderLeftColor: stakingDay ? '#004300' : '#594111',
-                          borderRightColor: stakingDay ? '#004300' : '#594111',
+                          borderLeftColor: stakingDay
+                            ? colors.fgSuccess
+                            : colors.borderWarning,
+                          borderRightColor: stakingDay
+                            ? colors.fgSuccess
+                            : colors.borderWarning,
                           borderLeftWidth: 1,
                           borderRightWidth: 1,
                         }}
@@ -667,20 +697,15 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
                             );
                           }}
                         >
-                          <LinearGradient
-                            colors={[
-                              stakingDay ? '#002309' : '#1F1F1F',
-                              stakingDay ? '#272727' : '#1F1F1F',
+                          <View
+                            style={[
+                              styles.scheduledRow,
+                              {
+                                backgroundColor: stakingDay
+                                  ? colors.bgSuccessTint
+                                  : colors.bgFaint,
+                              },
                             ]}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 1 }}
-                            style={{
-                              flexDirection: 'row',
-                              justifyContent: 'space-between',
-                              alignItems: 'center',
-                              paddingHorizontal: 10,
-                              borderRadius: 16,
-                            }}
                           >
                             <View
                               style={{
@@ -693,13 +718,14 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
 
                               <View>
                                 <Text
-                                  style={{
-                                    color: colors.fgDefault,
-                                    fontWeight: '500',
-                                    fontSize: 14,
-                                    marginBottom: 2,
-                                    marginLeft: 5,
-                                  }}
+                                  style={[
+                                    text.caption,
+                                    {
+                                      color: colors.fgDefault,
+                                      marginBottom: 2,
+                                      marginLeft: 5,
+                                    },
+                                  ]}
                                 >
                                   {label}
                                 </Text>
@@ -730,10 +756,10 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
                                     privacy={privacy}
                                   />
                                   <Text
-                                    style={{
-                                      color: colors.fgSubtle,
-                                      fontSize: 12,
-                                    }}
+                                    style={[
+                                      text.caption1,
+                                      { color: colors.fgSubtle },
+                                    ]}
                                   >
                                     {'with '}
                                     {item.finalizer.length >
@@ -757,24 +783,27 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
                               {stakingDay ? (
                                 <>
                                   <RegText
-                                    style={{
-                                      color: '#00B800',
-                                      fontSize:
-                                        timeLeftStakingDay === 0 ? 10 : 15,
-                                    }}
+                                    style={[
+                                      timeLeftStakingDay === 0
+                                        ? text.caption2
+                                        : text.subheadline,
+                                      { color: colors.fgSuccess },
+                                    ]}
                                   >
                                     {'Now'}
                                   </RegText>
-                                  <FadeText style={{ fontSize: 12 }}>
+                                  <FadeText style={text.caption1}>
                                     Click to execute
                                   </FadeText>
                                 </>
                               ) : (
                                 <RegText
-                                  style={{
-                                    color: '#FFAF02',
-                                    fontSize: timeToStakingDay === 0 ? 10 : 13,
-                                  }}
+                                  style={[
+                                    timeToStakingDay === 0
+                                      ? text.caption2
+                                      : text.footnote,
+                                    { color: colors.fgWarning },
+                                  ]}
                                 >
                                   {timeToStakingDay === 0
                                     ? 'calculating...'
@@ -782,7 +811,7 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
                                 </RegText>
                               )}
                             </View>
-                          </LinearGradient>
+                          </View>
                         </TouchableOpacity>
                       </View>
                     );
@@ -797,31 +826,28 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
                 onScroll={handleScroll}
                 data={movements}
                 keyExtractor={item => `movements-${item.txid}`}
-                contentContainerStyle={{ paddingTop: 8, paddingBottom: 4 }}
+                contentContainerStyle={{
+                  paddingTop: space.sm,
+                  paddingBottom: space.xs,
+                }}
                 ListHeaderComponent={
                   <View
                     style={{
-                      borderTopLeftRadius: 25,
-                      borderTopRightRadius: 25,
+                      borderTopLeftRadius: radiusCard,
+                      borderTopRightRadius: radiusCard,
                       paddingVertical: 10,
                       paddingHorizontal: 25,
                       paddingTop: 15,
-                      backgroundColor: '#181818',
-                      borderTopColor: '#3B3B3C',
-                      borderLeftColor: '#3B3B3C',
-                      borderRightColor: '#3B3B3C',
+                      backgroundColor: colors.bgSurface,
+                      borderTopColor: colors.borderFaint,
+                      borderLeftColor: colors.borderFaint,
+                      borderRightColor: colors.borderFaint,
                       borderTopWidth: 1,
                       borderLeftWidth: 1,
                       borderRightWidth: 1,
                     }}
                   >
-                    <Text
-                      style={{
-                        color: colors.fgDefault,
-                        fontSize: 16,
-                        fontWeight: 600,
-                      }}
-                    >
+                    <Text style={[text.headline, { color: colors.fgDefault }]}>
                       {'Staking Positions'}
                     </Text>
                   </View>
@@ -830,13 +856,13 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
                   <>
                     <View
                       style={{
-                        borderBottomLeftRadius: 25,
-                        borderBottomRightRadius: 25,
+                        borderBottomLeftRadius: radiusCard,
+                        borderBottomRightRadius: radiusCard,
                         paddingBottom: 15,
-                        backgroundColor: '#181818',
-                        borderBottomColor: '#3B3B3C',
-                        borderLeftColor: '#3B3B3C',
-                        borderRightColor: '#3B3B3C',
+                        backgroundColor: colors.bgSurface,
+                        borderBottomColor: colors.borderFaint,
+                        borderLeftColor: colors.borderFaint,
+                        borderRightColor: colors.borderFaint,
                         borderBottomWidth: 1,
                         borderLeftWidth: 1,
                         borderRightWidth: 1,
@@ -854,19 +880,19 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
                   return (
                     <View
                       style={{
-                        backgroundColor: '#181818',
+                        backgroundColor: colors.bgSurface,
                         alignItems: 'center',
                         paddingVertical: 10,
                         paddingHorizontal: 10,
-                        borderLeftColor: '#3B3B3C',
-                        borderRightColor: '#3B3B3C',
+                        borderLeftColor: colors.borderFaint,
+                        borderRightColor: colors.borderFaint,
                         borderLeftWidth: 1,
                         borderRightWidth: 1,
                       }}
                     >
                       <View
                         style={{
-                          backgroundColor: '#1F1F1F',
+                          backgroundColor: colors.bgSurface,
                           justifyContent: 'space-between',
                           alignItems: 'center',
                           paddingVertical: 10,
@@ -885,13 +911,14 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
                           >
                             <View>
                               <Text
-                                style={{
-                                  color: colors.fgDefault,
-                                  fontWeight: '500',
-                                  fontSize: 14,
-                                  marginBottom: 2,
-                                  marginLeft: 5,
-                                }}
+                                style={[
+                                  text.caption,
+                                  {
+                                    color: colors.fgDefault,
+                                    marginBottom: 2,
+                                    marginLeft: 5,
+                                  },
+                                ]}
                               >
                                 {item.finalizer.length >
                                 (dimensions.width < 500 ? 10 : 20)
@@ -902,11 +929,10 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
                                   : item.finalizer}
                               </Text>
                               <Text
-                                style={{
-                                  color: colors.fgSubtle,
-                                  fontSize: 12,
-                                  marginLeft: 5,
-                                }}
+                                style={[
+                                  text.caption1,
+                                  { color: colors.fgSubtle, marginLeft: 5 },
+                                ]}
                               >
                                 2026
                                 {/* {formatMovementDate(
@@ -937,14 +963,14 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
                             justifyContent: 'center',
                             alignItems: 'center',
                             marginTop: 10,
-                            gap: 10,
+                            gap: space.sm,
                           }}
                         >
                           {item.status === WalletBondsStatusEnum.Active && (
                             <View
                               style={{
                                 flexDirection: 'row',
-                                gap: 10,
+                                gap: space.sm,
                                 width: '100%',
                               }}
                             >
@@ -1015,7 +1041,7 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
                       padding: 5,
                       alignItems: 'flex-start',
                       backgroundColor: colors.bgSurface,
-                      borderRadius: 26,
+                      borderRadius: radiusCard,
                     }}
                   >
                     {stakedData.map((item, index) => {
@@ -1047,7 +1073,7 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
                   paddingHorizontal: 5,
                   paddingVertical: 10,
                   backgroundColor: colors.bgChrome,
-                  borderRadius: 50,
+                  borderRadius: radiusPill,
                   transform: [{ scale: pressed ? 0.9 : 1 }],
                   borderWidth: 1,
                   borderColor: colors.borderMuted,
@@ -1077,6 +1103,13 @@ const styles = StyleSheet.create({
   },
   emptyState: {
     paddingBottom: 96,
+  },
+  scheduledRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    borderRadius: 16,
   },
 });
 

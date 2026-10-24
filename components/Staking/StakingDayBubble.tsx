@@ -7,7 +7,6 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
 
 import ClockActiveWithCheck from '../../assets/icons/clock-active-with-check.svg';
 import TriangleYellow from '../../assets/icons/triangle-yellow.svg';
@@ -16,6 +15,7 @@ import RegText from '../Components/RegText';
 import { formatSeconds } from '../../app/utils/Utils';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { duration, radiusPill, text, useTheme } from '../../app/theme';
 
 const TAG_HEIGHT = 50;
 const COLLAPSED_SIZE = 52;
@@ -24,6 +24,7 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 const CENTER_LEFT = (SCREEN_WIDTH - EXPANDED_WIDTH) / 2;
 
 const StakingDayBubble: React.FC = () => {
+  const { colors } = useTheme();
   const {
     stakingDay,
     timeToStakingDaySeconds: timeToStakingDay,
@@ -53,13 +54,13 @@ const StakingDayBubble: React.FC = () => {
       Animated.parallel([
         Animated.timing(rightAnim, {
           toValue: CENTER_LEFT,
-          duration: 280,
+          duration: duration.enter,
           easing: Easing.out(Easing.cubic),
           useNativeDriver: false,
         }),
         Animated.timing(scaleAnim, {
           toValue: 1,
-          duration: 280,
+          duration: duration.enter,
           easing: Easing.out(Easing.cubic),
           useNativeDriver: false,
         }),
@@ -127,7 +128,8 @@ const StakingDayBubble: React.FC = () => {
     ? formatSeconds(timeLeftStakingDay)
     : formatSeconds(timeToStakingDay);
   const title = stakingDay ? 'Staking day active' : 'Staking day inactive';
-  const gradientColors = [stakingDay ? '#002309' : '#553000', '#272727'];
+  // Status as a flat tint: DESIGN.md forbids gradients.
+  const bubbleTint = stakingDay ? colors.bgSuccessTint : colors.bgWarningTint;
 
   return (
     <View
@@ -141,20 +143,15 @@ const StakingDayBubble: React.FC = () => {
         onPress={() => setExpanded(prev => !prev)}
         style={styles.anchorPressable}
       >
-        <LinearGradient
-          colors={gradientColors}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.smallBubble}
-        >
+        <View style={[styles.smallBubble, { backgroundColor: bubbleTint }]}>
           {expanded ? (
-            <FontAwesomeIcon icon={faXmark} size={22} color={'#A8A8A8'} />
+            <FontAwesomeIcon icon={faXmark} size={22} color={colors.fgMuted} />
           ) : stakingDay ? (
             <ClockActiveWithCheck width={28} height={28} />
           ) : (
             <TriangleYellow width={28} height={28} />
           )}
-        </LinearGradient>
+        </View>
       </Pressable>
 
       {/* Expanded bubble */}
@@ -169,12 +166,7 @@ const StakingDayBubble: React.FC = () => {
           },
         ]}
       >
-        <LinearGradient
-          colors={gradientColors}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.expandedBubble}
-        >
+        <View style={[styles.expandedBubble, { backgroundColor: bubbleTint }]}>
           <View style={styles.expandedIconWrapper}>
             {stakingDay ? (
               <ClockActiveWithCheck width={28} height={28} />
@@ -196,16 +188,19 @@ const StakingDayBubble: React.FC = () => {
             <RegText
               numberOfLines={1}
               ellipsizeMode="clip"
-              style={[styles.valueText, isCalculating && styles.valueTextSmall]}
+              style={isCalculating ? text.caption2 : text.subheadline}
             >
               {isCalculating ? 'calculating...' : mainValue}
             </RegText>
 
-            <RegText numberOfLines={1} style={styles.labelText}>
+            <RegText
+              numberOfLines={1}
+              style={[text.caption1, { color: colors.fgMuted }]}
+            >
               {title}
             </RegText>
           </Animated.View>
-        </LinearGradient>
+        </View>
       </Animated.View>
     </View>
   );
@@ -226,7 +221,7 @@ const styles = StyleSheet.create({
   smallBubble: {
     width: COLLAPSED_SIZE,
     height: COLLAPSED_SIZE,
-    borderRadius: 100,
+    borderRadius: radiusPill,
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
@@ -243,7 +238,7 @@ const styles = StyleSheet.create({
   expandedBubble: {
     width: EXPANDED_WIDTH,
     height: TAG_HEIGHT,
-    borderRadius: 100,
+    borderRadius: radiusPill,
     justifyContent: 'center',
     overflow: 'hidden',
   },
@@ -266,31 +261,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'center',
     overflow: 'hidden',
-  },
-
-  valueText: {
-    fontSize: 15,
-  },
-
-  valueTextSmall: {
-    fontSize: 10,
-  },
-
-  labelText: {
-    fontSize: 12,
-    color: '#A8A8A8',
-  },
-
-  collapseMockIcon: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  collapseMockIconLine: {
-    width: 14,
-    height: 2,
-    borderRadius: 2,
-    backgroundColor: '#FFFFFF',
   },
 });
 
