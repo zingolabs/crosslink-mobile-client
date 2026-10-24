@@ -212,7 +212,12 @@ const styles = StyleSheet.create({
     boxShadow: '0 6px 16px -10px rgba(0, 0, 0, 0.45)',
   },
   panelGradient: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+    width: '100%',
   },
   bar: {
     position: 'absolute',
