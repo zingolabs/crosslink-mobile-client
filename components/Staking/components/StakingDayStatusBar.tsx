@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
 
 import RegText from '../../Components/RegText';
 import { useAppLoadedWallet } from '../../../app/context';
 import ClockActiveWithCheck from '../../../assets/icons/clock-active-with-check.svg';
 import TriangleYellow from '../../../assets/icons/triangle-yellow.svg';
 import { formatSeconds } from '../../../app/utils/Utils';
+import { duration, radiusPill, text, useTheme } from '../../../app/theme';
 
 type StakingDayStatusBarProps = {};
 
@@ -15,6 +15,7 @@ const COLLAPSED_WIDTH = 52;
 const EXPANDED_WIDTH = 210;
 
 const StakingDayStatusBar: React.FC<StakingDayStatusBarProps> = () => {
+  const { colors } = useTheme();
   const {
     stakingDay,
     timeToStakingDaySeconds: timeToStakingDay,
@@ -31,7 +32,7 @@ const StakingDayStatusBar: React.FC<StakingDayStatusBarProps> = () => {
     Animated.parallel([
       Animated.timing(widthAnim, {
         toValue: expanded ? EXPANDED_WIDTH : COLLAPSED_WIDTH,
-        duration: 260,
+        duration: duration.list,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: false,
       }),
@@ -63,11 +64,16 @@ const StakingDayStatusBar: React.FC<StakingDayStatusBarProps> = () => {
   return (
     <Pressable onPress={() => setExpanded(prev => !prev)}>
       <Animated.View style={[styles.wrapper, { width: widthAnim }]}>
-        <LinearGradient
-          colors={[stakingDay ? '#002309' : '#553000', '#272727']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.container}
+        {/* Status as a flat tint: DESIGN.md forbids gradients. */}
+        <View
+          style={[
+            styles.container,
+            {
+              backgroundColor: stakingDay
+                ? colors.bgSuccessTint
+                : colors.bgWarningTint,
+            },
+          ]}
         >
           <View style={styles.iconWrapper}>
             {stakingDay ? (
@@ -90,16 +96,19 @@ const StakingDayStatusBar: React.FC<StakingDayStatusBarProps> = () => {
             <RegText
               numberOfLines={1}
               ellipsizeMode="clip"
-              style={[styles.valueText, isCalculating && styles.valueTextSmall]}
+              style={isCalculating ? text.caption2 : text.subheadline}
             >
               {isCalculating ? 'calculating...' : mainValue}
             </RegText>
 
-            <RegText numberOfLines={1} style={styles.labelText}>
+            <RegText
+              numberOfLines={1}
+              style={[text.caption1, { color: colors.fgMuted }]}
+            >
               {title}
             </RegText>
           </Animated.View>
-        </LinearGradient>
+        </View>
       </Animated.View>
     </Pressable>
   );
@@ -113,9 +122,9 @@ const styles = StyleSheet.create({
   container: {
     height: TAG_HEIGHT,
     borderTopLeftRadius: 0,
-    borderTopRightRadius: 100,
+    borderTopRightRadius: radiusPill,
     borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 100,
+    borderBottomRightRadius: radiusPill,
     overflow: 'hidden',
     justifyContent: 'center',
   },
@@ -136,16 +145,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'center',
     overflow: 'hidden',
-  },
-  valueText: {
-    fontSize: 15,
-  },
-  valueTextSmall: {
-    fontSize: 10,
-  },
-  labelText: {
-    fontSize: 12,
-    color: '#A8A8A8',
   },
 });
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, TextStyle, StyleProp, TextProps } from 'react-native';
-import { useTheme } from '../../app/theme';
+import { text, useTheme } from '../../app/theme';
 
 type RegTextProps = TextProps & {
   style?: StyleProp<TextStyle>;
@@ -8,6 +8,7 @@ type RegTextProps = TextProps & {
   children: React.ReactNode;
 };
 
+/** Body text. A thin wrapper over the typography ramp's `body` style. */
 const RegText: React.FunctionComponent<RegTextProps> = ({
   style,
   color,
@@ -19,16 +20,7 @@ const RegText: React.FunctionComponent<RegTextProps> = ({
   return (
     <Text
       {...props}
-      style={[
-        // eslint-disable-next-line react-native/no-inline-styles
-        {
-          color: color || colors.fgDefault,
-          fontSize: 18,
-          fontWeight: '600',
-          opacity: 1,
-        },
-        style,
-      ]}
+      style={[text.body, { color: color || colors.fgDefault }, style]}
     >
       {children}
     </Text>

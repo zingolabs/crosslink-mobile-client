@@ -1,6 +1,5 @@
-/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import { View, ScrollView } from 'react-native';
+import { View, ScrollView, StyleSheet } from 'react-native';
 
 import RegText from '../Components/RegText';
 import { LoadedAppStackParamList } from '../../app/types';
@@ -22,6 +21,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../Header';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
+import { space } from '../../app/theme';
 
 type RescanProps = NativeStackScreenProps<
   LoadedAppStackParamList,
@@ -92,21 +92,13 @@ const Rescan: React.FunctionComponent<RescanProps> = ({
 
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{
-          flexGrow: 1,
-          paddingTop: 8,
-          paddingBottom: insets.bottom + 8,
-          paddingHorizontal: 16,
-        }}
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: insets.bottom + space.sm },
+        ]}
       >
-        <View
-          style={{
-            flexGrow: 1,
-            alignItems: 'flex-start',
-            justifyContent: 'center',
-          }}
-        >
-          <View style={{ display: 'flex', margin: 20, marginBottom: 30 }}>
+        <View style={styles.center}>
+          <View style={styles.text}>
             <RegText>
               {(translate('rescan.text-1') as string) +
                 wallet.birthday +
@@ -115,15 +107,7 @@ const Rescan: React.FunctionComponent<RescanProps> = ({
           </View>
         </View>
       </ScrollView>
-      <View
-        style={{
-          marginTop: 'auto',
-          alignItems: 'center',
-          justifyContent: 'center',
-          paddingTop: 10,
-          paddingBottom: 20,
-        }}
-      >
+      <View style={styles.footer}>
         <LiquidPrimaryButton
           title={translate('rescan.button') as string}
           onPress={doRescanAndClose}
@@ -132,5 +116,30 @@ const Rescan: React.FunctionComponent<RescanProps> = ({
     </ToastProvider>
   );
 };
+
+const styles = StyleSheet.create({
+  content: {
+    flexGrow: 1,
+    paddingTop: space.sm,
+    paddingHorizontal: space.lg,
+  },
+  center: {
+    flexGrow: 1,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+  },
+  text: {
+    display: 'flex',
+    margin: space.xl,
+    marginBottom: space.xxxl,
+  },
+  footer: {
+    marginTop: 'auto',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: space.md,
+    paddingBottom: space.xl,
+  },
+});
 
 export default Rescan;

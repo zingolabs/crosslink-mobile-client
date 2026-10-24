@@ -174,13 +174,19 @@ const SeedChip: React.FC<SeedChipProps> = ({
         }
         returnKeyType="done"
         editable={!disabled}
-        style={[styles.word, styles.input]}
+        style={[styles.word, styles.input, { color: colors.fgDefault }]}
         accessibilityLabel={`Word ${index + 1}`}
       />
     </View>
   ) : (
     <View style={styles.row}>
-      <Text style={[styles.word, invalid && { color: colors.fgDanger }]}>
+      <Text
+        style={[
+          styles.word,
+          { color: colors.fgDefault },
+          invalid && { color: colors.fgDanger },
+        ]}
+      >
         {word}
       </Text>
     </View>
@@ -249,7 +255,6 @@ const styles = StyleSheet.create({
   word: {
     ...text.body,
     fontWeight: '500',
-    color: '#ffffff',
   },
   ghost: {
     ...text.body,

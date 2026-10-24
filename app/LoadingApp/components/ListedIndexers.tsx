@@ -80,7 +80,7 @@ const IndexerRow: React.FC<IndexerRowProps> = ({ item, selected, onPress }) => {
           style={[
             styles.row,
             { backgroundColor: colors.bgSurface },
-            pressed && styles.rowPressed,
+            pressed && { backgroundColor: colors.bgPress },
           ]}
         >
           <Text
@@ -301,9 +301,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  rowPressed: {
-    backgroundColor: '#2C2C2E',
   },
   rowTitle: {
     ...text.body,

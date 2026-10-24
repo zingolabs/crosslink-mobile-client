@@ -3,12 +3,16 @@
 exports[`Component LoadedApp - test LoadedApp - snapshot 1`] = `
 <View
   style={
-    {
-      "alignItems": "center",
-      "backgroundColor": "#011401",
-      "flex": 1,
-      "justifyContent": "center",
-    }
+    [
+      {
+        "alignItems": "center",
+        "flex": 1,
+        "justifyContent": "center",
+      },
+      {
+        "backgroundColor": "#011401",
+      },
+    ]
   }
 >
   <View
@@ -30,28 +34,41 @@ exports[`Component LoadedApp - test LoadedApp - snapshot 1`] = `
           "height": "40%",
           "justifyContent": "flex-end",
           "marginTop": 20,
-          "padding": 10,
+          "padding": 12,
           "width": "80%",
         }
       }
     >
       <Text
         style={
-          {
-            "color": "#888888",
-            "fontSize": 40,
-            "fontWeight": "bold",
-          }
+          [
+            {
+              "fontSize": 34,
+              "fontWeight": "700",
+              "letterSpacing": 0.37,
+              "lineHeight": 41,
+            },
+            {
+              "color": "#888888",
+            },
+          ]
         }
       >
         zingodelegator
       </Text>
       <Text
         style={
-          {
-            "color": "#888888",
-            "fontSize": 15,
-          }
+          [
+            {
+              "fontSize": 15,
+              "fontWeight": "400",
+              "letterSpacing": -0.24,
+              "lineHeight": 20,
+            },
+            {
+              "color": "#888888",
+            },
+          ]
         }
       >
         version
@@ -65,7 +82,7 @@ exports[`Component LoadedApp - test LoadedApp - snapshot 1`] = `
           "height": "60%",
           "justifyContent": "flex-start",
           "marginTop": 20,
-          "padding": 10,
+          "padding": 12,
           "width": "80%",
         }
       }
@@ -77,14 +94,22 @@ exports[`Component LoadedApp - test LoadedApp - snapshot 1`] = `
       <Text
         selectable={true}
         style={
-          {
-            "color": "#c3c3c3",
-            "fontSize": 20,
-            "fontWeight": "bold",
-            "marginTop": 10,
-            "opacity": 0,
-            "textAlign": "center",
-          }
+          [
+            {
+              "fontSize": 20,
+              "fontWeight": "600",
+              "letterSpacing": 0.38,
+              "lineHeight": 25,
+            },
+            {
+              "textAlign": "center",
+            },
+            {
+              "color": "#c3c3c3",
+              "marginTop": 12,
+              "opacity": 0,
+            },
+          ]
         }
       >
         updating.firstlaunchingmessage-title
@@ -92,13 +117,22 @@ exports[`Component LoadedApp - test LoadedApp - snapshot 1`] = `
       <Text
         selectable={true}
         style={
-          {
-            "color": "#c3c3c3",
-            "fontSize": 15,
-            "marginTop": 10,
-            "opacity": 0,
-            "textAlign": "center",
-          }
+          [
+            {
+              "fontSize": 15,
+              "fontWeight": "400",
+              "letterSpacing": -0.24,
+              "lineHeight": 20,
+            },
+            {
+              "textAlign": "center",
+            },
+            {
+              "color": "#c3c3c3",
+              "marginTop": 12,
+              "opacity": 0,
+            },
+          ]
         }
       >
         updating.firstlaunchingmessage-body
@@ -106,14 +140,23 @@ exports[`Component LoadedApp - test LoadedApp - snapshot 1`] = `
       <Text
         selectable={true}
         style={
-          {
-            "color": "#c3c3c3",
-            "fontSize": 15,
-            "marginBottom": 10,
-            "marginTop": 10,
-            "opacity": 0,
-            "textAlign": "center",
-          }
+          [
+            {
+              "fontSize": 15,
+              "fontWeight": "400",
+              "letterSpacing": -0.24,
+              "lineHeight": 20,
+            },
+            {
+              "textAlign": "center",
+            },
+            {
+              "color": "#c3c3c3",
+              "marginBottom": 12,
+              "marginTop": 12,
+              "opacity": 0,
+            },
+          ]
         }
       >
         updating.firstlaunchingmessage-footer

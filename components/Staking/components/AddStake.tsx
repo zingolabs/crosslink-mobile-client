@@ -38,7 +38,7 @@ import { HeaderTitle } from '../../Header';
 import ChevronDown from '../../../assets/icons/chevron-down.svg';
 import RegText from '../../Components/RegText';
 import StakingDayBubble from '../StakingDayBubble';
-import { useTheme } from '../../../app/theme';
+import { useTheme, text, space } from '../../../app/theme';
 
 const PRESET_AMOUNTS = [0.01, 0.1, 1, 10];
 
@@ -202,14 +202,15 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
         />
 
         <Text
-          style={{
-            fontSize: 16,
-            fontWeight: '600',
-            color: colors.fgDefault,
-            marginBottom: 8,
-            marginTop: 15,
-            marginHorizontal: 20,
-          }}
+          style={[
+            text.headline,
+            {
+              color: colors.fgDefault,
+              marginBottom: space.sm,
+              marginTop: 15,
+              marginHorizontal: space.xl,
+            },
+          ]}
         >
           Finalizer address
         </Text>
@@ -222,7 +223,7 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
             borderRadius: 20,
             marginBottom: 10,
             backgroundColor: colors.bgSurface,
-            padding: 16,
+            padding: space.lg,
             marginHorizontal: 10,
             borderWidth: 0.5,
             borderColor: colors.fgDefault,
@@ -241,7 +242,7 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
               style={{ marginRight: 15 }}
               size={20}
               icon={faCircle}
-              color="rgba(143, 191, 250, 1)"
+              color={colors.fgAccent}
             />
             <View
               style={{
@@ -254,13 +255,14 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
             >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <TextInput
-                  style={{
-                    flexGrow: 1,
-                    flexShrink: 1,
-                    color: colors.fgDefault,
-                    fontSize: 17,
-                    fontWeight: '400',
-                  }}
+                  style={[
+                    text.body,
+                    {
+                      flexGrow: 1,
+                      flexShrink: 1,
+                      color: colors.fgDefault,
+                    },
+                  ]}
                   placeholder="Tap here for finalizer address"
                   placeholderTextColor={colors.fgSubtle}
                   value={finalizerText}
@@ -324,12 +326,18 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
             flexGrow: 1,
-            paddingBottom: insets.bottom + 8,
+            paddingBottom: insets.bottom + space.sm,
             paddingHorizontal: 10,
           }}
         >
-          <View style={{ flex: 1, paddingHorizontal: 24, paddingTop: 24 }}>
-            <View style={{ marginBottom: 32 }}>
+          <View
+            style={{
+              flex: 1,
+              paddingHorizontal: space.xxl,
+              paddingTop: space.xxl,
+            }}
+          >
+            <View style={{ marginBottom: space.xxxl }}>
               <ZecAmount
                 style={{
                   alignSelf: 'center',
@@ -351,8 +359,8 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
                     key={value}
                     style={[
                       styles.pill,
+                      { backgroundColor: colors.bgSurface },
                       isSelected && {
-                        backgroundColor: '#1A1A1A',
                         borderColor: colors.borderAccent,
                       },
                     ]}
@@ -360,6 +368,7 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
                   >
                     <Text
                       style={[
+                        text.numeral,
                         styles.pillAmount,
                         {
                           color: isSelected
@@ -372,7 +381,7 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
                     </Text>
                     <Text
                       style={[
-                        styles.pillLabel,
+                        text.caption1,
                         {
                           color: isSelected ? colors.fgAccent : colors.fgSubtle,
                         },
@@ -413,8 +422,8 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
             alignItems: 'center',
             justifyContent: 'center',
             paddingTop: 10,
-            paddingBottom: 20,
-            paddingHorizontal: 24,
+            paddingBottom: space.xl,
+            paddingHorizontal: space.xxl,
           }}
         >
           <LiquidPrimaryButton
@@ -453,12 +462,14 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
                 <>
                   <ActivityIndicator size="large" color={colors.fgDefault} />
                   <Text
-                    style={{
-                      marginTop: 16,
-                      color: colors.fgDefault,
-                      fontSize: 16,
-                      textAlign: 'center',
-                    }}
+                    style={[
+                      text.callout,
+                      {
+                        marginTop: space.lg,
+                        color: colors.fgDefault,
+                        textAlign: 'center',
+                      },
+                    ]}
                   >
                     Sending staking transaction…
                   </Text>
@@ -473,13 +484,14 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
                     color={colors.fgAccent}
                   />
                   <Text
-                    style={{
-                      marginTop: 16,
-                      color: colors.fgDefault,
-                      fontSize: 18,
-                      fontWeight: '600',
-                      textAlign: 'center',
-                    }}
+                    style={[
+                      text.headline,
+                      {
+                        marginTop: space.lg,
+                        color: colors.fgDefault,
+                        textAlign: 'center',
+                      },
+                    ]}
                   >
                     Staking transaction sent!
                   </Text>
@@ -488,9 +500,9 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
                     style={{
                       alignItems: 'center',
                       justifyContent: 'center',
-                      paddingTop: 24,
-                      paddingBottom: 20,
-                      paddingHorizontal: 24,
+                      paddingTop: space.xxl,
+                      paddingBottom: space.xl,
+                      paddingHorizontal: space.xxl,
                     }}
                   >
                     <LiquidPrimaryButton
@@ -513,26 +525,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    rowGap: 16,
+    rowGap: space.lg,
   },
   pill: {
     width: '48%',
     borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 12,
+    paddingVertical: space.lg,
+    paddingHorizontal: space.md,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'transparent',
-    backgroundColor: '#1C1C1E',
   },
   pillAmount: {
-    fontSize: 18,
-    fontWeight: '600',
     marginBottom: 2,
-  },
-  pillLabel: {
-    fontSize: 12,
   },
   modalBackdrop: {
     flex: 1,
@@ -544,8 +550,8 @@ const styles = StyleSheet.create({
     width: '80%',
     maxWidth: 320,
     borderRadius: 18,
-    paddingHorizontal: 20,
-    paddingVertical: 24,
+    paddingHorizontal: space.xl,
+    paddingVertical: space.xxl,
     alignItems: 'center',
     borderWidth: StyleSheet.hairlineWidth,
   },

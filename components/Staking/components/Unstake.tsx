@@ -38,7 +38,7 @@ import RegText from '../../Components/RegText';
 import { WalletBondsStatusEnum } from '../../../app/AppState/enums/WalletBondsStatusEnum';
 import ZecAmount from '../../Components/ZecAmount';
 import StakingDayBubble from '../StakingDayBubble';
-import { useTheme } from '../../../app/theme';
+import { useTheme, text, space } from '../../../app/theme';
 
 type ModalState = 'idle' | 'sending' | 'success';
 
@@ -227,7 +227,7 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
     }
   };
 
-  const renderSeparator = () => <View style={{ height: 8 }} />;
+  const renderSeparator = () => <View style={{ height: space.sm }} />;
 
   const renderStakedTxItem = ({ item }: { item: WalletBondsType }) => {
     console.log('item', item);
@@ -258,11 +258,7 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
               <Refresh width={15} height={15} style={{ marginRight: 5 }} />
             )}
             <Text
-              style={{
-                color: colors.fgDefault,
-                fontSize: 13,
-                fontWeight: '500',
-              }}
+              style={[text.caption, { color: colors.fgDefault }]}
               numberOfLines={1}
             >
               {item.status === WalletBondsStatusEnum.Unbonding
@@ -271,11 +267,7 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
             </Text>
           </View>
           <Text
-            style={{
-              color: colors.fgSubtle,
-              fontSize: 11,
-              marginTop: 2,
-            }}
+            style={[text.caption2, { color: colors.fgSubtle, marginTop: 2 }]}
           >
             {shortenTxid(item.pubKey)}
           </Text>
@@ -283,7 +275,7 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
         <ZecAmount
           style={{
             alignSelf: 'center',
-            marginLeft: 12,
+            marginLeft: space.md,
           }}
           size={14}
           currencyName={info.currencyName}
@@ -318,14 +310,15 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
         />
 
         <Text
-          style={{
-            fontSize: 16,
-            fontWeight: '600',
-            color: colors.fgDefault,
-            marginBottom: 8,
-            marginTop: 15,
-            marginHorizontal: 20,
-          }}
+          style={[
+            text.headline,
+            {
+              color: colors.fgDefault,
+              marginBottom: space.sm,
+              marginTop: 15,
+              marginHorizontal: space.xl,
+            },
+          ]}
         >
           Finalizer details
         </Text>
@@ -337,11 +330,11 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
             alignItems: 'center',
             borderRadius: 20,
             marginBottom: 10,
-            backgroundColor: '#161616',
-            padding: 16,
+            backgroundColor: colors.bgSurface,
+            padding: space.lg,
             marginHorizontal: 10,
             borderWidth: 0.5,
-            borderColor: '#575757',
+            borderColor: colors.borderFaint,
           }}
         >
           <View
@@ -357,7 +350,7 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
               style={{ marginRight: 15 }}
               size={20}
               icon={faCircle}
-              color="#FC0"
+              color={colors.fgWarning}
             />
             <View
               style={{
@@ -370,13 +363,14 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
             >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <TextInput
-                  style={{
-                    flexGrow: 1,
-                    flexShrink: 1,
-                    color: colors.fgDefault,
-                    fontSize: 17,
-                    fontWeight: '400',
-                  }}
+                  style={[
+                    text.body,
+                    {
+                      flexGrow: 1,
+                      flexShrink: 1,
+                      color: colors.fgDefault,
+                    },
+                  ]}
                   placeholder="Tap here for finalizer address"
                   placeholderTextColor={colors.fgSubtle}
                   value={shortenTxid(finalizerFromText)}
@@ -444,28 +438,25 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
         <View
           style={{
             flex: 1,
-            paddingHorizontal: 24,
-            paddingTop: 24,
+            paddingHorizontal: space.xxl,
+            paddingTop: space.xxl,
           }}
         >
           {/* Staked TX list */}
           <Text
-            style={{
-              fontSize: 16,
-              fontWeight: '600',
-              color: colors.fgDefault,
-              marginBottom: 8,
-            }}
+            style={[
+              text.headline,
+              { color: colors.fgDefault, marginBottom: space.sm },
+            ]}
           >
             Staking positions
           </Text>
 
           <Text
-            style={{
-              fontSize: 12,
-              color: colors.fgSubtle,
-              marginBottom: 8,
-            }}
+            style={[
+              text.caption1,
+              { color: colors.fgSubtle, marginBottom: space.sm },
+            ]}
           >
             These are the currently-active delegation bonds, which includes
             bonded and unstaked positions.
@@ -474,7 +465,7 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
           <View
             style={{
               flex: 1,
-              marginBottom: 16,
+              marginBottom: space.lg,
             }}
           >
             <FlatList
@@ -484,12 +475,14 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
               ItemSeparatorComponent={renderSeparator}
               ListEmptyComponent={
                 <Text
-                  style={{
-                    color: colors.fgSubtle,
-                    fontSize: 13,
-                    textAlign: 'center',
-                    marginTop: 16,
-                  }}
+                  style={[
+                    text.footnote,
+                    {
+                      color: colors.fgSubtle,
+                      textAlign: 'center',
+                      marginTop: space.lg,
+                    },
+                  ]}
                 >
                   You don&apos;t have any staking positions that match the
                   currently selected filters.
@@ -506,7 +499,7 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
             justifyContent: 'center',
             paddingTop: 10,
             paddingBottom: insets.bottom + 20,
-            paddingHorizontal: 24,
+            paddingHorizontal: space.xxl,
           }}
         >
           <LiquidPrimaryButton
@@ -544,12 +537,14 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
                 <>
                   <ActivityIndicator size="large" color={colors.fgDefault} />
                   <Text
-                    style={{
-                      marginTop: 16,
-                      color: colors.fgDefault,
-                      fontSize: 16,
-                      textAlign: 'center',
-                    }}
+                    style={[
+                      text.callout,
+                      {
+                        marginTop: space.lg,
+                        color: colors.fgDefault,
+                        textAlign: 'center',
+                      },
+                    ]}
                   >
                     Sending unstaking transaction…
                   </Text>
@@ -564,13 +559,14 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
                     color={colors.fgAccent}
                   />
                   <Text
-                    style={{
-                      marginTop: 16,
-                      color: colors.fgDefault,
-                      fontSize: 18,
-                      fontWeight: '600',
-                      textAlign: 'center',
-                    }}
+                    style={[
+                      text.headline,
+                      {
+                        marginTop: space.lg,
+                        color: colors.fgDefault,
+                        textAlign: 'center',
+                      },
+                    ]}
                   >
                     Unstaking request transaction sent!
                   </Text>
@@ -579,9 +575,9 @@ const Unstake: React.FC<UnstakeProps> = ({ route }) => {
                     style={{
                       alignItems: 'center',
                       justifyContent: 'center',
-                      paddingTop: 24,
-                      paddingBottom: 20,
-                      paddingHorizontal: 24,
+                      paddingTop: space.xxl,
+                      paddingBottom: space.xl,
+                      paddingHorizontal: space.xxl,
                     }}
                   >
                     <LiquidPrimaryButton
@@ -611,8 +607,8 @@ const styles = StyleSheet.create({
     width: '80%',
     maxWidth: 320,
     borderRadius: 18,
-    paddingHorizontal: 20,
-    paddingVertical: 24,
+    paddingHorizontal: space.xl,
+    paddingVertical: space.xxl,
     alignItems: 'center',
     borderWidth: StyleSheet.hairlineWidth,
   },
@@ -621,7 +617,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 12,
     borderWidth: 1,
-    paddingHorizontal: 12,
+    paddingHorizontal: space.md,
     paddingVertical: 10,
   },
 });

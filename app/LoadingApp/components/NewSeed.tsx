@@ -1,6 +1,11 @@
-/* eslint-disable react-native/no-inline-styles */
 import React, { useState, useEffect, useContext } from 'react';
-import { View, ScrollView, TouchableOpacity, Text } from 'react-native';
+import {
+  View,
+  ScrollView,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+} from 'react-native';
 
 import Clipboard from '@react-native-clipboard/clipboard';
 
@@ -13,7 +18,7 @@ import Utils from '../../utils';
 import Snackbars from '../../../components/Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import LiquidPrimaryButton from '../../../components/Components/LiquidButton/LiquidPrimaryButton';
-import { useTheme } from '../../theme';
+import { space, useTheme } from '../../theme';
 
 type TextsType = {
   new: string[];
@@ -98,12 +103,7 @@ const NewSeed: React.FunctionComponent<NewSeedProps> = ({ onClickOK }) => {
         screenName={screenName}
       />
 
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: colors.bgCanvas,
-        }}
-      >
+      <View style={[styles.screen, { backgroundColor: colors.bgCanvas }]}>
         <Header
           title={translate('seed.title') + ' (' + translate(`seed.new`) + ')'}
           screenName={screenName}
@@ -120,33 +120,13 @@ const NewSeed: React.FunctionComponent<NewSeedProps> = ({ onClickOK }) => {
         />
         <ScrollView
           keyboardShouldPersistTaps="handled"
-          style={{ height: '80%', maxHeight: '80%' }}
-          contentContainerStyle={{
-            flexDirection: 'column',
-            alignItems: 'stretch',
-            justifyContent: 'flex-start',
-          }}
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
         >
-          <RegText
-            style={{
-              marginTop: 0,
-              padding: 20,
-              textAlign: 'center',
-              fontWeight: '900',
-            }}
-          >
+          <RegText style={styles.warning}>
             {translate('seed.text-readonly') as string}
           </RegText>
-          <View
-            style={{
-              margin: 10,
-              padding: 10,
-              borderWidth: 1,
-              borderRadius: 10,
-              borderColor: colors.fgDefault,
-              maxHeight: '45%',
-            }}
-          >
+          <View style={[styles.seedBox, { borderColor: colors.fgDefault }]}>
             <TouchableOpacity
               onPress={() => {
                 if (seedPhrase) {
@@ -167,18 +147,11 @@ const NewSeed: React.FunctionComponent<NewSeedProps> = ({ onClickOK }) => {
                 }
               }}
             >
-              <RegText
-                color={colors.fgDefault}
-                style={{
-                  textAlign: 'center',
-                }}
-              >
+              <RegText color={colors.fgDefault} style={styles.centerText}>
                 {!expandSeed ? Utils.trimToSmall(seedPhrase, 5) : seedPhrase}
               </RegText>
             </TouchableOpacity>
-            <View
-              style={{ flexDirection: 'row', justifyContent: 'space-between' }}
-            >
+            <View style={styles.copyRow}>
               <View />
               <TouchableOpacity
                 onPress={() => {
@@ -196,16 +169,7 @@ const NewSeed: React.FunctionComponent<NewSeedProps> = ({ onClickOK }) => {
                   }
                 }}
               >
-                <Text
-                  style={{
-                    color: colors.fgDefault,
-                    textDecorationLine: 'underline',
-                    padding: 10,
-                    marginTop: 0,
-                    textAlign: 'center',
-                    minHeight: 48,
-                  }}
-                >
+                <Text style={[styles.copyLink, { color: colors.fgDefault }]}>
                   {translate('seed.tapcopy') as string}
                 </Text>
               </TouchableOpacity>
@@ -213,8 +177,8 @@ const NewSeed: React.FunctionComponent<NewSeedProps> = ({ onClickOK }) => {
             </View>
           </View>
 
-          <View style={{ marginTop: 10, alignItems: 'center' }}>
-            <FadeText style={{ textAlign: 'center' }}>
+          <View style={styles.birthdaySection}>
+            <FadeText style={styles.centerText}>
               {translate('seed.birthday-readonly') as string}
             </FadeText>
             <TouchableOpacity
@@ -239,34 +203,85 @@ const NewSeed: React.FunctionComponent<NewSeedProps> = ({ onClickOK }) => {
                 }
               }}
             >
-              <RegText color={colors.fgDefault} style={{ textAlign: 'center' }}>
+              <RegText color={colors.fgDefault} style={styles.centerText}>
                 {!expandBirthday
                   ? Utils.trimToSmall(birthdayNumber, 1)
                   : birthdayNumber}
               </RegText>
             </TouchableOpacity>
           </View>
-          <View style={{ marginBottom: 30 }} />
+          <View style={styles.bottomSpacer} />
         </ScrollView>
-        <View
-          style={{
-            marginTop: 'auto',
-            alignItems: 'center',
-            justifyContent: 'center',
-            paddingTop: 10,
-            paddingBottom: 20,
-            paddingHorizontal: 15,
-          }}
-        >
+        <View style={styles.footer}>
           <LiquidPrimaryButton
             title={!!texts && !!texts.new ? texts.new[0] : ''}
             onPress={() => onClickOKHide()}
-            style={{ alignSelf: 'stretch' }}
+            style={styles.stretch}
           />
         </View>
       </View>
     </ToastProvider>
   );
 };
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+  scroll: {
+    height: '80%',
+    maxHeight: '80%',
+  },
+  scrollContent: {
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    justifyContent: 'flex-start',
+  },
+  warning: {
+    marginTop: 0,
+    padding: space.xl,
+    textAlign: 'center',
+    fontWeight: '900',
+  },
+  seedBox: {
+    margin: space.md,
+    padding: space.md,
+    borderWidth: 1,
+    borderRadius: 10,
+    maxHeight: '45%',
+  },
+  centerText: {
+    textAlign: 'center',
+  },
+  copyRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  copyLink: {
+    textDecorationLine: 'underline',
+    padding: space.md,
+    marginTop: 0,
+    textAlign: 'center',
+    minHeight: 48,
+  },
+  birthdaySection: {
+    marginTop: space.md,
+    alignItems: 'center',
+  },
+  bottomSpacer: {
+    marginBottom: space.xxxl,
+  },
+  footer: {
+    marginTop: 'auto',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: space.md,
+    paddingBottom: space.xl,
+    paddingHorizontal: space.lg,
+  },
+  stretch: {
+    alignSelf: 'stretch',
+  },
+});
 
 export default NewSeed;

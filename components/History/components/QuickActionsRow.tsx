@@ -1,6 +1,5 @@
-/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import { View, TouchableOpacity, Alert } from 'react-native';
+import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import { GlobalConst, RouteEnum } from '../../../app/AppState';
@@ -9,6 +8,7 @@ import PaperPlane from '../../../assets/icons/paper-plane.svg';
 import QrCode from '../../../assets/icons/qr.svg';
 import FaucetIcon from '../../../assets/icons/faucet.svg';
 import { useAppLoadedActions, useAppLoadedWallet } from '../../../app/context';
+import { space, useTheme } from '../../../app/theme';
 
 const ActionButton = ({
   icon,
@@ -18,55 +18,30 @@ const ActionButton = ({
   icon: React.ReactNode;
   label: string;
   onPress: () => void;
-}) => (
-  <View
-    style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexWrap: 'wrap',
-      marginHorizontal: 8,
-    }}
-  >
-    <TouchableOpacity
-      style={{
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
-      onPress={onPress}
-    >
-      <View
-        style={{
-          borderRadius: 35,
-          backgroundColor: '#1C78D24D',
-          padding: 20,
-          margin: 10,
-        }}
-      >
-        {icon}
-      </View>
-      <FadeText>{label}</FadeText>
-    </TouchableOpacity>
-  </View>
-);
+}) => {
+  const { colors } = useTheme();
+
+  return (
+    <View style={styles.action}>
+      <TouchableOpacity style={styles.hit} onPress={onPress}>
+        <View style={[styles.disc, { backgroundColor: colors.bgAccentTint }]}>
+          {icon}
+        </View>
+        <FadeText>{label}</FadeText>
+      </TouchableOpacity>
+    </View>
+  );
+};
 
 const QuickActionsRow: React.FC = () => {
   const navigation: any = useNavigation();
+  const { colors } = useTheme();
 
   const { requestFaucetFunds } = useAppLoadedActions();
   const { defaultUnifiedAddress } = useAppLoadedWallet();
 
   return (
-    <View
-      style={{
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexWrap: 'wrap',
-        marginTop: 10,
-      }}
-    >
+    <View style={styles.row}>
       <ActionButton
         icon={<PaperPlane width={30} height={30} />}
         label={'Send'}
@@ -78,7 +53,7 @@ const QuickActionsRow: React.FC = () => {
         onPress={() => navigation.navigate(RouteEnum.Receive)}
       />
       <ActionButton
-        icon={<FaucetIcon width={30} height={30} color={'#8FBFFA'} />}
+        icon={<FaucetIcon width={30} height={30} color={colors.fgAccent} />}
         label={'Faucet'}
         onPress={async () => {
           const resp = await requestFaucetFunds(defaultUnifiedAddress);
@@ -92,6 +67,34 @@ const QuickActionsRow: React.FC = () => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  row: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    marginTop: space.md,
+  },
+  action: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    marginHorizontal: space.sm,
+  },
+  hit: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  disc: {
+    // Half the 70pt action circle.
+    borderRadius: 35,
+    padding: space.xl,
+    margin: space.md,
+  },
+});
 
 export default QuickActionsRow;
 

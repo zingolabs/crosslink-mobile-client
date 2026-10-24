@@ -1,6 +1,5 @@
-/* eslint-disable react-native/no-inline-styles */
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Animated, TouchableOpacity } from 'react-native';
+import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { isEqual } from 'lodash';
 
@@ -13,7 +12,7 @@ import { RouteEnum, SelectServerEnum } from '../../../app/AppState';
 import { RPCSyncStatusType } from '../../../app/rpc/types/RPCSyncStatusType';
 import ZecAmount from '../../Components/ZecAmount';
 import FadeText from '../../Components/FadeText';
-import { useTheme } from '../../../app/theme';
+import { space, text, useTheme } from '../../../app/theme';
 
 type WalletSummaryHeaderProps = {
   show_staked: boolean;
@@ -110,23 +109,9 @@ const WalletSummaryHeader: React.FC<WalletSummaryHeaderProps> = ({
     : (totalBalance?.totalSpendableBalance ?? 0);
 
   return (
-    <View
-      style={{
-        alignItems: 'center',
-        paddingTop: 10,
-        paddingBottom: 10,
-        backgroundColor: colors.bgCanvas,
-      }}
-    >
+    <View style={[styles.container, { backgroundColor: colors.bgCanvas }]}>
       {/* Balance */}
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 4,
-        }}
-      >
+      <View style={styles.balanceRow}>
         <ZecAmount
           currencyName={info.currencyName}
           color={colors.fgDefault}
@@ -138,114 +123,48 @@ const WalletSummaryHeader: React.FC<WalletSummaryHeaderProps> = ({
       </View>
 
       {/* Sync bar */}
-      <View
-        style={{
-          width: '30%',
-          height: 5,
-          marginTop: 10,
-          borderRadius: 3,
-          alignSelf: 'center',
-        }}
-      >
+      <View style={styles.syncBar}>
         {netInfo.isConnected && percentageOutputsScanned > 0 ? (
           <>
+            <View style={[styles.bar, { backgroundColor: colors.bgSurface }]} />
             <View
-              style={{
-                height: 5,
-                width: '100%',
-                borderRadius: 3,
-                backgroundColor: colors.bgSurface,
-              }}
-            />
-            <View
-              style={{
-                height: 5,
-                width: `${percentageOutputsScanned}%`,
-                borderRadius: 3,
-                backgroundColor: 'green',
-                marginTop: -5,
-              }}
+              style={[
+                styles.barFill,
+                {
+                  width: `${percentageOutputsScanned}%`,
+                  backgroundColor: colors.fgSuccess,
+                },
+              ]}
             />
           </>
         ) : netInfo.isConnected ? (
-          <View
-            style={{
-              height: 5,
-              width: '100%',
-              borderRadius: 3,
-              backgroundColor: colors.bgSyncing,
-            }}
-          />
+          <View style={[styles.bar, { backgroundColor: colors.bgSyncing }]} />
         ) : null}
       </View>
 
       {/* Sync status chip */}
-      <View
-        style={{
-          marginTop: 8,
-          minHeight: 29,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
+      <View style={styles.chipRow}>
         {selectIndexerServer === SelectServerEnum.offline ? (
-          <View
-            style={{
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginHorizontal: 2.5,
-              paddingHorizontal: 5,
-              paddingVertical: 1,
-              borderColor: colors.borderMuted,
-              borderWidth: 1,
-              borderRadius: 10,
-              minWidth: 25,
-              minHeight: 25,
-            }}
-          >
-            <FadeText style={{ fontSize: 10 }}>
+          <View style={[styles.chip, { borderColor: colors.borderMuted }]}>
+            <FadeText style={text.caption2}>
               {translate('settings.server-offline') as string}
             </FadeText>
           </View>
         ) : netInfo.isConnected && percentageOutputsScanned > 0 ? (
           <>
             {syncInProgress ? (
-              <View
-                style={{
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginHorizontal: 2.5,
-                  padding: 1,
-                  minWidth: 25,
-                  minHeight: 25,
-                }}
-              >
+              <View style={styles.chipBox}>
                 <Animated.View
-                  style={{
-                    opacity: opacityValue,
-                    flexDirection: 'row',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    padding: 3,
-                  }}
+                  style={[styles.blink, { opacity: opacityValue }]}
                 >
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <FadeText style={{ fontSize: 10, marginLeft: 2 }}>
+                  <View style={styles.rowCenter}>
+                    <FadeText style={styles.chipText}>
                       {translate('syncing') as string}
                     </FadeText>
                     {percentageOutputsScanned > 0 && (
                       <>
-                        <FadeText style={{ fontSize: 10, marginLeft: 2 }}>
-                          {' - '}
-                        </FadeText>
-                        <FadeText style={{ fontSize: 10, marginLeft: 2 }}>
+                        <FadeText style={styles.chipText}>{' - '}</FadeText>
+                        <FadeText style={styles.chipText}>
                           {` ${percentageOutputsScanned}%`}
                         </FadeText>
                       </>
@@ -254,25 +173,9 @@ const WalletSummaryHeader: React.FC<WalletSummaryHeaderProps> = ({
                 </Animated.View>
               </View>
             ) : (
-              <View
-                style={{
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginHorizontal: 2.5,
-                  padding: 1,
-                  minWidth: 25,
-                  minHeight: 25,
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    padding: 3,
-                  }}
-                >
-                  <FadeText style={{ fontSize: 10, marginLeft: 2 }}>
+              <View style={styles.chipBox}>
+                <View style={styles.blink}>
+                  <FadeText style={styles.chipText}>
                     {translate('synced') as string}
                   </FadeText>
                 </View>
@@ -280,26 +183,10 @@ const WalletSummaryHeader: React.FC<WalletSummaryHeaderProps> = ({
             )}
           </>
         ) : netInfo.isConnected ? (
-          <View
-            style={{
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginHorizontal: 2.5,
-              padding: 1,
-              minWidth: 25,
-              minHeight: 25,
-            }}
-          >
+          <View style={styles.chipBox}>
             <TouchableOpacity onPress={showSyncReport}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  padding: 3,
-                }}
-              >
-                <FadeText style={{ fontSize: 10, marginLeft: 2 }}>
+              <View style={styles.blink}>
+                <FadeText style={styles.chipText}>
                   {translate('connecting') as string}
                 </FadeText>
               </View>
@@ -310,5 +197,77 @@ const WalletSummaryHeader: React.FC<WalletSummaryHeaderProps> = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+    paddingTop: space.md,
+    paddingBottom: space.md,
+  },
+  balanceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: space.xs,
+  },
+  syncBar: {
+    width: '30%',
+    height: 5,
+    marginTop: space.md,
+    borderRadius: 3,
+    alignSelf: 'center',
+  },
+  bar: {
+    height: 5,
+    width: '100%',
+    borderRadius: 3,
+  },
+  barFill: {
+    height: 5,
+    borderRadius: 3,
+    marginTop: -5,
+  },
+  chipRow: {
+    marginTop: space.sm,
+    minHeight: 29,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chip: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 2.5,
+    paddingHorizontal: space.xs,
+    paddingVertical: 1,
+    borderWidth: 1,
+    borderRadius: 10,
+    minWidth: 25,
+    minHeight: 25,
+  },
+  chipBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 2.5,
+    padding: 1,
+    minWidth: 25,
+    minHeight: 25,
+  },
+  blink: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 3,
+  },
+  rowCenter: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  chipText: {
+    ...text.caption2,
+    marginLeft: 2,
+  },
+});
 
 export default WalletSummaryHeader;

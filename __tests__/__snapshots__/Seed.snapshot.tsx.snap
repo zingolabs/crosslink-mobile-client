@@ -177,13 +177,22 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
       >
         <Text
           style={
-            {
-              "color": "#c3c3c3",
-              "fontSize": 17,
-              "opacity": 0.65,
-              "padding": 10,
-              "textAlign": "center",
-            }
+            [
+              {
+                "fontSize": 17,
+                "fontWeight": "400",
+                "letterSpacing": -0.41,
+                "lineHeight": 22,
+              },
+              {
+                "color": "#888888",
+              },
+              {
+                "fontSize": 17,
+                "padding": 10,
+                "textAlign": "center",
+              },
+            ]
           }
         >
           Your seed phrase is the key to your wallet. Back it up so you can restore your wallet if you lose or damage your device 
@@ -226,10 +235,18 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
             >
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 1
@@ -277,10 +294,18 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
             >
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 2
@@ -328,10 +353,18 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
             >
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 3
@@ -502,10 +535,13 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
                 style={
                   [
                     {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
                       "color": "#c3c3c3",
-                      "fontSize": 18,
-                      "fontWeight": "600",
-                      "opacity": 1,
                     },
                     {
                       "color": "white",
@@ -574,10 +610,13 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
               style={
                 [
                   {
+                    "fontSize": 17,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.41,
+                    "lineHeight": 22,
+                  },
+                  {
                     "color": "#c3c3c3",
-                    "fontSize": 18,
-                    "fontWeight": "600",
-                    "opacity": 1,
                   },
                   {
                     "color": "#c3c3c3",
@@ -613,13 +652,22 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
         >
           <Text
             style={
-              {
-                "color": "#c3c3c3",
-                "flexGrow": 1,
-                "flexShrink": 1,
-                "fontSize": 20,
-                "opacity": 0.65,
-              }
+              [
+                {
+                  "fontSize": 17,
+                  "fontWeight": "400",
+                  "letterSpacing": -0.41,
+                  "lineHeight": 22,
+                },
+                {
+                  "color": "#888888",
+                },
+                {
+                  "flexGrow": 1,
+                  "flexShrink": 1,
+                  "fontSize": 20,
+                },
+              ]
             }
           >
             Birthday
@@ -662,10 +710,13 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
               style={
                 [
                   {
+                    "fontSize": 17,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.41,
+                    "lineHeight": 22,
+                  },
+                  {
                     "color": "#c3c3c3",
-                    "fontSize": 18,
-                    "fontWeight": "600",
-                    "opacity": 1,
                   },
                   {
                     "textAlign": "center",
@@ -679,14 +730,23 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
         </View>
         <Text
           style={
-            {
-              "color": "#c3c3c3",
-              "flexGrow": 1,
-              "flexShrink": 1,
-              "fontSize": 20,
-              "marginTop": 10,
-              "opacity": 0.65,
-            }
+            [
+              {
+                "fontSize": 17,
+                "fontWeight": "400",
+                "letterSpacing": -0.41,
+                "lineHeight": 22,
+              },
+              {
+                "color": "#888888",
+              },
+              {
+                "flexGrow": 1,
+                "flexShrink": 1,
+                "fontSize": 20,
+                "marginTop": 10,
+              },
+            ]
           }
         >
           ... extracting UFVK...
@@ -874,13 +934,22 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
       >
         <Text
           style={
-            {
-              "color": "#c3c3c3",
-              "fontSize": 17,
-              "opacity": 0.65,
-              "padding": 10,
-              "textAlign": "center",
-            }
+            [
+              {
+                "fontSize": 17,
+                "fontWeight": "400",
+                "letterSpacing": -0.41,
+                "lineHeight": 22,
+              },
+              {
+                "color": "#888888",
+              },
+              {
+                "fontSize": 17,
+                "padding": 10,
+                "textAlign": "center",
+              },
+            ]
           }
         >
           Your seed phrase is the key to your wallet. Back it up so you can restore your wallet if you lose or damage your device 
@@ -923,10 +992,18 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
             >
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 1
@@ -974,10 +1051,18 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
             >
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 2
@@ -1025,10 +1110,18 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
             >
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 3
@@ -1199,10 +1292,13 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
                 style={
                   [
                     {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
                       "color": "#c3c3c3",
-                      "fontSize": 18,
-                      "fontWeight": "600",
-                      "opacity": 1,
                     },
                     {
                       "color": "white",
@@ -1271,10 +1367,13 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
               style={
                 [
                   {
+                    "fontSize": 17,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.41,
+                    "lineHeight": 22,
+                  },
+                  {
                     "color": "#c3c3c3",
-                    "fontSize": 18,
-                    "fontWeight": "600",
-                    "opacity": 1,
                   },
                   {
                     "color": "#c3c3c3",
@@ -1310,13 +1409,22 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
         >
           <Text
             style={
-              {
-                "color": "#c3c3c3",
-                "flexGrow": 1,
-                "flexShrink": 1,
-                "fontSize": 20,
-                "opacity": 0.65,
-              }
+              [
+                {
+                  "fontSize": 17,
+                  "fontWeight": "400",
+                  "letterSpacing": -0.41,
+                  "lineHeight": 22,
+                },
+                {
+                  "color": "#888888",
+                },
+                {
+                  "flexGrow": 1,
+                  "flexShrink": 1,
+                  "fontSize": 20,
+                },
+              ]
             }
           >
             Birthday
@@ -1359,10 +1467,13 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
               style={
                 [
                   {
+                    "fontSize": 17,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.41,
+                    "lineHeight": 22,
+                  },
+                  {
                     "color": "#c3c3c3",
-                    "fontSize": 18,
-                    "fontWeight": "600",
-                    "opacity": 1,
                   },
                   {
                     "textAlign": "center",
@@ -1376,14 +1487,23 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
         </View>
         <Text
           style={
-            {
-              "color": "#c3c3c3",
-              "flexGrow": 1,
-              "flexShrink": 1,
-              "fontSize": 20,
-              "marginTop": 10,
-              "opacity": 0.65,
-            }
+            [
+              {
+                "fontSize": 17,
+                "fontWeight": "400",
+                "letterSpacing": -0.41,
+                "lineHeight": 22,
+              },
+              {
+                "color": "#888888",
+              },
+              {
+                "flexGrow": 1,
+                "flexShrink": 1,
+                "fontSize": 20,
+                "marginTop": 10,
+              },
+            ]
           }
         >
           ... extracting UFVK...
@@ -1408,30 +1528,39 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
   <View />
   <View
     style={
-      {
-        "backgroundColor": "#011401",
-        "flex": 1,
-      }
+      [
+        {
+          "flex": 1,
+        },
+        {
+          "backgroundColor": "#011401",
+        },
+      ]
     }
   >
     <View>
       <View
         style={
-          {
-            "alignItems": "center",
-            "backgroundColor": "#011401",
-            "display": "flex",
-            "minHeight": 25,
-            "paddingBottom": 0,
-            "paddingTop": 10,
-          }
+          [
+            {
+              "alignItems": "center",
+              "display": "flex",
+              "paddingBottom": 0,
+            },
+            {
+              "minHeight": 25,
+            },
+            {
+              "backgroundColor": "#011401",
+              "paddingTop": 10,
+            },
+          ]
         }
         testID="header"
       >
         <View
           style={
             {
-              "borderRadius": 3,
               "display": "flex",
               "height": 5,
               "justifyContent": "flex-start",
@@ -1513,12 +1642,16 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
             >
               <View
                 style={
-                  {
-                    "backgroundColor": "#222223",
-                    "borderRadius": 35,
-                    "margin": 10,
-                    "padding": 20,
-                  }
+                  [
+                    {
+                      "borderRadius": 9999,
+                      "margin": 10,
+                      "padding": 20,
+                    },
+                    {
+                      "backgroundColor": "#222223",
+                    },
+                  ]
                 }
               >
                 <
@@ -1552,10 +1685,18 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
               </View>
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 Send
@@ -1610,12 +1751,16 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
             >
               <View
                 style={
-                  {
-                    "backgroundColor": "#222223",
-                    "borderRadius": 35,
-                    "margin": 10,
-                    "padding": 20,
-                  }
+                  [
+                    {
+                      "borderRadius": 9999,
+                      "margin": 10,
+                      "padding": 20,
+                    },
+                    {
+                      "backgroundColor": "#222223",
+                    },
+                  ]
                 }
               >
                 <
@@ -1649,10 +1794,18 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
               </View>
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 Receive
@@ -1707,12 +1860,16 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
             >
               <View
                 style={
-                  {
-                    "backgroundColor": "#222223",
-                    "borderRadius": 35,
-                    "margin": 10,
-                    "padding": 20,
-                  }
+                  [
+                    {
+                      "borderRadius": 9999,
+                      "margin": 10,
+                      "padding": 20,
+                    },
+                    {
+                      "backgroundColor": "#222223",
+                    },
+                  ]
                 }
               >
                 <
@@ -1735,10 +1892,18 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
               </View>
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 Faucet
@@ -1748,12 +1913,16 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
         </View>
         <View
           style={
-            {
-              "left": 0,
-              "padding": 11.5,
-              "position": "absolute",
-              "top": 0,
-            }
+            [
+              {
+                "left": 0,
+                "padding": 11.5,
+                "position": "absolute",
+              },
+              {
+                "top": 0,
+              },
+            ]
           }
         >
           <View
@@ -1769,12 +1938,16 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
       </View>
       <View
         style={
-          {
-            "padding": 13,
-            "position": "absolute",
-            "right": 0,
-            "top": 0,
-          }
+          [
+            {
+              "padding": 13,
+              "position": "absolute",
+              "right": 0,
+            },
+            {
+              "top": 0,
+            },
+          ]
         }
       >
         <View
@@ -1842,10 +2015,13 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
           style={
             [
               {
+                "fontSize": 17,
+                "fontWeight": "400",
+                "letterSpacing": -0.41,
+                "lineHeight": 22,
+              },
+              {
                 "color": "#c3c3c3",
-                "fontSize": 18,
-                "fontWeight": "600",
-                "opacity": 1,
               },
               {
                 "fontWeight": "900",
@@ -1860,14 +2036,18 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
         </Text>
         <View
           style={
-            {
-              "borderColor": "#c3c3c3",
-              "borderRadius": 10,
-              "borderWidth": 1,
-              "margin": 10,
-              "maxHeight": "45%",
-              "padding": 10,
-            }
+            [
+              {
+                "borderRadius": 10,
+                "borderWidth": 1,
+                "margin": 12,
+                "maxHeight": "45%",
+                "padding": 12,
+              },
+              {
+                "borderColor": "#c3c3c3",
+              },
+            ]
           }
         >
           <View
@@ -1908,10 +2088,13 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
               style={
                 [
                   {
+                    "fontSize": 17,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.41,
+                    "lineHeight": 22,
+                  },
+                  {
                     "color": "#c3c3c3",
-                    "fontSize": 18,
-                    "fontWeight": "600",
-                    "opacity": 1,
                   },
                   {
                     "textAlign": "center",
@@ -1967,14 +2150,18 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
             >
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "marginTop": 0,
-                    "minHeight": 48,
-                    "padding": 10,
-                    "textAlign": "center",
-                    "textDecorationLine": "underline",
-                  }
+                  [
+                    {
+                      "marginTop": 0,
+                      "minHeight": 48,
+                      "padding": 12,
+                      "textAlign": "center",
+                      "textDecorationLine": "underline",
+                    },
+                    {
+                      "color": "#c3c3c3",
+                    },
+                  ]
                 }
               >
                 text translated
@@ -1987,17 +2174,26 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
           style={
             {
               "alignItems": "center",
-              "marginTop": 10,
+              "marginTop": 12,
             }
           }
         >
           <Text
             style={
-              {
-                "color": "#c3c3c3",
-                "opacity": 0.65,
-                "textAlign": "center",
-              }
+              [
+                {
+                  "fontSize": 17,
+                  "fontWeight": "400",
+                  "letterSpacing": -0.41,
+                  "lineHeight": 22,
+                },
+                {
+                  "color": "#888888",
+                },
+                {
+                  "textAlign": "center",
+                },
+              ]
             }
           >
             text translated
@@ -2040,10 +2236,13 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
               style={
                 [
                   {
+                    "fontSize": 17,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.41,
+                    "lineHeight": 22,
+                  },
+                  {
                     "color": "#c3c3c3",
-                    "fontSize": 18,
-                    "fontWeight": "600",
-                    "opacity": 1,
                   },
                   {
                     "textAlign": "center",
@@ -2058,7 +2257,7 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
         <View
           style={
             {
-              "marginBottom": 30,
+              "marginBottom": 32,
             }
           }
         />
@@ -2071,8 +2270,8 @@ exports[`Component Seed - test Seed New - snapshot 1`] = `
           "justifyContent": "center",
           "marginTop": "auto",
           "paddingBottom": 20,
-          "paddingHorizontal": 15,
-          "paddingTop": 10,
+          "paddingHorizontal": 16,
+          "paddingTop": 12,
         }
       }
     >
@@ -2385,13 +2584,22 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
       >
         <Text
           style={
-            {
-              "color": "#c3c3c3",
-              "fontSize": 17,
-              "opacity": 0.65,
-              "padding": 10,
-              "textAlign": "center",
-            }
+            [
+              {
+                "fontSize": 17,
+                "fontWeight": "400",
+                "letterSpacing": -0.41,
+                "lineHeight": 22,
+              },
+              {
+                "color": "#888888",
+              },
+              {
+                "fontSize": 17,
+                "padding": 10,
+                "textAlign": "center",
+              },
+            ]
           }
         >
           Your seed phrase is the key to your wallet. Back it up so you can restore your wallet if you lose or damage your device 
@@ -2434,10 +2642,18 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
             >
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 1
@@ -2485,10 +2701,18 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
             >
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 2
@@ -2536,10 +2760,18 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
             >
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 3
@@ -2710,10 +2942,13 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
                 style={
                   [
                     {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
                       "color": "#c3c3c3",
-                      "fontSize": 18,
-                      "fontWeight": "600",
-                      "opacity": 1,
                     },
                     {
                       "color": "white",
@@ -2782,10 +3017,13 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
               style={
                 [
                   {
+                    "fontSize": 17,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.41,
+                    "lineHeight": 22,
+                  },
+                  {
                     "color": "#c3c3c3",
-                    "fontSize": 18,
-                    "fontWeight": "600",
-                    "opacity": 1,
                   },
                   {
                     "color": "#c3c3c3",
@@ -2821,13 +3059,22 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
         >
           <Text
             style={
-              {
-                "color": "#c3c3c3",
-                "flexGrow": 1,
-                "flexShrink": 1,
-                "fontSize": 20,
-                "opacity": 0.65,
-              }
+              [
+                {
+                  "fontSize": 17,
+                  "fontWeight": "400",
+                  "letterSpacing": -0.41,
+                  "lineHeight": 22,
+                },
+                {
+                  "color": "#888888",
+                },
+                {
+                  "flexGrow": 1,
+                  "flexShrink": 1,
+                  "fontSize": 20,
+                },
+              ]
             }
           >
             Birthday
@@ -2870,10 +3117,13 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
               style={
                 [
                   {
+                    "fontSize": 17,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.41,
+                    "lineHeight": 22,
+                  },
+                  {
                     "color": "#c3c3c3",
-                    "fontSize": 18,
-                    "fontWeight": "600",
-                    "opacity": 1,
                   },
                   {
                     "textAlign": "center",
@@ -2887,14 +3137,23 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
         </View>
         <Text
           style={
-            {
-              "color": "#c3c3c3",
-              "flexGrow": 1,
-              "flexShrink": 1,
-              "fontSize": 20,
-              "marginTop": 10,
-              "opacity": 0.65,
-            }
+            [
+              {
+                "fontSize": 17,
+                "fontWeight": "400",
+                "letterSpacing": -0.41,
+                "lineHeight": 22,
+              },
+              {
+                "color": "#888888",
+              },
+              {
+                "flexGrow": 1,
+                "flexShrink": 1,
+                "fontSize": 20,
+                "marginTop": 10,
+              },
+            ]
           }
         >
           ... extracting UFVK...
@@ -3082,13 +3341,22 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
       >
         <Text
           style={
-            {
-              "color": "#c3c3c3",
-              "fontSize": 17,
-              "opacity": 0.65,
-              "padding": 10,
-              "textAlign": "center",
-            }
+            [
+              {
+                "fontSize": 17,
+                "fontWeight": "400",
+                "letterSpacing": -0.41,
+                "lineHeight": 22,
+              },
+              {
+                "color": "#888888",
+              },
+              {
+                "fontSize": 17,
+                "padding": 10,
+                "textAlign": "center",
+              },
+            ]
           }
         >
           Your seed phrase is the key to your wallet. Back it up so you can restore your wallet if you lose or damage your device 
@@ -3131,10 +3399,18 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
             >
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 1
@@ -3182,10 +3458,18 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
             >
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 2
@@ -3233,10 +3517,18 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
             >
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 3
@@ -3407,10 +3699,13 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
                 style={
                   [
                     {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
                       "color": "#c3c3c3",
-                      "fontSize": 18,
-                      "fontWeight": "600",
-                      "opacity": 1,
                     },
                     {
                       "color": "white",
@@ -3479,10 +3774,13 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
               style={
                 [
                   {
+                    "fontSize": 17,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.41,
+                    "lineHeight": 22,
+                  },
+                  {
                     "color": "#c3c3c3",
-                    "fontSize": 18,
-                    "fontWeight": "600",
-                    "opacity": 1,
                   },
                   {
                     "color": "#c3c3c3",
@@ -3518,13 +3816,22 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
         >
           <Text
             style={
-              {
-                "color": "#c3c3c3",
-                "flexGrow": 1,
-                "flexShrink": 1,
-                "fontSize": 20,
-                "opacity": 0.65,
-              }
+              [
+                {
+                  "fontSize": 17,
+                  "fontWeight": "400",
+                  "letterSpacing": -0.41,
+                  "lineHeight": 22,
+                },
+                {
+                  "color": "#888888",
+                },
+                {
+                  "flexGrow": 1,
+                  "flexShrink": 1,
+                  "fontSize": 20,
+                },
+              ]
             }
           >
             Birthday
@@ -3567,10 +3874,13 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
               style={
                 [
                   {
+                    "fontSize": 17,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.41,
+                    "lineHeight": 22,
+                  },
+                  {
                     "color": "#c3c3c3",
-                    "fontSize": 18,
-                    "fontWeight": "600",
-                    "opacity": 1,
                   },
                   {
                     "textAlign": "center",
@@ -3584,14 +3894,23 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
         </View>
         <Text
           style={
-            {
-              "color": "#c3c3c3",
-              "flexGrow": 1,
-              "flexShrink": 1,
-              "fontSize": 20,
-              "marginTop": 10,
-              "opacity": 0.65,
-            }
+            [
+              {
+                "fontSize": 17,
+                "fontWeight": "400",
+                "letterSpacing": -0.41,
+                "lineHeight": 22,
+              },
+              {
+                "color": "#888888",
+              },
+              {
+                "flexGrow": 1,
+                "flexShrink": 1,
+                "fontSize": 20,
+                "marginTop": 10,
+              },
+            ]
           }
         >
           ... extracting UFVK...

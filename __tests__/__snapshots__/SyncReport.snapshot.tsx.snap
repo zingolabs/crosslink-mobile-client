@@ -14,30 +14,39 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
   <View />
   <View
     style={
-      {
-        "backgroundColor": "#011401",
-        "flex": 1,
-      }
+      [
+        {
+          "flex": 1,
+        },
+        {
+          "backgroundColor": "#011401",
+        },
+      ]
     }
   >
     <View>
       <View
         style={
-          {
-            "alignItems": "center",
-            "backgroundColor": "#011401",
-            "display": "flex",
-            "minHeight": 25,
-            "paddingBottom": 0,
-            "paddingTop": 10,
-          }
+          [
+            {
+              "alignItems": "center",
+              "display": "flex",
+              "paddingBottom": 0,
+            },
+            {
+              "minHeight": 25,
+            },
+            {
+              "backgroundColor": "#011401",
+              "paddingTop": 10,
+            },
+          ]
         }
         testID="header"
       >
         <View
           style={
             {
-              "borderRadius": 3,
               "display": "flex",
               "height": 5,
               "justifyContent": "flex-start",
@@ -48,23 +57,33 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
         >
           <View
             style={
-              {
-                "backgroundColor": "#222223",
-                "borderRadius": 3,
-                "height": 5,
-                "width": "100%",
-              }
+              [
+                {
+                  "borderRadius": 3,
+                  "height": 5,
+                  "width": "100%",
+                },
+                {
+                  "backgroundColor": "#222223",
+                },
+              ]
             }
           />
           <View
             style={
-              {
-                "backgroundColor": "green",
-                "borderRadius": 3,
-                "height": 5,
-                "marginTop": -5,
-                "width": "99.99%",
-              }
+              [
+                {
+                  "borderRadius": 3,
+                  "height": 5,
+                  "width": "100%",
+                },
+                {
+                  "marginTop": -5,
+                },
+                {
+                  "backgroundColor": "#30D158",
+                },
+              ]
             }
           />
         </View>
@@ -141,12 +160,16 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
             >
               <View
                 style={
-                  {
-                    "backgroundColor": "#222223",
-                    "borderRadius": 35,
-                    "margin": 10,
-                    "padding": 20,
-                  }
+                  [
+                    {
+                      "borderRadius": 9999,
+                      "margin": 10,
+                      "padding": 20,
+                    },
+                    {
+                      "backgroundColor": "#222223",
+                    },
+                  ]
                 }
               >
                 <
@@ -180,10 +203,18 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
               </View>
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 Send
@@ -238,12 +269,16 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
             >
               <View
                 style={
-                  {
-                    "backgroundColor": "#222223",
-                    "borderRadius": 35,
-                    "margin": 10,
-                    "padding": 20,
-                  }
+                  [
+                    {
+                      "borderRadius": 9999,
+                      "margin": 10,
+                      "padding": 20,
+                    },
+                    {
+                      "backgroundColor": "#222223",
+                    },
+                  ]
                 }
               >
                 <
@@ -277,10 +312,18 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
               </View>
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 Receive
@@ -335,12 +378,16 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
             >
               <View
                 style={
-                  {
-                    "backgroundColor": "#222223",
-                    "borderRadius": 35,
-                    "margin": 10,
-                    "padding": 20,
-                  }
+                  [
+                    {
+                      "borderRadius": 9999,
+                      "margin": 10,
+                      "padding": 20,
+                    },
+                    {
+                      "backgroundColor": "#222223",
+                    },
+                  ]
                 }
               >
                 <
@@ -363,10 +410,18 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
               </View>
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 Faucet
@@ -376,12 +431,16 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
         </View>
         <View
           style={
-            {
-              "left": 0,
-              "padding": 11.5,
-              "position": "absolute",
-              "top": 0,
-            }
+            [
+              {
+                "left": 0,
+                "padding": 11.5,
+                "position": "absolute",
+              },
+              {
+                "top": 0,
+              },
+            ]
           }
         >
           <View
@@ -397,12 +456,16 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
       </View>
       <View
         style={
-          {
-            "padding": 13,
-            "position": "absolute",
-            "right": 0,
-            "top": 0,
-          }
+          [
+            {
+              "padding": 13,
+              "position": "absolute",
+              "right": 0,
+            },
+            {
+              "top": 0,
+            },
+          ]
         }
       >
         <View
@@ -469,7 +532,7 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
           style={
             {
               "display": "flex",
-              "marginBottom": 30,
+              "marginBottom": 32,
               "marginHorizontal": 20,
             }
           }
@@ -484,10 +547,18 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
           >
             <Text
               style={
-                {
-                  "color": "#c3c3c3",
-                  "opacity": 0.65,
-                }
+                [
+                  {
+                    "fontSize": 17,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.41,
+                    "lineHeight": 22,
+                  },
+                  {
+                    "color": "#888888",
+                  },
+                  undefined,
+                ]
               }
             >
               text translated
@@ -530,10 +601,13 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
                 style={
                   [
                     {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
                       "color": "#c3c3c3",
-                      "fontSize": 18,
-                      "fontWeight": "600",
-                      "opacity": 1,
                     },
                     undefined,
                   ]
@@ -545,13 +619,17 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
           </View>
           <View
             style={
-              {
-                "backgroundColor": "white",
-                "height": 2,
-                "marginBottom": 10,
-                "marginTop": 15,
-                "width": "100%",
-              }
+              [
+                {
+                  "height": 0.5,
+                  "marginBottom": 8,
+                  "marginTop": 16,
+                  "width": "100%",
+                },
+                {
+                  "backgroundColor": "#ffffff",
+                },
+              ]
             }
           />
           <View
@@ -560,7 +638,7 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
                 "display": "flex",
                 "flexDirection": "row",
                 "justifyContent": "space-between",
-                "marginTop": 10,
+                "marginTop": 8,
                 "width": "100%",
               }
             }
@@ -631,113 +709,159 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
           >
             <View
               style={
-                {
-                  "borderLeftColor": "#18bd18",
-                  "borderLeftWidth": 1,
-                  "borderRightColor": "#18bd18",
-                  "borderRightWidth": 1,
-                  "height": 10,
-                  "width": "20%",
-                }
+                [
+                  {
+                    "borderLeftWidth": 1,
+                    "borderRightWidth": 1,
+                    "height": 10,
+                  },
+                  {
+                    "borderLeftColor": "#18bd18",
+                    "borderRightColor": "#18bd18",
+                    "width": "20%",
+                  },
+                ]
               }
             />
             <View
               style={
-                {
-                  "borderLeftColor": "#18bd18",
-                  "borderLeftWidth": 1,
-                  "borderRightColor": "#18bd18",
-                  "borderRightWidth": 1,
-                  "height": 10,
-                  "width": "20%",
-                }
+                [
+                  {
+                    "borderLeftWidth": 1,
+                    "borderRightWidth": 1,
+                    "height": 10,
+                  },
+                  {
+                    "borderLeftColor": "#18bd18",
+                    "borderRightColor": "#18bd18",
+                    "width": "20%",
+                  },
+                ]
               }
             />
             <View
               style={
-                {
-                  "borderLeftColor": "#18bd18",
-                  "borderLeftWidth": 1,
-                  "borderRightColor": "#18bd18",
-                  "borderRightWidth": 1,
-                  "height": 10,
-                  "width": "20%",
-                }
+                [
+                  {
+                    "borderLeftWidth": 1,
+                    "borderRightWidth": 1,
+                    "height": 10,
+                  },
+                  {
+                    "borderLeftColor": "#18bd18",
+                    "borderRightColor": "#18bd18",
+                    "width": "20%",
+                  },
+                ]
               }
             />
             <View
               style={
-                {
-                  "borderLeftColor": "#18bd18",
-                  "borderLeftWidth": 1,
-                  "borderRightColor": "#18bd18",
-                  "borderRightWidth": 1,
-                  "height": 10,
-                  "width": "20%",
-                }
+                [
+                  {
+                    "borderLeftWidth": 1,
+                    "borderRightWidth": 1,
+                    "height": 10,
+                  },
+                  {
+                    "borderLeftColor": "#18bd18",
+                    "borderRightColor": "#18bd18",
+                    "width": "20%",
+                  },
+                ]
               }
             />
             <View
               style={
-                {
-                  "borderLeftColor": "#18bd18",
-                  "borderLeftWidth": 1,
-                  "borderRightColor": "#18bd18",
-                  "borderRightWidth": 1,
-                  "height": 10,
-                  "width": "20%",
-                }
+                [
+                  {
+                    "borderLeftWidth": 1,
+                    "borderRightWidth": 1,
+                    "height": 10,
+                  },
+                  {
+                    "borderLeftColor": "#18bd18",
+                    "borderRightColor": "#18bd18",
+                    "width": "20%",
+                  },
+                ]
               }
             />
           </View>
           <View
             style={
-              {
-                "borderBottomColor": "#18bd18",
-                "borderBottomWidth": 2,
-                "display": "flex",
-                "flexDirection": "row",
-                "justifyContent": "flex-start",
-                "marginBottom": 0,
-                "width": "100%",
-              }
+              [
+                {
+                  "borderBottomWidth": 2,
+                  "display": "flex",
+                  "flexDirection": "row",
+                  "justifyContent": "flex-start",
+                  "marginBottom": 0,
+                  "width": "100%",
+                },
+                {
+                  "borderBottomColor": "#18bd18",
+                },
+              ]
             }
           >
             <View
               style={
-                {
-                  "backgroundColor": "blue",
-                  "borderLeftColor": "#18bd18",
-                  "borderLeftWidth": 1,
-                  "borderRightColor": "blue",
-                  "borderRightWidth": 1,
-                  "height": 10,
-                  "width": "76.004%",
-                }
+                [
+                  {
+                    "height": 10,
+                  },
+                  {
+                    "borderLeftWidth": 1,
+                  },
+                  {
+                    "borderRightWidth": 1,
+                  },
+                  {
+                    "backgroundColor": "#18bd18",
+                    "borderLeftColor": "#18bd18",
+                    "borderRightColor": "#18bd18",
+                    "width": "76.004%",
+                  },
+                ]
               }
             />
             <View
               style={
-                {
-                  "backgroundColor": "yellow",
-                  "borderBottomColor": "blue",
-                  "borderBottomWidth": 5,
-                  "borderRightColor": "yellow",
-                  "borderRightWidth": 1,
-                  "height": 10,
-                  "width": "3.996%",
-                }
+                [
+                  {
+                    "height": 10,
+                  },
+                  {
+                    "borderRightWidth": 1,
+                  },
+                  {
+                    "borderBottomWidth": 5,
+                  },
+                  {
+                    "backgroundColor": "#ebff5a",
+                    "borderBottomColor": "#18bd18",
+                    "borderRightColor": "#ebff5a",
+                    "width": "3.996%",
+                  },
+                ]
               }
             />
             <View
               style={
-                {
-                  "backgroundColor": "#333333",
-                  "borderRightColor": "#18bd18",
-                  "borderRightWidth": 1,
-                  "height": 10,
-                  "width": "20%",
-                }
+                [
+                  {
+                    "height": 10,
+                  },
+                  {
+                    "borderRightWidth": 1,
+                  },
+                  {
+                    "backgroundColor": "#ffffff",
+                    "borderRightColor": "#18bd18",
+                    "width": "20%",
+                  },
+                ]
               }
             />
           </View>
@@ -748,7 +872,7 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
                 "display": "flex",
                 "flexDirection": "row",
                 "justifyContent": "flex-start",
-                "marginTop": 5,
+                "marginTop": 4,
                 "width": "100%",
               }
             }
@@ -764,15 +888,19 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
             </Text>
             <View
               style={
-                {
-                  "backgroundColor": "blue",
-                  "display": "flex",
-                  "flexDirection": "row",
-                  "height": 10,
-                  "justifyContent": "flex-start",
-                  "margin": 5,
-                  "width": 10,
-                }
+                [
+                  {
+                    "display": "flex",
+                    "flexDirection": "row",
+                    "height": 10,
+                    "justifyContent": "flex-start",
+                    "margin": 4,
+                    "width": 10,
+                  },
+                  {
+                    "backgroundColor": "#18bd18",
+                  },
+                ]
               }
             />
             <Text
@@ -792,7 +920,7 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
                 "display": "flex",
                 "flexDirection": "row",
                 "justifyContent": "flex-start",
-                "marginTop": 5,
+                "marginTop": 4,
                 "width": "100%",
               }
             }
@@ -808,15 +936,19 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
             </Text>
             <View
               style={
-                {
-                  "backgroundColor": "yellow",
-                  "display": "flex",
-                  "flexDirection": "row",
-                  "height": 10,
-                  "justifyContent": "flex-start",
-                  "margin": 5,
-                  "width": 10,
-                }
+                [
+                  {
+                    "display": "flex",
+                    "flexDirection": "row",
+                    "height": 10,
+                    "justifyContent": "flex-start",
+                    "margin": 4,
+                    "width": 10,
+                  },
+                  {
+                    "backgroundColor": "#ebff5a",
+                  },
+                ]
               }
             />
             <Text
@@ -832,13 +964,17 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
           </View>
           <View
             style={
-              {
-                "backgroundColor": "white",
-                "height": 2,
-                "marginBottom": 10,
-                "marginTop": 15,
-                "width": "100%",
-              }
+              [
+                {
+                  "height": 0.5,
+                  "marginBottom": 8,
+                  "marginTop": 16,
+                  "width": "100%",
+                },
+                {
+                  "backgroundColor": "#ffffff",
+                },
+              ]
             }
           />
           <View
@@ -851,10 +987,18 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
           >
             <Text
               style={
-                {
-                  "color": "#c3c3c3",
-                  "opacity": 0.65,
-                }
+                [
+                  {
+                    "fontSize": 17,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.41,
+                    "lineHeight": 22,
+                  },
+                  {
+                    "color": "#888888",
+                  },
+                  undefined,
+                ]
               }
             >
               text translated
@@ -865,7 +1009,7 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
                   "display": "flex",
                   "flexDirection": "row",
                   "justifyContent": "space-between",
-                  "marginTop": 5,
+                  "marginTop": 4,
                   "width": "100%",
                 }
               }
@@ -901,27 +1045,32 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
             >
               <View
                 style={
-                  {
-                    "borderLeftColor": "#18bd18",
-                    "borderLeftWidth": 1,
-                    "height": 10,
-                  }
+                  [
+                    {
+                      "height": 10,
+                    },
+                    {
+                      "borderLeftColor": "#18bd18",
+                    },
+                  ]
                 }
               />
               <View
                 style={
-                  {
-                    "borderRightColor": "#18bd18",
-                    "borderRightWidth": 1,
-                    "height": 10,
-                  }
+                  [
+                    {
+                      "height": 10,
+                    },
+                    {
+                      "borderRightColor": "#18bd18",
+                    },
+                  ]
                 }
               />
             </View>
             <View
               style={
                 {
-                  "borderBottomColor": "green",
                   "borderBottomWidth": 0,
                   "display": "flex",
                   "flexDirection": "row",
@@ -933,11 +1082,15 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
             >
               <View
                 style={
-                  {
-                    "backgroundColor": "green",
-                    "height": 15,
-                    "width": "500.5005005005005%",
-                  }
+                  [
+                    {
+                      "height": 15,
+                    },
+                    {
+                      "backgroundColor": "#30D158",
+                      "width": "500.5005005005005%",
+                    },
+                  ]
                 }
               />
             </View>
@@ -952,10 +1105,18 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
           >
             <Text
               style={
-                {
-                  "color": "#c3c3c3",
-                  "opacity": 0.65,
-                }
+                [
+                  {
+                    "fontSize": 17,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.41,
+                    "lineHeight": 22,
+                  },
+                  {
+                    "color": "#888888",
+                  },
+                  undefined,
+                ]
               }
             >
               text translated
@@ -966,8 +1127,8 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
                   "alignItems": "flex-start",
                   "display": "flex",
                   "justifyContent": "flex-start",
-                  "marginLeft": 10,
-                  "marginTop": 5,
+                  "marginLeft": 8,
+                  "marginTop": 4,
                   "width": "100%",
                 }
               }
@@ -983,23 +1144,31 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
               >
                 <View
                   style={
-                    {
-                      "backgroundColor": "green",
-                      "display": "flex",
-                      "flexDirection": "row",
-                      "height": 10,
-                      "justifyContent": "flex-start",
-                      "margin": 5,
-                      "width": 10,
-                    }
+                    [
+                      {
+                        "display": "flex",
+                        "flexDirection": "row",
+                        "height": 10,
+                        "justifyContent": "flex-start",
+                        "margin": 4,
+                        "width": 10,
+                      },
+                      {
+                        "backgroundColor": "#30D158",
+                      },
+                    ]
                   }
                 />
                 <Text
                   style={
-                    {
-                      "color": "#c3c3c3",
-                      "marginRight": 10,
-                    }
+                    [
+                      {
+                        "marginRight": 8,
+                      },
+                      {
+                        "color": "#c3c3c3",
+                      },
+                    ]
                   }
                 >
                   text translated
@@ -1016,23 +1185,31 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
               >
                 <View
                   style={
-                    {
-                      "backgroundColor": "orange",
-                      "display": "flex",
-                      "flexDirection": "row",
-                      "height": 10,
-                      "justifyContent": "flex-start",
-                      "margin": 5,
-                      "width": 10,
-                    }
+                    [
+                      {
+                        "display": "flex",
+                        "flexDirection": "row",
+                        "height": 10,
+                        "justifyContent": "flex-start",
+                        "margin": 4,
+                        "width": 10,
+                      },
+                      {
+                        "backgroundColor": "#ebff5a",
+                      },
+                    ]
                   }
                 />
                 <Text
                   style={
-                    {
-                      "color": "#c3c3c3",
-                      "marginRight": 10,
-                    }
+                    [
+                      {
+                        "marginRight": 8,
+                      },
+                      {
+                        "color": "#c3c3c3",
+                      },
+                    ]
                   }
                 >
                   text translated
@@ -1049,23 +1226,31 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
               >
                 <View
                   style={
-                    {
-                      "backgroundColor": "gray",
-                      "display": "flex",
-                      "flexDirection": "row",
-                      "height": 10,
-                      "justifyContent": "flex-start",
-                      "margin": 5,
-                      "width": 10,
-                    }
+                    [
+                      {
+                        "display": "flex",
+                        "flexDirection": "row",
+                        "height": 10,
+                        "justifyContent": "flex-start",
+                        "margin": 4,
+                        "width": 10,
+                      },
+                      {
+                        "backgroundColor": "#888888",
+                      },
+                    ]
                   }
                 />
                 <Text
                   style={
-                    {
-                      "color": "#c3c3c3",
-                      "marginRight": 10,
-                    }
+                    [
+                      {
+                        "marginRight": 8,
+                      },
+                      {
+                        "color": "#c3c3c3",
+                      },
+                    ]
                   }
                 >
                   text translated
@@ -1082,23 +1267,31 @@ exports[`Component SyncReport - test SyncReport - snapshot 1`] = `
               >
                 <View
                   style={
-                    {
-                      "backgroundColor": "blue",
-                      "display": "flex",
-                      "flexDirection": "row",
-                      "height": 10,
-                      "justifyContent": "flex-start",
-                      "margin": 5,
-                      "width": 10,
-                    }
+                    [
+                      {
+                        "display": "flex",
+                        "flexDirection": "row",
+                        "height": 10,
+                        "justifyContent": "flex-start",
+                        "margin": 4,
+                        "width": 10,
+                      },
+                      {
+                        "backgroundColor": "#18bd18",
+                      },
+                    ]
                   }
                 />
                 <Text
                   style={
-                    {
-                      "color": "#c3c3c3",
-                      "marginRight": 10,
-                    }
+                    [
+                      {
+                        "marginRight": 8,
+                      },
+                      {
+                        "color": "#c3c3c3",
+                      },
+                    ]
                   }
                 >
                   text translated

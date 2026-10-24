@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { LoadedAppStackParamList } from '../../app/types';
@@ -17,6 +16,10 @@ import {
 } from '../../app/AppState';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HeaderTitle } from '../Header';
+import Animated, {
+  CSSTransitionProperties,
+  cubicBezier,
+} from 'react-native-reanimated';
 import {
   Dimensions,
   NativeScrollEvent,
@@ -24,6 +27,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  StyleSheet,
   TextInput,
   TouchableOpacity,
   View,
@@ -44,12 +48,21 @@ import ZcashIcon from '../../assets/icons/zcash.svg';
 import ZecAmount from '../Components/ZecAmount';
 import { XIcon } from '../Components/Icons/XIcon';
 import StakingDayBubble from '../Staking/StakingDayBubble';
-import { useTheme } from '../../app/theme';
+import {
+  curve,
+  duration,
+  radiusCard,
+  space,
+  text,
+  useTheme,
+} from '../../app/theme';
 
 type FinalizersProps = NativeStackScreenProps<
   LoadedAppStackParamList,
   RouteEnum.Finalizers
 >;
+
+const EASE_OUT = cubicBezier(curve[0], curve[1], curve[2], curve[3]);
 
 const Finalizers: React.FunctionComponent<FinalizersProps> = ({
   navigation,
@@ -81,6 +94,7 @@ const Finalizers: React.FunctionComponent<FinalizersProps> = ({
   const [expandAddress, _setExpandAddress] = useState<boolean[]>([]);
   const [isAtTop, setIsAtTop] = useState<boolean>(true);
   const [isScrollingToTop, setIsScrollingToTop] = useState<boolean>(false);
+  const [pressedIndex, setPressedIndex] = useState<number | null>(null);
 
   const dimensions = {
     width: Dimensions.get('window').width,
@@ -193,6 +207,12 @@ const Finalizers: React.FunctionComponent<FinalizersProps> = ({
     [isScrollingToTop],
   );
 
+  const press: CSSTransitionProperties = {
+    transitionProperty: ['backgroundColor'],
+    transitionDuration: `${duration.press}ms`,
+    transitionTimingFunction: EASE_OUT,
+  };
+
   const line = (item: StakeType, index: number, last: boolean) => {
     const totalValue = stakedFiltered
       ? stakedFiltered.reduce((acc, curr) => acc + curr.votingPower, 0)
@@ -204,47 +224,41 @@ const Finalizers: React.FunctionComponent<FinalizersProps> = ({
         ? 2
         : item.finalizer.length / (dimensions.width < 500 ? 21 : 30);
     return (
-      <TouchableOpacity
-        style={{ width: '100%' }}
+      <Pressable
+        style={styles.rowPressable}
         key={`tag-${index}`}
+        accessibilityRole="button"
         onPress={() => {
           setFinalizer(item.finalizer, item.votingPower);
           if (navigation.canGoBack()) {
             navigation.goBack();
           }
         }}
+        onPressIn={() => setPressedIndex(index)}
+        onPressOut={() => setPressedIndex(null)}
+        pressRetentionOffset={space.lg}
       >
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginHorizontal: 20,
-            paddingVertical: 15,
-            borderBottomColor: '#333333',
-            borderBottomWidth: last ? 0 : 1,
-          }}
+        <Animated.View
+          style={[
+            styles.row,
+            pressedIndex === index
+              ? { backgroundColor: colors.bgPress }
+              : styles.rowIdle,
+            press,
+            styles.rowBordered,
+            last ? styles.rowLast : null,
+            { borderBottomColor: colors.borderFaint },
+          ]}
         >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
+          <View style={styles.rowLeft}>
             <FontAwesomeIcon
-              style={{ marginRight: 15 }}
+              style={styles.rowIcon}
               size={15}
               icon={faCircle}
               color={randomColors[index]}
             />
             <View>
-              <View
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  flexWrap: 'wrap',
-                }}
-              >
+              <View style={styles.addressCol}>
                 <AddressItem
                   address={item.finalizer}
                   screenName={screenName}
@@ -272,17 +286,9 @@ const Finalizers: React.FunctionComponent<FinalizersProps> = ({
                   ))}
               </View>
 
-              <View
-                style={{
-                  marginTop: 10,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'flex-start',
-                  gap: 5,
-                }}
-              >
+              <View style={styles.rowStats}>
                 <ChartPieIcon height={16} width={16} color={colors.fgDefault} />
-                <FadeText style={{ marginRight: 10 }}>
+                <FadeText style={styles.rowPercent}>
                   {getPercent(percent)}
                 </FadeText>
                 <ZcashIcon height={16} width={16} color={colors.fgDefault} />
@@ -294,22 +300,16 @@ const Finalizers: React.FunctionComponent<FinalizersProps> = ({
               </View>
             </View>
           </View>
-          <View
-            style={{
-              flexDirection: 'column-reverse',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
+          <View style={styles.rowChevronCol}>
             <FontAwesomeIcon
-              style={{ marginRight: 15 }}
+              style={styles.rowIcon}
               size={15}
               icon={faChevronRight}
               color={colors.fgDefault}
             />
           </View>
-        </View>
-      </TouchableOpacity>
+        </Animated.View>
+      </Pressable>
     );
   };
 
@@ -332,32 +332,15 @@ const Finalizers: React.FunctionComponent<FinalizersProps> = ({
         ExtraComponent={<StakingDayBubble />}
       />
 
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'flex-start',
-          borderRadius: 20,
-          marginBottom: 10,
-          backgroundColor: colors.bgSurface,
-          height: 44,
-          alignItems: 'center',
-          paddingHorizontal: 16,
-          margin: 15,
-        }}
-      >
+      <View style={[styles.searchBar, { backgroundColor: colors.bgSurface }]}>
         <FontAwesomeIcon
           icon={faMagnifyingGlass}
           size={17}
           color={colors.fgSubtle}
-          style={{ marginRight: 10 }}
+          style={styles.searchIcon}
         />
         <TextInput
-          style={{
-            flex: 1,
-            color: colors.fgDefault,
-            fontSize: 17,
-            fontWeight: '400',
-          }}
+          style={[styles.searchInput, text.body, { color: colors.fgDefault }]}
           placeholder="Search finalizer..."
           placeholderTextColor={colors.fgSubtle}
           keyboardType={'default'}
@@ -371,15 +354,7 @@ const Finalizers: React.FunctionComponent<FinalizersProps> = ({
             }}
           >
             <View
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: colors.bgMuted,
-                borderRadius: 11,
-                height: 22,
-                width: 22,
-                padding: 0,
-              }}
+              style={[styles.clearButton, { backgroundColor: colors.bgMuted }]}
             >
               <XIcon color={colors.bgCanvas} width={20} height={20} />
             </View>
@@ -394,27 +369,22 @@ const Finalizers: React.FunctionComponent<FinalizersProps> = ({
           showsVerticalScrollIndicator={true}
           persistentScrollbar={true}
           indicatorStyle={'white'}
-          style={{ maxHeight: '100%' }}
+          style={styles.list}
           contentContainerStyle={{}}
         >
           <View
-            style={{
-              display: 'flex',
-              marginHorizontal: 10,
-              padding: 5,
-              alignItems: 'flex-start',
-              backgroundColor: colors.bgSurface,
-              borderRadius: 26,
-            }}
+            style={[styles.listCard, { backgroundColor: colors.bgSurface }]}
           >
             {stakedFiltered.map((item, index) => {
               return line(item, index, index + 1 === stakedFiltered.length);
             })}
           </View>
           <View
-            style={{
-              height: Platform.OS === GlobalConst.platformOSios ? 100 : 10,
-            }}
+            style={
+              Platform.OS === GlobalConst.platformOSios
+                ? styles.listFooterIos
+                : styles.listFooter
+            }
           />
         </ScrollView>
       )}
@@ -423,22 +393,18 @@ const Finalizers: React.FunctionComponent<FinalizersProps> = ({
         <Pressable
           onPress={handleScrollToTop}
           disabled={isScrollingToTop}
-          style={({ pressed }) => ({
-            position: 'absolute',
-            bottom: 30,
-            right: 20,
-            paddingHorizontal: 5,
-            paddingVertical: 10,
-            backgroundColor: colors.bgChrome,
-            borderRadius: 50,
-            transform: [{ scale: pressed ? 0.9 : 1 }],
-            borderWidth: 1,
-            borderColor: colors.borderMuted,
-            opacity: isScrollingToTop ? 0.5 : 1,
-          })}
+          style={({ pressed }) => [
+            styles.scrollTop,
+            pressed ? { transform: [{ scale: 0.9 }] } : null,
+            {
+              backgroundColor: colors.bgChrome,
+              borderColor: colors.borderMuted,
+              opacity: isScrollingToTop ? 0.5 : 1,
+            },
+          ]}
         >
           <FontAwesomeIcon
-            style={{ marginLeft: 5, marginRight: 5, marginTop: 0 }}
+            style={styles.scrollTopIcon}
             size={16}
             icon={faAngleUp}
             color={colors.fgMuted}
@@ -448,5 +414,108 @@ const Finalizers: React.FunctionComponent<FinalizersProps> = ({
     </ToastProvider>
   );
 };
+
+const styles = StyleSheet.create({
+  rowPressable: {
+    width: '100%',
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginHorizontal: space.xl,
+    paddingVertical: space.lg,
+  },
+  rowBordered: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  rowLast: {
+    borderBottomWidth: 0,
+  },
+  rowIdle: {
+    backgroundColor: 'transparent',
+  },
+  rowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addressCol: {
+    display: 'flex',
+    flexDirection: 'column',
+    flexWrap: 'wrap',
+  },
+  rowChevronCol: {
+    flexDirection: 'column-reverse',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rowIcon: {
+    marginRight: space.lg,
+  },
+  rowStats: {
+    marginTop: space.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    gap: space.xs,
+  },
+  rowPercent: {
+    marginRight: space.sm,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    borderRadius: 20,
+    marginBottom: space.sm,
+    height: 44,
+    alignItems: 'center',
+    paddingHorizontal: space.lg,
+    margin: space.lg,
+  },
+  searchIcon: {
+    marginRight: space.sm,
+  },
+  searchInput: {
+    flex: 1,
+  },
+  clearButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 11,
+    height: 22,
+    width: 22,
+    padding: 0,
+  },
+  list: {
+    maxHeight: '100%',
+  },
+  listCard: {
+    display: 'flex',
+    marginHorizontal: space.sm,
+    padding: space.xs,
+    alignItems: 'flex-start',
+    borderRadius: radiusCard,
+  },
+  listFooter: {
+    height: 10,
+  },
+  listFooterIos: {
+    height: 100,
+  },
+  scrollTop: {
+    position: 'absolute',
+    bottom: 30,
+    right: space.xl,
+    paddingHorizontal: space.xs,
+    paddingVertical: space.sm,
+    borderRadius: 50,
+    borderWidth: 1,
+  },
+  scrollTopIcon: {
+    marginLeft: space.xs,
+    marginRight: space.xs,
+    marginTop: 0,
+  },
+});
 
 export default Finalizers;

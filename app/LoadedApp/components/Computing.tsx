@@ -1,6 +1,5 @@
-/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import RegText from '../../../components/Components/RegText';
 import { LoadedAppStackParamList } from '../../types';
@@ -11,7 +10,7 @@ import ZecAmount from '../../../components/Components/ZecAmount';
 import { useAppLoadedSettings, useAppLoadedWallet } from '../../context';
 import { faPaperPlane } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { useTheme } from '../../theme';
+import { radiusCard, radiusPill, space, text, useTheme } from '../../theme';
 
 type ComputingProps = NativeStackScreenProps<
   LoadedAppStackParamList,
@@ -29,64 +28,32 @@ const Computing: React.FunctionComponent<ComputingProps> = ({ route }) => {
       : ({} as SendPageStateClass);
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: colors.bgCanvas,
-      }}
-    >
-      <View
-        style={{
-          flexGrow: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <View
-          style={{
-            backgroundColor: colors.bgSurface,
-            padding: 50,
-            width: '90%',
-            borderRadius: 50,
-          }}
-        >
-          <View
-            style={{
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginHorizontal: 8,
-            }}
-          >
+    <View style={[styles.screen, { backgroundColor: colors.bgCanvas }]}>
+      <View style={styles.center}>
+        <View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
+          <View style={styles.iconWrap}>
             <View
-              style={{
-                borderRadius: 50,
-                backgroundColor: '#1C78D24D',
-                padding: 20,
-                margin: 10,
-              }}
+              style={[
+                styles.iconDisc,
+                { backgroundColor: colors.bgAccentTint },
+              ]}
             >
-              <FontAwesomeIcon icon={faPaperPlane} color="#1C78D2" size={50} />
+              <FontAwesomeIcon
+                icon={faPaperPlane}
+                color={colors.fgAccent}
+                size={50}
+              />
             </View>
           </View>
-          <RegText style={{ fontSize: 30, alignSelf: 'center' }}>
-            Sending
-          </RegText>
+          <RegText style={[text.title1, styles.centerSelf]}>Sending</RegText>
           <ActivityIndicator
             size="large"
             color={colors.fgDefault}
-            style={{ marginVertical: 20 }}
+            style={styles.spinner}
           />
         </View>
         <View
-          style={{
-            marginTop: 20,
-            backgroundColor: colors.bgSurface,
-            padding: 50,
-            width: '90%',
-            borderRadius: 20,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
+          style={[styles.amountCard, { backgroundColor: colors.bgSurface }]}
         >
           <ZecAmount
             currencyName={info.currencyName}
@@ -96,7 +63,7 @@ const Computing: React.FunctionComponent<ComputingProps> = ({ route }) => {
               sendPageStatePar.toaddr.amount,
             )}
             privacy={privacy}
-            style={{ fontWeight: '900', marginBottom: 20 }}
+            style={styles.amount}
           />
           <RegText>{`To: ${Utils.trimToSmall(sendPageStatePar.toaddr.to, 10)}`}</RegText>
         </View>
@@ -104,5 +71,49 @@ const Computing: React.FunctionComponent<ComputingProps> = ({ route }) => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+  center: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  card: {
+    padding: space.xxxl,
+    width: '90%',
+    borderRadius: radiusCard,
+  },
+  iconWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: space.sm,
+  },
+  iconDisc: {
+    borderRadius: radiusPill,
+    padding: space.xl,
+    margin: space.md,
+  },
+  centerSelf: {
+    alignSelf: 'center',
+  },
+  spinner: {
+    marginVertical: space.xl,
+  },
+  amountCard: {
+    marginTop: space.xl,
+    padding: space.xxxl,
+    width: '90%',
+    borderRadius: radiusCard,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  amount: {
+    fontWeight: '900',
+    marginBottom: space.xl,
+  },
+});
 
 export default Computing;

@@ -1,10 +1,22 @@
-/* eslint-disable react-native/no-inline-styles */
-import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import Animated, {
+  CSSTransitionProperties,
+  cubicBezier,
+  useReducedMotion,
+} from 'react-native-reanimated';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import RegText from '../../Components/RegText';
-import { useTheme } from '../../../app/theme';
+import { duration, mono, space, text, useTheme } from '../../../app/theme';
+
+const EASE_OUT = cubicBezier(0.23, 1, 0.32, 1);
 
 type ExpandedAddressProps = {
   address: string;
@@ -24,6 +36,14 @@ const ExpandedAddress: React.FunctionComponent<ExpandedAddressProps> = ({
   setHeightLayout,
 }) => {
   const { colors } = useTheme();
+  const reducedMotion = useReducedMotion();
+  const [pressed, setPressed] = useState(false);
+
+  const press: CSSTransitionProperties = {
+    transitionProperty: ['backgroundColor'],
+    transitionDuration: reducedMotion ? '0ms' : `${duration.press}ms`,
+    transitionTimingFunction: EASE_OUT,
+  };
 
   return (
     <View
@@ -32,9 +52,7 @@ const ExpandedAddress: React.FunctionComponent<ExpandedAddressProps> = ({
         //console.log('LAYOUTTT', height);
         setHeightLayout(height + 70);
       }}
-      style={{
-        backgroundColor: colors.bgCanvas,
-      }}
+      style={{ backgroundColor: colors.bgCanvas }}
     >
       <TouchableOpacity
         onPress={() => {
@@ -45,48 +63,75 @@ const ExpandedAddress: React.FunctionComponent<ExpandedAddressProps> = ({
           size={30}
           icon={faXmark}
           color={colors.fgDefault}
-          style={{ marginTop: 10, marginRight: 20, alignSelf: 'flex-end' }}
+          style={styles.close}
         />
       </TouchableOpacity>
-      <RegText
-        style={{ marginTop: 0, paddingHorizontal: 10, alignSelf: 'center' }}
-      >
-        {title ? title : ''}
-      </RegText>
-      <View
-        style={{
-          width: '90%',
-          padding: 16,
-          borderRadius: 8,
-          backgroundColor: colors.bgCanvas,
-          alignSelf: 'center',
-        }}
-      >
-        <View style={{ alignItems: 'flex-start' }}>
-          <Text style={{ color: '#cbd5e1', fontSize: 16, marginBottom: 20 }}>
+      <RegText style={styles.title}>{title ? title : ''}</RegText>
+      <View style={[styles.card, { backgroundColor: colors.bgCanvas }]}>
+        <View style={styles.body}>
+          <Text style={[mono, styles.address, { color: colors.fgMuted }]}>
             {address}
           </Text>
-          <TouchableOpacity
+          <Pressable
+            accessibilityRole="button"
             onPress={() => {
               onCopy && onCopy();
               closeSheet();
             }}
-            style={{
-              borderColor: '#3B4B5F',
-              backgroundColor: '#2A394D',
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-              borderRadius: 5,
-              borderWidth: 1,
-              alignSelf: 'center',
-            }}
+            onPressIn={() => setPressed(true)}
+            onPressOut={() => setPressed(false)}
+            pressRetentionOffset={space.lg}
           >
-            <Text style={{ color: '#ccc', fontSize: 16 }}>{button}</Text>
-          </TouchableOpacity>
+            <Animated.View
+              style={[
+                styles.copyButton,
+                {
+                  backgroundColor: pressed ? colors.bgPress : colors.bgSurface,
+                  borderColor: colors.borderSubtle,
+                },
+                press,
+              ]}
+            >
+              <Text style={[text.callout, { color: colors.fgMuted }]}>
+                {button}
+              </Text>
+            </Animated.View>
+          </Pressable>
         </View>
       </View>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  close: {
+    marginTop: space.md,
+    marginRight: space.xl,
+    alignSelf: 'flex-end',
+  },
+  title: {
+    paddingHorizontal: space.md,
+    alignSelf: 'center',
+  },
+  card: {
+    width: '90%',
+    padding: space.lg,
+    borderRadius: 8,
+    alignSelf: 'center',
+  },
+  body: {
+    alignItems: 'flex-start',
+  },
+  address: {
+    marginBottom: space.xl,
+  },
+  copyButton: {
+    paddingHorizontal: space.sm,
+    paddingVertical: space.xs,
+    borderRadius: 5,
+    borderWidth: 1,
+    alignSelf: 'center',
+  },
+});
 
 export default ExpandedAddress;

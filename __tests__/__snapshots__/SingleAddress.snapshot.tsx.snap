@@ -25,29 +25,37 @@ exports[`Component SingleAddress - test SingleAddress - snapshot 1`] = `
     <View>
       <View
         style={
-          {
-            "backgroundColor": "#c3c3c3",
-            "borderRadius": 15,
-            "marginHorizontal": 20,
-            "marginTop": 20,
-            "padding": 10,
-          }
+          [
+            {
+              "borderRadius": 15,
+              "marginHorizontal": 20,
+              "marginTop": 20,
+              "padding": 12,
+            },
+            {
+              "backgroundColor": "#c3c3c3",
+            },
+          ]
         }
       >
         <mockQRCode />
       </View>
       <View
         style={
-          {
-            "alignItems": "center",
-            "backgroundColor": "#222223",
-            "borderRadius": 20,
-            "flexDirection": "row",
-            "justifyContent": "center",
-            "marginTop": 40,
-            "padding": 10,
-            "width": "90%",
-          }
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 20,
+              "flexDirection": "row",
+              "justifyContent": "center",
+              "marginTop": 32,
+              "padding": 12,
+              "width": "90%",
+            },
+            {
+              "backgroundColor": "#222223",
+            },
+          ]
         }
       >
         <View
@@ -159,7 +167,10 @@ exports[`Component SingleAddress - test SingleAddress - snapshot 1`] = `
                       },
                       {
                         "color": "#888888",
-                        "fontSize": 18,
+                        "fontSize": 17,
+                        "fontWeight": "600",
+                        "letterSpacing": -0.41,
+                        "lineHeight": 22,
                         "opacity": 0.8,
                       },
                     ],
@@ -216,13 +227,17 @@ exports[`Component SingleAddress - test SingleAddress - snapshot 1`] = `
           >
             <View
               style={
-                {
-                  "borderColor": "#888888",
-                  "borderRadius": 30,
-                  "marginHorizontal": 10,
-                  "paddingHorizontal": 5,
-                  "paddingVertical": 5,
-                }
+                [
+                  {
+                    "borderRadius": 9999,
+                    "marginHorizontal": 12,
+                    "paddingHorizontal": 4,
+                    "paddingVertical": 4,
+                  },
+                  {
+                    "borderColor": "#888888",
+                  },
+                ]
               }
             >
               <RNSVGSvgView
@@ -246,7 +261,7 @@ exports[`Component SingleAddress - test SingleAddress - snapshot 1`] = `
                       "borderWidth": 0,
                     },
                     {
-                      "margin": 3,
+                      "margin": 4,
                     },
                     {
                       "flex": 0,

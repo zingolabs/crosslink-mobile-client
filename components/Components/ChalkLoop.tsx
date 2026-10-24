@@ -1,5 +1,5 @@
-import React from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import React, { useMemo } from 'react';
+import { Image, StyleSheet, View, ViewStyle } from 'react-native';
 import Animated, {
   CSSAnimationProperties,
   steps,
@@ -34,47 +34,50 @@ type ChalkLoopProps = {
 };
 
 /**
- * Steps the sheet through a window: rows step over the whole cycle and
- * columns step within each row. Reduced motion holds the first frame.
+ * Steps the sheet through a window. Both axes are keyframed on ONE
+ * animation, with steps(1, 'end') per keyframe so each sprite frame
+ * holds discrete - the earlier two-animation version jumped to a stray
+ * cell whenever the row and column clocks drifted apart.
+ * Reduced motion holds the first frame.
  */
 const ChalkLoop: React.FC<ChalkLoopProps> = ({ name, size = 200 }) => {
   const reduced = useReducedMotion();
   const sheet = SHEETS[name];
   const rows = sheet.frames / sheet.cols;
-  const down: CSSAnimationProperties = {
-    animationName: {
-      from: { transform: [{ translateY: 0 }] },
-      to: { transform: [{ translateY: -size * rows }] },
-    },
-    animationDuration: CYCLE_MS,
-    animationTimingFunction: steps(rows),
-    animationIterationCount: 'infinite',
-    animationPlayState: reduced ? 'paused' : 'running',
-  };
-  const across: CSSAnimationProperties = {
-    animationName: {
-      from: { transform: [{ translateX: 0 }] },
-      to: { transform: [{ translateX: -size * sheet.cols }] },
-    },
-    animationDuration: CYCLE_MS / rows,
-    animationTimingFunction: steps(sheet.cols),
-    animationIterationCount: 'infinite',
-    animationPlayState: reduced ? 'paused' : 'running',
-  };
+
+  // Memoized: a fresh animation object per render would restart the loop
+  // on every sync-tick re-render and visibly reset the drawing.
+  const cycle: CSSAnimationProperties = useMemo(() => {
+    const keyframes: Record<string, ViewStyle> = {};
+    for (let f = 0; f < sheet.frames; f += 1) {
+      keyframes[`${((f / sheet.frames) * 100).toFixed(4)}%`] = {
+        transform: [
+          { translateX: -(f % sheet.cols) * size },
+          { translateY: -Math.floor(f / sheet.cols) * size },
+        ],
+        animationTimingFunction: steps(1, 'end'),
+      } as ViewStyle;
+    }
+    return {
+      animationName: keyframes as CSSAnimationProperties['animationName'],
+      animationDuration: CYCLE_MS,
+      animationIterationCount: 'infinite',
+      animationPlayState: reduced ? 'paused' : 'running',
+    };
+  }, [sheet, size, reduced]);
+
   return (
     <View
       accessible={false}
       importantForAccessibility="no-hide-descendants"
       style={[styles.window, { width: size, height: size }]}
     >
-      <Animated.View style={down}>
-        <Animated.View style={across}>
-          <Image
-            source={sheet.source}
-            accessibilityIgnoresInvertColors
-            style={{ width: size * sheet.cols, height: size * rows }}
-          />
-        </Animated.View>
+      <Animated.View style={cycle}>
+        <Image
+          source={sheet.source}
+          accessibilityIgnoresInvertColors
+          style={{ width: size * sheet.cols, height: size * rows }}
+        />
       </Animated.View>
     </View>
   );

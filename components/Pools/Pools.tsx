@@ -1,6 +1,5 @@
-/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import { View, ScrollView, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, ScrollView, ActivityIndicator } from 'react-native';
 
 import ZecAmount from '../Components/ZecAmount';
 import BoldText from '../Components/BoldText';
@@ -21,7 +20,7 @@ import { RouteEnum, ScreenEnum } from '../../app/AppState';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../Header';
-import { useTheme } from '../../app/theme';
+import { space, useTheme } from '../../app/theme';
 
 type PoolsProps = NativeStackScreenProps<
   LoadedAppStackParamList,
@@ -63,28 +62,20 @@ const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
 
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{
-          flexGrow: 1,
-          paddingTop: 8,
-          paddingBottom: insets.bottom + 8,
-          paddingHorizontal: 16,
-        }}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + space.sm },
+        ]}
       >
-        <View
-          style={{
-            flexGrow: 1,
-            alignItems: 'flex-start',
-            justifyContent: 'center',
-          }}
-        >
-          <View style={{ display: 'flex', margin: 20, marginBottom: 30 }}>
+        <View style={styles.center}>
+          <View style={styles.pools}>
             {totalBalance && (
               <>
                 {!orchardPool && !saplingPool && !transparentPool && (
                   <ActivityIndicator
                     size="large"
                     color={colors.fgAccent}
-                    style={{ marginVertical: 20 }}
+                    style={styles.loader}
                   />
                 )}
                 {orchardPool && (
@@ -93,7 +84,7 @@ const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
                       {translate('pools.orchard-title') as string}
                     </BoldText>
 
-                    <View style={{ display: 'flex', marginLeft: 25 }}>
+                    <View style={styles.poolSection}>
                       <DetailLine
                         label={translate('pools.orchard-balance') as string}
                         screenName={screenName}
@@ -103,14 +94,13 @@ const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
                           amtZec={totalBalance.totalOrchardBalance}
                           size={18}
                           currencyName={info.currencyName}
-                          style={{
-                            opacity:
-                              totalBalance.confirmedOrchardBalance > 0 &&
-                              totalBalance.confirmedOrchardBalance ===
-                                totalBalance.totalOrchardBalance
-                                ? 1
-                                : 0.5,
-                          }}
+                          style={
+                            totalBalance.confirmedOrchardBalance > 0 &&
+                            totalBalance.confirmedOrchardBalance ===
+                              totalBalance.totalOrchardBalance
+                              ? styles.amountConfirmed
+                              : styles.amountPending
+                          }
                           privacy={privacy}
                         />
                       </DetailLine>
@@ -130,7 +120,7 @@ const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
                             totalBalance.confirmedOrchardBalance ===
                               totalBalance.totalOrchardBalance
                               ? colors.fgAccent
-                              : 'red'
+                              : colors.fgDanger
                           }
                           privacy={privacy}
                         />
@@ -138,13 +128,10 @@ const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
                     </View>
 
                     <View
-                      style={{
-                        height: 1,
-                        width: '100%',
-                        backgroundColor: 'white',
-                        marginTop: 15,
-                        marginBottom: 10,
-                      }}
+                      style={[
+                        styles.separator,
+                        { backgroundColor: colors.borderFaint },
+                      ]}
                     />
                   </>
                 )}
@@ -155,7 +142,7 @@ const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
                       {translate('pools.sapling-title') as string}
                     </BoldText>
 
-                    <View style={{ display: 'flex', marginLeft: 25 }}>
+                    <View style={styles.poolSection}>
                       <DetailLine
                         label={translate('pools.sapling-balance') as string}
                         screenName={screenName}
@@ -165,14 +152,13 @@ const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
                           amtZec={totalBalance.totalSaplingBalance}
                           size={18}
                           currencyName={info.currencyName}
-                          style={{
-                            opacity:
-                              totalBalance.confirmedSaplingBalance > 0 &&
-                              totalBalance.confirmedSaplingBalance ===
-                                totalBalance.totalSaplingBalance
-                                ? 1
-                                : 0.5,
-                          }}
+                          style={
+                            totalBalance.confirmedSaplingBalance > 0 &&
+                            totalBalance.confirmedSaplingBalance ===
+                              totalBalance.totalSaplingBalance
+                              ? styles.amountConfirmed
+                              : styles.amountPending
+                          }
                           privacy={privacy}
                         />
                       </DetailLine>
@@ -192,7 +178,7 @@ const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
                             totalBalance.confirmedSaplingBalance ===
                               totalBalance.totalSaplingBalance
                               ? colors.fgSyncing
-                              : 'red'
+                              : colors.fgDanger
                           }
                           privacy={privacy}
                         />
@@ -200,13 +186,10 @@ const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
                     </View>
 
                     <View
-                      style={{
-                        height: 1,
-                        width: '100%',
-                        backgroundColor: 'white',
-                        marginTop: 15,
-                        marginBottom: 10,
-                      }}
+                      style={[
+                        styles.separator,
+                        { backgroundColor: colors.borderFaint },
+                      ]}
                     />
                   </>
                 )}
@@ -217,7 +200,7 @@ const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
                       {translate('pools.transparent-title') as string}
                     </BoldText>
 
-                    <View style={{ display: 'flex', marginLeft: 25 }}>
+                    <View style={styles.poolSection}>
                       <DetailLine
                         label={translate('pools.transparent-balance') as string}
                         screenName={screenName}
@@ -227,7 +210,7 @@ const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
                           amtZec={totalBalance.totalTransparentBalance}
                           size={18}
                           currencyName={info.currencyName}
-                          color={'red'}
+                          color={colors.fgDanger}
                           privacy={privacy}
                         />
                       </DetailLine>
@@ -244,7 +227,7 @@ const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
                           amtZec={totalBalance.confirmedTransparentBalance}
                           size={18}
                           currencyName={info.currencyName}
-                          color={'red'}
+                          color={colors.fgDanger}
                           privacy={privacy}
                         />
                       </DetailLine>
@@ -257,20 +240,16 @@ const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
                   shieldingAmount === 0 &&
                   !somePending && (
                     <View
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        marginTop: 5,
-                        backgroundColor: colors.bgCanvas,
-                        padding: 5,
-                        borderRadius: 10,
-                      }}
+                      style={[
+                        styles.infoChip,
+                        { backgroundColor: colors.bgCanvas },
+                      ]}
                     >
                       <FontAwesomeIcon
                         icon={faInfoCircle}
                         size={20}
                         color={colors.fgAccent}
-                        style={{ marginRight: 5 }}
+                        style={styles.infoIcon}
                       />
                       <FadeText>{translate('pools.dust') as string}</FadeText>
                     </View>
@@ -278,20 +257,16 @@ const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
 
                 {somePending && (
                   <View
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'row',
-                      marginTop: 5,
-                      backgroundColor: colors.bgCanvas,
-                      padding: 5,
-                      borderRadius: 10,
-                    }}
+                    style={[
+                      styles.infoChip,
+                      { backgroundColor: colors.bgCanvas },
+                    ]}
                   >
                     <FontAwesomeIcon
                       icon={faInfoCircle}
                       size={20}
                       color={colors.fgAccent}
-                      style={{ marginRight: 5 }}
+                      style={styles.infoIcon}
                     />
                     <FadeText>{translate('send.somefunds') as string}</FadeText>
                   </View>
@@ -304,5 +279,52 @@ const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
     </ToastProvider>
   );
 };
+
+const styles = StyleSheet.create({
+  scrollContent: {
+    flexGrow: 1,
+    paddingTop: space.sm,
+    paddingHorizontal: space.lg,
+  },
+  center: {
+    flexGrow: 1,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+  },
+  pools: {
+    display: 'flex',
+    margin: space.xl,
+    marginBottom: space.xxxl,
+  },
+  loader: {
+    marginVertical: space.xl,
+  },
+  poolSection: {
+    display: 'flex',
+    marginLeft: space.xxl,
+  },
+  separator: {
+    height: StyleSheet.hairlineWidth,
+    width: '100%',
+    marginTop: space.lg,
+    marginBottom: space.sm,
+  },
+  infoChip: {
+    display: 'flex',
+    flexDirection: 'row',
+    marginTop: space.xs,
+    padding: space.xs,
+    borderRadius: 10,
+  },
+  infoIcon: {
+    marginRight: space.xs,
+  },
+  amountConfirmed: {
+    opacity: 1,
+  },
+  amountPending: {
+    opacity: 0.5,
+  },
+});
 
 export default Pools;

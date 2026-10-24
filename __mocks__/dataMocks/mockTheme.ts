@@ -24,11 +24,14 @@ const colors: ThemeColors = {
   fgAccent: '#18bd18',
   borderAccent: '#18bd18',
   bgAccent: '#18bd18',
-  bgAccentTint: '#18bd1826',
   fgAccentDisabled: '#5a8c5a',
+  bgAccentTint: '#18bd1826',
   borderAccentDisabled: '#5a8c5a',
 
+  bgSurfaceRaised: '#2c2c2e',
+
   fgSuccess: '#30D158',
+  bgSuccessTint: '#30D15833',
 
   fgSyncing: '#ebff5a',
   bgSyncing: '#ebff5a',
@@ -38,10 +41,12 @@ const colors: ThemeColors = {
   fgWarningMuted: '#FEE587',
   borderWarning: '#65491C',
   bgWarning: '#262527',
+  bgWarningTint: '#F99D004d',
 
   fgDanger: '#dc2626',
   borderDanger: '#dc2626',
   bgDanger: '#dc2626',
+  bgDangerTint: '#dc262633',
 };
 
 export const mockTheme: AppTheme = { colors };

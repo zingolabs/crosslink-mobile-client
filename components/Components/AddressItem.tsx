@@ -1,6 +1,10 @@
-/* eslint-disable react-native/no-inline-styles */
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { useAppLoadedActions, useAppLoadedSettings } from '../../app/context';
 import RegText from './RegText';
@@ -16,7 +20,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
-import { useTheme } from '../../app/theme';
+import { space, useTheme } from '../../app/theme';
 
 type AddressItemProps = {
   address: string;
@@ -75,20 +79,9 @@ const AddressItem: React.FunctionComponent<AddressItemProps> = ({
       {loading ? (
         <ActivityIndicator size="small" color={colors.fgAccent} />
       ) : (
-        <View
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'flex-start',
-          }}
-        >
+        <View style={styles.row}>
           <View
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-start',
-              marginRight: onlyContact ? 0 : 10,
-            }}
+            style={[styles.addressCol, onlyContact && styles.addressColTight]}
           >
             {!onlyContact && (
               <TouchableOpacity
@@ -111,13 +104,7 @@ const AddressItem: React.FunctionComponent<AddressItemProps> = ({
                   }
                 }}
               >
-                <View
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    flexWrap: 'wrap',
-                  }}
-                >
+                <View style={styles.addressLines}>
                   {!address && <RegText>{'Unknown'}</RegText>}
                   {!expandAddress && !!address && (
                     <RegText>{Utils.trimToSmall(address, 7)}</RegText>
@@ -139,7 +126,7 @@ const AddressItem: React.FunctionComponent<AddressItemProps> = ({
             !readOnly &&
             selectIndexerServer !== SelectServerEnum.offline && (
               <TouchableOpacity
-                style={{ marginLeft: 10 }}
+                style={styles.sendButton}
                 onPress={() => {
                   // enviar
                   const sendPageState = new SendPageStateClass(
@@ -151,7 +138,7 @@ const AddressItem: React.FunctionComponent<AddressItemProps> = ({
                 }}
               >
                 <FontAwesomeIcon
-                  style={{ marginTop: 3 }}
+                  style={styles.sendIcon}
                   size={30}
                   icon={faPaperPlane}
                   color={colors.fgAccent}
@@ -163,5 +150,33 @@ const AddressItem: React.FunctionComponent<AddressItemProps> = ({
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  row: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  addressCol: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    marginRight: space.md,
+  },
+  addressColTight: {
+    marginRight: 0,
+  },
+  addressLines: {
+    display: 'flex',
+    flexDirection: 'column',
+    flexWrap: 'wrap',
+  },
+  sendButton: {
+    marginLeft: space.md,
+  },
+  sendIcon: {
+    marginTop: space.xs,
+  },
+});
 
 export default AddressItem;

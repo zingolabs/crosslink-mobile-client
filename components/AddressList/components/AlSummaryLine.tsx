@@ -1,6 +1,5 @@
-/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import {
   faQrcode,
@@ -19,7 +18,7 @@ import {
 } from '../../../app/AppState';
 import Utils from '../../../app/utils';
 import { useAppLoadedActions } from '../../../app/context';
-import { useTheme } from '../../../app/theme';
+import { space, text, useTheme } from '../../../app/theme';
 
 type AlSummaryLineProps = {
   index: number;
@@ -59,76 +58,47 @@ const AlSummaryLine: React.FunctionComponent<AlSummaryLineProps> = ({
   //console.log('render Ab SummaryLine - 5', index);
 
   return (
-    <View style={{ display: 'flex', flexDirection: 'column' }}>
-      <View
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          marginTop: 15,
-          paddingBottom: 15,
-          borderBottomWidth: 1,
-          borderBottomColor: colors.borderFaint,
-          opacity: 1,
-        }}
-      >
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'flex-start',
-          }}
-        >
+    <View style={styles.wrap}>
+      <View style={[styles.row, { borderBottomColor: colors.borderFaint }]}>
+        <View style={styles.main}>
           <TouchableOpacity onPress={() => {}}>
-            <View style={{ flexDirection: 'row', marginBottom: 5 }}>
+            <View style={styles.tagRow}>
               <FontAwesomeIcon
-                style={{ marginHorizontal: 10 }}
+                style={styles.icon}
                 size={24}
                 icon={faTags}
                 color={colors.fgDefault}
               />
             </View>
-            <View style={{ flexDirection: 'row' }}>
+            <View style={styles.addressRow}>
               <FontAwesomeIcon
-                style={{ marginHorizontal: 10 }}
+                style={styles.icon}
                 size={24}
                 icon={faWallet}
                 color={colors.fgDefault}
               />
-              <FadeText
-                style={{
-                  fontSize: 18,
-                  marginHorizontal: 10,
-                  opacity: 1,
-                  fontWeight: 'bold',
-                }}
-              >
-                {displayAddress}
-              </FadeText>
+              <FadeText style={styles.address}>{displayAddress}</FadeText>
             </View>
           </TouchableOpacity>
         </View>
-        <View
-          style={{ width: 50, justifyContent: 'center', alignItems: 'center' }}
-        >
+        <View style={styles.actionCol}>
           <TouchableOpacity
-            style={{ zIndex: 999, padding: 10 }}
+            style={styles.action}
             onPress={() => {
               doCopy();
             }}
           >
             <FontAwesomeIcon
-              style={{ opacity: 0.8 }}
+              style={styles.copyIcon}
               size={25}
               icon={faCopy}
               color={colors.fgMuted}
             />
           </TouchableOpacity>
         </View>
-        <View
-          style={{ width: 50, justifyContent: 'center', alignItems: 'center' }}
-        >
+        <View style={styles.actionCol}>
           <TouchableOpacity
-            style={{ zIndex: 999, padding: 10 }}
+            style={styles.action}
             onPress={() => {
               doQr();
             }}
@@ -144,5 +114,50 @@ const AlSummaryLine: React.FunctionComponent<AlSummaryLineProps> = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  wrap: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  row: {
+    display: 'flex',
+    flexDirection: 'row',
+    marginTop: space.lg,
+    paddingBottom: space.lg,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  main: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  tagRow: {
+    flexDirection: 'row',
+    marginBottom: space.xs,
+  },
+  icon: {
+    marginHorizontal: space.md,
+  },
+  addressRow: {
+    flexDirection: 'row',
+  },
+  address: {
+    ...text.headline,
+    marginHorizontal: space.md,
+  },
+  actionCol: {
+    width: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  action: {
+    zIndex: 999,
+    padding: space.md,
+  },
+  copyIcon: {
+    opacity: 0.8,
+  },
+});
 
 export default React.memo(AlSummaryLine);

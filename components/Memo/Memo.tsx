@@ -1,6 +1,6 @@
-/* eslint-disable react-native/no-inline-styles */
 import React, { useEffect, useState } from 'react';
 import {
+  StyleSheet,
   View,
   ScrollView,
   TextInput,
@@ -28,7 +28,7 @@ import { ToastProvider, useToast } from 'react-native-toastier';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { XIcon } from '../Components/Icons/XIcon';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
-import { useTheme } from '../../app/theme';
+import { space, text, useTheme } from '../../app/theme';
 
 type MemoProps = NativeStackScreenProps<
   LoadedAppStackParamList,
@@ -105,17 +105,9 @@ const Memo: React.FunctionComponent<MemoProps> = ({ navigation, route }) => {
         keyboardVerticalOffset={
           Platform.OS === GlobalConst.platformOSios ? 10 : 0
         }
-        style={{
-          flex: 1,
-          backgroundColor: colors.bgCanvas,
-        }}
+        style={[styles.kbView, { backgroundColor: colors.bgCanvas }]}
       >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: colors.bgCanvas,
-          }}
-        >
+        <View style={[styles.inner, { backgroundColor: colors.bgCanvas }]}>
           <Header
             title={translate('send.memo') as string}
             screenName={screenName}
@@ -132,48 +124,30 @@ const Memo: React.FunctionComponent<MemoProps> = ({ navigation, route }) => {
             }}
           />
           <ScrollView
-            style={{
-              height: '80%',
-              maxHeight: '80%',
-              minHeight: '50%',
-            }}
-            contentContainerStyle={{
-              flexDirection: 'column',
-              alignItems: 'stretch',
-              justifyContent: 'flex-start',
-              padding: 20,
-            }}
+            style={styles.scroll}
+            contentContainerStyle={styles.scrollContent}
           >
             <View
               accessible={true}
               accessibilityLabel={translate('send.memo-acc') as string}
-              style={{
-                flexGrow: 1,
-                borderWidth: 1,
-                borderRadius: 5,
-                borderColor: colors.fgDefault,
-                minWidth: 48,
-                minHeight: 48,
-                maxHeight: dimensions.height * 0.4,
-                flexDirection: 'row',
-              }}
+              style={[
+                styles.memoBox,
+                {
+                  borderColor: colors.fgDefault,
+                  maxHeight: dimensions.height * 0.4,
+                },
+              ]}
             >
               <TextInput
                 testID="send.memo-field"
                 multiline
-                style={{
-                  flex: 1,
-                  color: colors.fgDefault,
-                  fontWeight: '600',
-                  fontSize: 14,
-                  minWidth: 48,
-                  minHeight: 48,
-                  margin: 5,
-                  backgroundColor: 'transparent',
-                  textAlignVertical: 'top',
-                }}
+                style={[
+                  styles.memoInput,
+                  text.caption,
+                  { color: colors.fgDefault },
+                ]}
                 value={memo}
-                onChangeText={(text: string) => setMemo(text)}
+                onChangeText={(value: string) => setMemo(value)}
                 onEndEditing={(
                   e: NativeSyntheticEvent<TextInputEndEditingEventData>,
                 ) => setMemo(e.nativeEvent.text)}
@@ -189,44 +163,27 @@ const Memo: React.FunctionComponent<MemoProps> = ({ navigation, route }) => {
                 </TouchableOpacity>
               )}
             </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-              }}
-            >
+            <View style={styles.counterRow}>
               <FadeText
                 style={{
-                  marginTop: 0,
-                  fontWeight: 'bold',
+                  ...text.headline,
                   color:
                     Utils.countMemoBytes(
                       memo,
                       includeUAMessage,
                       defaultUnifiedAddress,
                     ) > GlobalConst.memoMaxLength
-                      ? 'red'
+                      ? colors.fgDanger
                       : colors.fgDefault,
                 }}
               >{`${Utils.countMemoBytes(memo, includeUAMessage, defaultUnifiedAddress)} `}</FadeText>
-              <FadeText style={{ marginTop: 0 }}>
-                {translate('loadedapp.of') as string}
-              </FadeText>
-              <FadeText style={{ marginTop: 0 }}>
+              <FadeText>{translate('loadedapp.of') as string}</FadeText>
+              <FadeText>
                 {' ' + GlobalConst.memoMaxLength.toString() + ' '}
               </FadeText>
             </View>
           </ScrollView>
-          <View
-            style={{
-              flexGrow: 1,
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginVertical: 10,
-            }}
-          >
+          <View style={styles.saveRow}>
             <LiquidPrimaryButton
               title={translate('save') as string}
               onPress={doSaveAndClose}
@@ -244,5 +201,53 @@ const Memo: React.FunctionComponent<MemoProps> = ({ navigation, route }) => {
     </ToastProvider>
   );
 };
+
+const styles = StyleSheet.create({
+  kbView: {
+    flex: 1,
+  },
+  inner: {
+    flex: 1,
+  },
+  scroll: {
+    height: '80%',
+    maxHeight: '80%',
+    minHeight: '50%',
+  },
+  scrollContent: {
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    justifyContent: 'flex-start',
+    padding: space.xl,
+  },
+  memoBox: {
+    flexGrow: 1,
+    borderWidth: 1,
+    borderRadius: 5,
+    minWidth: 48,
+    minHeight: 48,
+    flexDirection: 'row',
+  },
+  memoInput: {
+    flex: 1,
+    minWidth: 48,
+    minHeight: 48,
+    margin: space.xs,
+    backgroundColor: 'transparent',
+    textAlignVertical: 'top',
+  },
+  counterRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  saveRow: {
+    flexGrow: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: space.sm,
+  },
+});
 
 export default Memo;

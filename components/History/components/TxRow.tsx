@@ -1,7 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
-  CSSAnimationProperties,
   CSSTransitionProperties,
   Easing,
   FadeIn,
@@ -98,7 +97,7 @@ type TxRowProps = {
 /**
  * One transaction: kind icon, what happened, when, how much. A pending row
  * shows the loader where the time goes. A row that arrived after the list
- * was already on screen settles in from above and tints briefly.
+ * was already on screen settles in from above.
  */
 const TxRow: React.FC<TxRowProps> = ({ vt, fresh, last, onPress, testID }) => {
   const { colors } = useTheme();
@@ -118,19 +117,6 @@ const TxRow: React.FC<TxRowProps> = ({ vt, fresh, last, onPress, testID }) => {
     transitionDuration: reduced ? '0ms' : `${duration.press}ms`,
     transitionTimingFunction: CSS_EASE_OUT,
   };
-  const highlight: CSSAnimationProperties = useMemo(
-    () => ({
-      animationName: {
-        from: { backgroundColor: colors.bgAccentTint },
-        '35%': { backgroundColor: colors.bgAccentTint },
-        to: { backgroundColor: 'transparent' },
-      },
-      animationDuration: duration.highlight,
-      animationTimingFunction: 'ease-out',
-      animationFillMode: 'both',
-    }),
-    [colors.bgAccentTint],
-  );
 
   return (
     <Animated.View
@@ -152,7 +138,6 @@ const TxRow: React.FC<TxRowProps> = ({ vt, fresh, last, onPress, testID }) => {
               ? [styles.rowIdle, { backgroundColor: colors.bgPress }]
               : styles.rowIdle,
             press,
-            fresh && highlight,
           ]}
         >
           <View style={[styles.disc, { backgroundColor: colors.bgSurface }]}>

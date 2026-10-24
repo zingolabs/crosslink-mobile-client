@@ -1,7 +1,18 @@
-/* eslint-disable react-native/no-inline-styles */
 import React, { useState, useEffect, useRef } from 'react';
-import { View, ScrollView, TouchableOpacity, Text } from 'react-native';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
+import Animated, {
+  CSSTransitionProperties,
+  cubicBezier,
+  useReducedMotion,
+} from 'react-native-reanimated';
 
 import { useAppLoadedActions, useAppLoadedSettings } from '../../app/context';
 import {
@@ -18,7 +29,9 @@ import { CopyIcon } from './Icons/CopyIcon';
 import { TriangleAlert } from './Icons/TriangleAlert';
 import { ShieldIcon } from './Icons/ShieldIcon';
 import Address from './Address/Address';
-import { useTheme } from '../../app/theme';
+import { duration, radiusPill, space, text, useTheme } from '../../app/theme';
+
+const EASE_OUT = cubicBezier(0.23, 1, 0.32, 1);
 
 type SingleAddressProps = {
   address?: UnifiedAddressClass | TransparentAddressClass;
@@ -44,8 +57,16 @@ const SingleAddress: React.FunctionComponent<SingleAddressProps> = ({
   const { translate, addLastSnackbar } = useAppLoadedActions();
   const { privacy } = useAppLoadedSettings();
   const { colors } = useTheme();
+  const reducedMotion = useReducedMotion();
+  const [shieldPressed, setShieldPressed] = useState<boolean>(false);
 
   const [expandQRAddress, setExpandQRAddress] = useState<boolean>(true);
+
+  const press: CSSTransitionProperties = {
+    transitionProperty: ['transform', 'opacity'],
+    transitionDuration: reducedMotion ? '0ms' : `${duration.press}ms`,
+    transitionTimingFunction: EASE_OUT,
+  };
 
   const animatedHeight = useSharedValue(0);
   const animatedOpacity = useSharedValue(0);
@@ -92,53 +113,36 @@ const SingleAddress: React.FunctionComponent<SingleAddressProps> = ({
   };
 
   return (
-    <View style={{ flexDirection: 'column', width: '100%' }}>
+    <View style={styles.column}>
       <ScrollView
         ref={scrollViewRef}
-        style={{ width: '100%' }}
-        contentContainerStyle={{
-          alignItems: 'center',
-          paddingBottom: 20,
-        }}
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
       >
         {address &&
         address.address !== (translate('receive.noaddress') as string) ? (
           <>
             {address && !isUnified && (
               <View
-                style={{
-                  width: '95%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  justifyContent: 'center',
-                  backgroundColor: colors.bgWarning,
-                  borderRadius: 10,
-                  borderColor: colors.borderWarning,
-                  borderWidth: 1,
-                  padding: 10,
-                  marginTop: 10,
-                }}
+                style={[
+                  styles.warningCard,
+                  {
+                    backgroundColor: colors.bgWarning,
+                    borderColor: colors.borderWarning,
+                  },
+                ]}
               >
-                <View
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginBottom: 5,
-                  }}
-                >
+                <View style={styles.warningHeader}>
                   <TriangleAlert
                     color={colors.fgWarning}
                     size={24}
-                    style={{ marginRight: 10 }}
+                    style={styles.warningIcon}
                   />
                   <Text
-                    style={{
-                      color: colors.fgWarningEmphasis,
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                    }}
+                    style={[
+                      styles.warningTitle,
+                      { color: colors.fgWarningEmphasis },
+                    ]}
                   >
                     {translate('receive.transparent.warning.title') as string}
                   </Text>
@@ -150,48 +154,44 @@ const SingleAddress: React.FunctionComponent<SingleAddressProps> = ({
                     ) as string
                   }
                 </Text>
-                <TouchableOpacity
+                <Pressable
+                  accessibilityRole="button"
                   onPress={() => {
                     changeIndex && changeIndex(0);
                   }}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: '100%',
-                    backgroundColor: colors.bgAccent,
-                    padding: 10,
-                    borderRadius: 5,
-                    marginTop: 10,
-                  }}
+                  onPressIn={() => setShieldPressed(true)}
+                  onPressOut={() => setShieldPressed(false)}
+                  pressRetentionOffset={space.lg}
                 >
-                  <ShieldIcon
-                    color={colors.bgCanvas}
-                    size={24}
-                    style={{ marginRight: 5 }}
-                  />
-                  <Text
-                    style={{
-                      color: colors.bgCanvas,
-                      fontWeight: 'bold',
-                      fontSize: 14,
-                    }}
+                  <Animated.View
+                    style={[
+                      styles.shieldButton,
+                      { backgroundColor: colors.bgAccent },
+                      press,
+                      shieldPressed && styles.shieldPressed,
+                    ]}
                   >
-                    {translate('receive.transparent.warning.button') as string}
-                  </Text>
-                </TouchableOpacity>
+                    <ShieldIcon
+                      color={colors.bgCanvas}
+                      size={24}
+                      style={styles.shieldIcon}
+                    />
+                    <Text
+                      style={[styles.shieldLabel, { color: colors.bgCanvas }]}
+                    >
+                      {
+                        translate(
+                          'receive.transparent.warning.button',
+                        ) as string
+                      }
+                    </Text>
+                  </Animated.View>
+                </Pressable>
               </View>
             )}
 
             <View
-              style={{
-                marginTop: 20,
-                marginHorizontal: 20,
-                padding: 10,
-                backgroundColor: colors.fgDefault,
-                borderRadius: 15,
-              }}
+              style={[styles.qrWrap, { backgroundColor: colors.fgDefault }]}
             >
               <QRCode
                 value={address ? address.address : ''}
@@ -207,44 +207,29 @@ const SingleAddress: React.FunctionComponent<SingleAddressProps> = ({
             </View>
 
             <View
-              style={{
-                marginTop: 40,
-                backgroundColor: colors.bgSurface,
-                padding: 10,
-                width: '90%',
-                borderRadius: 20,
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
+              style={[
+                styles.addressCard,
+                { backgroundColor: colors.bgSurface },
+              ]}
             >
               <Address
                 address={address?.address ? address.address : ''}
-                style={{ color: colors.fgMuted, fontSize: 18, opacity: 0.8 }}
+                style={{ ...styles.address, color: colors.fgMuted }}
                 onPress={() => show('EA')}
               />
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-              >
+              <View style={styles.addressActions}>
                 <TouchableOpacity onPress={doCopy}>
                   <View
-                    style={{
-                      borderRadius: 30,
-                      borderColor: colors.borderMuted,
-                      paddingHorizontal: 5,
-                      paddingVertical: 5,
-                      marginHorizontal: 10,
-                    }}
+                    style={[
+                      styles.copyDisc,
+                      { borderColor: colors.borderMuted },
+                    ]}
                   >
                     <CopyIcon
                       color={colors.fgMuted}
                       size={24}
                       opacity={0.9}
-                      style={{ margin: 3 }}
+                      style={styles.copyIcon}
                     />
                   </View>
                 </TouchableOpacity>
@@ -252,15 +237,7 @@ const SingleAddress: React.FunctionComponent<SingleAddressProps> = ({
             </View>
           </>
         ) : (
-          <View
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              marginTop: 50,
-              marginBottom: 30,
-            }}
-          >
+          <View style={styles.noAddressRow}>
             <RegText>{address ? address.address : ''}</RegText>
           </View>
         )}
@@ -268,5 +245,102 @@ const SingleAddress: React.FunctionComponent<SingleAddressProps> = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  column: {
+    flexDirection: 'column',
+    width: '100%',
+  },
+  scroll: {
+    width: '100%',
+  },
+  scrollContent: {
+    alignItems: 'center',
+    paddingBottom: space.xl,
+  },
+  warningCard: {
+    width: '95%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    borderRadius: 10,
+    borderWidth: 1,
+    padding: space.md,
+    marginTop: space.md,
+  },
+  warningHeader: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: space.xs,
+  },
+  warningIcon: {
+    marginRight: space.md,
+  },
+  warningTitle: {
+    ...text.headline,
+  },
+  shieldButton: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    padding: space.md,
+    borderRadius: 5,
+    marginTop: space.md,
+  },
+  shieldPressed: {
+    transform: [{ scale: 0.975 }],
+    opacity: 0.8,
+  },
+  shieldIcon: {
+    marginRight: space.xs,
+  },
+  shieldLabel: {
+    ...text.caption,
+  },
+  qrWrap: {
+    marginTop: space.xl,
+    marginHorizontal: space.xl,
+    padding: space.md,
+    borderRadius: 15,
+  },
+  addressCard: {
+    marginTop: space.xxxl,
+    padding: space.md,
+    width: '90%',
+    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  address: {
+    ...text.headline,
+    opacity: 0.8,
+  },
+  addressActions: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  copyDisc: {
+    borderRadius: radiusPill,
+    paddingHorizontal: space.xs,
+    paddingVertical: space.xs,
+    marginHorizontal: space.md,
+  },
+  copyIcon: {
+    margin: space.xs,
+  },
+  noAddressRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: space.xxxl,
+    marginBottom: space.xxxl,
+  },
+});
 
 export default SingleAddress;

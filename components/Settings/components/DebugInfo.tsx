@@ -1,6 +1,5 @@
-/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import { View, ScrollView } from 'react-native';
+import { StyleSheet, ScrollView, Text, View } from 'react-native';
 
 import { LoadedAppStackParamList } from '../../../app/types';
 import {
@@ -14,18 +13,18 @@ import { ToastProvider, useToast } from 'react-native-toastier';
 import { RouteEnum, ScreenEnum } from '../../../app/AppState';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import FadeText from '../../Components/FadeText';
 import { createAlert } from '../../../app/createAlert';
 import { sendEmail } from '../../../app/sendEmail';
 import { HeaderTitle } from '../../Header';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
-import { useTheme } from '../../../app/theme';
+import { mono, radiusCard, space, useTheme } from '../../../app/theme';
 
 type DebugInfoProps = NativeStackScreenProps<
   LoadedAppStackParamList,
   RouteEnum.DebugInfo
 >;
 
+/** Last error, presented as a terminal: mono text on a dark panel. */
 const DebugInfo: React.FunctionComponent<DebugInfoProps> = ({ navigation }) => {
   const {
     removeFirstSnackbar,
@@ -76,52 +75,28 @@ const DebugInfo: React.FunctionComponent<DebugInfoProps> = ({ navigation }) => {
 
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{
-          flexGrow: 1,
-          paddingBottom: insets.bottom + 8,
-          paddingHorizontal: 16,
-        }}
+        contentContainerStyle={[
+          styles.screen,
+          { paddingBottom: insets.bottom + space.sm },
+        ]}
       >
-        <View
-          style={{
-            flexGrow: 1,
-            alignItems: 'flex-start',
-            justifyContent: 'center',
-          }}
-        >
-          <View
-            style={{
-              borderRadius: 26,
-              backgroundColor: colors.bgSurface,
-              width: '100%',
-              marginTop: 20,
-              paddingVertical: 10,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-                marginVertical: 20,
-                marginHorizontal: 30,
-                width: '85%',
-              }}
-            >
-              <FadeText>
-                {lastError ? lastError : 'No errors detected'}
-              </FadeText>
-            </View>
-          </View>
+        <View style={[styles.terminal, { backgroundColor: colors.bgChrome }]}>
+          <Text style={[styles.line, { color: colors.fgFaint }]}>
+            $ debug --last-error
+          </Text>
+          {lastError ? (
+            <Text selectable style={[styles.line, { color: colors.fgDefault }]}>
+              {lastError}
+            </Text>
+          ) : (
+            <Text style={[styles.line, { color: colors.fgMuted }]}>
+              no errors detected
+            </Text>
+          )}
         </View>
       </ScrollView>
       <View
-        style={{
-          marginTop: 'auto',
-          alignItems: 'center',
-          justifyContent: 'center',
-          paddingTop: 10,
-          paddingBottom: 20,
-        }}
+        style={[styles.footer, { paddingBottom: insets.bottom + space.xl }]}
       >
         {!!lastError && (
           <LiquidPrimaryButton
@@ -135,5 +110,29 @@ const DebugInfo: React.FunctionComponent<DebugInfoProps> = ({ navigation }) => {
     </ToastProvider>
   );
 };
+
+const styles = StyleSheet.create({
+  screen: {
+    flexGrow: 1,
+    paddingHorizontal: space.lg,
+  },
+  terminal: {
+    borderRadius: radiusCard,
+    width: '100%',
+    marginTop: space.xl,
+    padding: space.xl,
+    minHeight: 220,
+  },
+  line: {
+    ...mono,
+    lineHeight: 22,
+  },
+  footer: {
+    marginTop: 'auto',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: space.sm,
+  },
+});
 
 export default DebugInfo;

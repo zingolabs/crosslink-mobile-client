@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Native alert dialog surface: the summary-card panel color with the
+     app's card radius. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#222223" />
+    <corners android:radius="28dp" />
+</shape>

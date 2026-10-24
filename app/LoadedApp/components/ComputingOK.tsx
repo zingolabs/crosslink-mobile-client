@@ -1,6 +1,5 @@
-/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import RegText from '../../../components/Components/RegText';
@@ -11,7 +10,7 @@ import { useAppLoadedWallet } from '../../context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import Button from '../../../components/Components/Button';
-import { useTheme } from '../../theme';
+import { radiusCard, radiusPill, space, text, useTheme } from '../../theme';
 
 type ComputingOKProps = NativeStackScreenProps<
   LoadedAppStackParamList,
@@ -27,58 +26,27 @@ const ComputingOK: React.FunctionComponent<ComputingOKProps> = ({ route }) => {
     !!route.params && route.params.txid !== undefined ? route.params.txid : '';
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: colors.bgCanvas,
-      }}
-    >
-      <View
-        style={{
-          flexGrow: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <View
-          style={{
-            backgroundColor: colors.bgSurface,
-            paddingHorizontal: 20,
-            paddingVertical: 40,
-            width: '90%',
-            borderRadius: 50,
-          }}
-        >
-          <View
-            style={{
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginHorizontal: 8,
-            }}
-          >
+    <View style={[styles.screen, { backgroundColor: colors.bgCanvas }]}>
+      <View style={styles.center}>
+        <View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
+          <View style={styles.iconWrap}>
+            {/* No successTint token: a low-alpha fill derived from the token. */}
             <View
-              style={{
-                borderRadius: 50,
-                backgroundColor: '#34C75933',
-                padding: 20,
-                margin: 10,
-              }}
+              style={[
+                styles.iconDisc,
+                { backgroundColor: colors.bgSuccessTint },
+              ]}
             >
-              <FontAwesomeIcon icon={faCheck} color="#34C759" size={50} />
+              <FontAwesomeIcon
+                icon={faCheck}
+                color={colors.fgSuccess}
+                size={50}
+              />
             </View>
           </View>
-          <RegText style={{ fontSize: 30, alignSelf: 'center' }}>Sent</RegText>
+          <RegText style={[text.title1, styles.centerSelf]}>Sent</RegText>
 
-          <View
-            style={{
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              paddingTop: 50,
-              paddingBottom: 20,
-              gap: 10,
-            }}
-          >
+          <View style={styles.actions}>
             <Button
               variant="secondary"
               title={'Details'}
@@ -118,5 +86,43 @@ const ComputingOK: React.FunctionComponent<ComputingOKProps> = ({ route }) => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+  center: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  card: {
+    paddingHorizontal: space.xl,
+    paddingVertical: space.xxxl,
+    width: '90%',
+    borderRadius: radiusCard,
+  },
+  iconWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: space.sm,
+  },
+  iconDisc: {
+    borderRadius: radiusPill,
+    padding: space.xl,
+    margin: space.md,
+  },
+  centerSelf: {
+    alignSelf: 'center',
+  },
+  actions: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: space.xxxl,
+    paddingBottom: space.xl,
+    gap: space.md,
+  },
+});
 
 export default ComputingOK;

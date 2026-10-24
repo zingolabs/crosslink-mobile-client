@@ -12,7 +12,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 
-import { radiusPill, useTheme } from '../../app/theme';
+import { duration, radiusPill, useTheme } from '../../app/theme';
 
 type HeaderIconButtonProps = {
   icon: IconDefinition;
@@ -38,7 +38,7 @@ const HeaderIconButton: React.FC<HeaderIconButtonProps> = ({
 
   const transition: CSSTransitionProperties = {
     transitionProperty: ['transform', 'opacity'],
-    transitionDuration: reducedMotion ? '0ms' : '120ms',
+    transitionDuration: reducedMotion ? '0ms' : `${duration.press}ms`,
     transitionTimingFunction: EASE_OUT,
   };
 

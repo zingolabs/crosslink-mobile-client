@@ -5,7 +5,7 @@ import { WalletBondsStatusEnum } from '../../../../app/AppState/enums/WalletBond
 import { RefreshCcw } from 'lucide-react-native';
 import ZecAmount from '../../../Components/ZecAmount';
 import { useAppLoadedWallet } from '../../../../app/context';
-import { useTheme } from '../../../../app/theme';
+import { useTheme, text, space } from '../../../../app/theme';
 
 type StakingPositionProps = {
   item: WalletBondsType;
@@ -41,11 +41,7 @@ export function StakingPosition({ item, selected }: StakingPositionProps) {
             <RefreshCcw width={15} height={15} style={{ marginRight: 5 }} />
           )}
           <Text
-            style={{
-              color: colors.fgDefault,
-              fontSize: 13,
-              fontWeight: '500',
-            }}
+            style={[text.caption, { color: colors.fgDefault }]}
             numberOfLines={1}
           >
             {item.status === WalletBondsStatusEnum.Unbonding
@@ -53,20 +49,14 @@ export function StakingPosition({ item, selected }: StakingPositionProps) {
               : item.status}
           </Text>
         </View>
-        <Text
-          style={{
-            color: colors.fgSubtle,
-            fontSize: 11,
-            marginTop: 2,
-          }}
-        >
+        <Text style={[text.caption2, { color: colors.fgSubtle, marginTop: 2 }]}>
           {shortenTxid(item.pubKey)}
         </Text>
       </View>
       <ZecAmount
         style={{
           alignSelf: 'center',
-          marginLeft: 12,
+          marginLeft: space.md,
         }}
         size={14}
         currencyName={CurrencyNameEnum.cTAZ}
@@ -79,27 +69,12 @@ export function StakingPosition({ item, selected }: StakingPositionProps) {
 }
 
 const styles = StyleSheet.create({
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalCard: {
-    width: '80%',
-    maxWidth: 320,
-    borderRadius: 18,
-    paddingHorizontal: 20,
-    paddingVertical: 24,
-    alignItems: 'center',
-    borderWidth: StyleSheet.hairlineWidth,
-  },
   txRow: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 12,
     borderWidth: 1,
-    paddingHorizontal: 12,
+    paddingHorizontal: space.md,
     paddingVertical: 10,
   },
 });

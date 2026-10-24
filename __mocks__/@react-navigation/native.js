@@ -1,4 +1,3 @@
-
 export const useScrollToTop = jest.fn();
 export const useIsFocused = jest.fn();
 export const useNavigation = jest.fn();

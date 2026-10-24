@@ -1,6 +1,5 @@
-/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import { View, ScrollView } from 'react-native';
+import { StyleSheet, View, ScrollView } from 'react-native';
 
 import DetailLine from '../Components/DetailLine';
 import { LoadedAppStackParamList } from '../../app/types';
@@ -24,7 +23,7 @@ import { ToastProvider, useToast } from 'react-native-toastier';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../Header';
-import { useTheme } from '../../app/theme';
+import { space, useTheme } from '../../app/theme';
 
 type InfoProps = NativeStackScreenProps<
   LoadedAppStackParamList,
@@ -62,21 +61,13 @@ const Info: React.FunctionComponent<InfoProps> = ({ navigation }) => {
 
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{
-          flexGrow: 1,
-          paddingTop: 8,
-          paddingBottom: insets.bottom + 8,
-          paddingHorizontal: 16,
-        }}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + space.sm },
+        ]}
       >
-        <View
-          style={{
-            flexGrow: 1,
-            alignItems: 'flex-start',
-            justifyContent: 'center',
-          }}
-        >
-          <View style={{ display: 'flex', margin: 20 }}>
+        <View style={styles.center}>
+          <View style={styles.details}>
             <DetailLine
               label={translate('info.version') as string}
               value={translate('zingodelegator') + ' ' + translate('version')}
@@ -117,7 +108,7 @@ const Info: React.FunctionComponent<InfoProps> = ({ navigation }) => {
             />
             {(currency === CurrencyEnum.USDCurrency ||
               currency === CurrencyEnum.USDTORCurrency) && (
-              <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+              <View style={styles.priceRow}>
                 <DetailLine
                   label={
                     (currency === CurrencyEnum.USDTORCurrency
@@ -143,7 +134,7 @@ const Info: React.FunctionComponent<InfoProps> = ({ navigation }) => {
                     privacy={privacy}
                   />
                 </DetailLine>
-                <View style={{ marginLeft: 5 }}>
+                <View style={styles.priceFetcher}>
                   <PriceFetcher
                     setZecPrice={setZecPrice}
                     screenName={screenName}
@@ -157,5 +148,29 @@ const Info: React.FunctionComponent<InfoProps> = ({ navigation }) => {
     </ToastProvider>
   );
 };
+
+const styles = StyleSheet.create({
+  scrollContent: {
+    flexGrow: 1,
+    paddingTop: space.sm,
+    paddingHorizontal: space.lg,
+  },
+  center: {
+    flexGrow: 1,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+  },
+  details: {
+    display: 'flex',
+    margin: space.xl,
+  },
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  priceFetcher: {
+    marginLeft: space.xs,
+  },
+});
 
 export default Info;

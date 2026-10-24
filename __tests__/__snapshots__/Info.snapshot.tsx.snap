@@ -157,12 +157,16 @@ exports[`Component Info - test Info - snapshot 1`] = `
   </View>
   <RCTScrollView
     contentContainerStyle={
-      {
-        "flexGrow": 1,
-        "paddingBottom": 8,
-        "paddingHorizontal": 16,
-        "paddingTop": 8,
-      }
+      [
+        {
+          "flexGrow": 1,
+          "paddingHorizontal": 16,
+          "paddingTop": 8,
+        },
+        {
+          "paddingBottom": 8,
+        },
+      ]
     }
     keyboardShouldPersistTaps="handled"
   >
@@ -194,10 +198,18 @@ exports[`Component Info - test Info - snapshot 1`] = `
           >
             <Text
               style={
-                {
-                  "color": "#c3c3c3",
-                  "opacity": 0.65,
-                }
+                [
+                  {
+                    "fontSize": 17,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.41,
+                    "lineHeight": 22,
+                  },
+                  {
+                    "color": "#888888",
+                  },
+                  undefined,
+                ]
               }
             >
               text translated
@@ -240,10 +252,13 @@ exports[`Component Info - test Info - snapshot 1`] = `
                 style={
                   [
                     {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
                       "color": "#c3c3c3",
-                      "fontSize": 18,
-                      "fontWeight": "600",
-                      "opacity": 1,
                     },
                     undefined,
                   ]
@@ -263,10 +278,18 @@ exports[`Component Info - test Info - snapshot 1`] = `
           >
             <Text
               style={
-                {
-                  "color": "#c3c3c3",
-                  "opacity": 0.65,
-                }
+                [
+                  {
+                    "fontSize": 17,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.41,
+                    "lineHeight": 22,
+                  },
+                  {
+                    "color": "#888888",
+                  },
+                  undefined,
+                ]
               }
             >
               text translated
@@ -309,10 +332,13 @@ exports[`Component Info - test Info - snapshot 1`] = `
                 style={
                   [
                     {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
                       "color": "#c3c3c3",
-                      "fontSize": 18,
-                      "fontWeight": "600",
-                      "opacity": 1,
                     },
                     undefined,
                   ]
@@ -332,10 +358,18 @@ exports[`Component Info - test Info - snapshot 1`] = `
           >
             <Text
               style={
-                {
-                  "color": "#c3c3c3",
-                  "opacity": 0.65,
-                }
+                [
+                  {
+                    "fontSize": 17,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.41,
+                    "lineHeight": 22,
+                  },
+                  {
+                    "color": "#888888",
+                  },
+                  undefined,
+                ]
               }
             >
               text translated
@@ -378,10 +412,13 @@ exports[`Component Info - test Info - snapshot 1`] = `
                 style={
                   [
                     {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
                       "color": "#c3c3c3",
-                      "fontSize": 18,
-                      "fontWeight": "600",
-                      "opacity": 1,
                     },
                     undefined,
                   ]
@@ -401,10 +438,18 @@ exports[`Component Info - test Info - snapshot 1`] = `
           >
             <Text
               style={
-                {
-                  "color": "#c3c3c3",
-                  "opacity": 0.65,
-                }
+                [
+                  {
+                    "fontSize": 17,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.41,
+                    "lineHeight": 22,
+                  },
+                  {
+                    "color": "#888888",
+                  },
+                  undefined,
+                ]
               }
             >
               text translated
@@ -447,10 +492,13 @@ exports[`Component Info - test Info - snapshot 1`] = `
                 style={
                   [
                     {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
                       "color": "#c3c3c3",
-                      "fontSize": 18,
-                      "fontWeight": "600",
-                      "opacity": 1,
                     },
                     undefined,
                   ]
@@ -470,10 +518,18 @@ exports[`Component Info - test Info - snapshot 1`] = `
           >
             <Text
               style={
-                {
-                  "color": "#c3c3c3",
-                  "opacity": 0.65,
-                }
+                [
+                  {
+                    "fontSize": 17,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.41,
+                    "lineHeight": 22,
+                  },
+                  {
+                    "color": "#888888",
+                  },
+                  undefined,
+                ]
               }
             >
               text translated
@@ -516,10 +572,13 @@ exports[`Component Info - test Info - snapshot 1`] = `
                 style={
                   [
                     {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
                       "color": "#c3c3c3",
-                      "fontSize": 18,
-                      "fontWeight": "600",
-                      "opacity": 1,
                     },
                     undefined,
                   ]
@@ -547,10 +606,18 @@ exports[`Component Info - test Info - snapshot 1`] = `
             >
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 text translated
@@ -623,7 +690,7 @@ exports[`Component Info - test Info - snapshot 1`] = `
             <View
               style={
                 {
-                  "marginLeft": 5,
+                  "marginLeft": 4,
                 }
               }
             >

@@ -14,30 +14,39 @@ exports[`Component Unified Address List - test Address Transparent List - snapsh
   <View />
   <View
     style={
-      {
-        "backgroundColor": "#011401",
-        "flex": 1,
-      }
+      [
+        {
+          "flex": 1,
+        },
+        {
+          "backgroundColor": "#011401",
+        },
+      ]
     }
   >
     <View>
       <View
         style={
-          {
-            "alignItems": "center",
-            "backgroundColor": "#011401",
-            "display": "flex",
-            "minHeight": 25,
-            "paddingBottom": 0,
-            "paddingTop": 10,
-          }
+          [
+            {
+              "alignItems": "center",
+              "display": "flex",
+              "paddingBottom": 0,
+            },
+            {
+              "minHeight": 25,
+            },
+            {
+              "backgroundColor": "#011401",
+              "paddingTop": 10,
+            },
+          ]
         }
         testID="header"
       >
         <View
           style={
             {
-              "borderRadius": 3,
               "display": "flex",
               "height": 5,
               "justifyContent": "flex-start",
@@ -119,12 +128,16 @@ exports[`Component Unified Address List - test Address Transparent List - snapsh
             >
               <View
                 style={
-                  {
-                    "backgroundColor": "#222223",
-                    "borderRadius": 35,
-                    "margin": 10,
-                    "padding": 20,
-                  }
+                  [
+                    {
+                      "borderRadius": 9999,
+                      "margin": 10,
+                      "padding": 20,
+                    },
+                    {
+                      "backgroundColor": "#222223",
+                    },
+                  ]
                 }
               >
                 <
@@ -158,10 +171,18 @@ exports[`Component Unified Address List - test Address Transparent List - snapsh
               </View>
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 Send
@@ -216,12 +237,16 @@ exports[`Component Unified Address List - test Address Transparent List - snapsh
             >
               <View
                 style={
-                  {
-                    "backgroundColor": "#222223",
-                    "borderRadius": 35,
-                    "margin": 10,
-                    "padding": 20,
-                  }
+                  [
+                    {
+                      "borderRadius": 9999,
+                      "margin": 10,
+                      "padding": 20,
+                    },
+                    {
+                      "backgroundColor": "#222223",
+                    },
+                  ]
                 }
               >
                 <
@@ -255,10 +280,18 @@ exports[`Component Unified Address List - test Address Transparent List - snapsh
               </View>
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 Receive
@@ -313,12 +346,16 @@ exports[`Component Unified Address List - test Address Transparent List - snapsh
             >
               <View
                 style={
-                  {
-                    "backgroundColor": "#222223",
-                    "borderRadius": 35,
-                    "margin": 10,
-                    "padding": 20,
-                  }
+                  [
+                    {
+                      "borderRadius": 9999,
+                      "margin": 10,
+                      "padding": 20,
+                    },
+                    {
+                      "backgroundColor": "#222223",
+                    },
+                  ]
                 }
               >
                 <
@@ -341,10 +378,18 @@ exports[`Component Unified Address List - test Address Transparent List - snapsh
               </View>
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 Faucet
@@ -354,12 +399,16 @@ exports[`Component Unified Address List - test Address Transparent List - snapsh
         </View>
         <View
           style={
-            {
-              "left": 0,
-              "padding": 11.5,
-              "position": "absolute",
-              "top": 0,
-            }
+            [
+              {
+                "left": 0,
+                "padding": 11.5,
+                "position": "absolute",
+              },
+              {
+                "top": 0,
+              },
+            ]
           }
         >
           <View
@@ -375,12 +424,16 @@ exports[`Component Unified Address List - test Address Transparent List - snapsh
       </View>
       <View
         style={
-          {
-            "padding": 13,
-            "position": "absolute",
-            "right": 0,
-            "top": 0,
-          }
+          [
+            {
+              "padding": 13,
+              "position": "absolute",
+              "right": 0,
+            },
+            {
+              "top": 0,
+            },
+          ]
         }
       >
         <View
@@ -452,8 +505,8 @@ exports[`Component Unified Address List - test Address Transparent List - snapsh
           size={25}
           style={
             {
-              "marginRight": 7,
-              "marginTop": 7,
+              "marginRight": 8,
+              "marginTop": 8,
             }
           }
         />
@@ -477,30 +530,39 @@ exports[`Component Unified Address List - test Address Unified List - snapshot 1
   <View />
   <View
     style={
-      {
-        "backgroundColor": "#011401",
-        "flex": 1,
-      }
+      [
+        {
+          "flex": 1,
+        },
+        {
+          "backgroundColor": "#011401",
+        },
+      ]
     }
   >
     <View>
       <View
         style={
-          {
-            "alignItems": "center",
-            "backgroundColor": "#011401",
-            "display": "flex",
-            "minHeight": 25,
-            "paddingBottom": 0,
-            "paddingTop": 10,
-          }
+          [
+            {
+              "alignItems": "center",
+              "display": "flex",
+              "paddingBottom": 0,
+            },
+            {
+              "minHeight": 25,
+            },
+            {
+              "backgroundColor": "#011401",
+              "paddingTop": 10,
+            },
+          ]
         }
         testID="header"
       >
         <View
           style={
             {
-              "borderRadius": 3,
               "display": "flex",
               "height": 5,
               "justifyContent": "flex-start",
@@ -582,12 +644,16 @@ exports[`Component Unified Address List - test Address Unified List - snapshot 1
             >
               <View
                 style={
-                  {
-                    "backgroundColor": "#222223",
-                    "borderRadius": 35,
-                    "margin": 10,
-                    "padding": 20,
-                  }
+                  [
+                    {
+                      "borderRadius": 9999,
+                      "margin": 10,
+                      "padding": 20,
+                    },
+                    {
+                      "backgroundColor": "#222223",
+                    },
+                  ]
                 }
               >
                 <
@@ -621,10 +687,18 @@ exports[`Component Unified Address List - test Address Unified List - snapshot 1
               </View>
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 Send
@@ -679,12 +753,16 @@ exports[`Component Unified Address List - test Address Unified List - snapshot 1
             >
               <View
                 style={
-                  {
-                    "backgroundColor": "#222223",
-                    "borderRadius": 35,
-                    "margin": 10,
-                    "padding": 20,
-                  }
+                  [
+                    {
+                      "borderRadius": 9999,
+                      "margin": 10,
+                      "padding": 20,
+                    },
+                    {
+                      "backgroundColor": "#222223",
+                    },
+                  ]
                 }
               >
                 <
@@ -718,10 +796,18 @@ exports[`Component Unified Address List - test Address Unified List - snapshot 1
               </View>
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 Receive
@@ -776,12 +862,16 @@ exports[`Component Unified Address List - test Address Unified List - snapshot 1
             >
               <View
                 style={
-                  {
-                    "backgroundColor": "#222223",
-                    "borderRadius": 35,
-                    "margin": 10,
-                    "padding": 20,
-                  }
+                  [
+                    {
+                      "borderRadius": 9999,
+                      "margin": 10,
+                      "padding": 20,
+                    },
+                    {
+                      "backgroundColor": "#222223",
+                    },
+                  ]
                 }
               >
                 <
@@ -804,10 +894,18 @@ exports[`Component Unified Address List - test Address Unified List - snapshot 1
               </View>
               <Text
                 style={
-                  {
-                    "color": "#c3c3c3",
-                    "opacity": 0.65,
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
                 Faucet
@@ -817,12 +915,16 @@ exports[`Component Unified Address List - test Address Unified List - snapshot 1
         </View>
         <View
           style={
-            {
-              "left": 0,
-              "padding": 11.5,
-              "position": "absolute",
-              "top": 0,
-            }
+            [
+              {
+                "left": 0,
+                "padding": 11.5,
+                "position": "absolute",
+              },
+              {
+                "top": 0,
+              },
+            ]
           }
         >
           <View
@@ -838,12 +940,16 @@ exports[`Component Unified Address List - test Address Unified List - snapshot 1
       </View>
       <View
         style={
-          {
-            "padding": 13,
-            "position": "absolute",
-            "right": 0,
-            "top": 0,
-          }
+          [
+            {
+              "padding": 13,
+              "position": "absolute",
+              "right": 0,
+            },
+            {
+              "top": 0,
+            },
+          ]
         }
       >
         <View
@@ -915,8 +1021,8 @@ exports[`Component Unified Address List - test Address Unified List - snapshot 1
           size={25}
           style={
             {
-              "marginRight": 7,
-              "marginTop": 7,
+              "marginRight": 8,
+              "marginTop": 8,
             }
           }
         />

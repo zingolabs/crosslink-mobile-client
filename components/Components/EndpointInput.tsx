@@ -22,7 +22,6 @@ type EndpointInputProps = {
 };
 
 const EASE_OUT = cubicBezier(0.23, 1, 0.32, 1);
-const SURFACE_FOCUSED = '#2C2C2E';
 
 const EndpointInput: React.FC<EndpointInputProps> = ({
   value,
@@ -57,7 +56,9 @@ const EndpointInput: React.FC<EndpointInputProps> = ({
     <Animated.View
       style={[
         styles.field,
-        { backgroundColor: focused ? SURFACE_FOCUSED : colors.bgSurface },
+        {
+          backgroundColor: focused ? colors.bgSurfaceRaised : colors.bgSurface,
+        },
         error ? { borderColor: colors.borderDanger } : styles.borderNone,
         surface,
       ]}

@@ -1,6 +1,11 @@
-/* eslint-disable react-native/no-inline-styles */
 import React, { useEffect, useState } from 'react';
-import { View, ScrollView, Text, ActivityIndicator } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  Text,
+  ActivityIndicator,
+} from 'react-native';
 
 import { LoadedAppStackParamList } from '../../app/types';
 import DetailLine from '../Components/DetailLine';
@@ -29,12 +34,37 @@ import { createAlert } from '../../app/createAlert';
 import { sendEmail } from '../../app/sendEmail';
 import Utils from '../../app/utils';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
-import { useTheme } from '../../app/theme';
+import { space, useTheme } from '../../app/theme';
 
 type SyncReportProps = NativeStackScreenProps<
   LoadedAppStackParamList,
   RouteEnum.SyncReport
 >;
+
+/**
+ * The semantic color of one scan range in the progress map.
+ */
+const rangeColor = (
+  priority: RPCSyncScanRangePriorityStatusEnum,
+  tokenColors: ReturnType<typeof useTheme>['colors'],
+): string => {
+  switch (priority) {
+    case RPCSyncScanRangePriorityStatusEnum.Scanning:
+      return tokenColors.fgSyncing;
+    case RPCSyncScanRangePriorityStatusEnum.Scanned:
+    case RPCSyncScanRangePriorityStatusEnum.ScannedWithoutMapping:
+      return tokenColors.fgSuccess;
+    case RPCSyncScanRangePriorityStatusEnum.Historic:
+      return tokenColors.fgSubtle;
+    case RPCSyncScanRangePriorityStatusEnum.OpenAdjacent:
+    case RPCSyncScanRangePriorityStatusEnum.FoundNote:
+    case RPCSyncScanRangePriorityStatusEnum.ChainTip:
+    case RPCSyncScanRangePriorityStatusEnum.Verify:
+      return tokenColors.fgAccent;
+    default:
+      return tokenColors.fgDanger;
+  }
+};
 
 const SyncReport: React.FunctionComponent<SyncReportProps> = ({
   navigation,
@@ -207,12 +237,7 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
         screenName={screenName}
       />
 
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: colors.bgCanvas,
-        }}
-      >
+      <View style={[styles.screen, { backgroundColor: colors.bgCanvas }]}>
         <Header
           title={translate('report.title') as string}
           screenName={screenName}
@@ -230,43 +255,32 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
         />
         <ScrollView
           testID="syncreport.scroll-view"
-          style={{ maxHeight: '90%' }}
-          contentContainerStyle={{
-            flexDirection: 'column',
-            alignItems: 'stretch',
-            justifyContent: 'flex-start',
-          }}
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
         >
           {(!netInfo.isConnected ||
             netInfo.type === NetInfoStateType.cellular ||
             netInfo.isConnectionExpensive) && (
-            <View
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'flex-end',
-                marginHorizontal: 20,
-              }}
-            >
+            <View style={styles.netStatusRow}>
               <DetailLine
                 label={translate('report.networkstatus') as string}
                 screenName={screenName}
               >
-                <View style={{ display: 'flex', flexDirection: 'column' }}>
+                <View style={styles.netStatusCol}>
                   {!netInfo.isConnected && (
-                    <RegText color="red">
+                    <RegText color={colors.fgDanger}>
                       {' '}
                       {translate('report.nointernet') as string}{' '}
                     </RegText>
                   )}
                   {netInfo.type === NetInfoStateType.cellular && (
-                    <RegText color="yellow">
+                    <RegText color={colors.fgWarning}>
                       {' '}
                       {translate('report.cellulardata') as string}{' '}
                     </RegText>
                   )}
                   {netInfo.isConnectionExpensive && (
-                    <RegText color="yellow">
+                    <RegText color={colors.fgWarning}>
                       {' '}
                       {translate('report.connectionexpensive') as string}{' '}
                     </RegText>
@@ -275,21 +289,17 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
               </DetailLine>
               <FontAwesomeIcon
                 icon={faCloudDownload}
-                color={!netInfo.isConnected ? 'red' : 'yellow'}
+                color={
+                  !netInfo.isConnected ? colors.fgDanger : colors.fgWarning
+                }
                 size={20}
-                style={{ marginBottom: 5, marginLeft: 5 }}
+                style={styles.netStatusIcon}
               />
             </View>
           )}
           {!!maxBlocks && netInfo.isConnected ? (
             <>
-              <View
-                style={{
-                  display: 'flex',
-                  marginHorizontal: 20,
-                  marginBottom: 30,
-                }}
-              >
+              <View style={styles.syncSection}>
                 <DetailLine
                   label={translate('report.syncstatus') as string}
                   value={
@@ -302,126 +312,96 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
                 />
 
                 <View
-                  style={{
-                    height: 2,
-                    width: '100%',
-                    backgroundColor: 'white',
-                    marginTop: 15,
-                    marginBottom: 10,
-                  }}
+                  style={[
+                    styles.separator,
+                    { backgroundColor: colors.borderFaint },
+                  ]}
                 />
 
                 {!!maxBlocks && serverServer > 0 && serverWallet > 0 && (
                   <>
-                    <View
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        width: '100%',
-                        justifyContent: 'space-between',
-                        marginTop: 10,
-                      }}
-                    >
+                    <View style={styles.tickLabels}>
                       {labels.map((label: string) => (
                         <Text key={label} style={{ color: colors.fgAccent }}>
                           {label}
                         </Text>
                       ))}
                     </View>
-                    <View
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        width: '100%',
-                      }}
-                    >
+                    <View style={styles.tickRow}>
                       {points.map((point: number) => (
                         <View
                           key={point}
-                          style={{
-                            height: 10,
-                            borderRightColor: colors.borderAccent,
-                            borderRightWidth: 1,
-                            borderLeftColor: colors.borderAccent,
-                            borderLeftWidth: 1,
-                            width: `${(points[1] * 100) / maxBlocks}%`,
-                          }}
+                          style={[
+                            styles.tick,
+                            {
+                              borderRightColor: colors.borderAccent,
+                              borderLeftColor: colors.borderAccent,
+                              width: `${(points[1] * 100) / maxBlocks}%`,
+                            },
+                          ]}
                         />
                       ))}
                     </View>
                     <View
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'flex-start',
-                        width: '100%',
-                        borderBottomColor: colors.borderAccent,
-                        borderBottomWidth: 2,
-                        marginBottom: 0,
-                      }}
+                      style={[
+                        styles.serverBar,
+                        { borderBottomColor: colors.borderAccent },
+                      ]}
                     >
                       {server1Percent >= 0 && (
                         <View
-                          style={{
-                            height: 10,
-                            backgroundColor: 'blue',
-                            borderLeftColor: colors.borderAccent,
-                            borderLeftWidth: 1,
-                            borderRightColor: 'blue',
-                            borderRightWidth: server1Percent > 0 ? 1 : 0,
-                            width: `${server1Percent}%`,
-                          }}
+                          style={[
+                            styles.barSegment,
+                            styles.barSegmentStart,
+                            server1Percent > 0 ? styles.barSegmentEdge : null,
+                            {
+                              backgroundColor: colors.bgAccent,
+                              borderLeftColor: colors.borderAccent,
+                              borderRightColor: colors.bgAccent,
+                              width: `${server1Percent}%`,
+                            },
+                          ]}
                         />
                       )}
                       {server2Percent >= 0 && (
                         <View
-                          style={{
-                            height: 10,
-                            backgroundColor: 'yellow',
-                            borderRightColor: 'yellow',
-                            borderRightWidth: server2Percent > 0 ? 1 : 0,
-                            width: `${server2Percent}%`,
-                            borderBottomColor: 'blue',
-                            borderBottomWidth: 5,
-                          }}
+                          style={[
+                            styles.barSegment,
+                            server2Percent > 0 ? styles.barSegmentEdge : null,
+                            styles.barSegmentUnderline,
+                            {
+                              backgroundColor: colors.bgSyncing,
+                              borderRightColor: colors.bgSyncing,
+                              width: `${server2Percent}%`,
+                              borderBottomColor: colors.bgAccent,
+                            },
+                          ]}
                         />
                       )}
                       {server3Percent >= 0 && (
                         <View
-                          style={{
-                            height: 10,
-                            backgroundColor: '#333333',
-                            borderRightColor: colors.borderAccent,
-                            borderRightWidth: 1,
-                            width: `${server3Percent}%`,
-                          }}
+                          style={[
+                            styles.barSegment,
+                            styles.barSegmentEdge,
+                            {
+                              backgroundColor: colors.bgFaint,
+                              borderRightColor: colors.borderAccent,
+                              width: `${server3Percent}%`,
+                            },
+                          ]}
                         />
                       )}
                     </View>
                     {serverServer > 0 && (
-                      <View
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'row',
-                          width: '100%',
-                          justifyContent: 'flex-start',
-                          alignItems: 'center',
-                          marginTop: 5,
-                        }}
-                      >
+                      <View style={styles.legendRow}>
                         <Text style={{ color: colors.fgAccent }}>
                           {translate('report.server-title') as string}
                         </Text>
                         <View
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            width: 10,
-                            height: 10,
-                            justifyContent: 'flex-start',
-                            backgroundColor: 'blue',
-                            margin: 5,
-                          }}
+                          style={[
+                            styles.legendSwatch,
+                            { backgroundColor: colors.bgAccent },
+                          ]}
                         />
                         <Text style={{ color: colors.fgDefault }}>
                           {serverServer +
@@ -430,29 +410,15 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
                       </View>
                     )}
                     {serverWallet > 0 && (
-                      <View
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'row',
-                          width: '100%',
-                          justifyContent: 'flex-start',
-                          alignItems: 'center',
-                          marginTop: 5,
-                        }}
-                      >
+                      <View style={styles.legendRow}>
                         <Text style={{ color: colors.fgAccent }}>
                           {translate('report.wallet') as string}
                         </Text>
                         <View
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            width: 10,
-                            height: 10,
-                            justifyContent: 'flex-start',
-                            backgroundColor: 'yellow',
-                            margin: 5,
-                          }}
+                          style={[
+                            styles.legendSwatch,
+                            { backgroundColor: colors.bgSyncing },
+                          ]}
                         />
                         <Text
                           testID="syncreport.wallettotalblocks"
@@ -465,13 +431,10 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
                     )}
 
                     <View
-                      style={{
-                        height: 2,
-                        width: '100%',
-                        backgroundColor: 'white',
-                        marginTop: 15,
-                        marginBottom: 10,
-                      }}
+                      style={[
+                        styles.separator,
+                        { backgroundColor: colors.borderFaint },
+                      ]}
                     />
                   </>
                 )}
@@ -482,15 +445,7 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
                       label={translate('report.map') as string}
                       screenName={screenName}
                     >
-                      <View
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'row',
-                          width: '100%',
-                          justifyContent: 'space-between',
-                          marginTop: 5,
-                        }}
-                      >
+                      <View style={styles.mapBoundsRow}>
                         <>
                           <Text style={{ color: colors.fgDefault }}>
                             {wallet.birthday}
@@ -500,42 +455,23 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
                           </Text>
                         </>
                       </View>
-                      <View
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'row',
-                          width: '100%',
-                          justifyContent: 'space-between',
-                        }}
-                      >
+                      <View style={styles.mapBoundsTicks}>
                         <>
                           <View
-                            style={{
-                              height: 10,
-                              borderLeftColor: colors.borderAccent,
-                              borderLeftWidth: 1,
-                            }}
+                            style={[
+                              styles.boundTick,
+                              { borderLeftColor: colors.borderAccent },
+                            ]}
                           />
                           <View
-                            style={{
-                              height: 10,
-                              borderRightColor: colors.borderAccent,
-                              borderRightWidth: 1,
-                            }}
+                            style={[
+                              styles.boundTick,
+                              { borderRightColor: colors.borderAccent },
+                            ]}
                           />
                         </>
                       </View>
-                      <View
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'row',
-                          justifyContent: 'flex-start',
-                          width: '100%',
-                          borderBottomColor: 'green',
-                          borderBottomWidth: 0,
-                          marginBottom: 0,
-                        }}
-                      >
+                      <View style={styles.rangeBar}>
                         {!!syncingStatus.scan_ranges &&
                           syncingStatus.scan_ranges.map(
                             (range: RPCSyncScanRangeStatusType) => {
@@ -545,36 +481,16 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
                               return (
                                 <View
                                   key={`${range.start_block.toString() + '-' + range.end_block.toString()}`}
-                                  style={{
-                                    height: 15,
-                                    width: `${percent}%`,
-                                    backgroundColor:
-                                      range.priority ===
-                                      RPCSyncScanRangePriorityStatusEnum.Scanning
-                                        ? 'orange' /* Scanning */
-                                        : range.priority ===
-                                            RPCSyncScanRangePriorityStatusEnum.Scanned
-                                          ? 'green' /* Scanned  */
-                                          : range.priority ===
-                                              RPCSyncScanRangePriorityStatusEnum.ScannedWithoutMapping
-                                            ? 'green' /* Scanned  */
-                                            : range.priority ===
-                                                RPCSyncScanRangePriorityStatusEnum.Historic
-                                              ? 'gray' /* Low priority */
-                                              : range.priority ===
-                                                  RPCSyncScanRangePriorityStatusEnum.OpenAdjacent
-                                                ? 'blue' /* High priority */
-                                                : range.priority ===
-                                                    RPCSyncScanRangePriorityStatusEnum.FoundNote
-                                                  ? 'blue' /* High priority */
-                                                  : range.priority ===
-                                                      RPCSyncScanRangePriorityStatusEnum.ChainTip
-                                                    ? 'blue' /* High priority */
-                                                    : range.priority ===
-                                                        RPCSyncScanRangePriorityStatusEnum.Verify
-                                                      ? 'blue' /* High priority */
-                                                      : 'red' /* error somehow */,
-                                  }}
+                                  style={[
+                                    styles.rangeSegment,
+                                    {
+                                      backgroundColor: rangeColor(
+                                        range.priority,
+                                        colors,
+                                      ),
+                                      width: `${percent}%`,
+                                    },
+                                  ]}
                                 />
                               );
                             },
@@ -585,108 +501,67 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
                       label={translate('report.legend') as string}
                       screenName={screenName}
                     >
-                      <View
-                        style={{
-                          display: 'flex',
-                          width: '100%',
-                          justifyContent: 'flex-start',
-                          alignItems: 'flex-start',
-                          marginTop: 5,
-                          marginLeft: 10,
-                        }}
-                      >
-                        <View
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            flexWrap: 'nowrap',
-                          }}
-                        >
+                      <View style={styles.legendCol}>
+                        <View style={styles.legendItem}>
                           <View
-                            style={{
-                              display: 'flex',
-                              flexDirection: 'row',
-                              width: 10,
-                              height: 10,
-                              justifyContent: 'flex-start',
-                              backgroundColor: 'green',
-                              margin: 5,
-                            }}
+                            style={[
+                              styles.legendSwatch,
+                              { backgroundColor: colors.fgSuccess },
+                            ]}
                           />
                           <Text
-                            style={{ color: colors.fgDefault, marginRight: 10 }}
+                            style={[
+                              styles.legendText,
+                              { color: colors.fgDefault },
+                            ]}
                           >
                             {translate('report.scanned') as string}
                           </Text>
                         </View>
-                        <View
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            flexWrap: 'nowrap',
-                          }}
-                        >
+                        <View style={styles.legendItem}>
                           <View
-                            style={{
-                              display: 'flex',
-                              flexDirection: 'row',
-                              width: 10,
-                              height: 10,
-                              justifyContent: 'flex-start',
-                              backgroundColor: 'orange',
-                              margin: 5,
-                            }}
+                            style={[
+                              styles.legendSwatch,
+                              { backgroundColor: colors.fgSyncing },
+                            ]}
                           />
                           <Text
-                            style={{ color: colors.fgDefault, marginRight: 10 }}
+                            style={[
+                              styles.legendText,
+                              { color: colors.fgDefault },
+                            ]}
                           >
                             {translate('report.scanning') as string}
                           </Text>
                         </View>
-                        <View
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            flexWrap: 'nowrap',
-                          }}
-                        >
+                        <View style={styles.legendItem}>
                           <View
-                            style={{
-                              display: 'flex',
-                              flexDirection: 'row',
-                              width: 10,
-                              height: 10,
-                              justifyContent: 'flex-start',
-                              backgroundColor: 'gray',
-                              margin: 5,
-                            }}
+                            style={[
+                              styles.legendSwatch,
+                              { backgroundColor: colors.fgSubtle },
+                            ]}
                           />
                           <Text
-                            style={{ color: colors.fgDefault, marginRight: 10 }}
+                            style={[
+                              styles.legendText,
+                              { color: colors.fgDefault },
+                            ]}
                           >
                             {translate('report.lowpriority') as string}
                           </Text>
                         </View>
-                        <View
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            flexWrap: 'nowrap',
-                          }}
-                        >
+                        <View style={styles.legendItem}>
                           <View
-                            style={{
-                              display: 'flex',
-                              flexDirection: 'row',
-                              width: 10,
-                              height: 10,
-                              justifyContent: 'flex-start',
-                              backgroundColor: 'blue',
-                              margin: 5,
-                            }}
+                            style={[
+                              styles.legendSwatch,
+                              { backgroundColor: colors.fgAccent },
+                            ]}
                           />
                           <Text
-                            style={{ color: colors.fgDefault, marginRight: 10 }}
+                            style={[
+                              styles.legendText,
+                              { color: colors.fgDefault },
+                            ]}
                           >
                             {translate('report.highpriority') as string}
                           </Text>
@@ -698,13 +573,7 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
               </View>
             </>
           ) : (
-            <View
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginTop: 20,
-              }}
-            >
+            <View style={styles.loadingRow}>
               <ActivityIndicator size="large" color={colors.fgAccent} />
             </View>
           )}
@@ -712,16 +581,7 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
             Number(background.dateEnd) > 0 ||
             !!background.message ||
             !!background.error) && (
-            <View
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                marginHorizontal: 20,
-                width: '100%',
-                marginBottom: 20,
-              }}
-            >
+            <View style={styles.backgroundSection}>
               <DetailLine
                 label={translate('report.lastbackgroundsync') as string}
                 value={
@@ -751,7 +611,10 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
                 screenName={screenName}
               />
               {!!background.message && (
-                <RegText style={{ marginBottom: 20 }} color={colors.fgDefault}>
+                <RegText
+                  style={styles.backgroundMessage}
+                  color={colors.fgDefault}
+                >
                   {background.message}
                 </RegText>
               )}
@@ -770,5 +633,156 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
     </ToastProvider>
   );
 };
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+  scroll: {
+    maxHeight: '90%',
+  },
+  scrollContent: {
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    justifyContent: 'flex-start',
+  },
+  netStatusRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    marginHorizontal: space.xl,
+  },
+  netStatusCol: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  netStatusIcon: {
+    marginBottom: space.xs,
+    marginLeft: space.xs,
+  },
+  syncSection: {
+    display: 'flex',
+    marginHorizontal: space.xl,
+    marginBottom: space.xxxl,
+  },
+  separator: {
+    height: StyleSheet.hairlineWidth,
+    width: '100%',
+    marginTop: space.lg,
+    marginBottom: space.sm,
+  },
+  tickLabels: {
+    display: 'flex',
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'space-between',
+    marginTop: space.sm,
+  },
+  tickRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    width: '100%',
+  },
+  tick: {
+    height: 10,
+    borderRightWidth: 1,
+    borderLeftWidth: 1,
+  },
+  serverBar: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    width: '100%',
+    borderBottomWidth: 2,
+    marginBottom: 0,
+  },
+  barSegment: {
+    height: 10,
+  },
+  barSegmentStart: {
+    borderLeftWidth: 1,
+  },
+  barSegmentEdge: {
+    borderRightWidth: 1,
+  },
+  barSegmentUnderline: {
+    borderBottomWidth: 5,
+  },
+  legendRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    marginTop: space.xs,
+  },
+  legendSwatch: {
+    display: 'flex',
+    flexDirection: 'row',
+    width: 10,
+    height: 10,
+    justifyContent: 'flex-start',
+    margin: space.xs,
+  },
+  mapBoundsRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'space-between',
+    marginTop: space.xs,
+  },
+  mapBoundsTicks: {
+    display: 'flex',
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'space-between',
+  },
+  boundTick: {
+    height: 10,
+  },
+  rangeBar: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    width: '100%',
+    borderBottomWidth: 0,
+    marginBottom: 0,
+  },
+  rangeSegment: {
+    height: 15,
+  },
+  legendCol: {
+    display: 'flex',
+    width: '100%',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    marginTop: space.xs,
+    marginLeft: space.sm,
+  },
+  legendItem: {
+    display: 'flex',
+    flexDirection: 'row',
+    flexWrap: 'nowrap',
+  },
+  legendText: {
+    marginRight: space.sm,
+  },
+  loadingRow: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: space.xl,
+  },
+  backgroundSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    marginHorizontal: space.xl,
+    width: '100%',
+    marginBottom: space.xl,
+  },
+  backgroundMessage: {
+    marginBottom: space.xl,
+  },
+});
 
 export default SyncReport;

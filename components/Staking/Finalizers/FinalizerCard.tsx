@@ -10,6 +10,13 @@ import {
   ViewStyle,
 } from 'react-native';
 import Utils from '../../../app/utils';
+import {
+  radiusCard,
+  radiusPill,
+  space,
+  text,
+  useTheme,
+} from '../../../app/theme';
 
 type FinalizerCardProps = {
   lifehash: string;
@@ -52,38 +59,110 @@ export function FinalizerCard({
   statIconStyle,
   statValueStyle,
 }: FinalizerCardProps) {
+  const { colors } = useTheme();
+
   return (
-    <View style={[styles.container, containerStyle]}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: colors.bgSurface },
+        containerStyle,
+      ]}
+    >
       <View style={[styles.headerRow, headerRowStyle]}>
         <Image
           source={{ uri: lifehash }}
-          style={[styles.avatar, avatarStyle]}
+          style={[
+            styles.avatar,
+            { backgroundColor: colors.bgFaint },
+            avatarStyle,
+          ]}
           resizeMode="cover"
         />
 
-        <Text numberOfLines={1} style={[styles.title, titleStyle]}>
+        <Text
+          numberOfLines={1}
+          style={[
+            text.title3,
+            styles.title,
+            { color: colors.fgDefault },
+            titleStyle,
+          ]}
+        >
           {Utils.trimToSmall(finalizerId, 8)}
         </Text>
       </View>
 
       <View style={[styles.statsRow, statsRowStyle]}>
-        <View style={[styles.statCard, statCardStyle]}>
-          <Text style={[styles.statTitle, statTitleStyle]}>Your stake</Text>
+        <View
+          style={[
+            styles.statCard,
+            { backgroundColor: colors.bgFaint },
+            statCardStyle,
+          ]}
+        >
+          <Text
+            style={[
+              text.headline,
+              styles.statTitle,
+              { color: colors.fgDefault },
+              statTitleStyle,
+            ]}
+          >
+            Your stake
+          </Text>
 
           <View style={[styles.statValueRow, statValueRowStyle]}>
-            <Text style={[styles.statIcon, statIconStyle]}>⛁</Text>
-            <Text style={[styles.statValue, statValueStyle]}>
+            <Text
+              style={[
+                text.headline,
+                styles.statIcon,
+                { color: colors.fgSubtle },
+                statIconStyle,
+              ]}
+            >
+              ⛁
+            </Text>
+            <Text
+              style={[text.callout, { color: colors.fgSubtle }, statValueStyle]}
+            >
               {formatStake(userStake)}
             </Text>
           </View>
         </View>
 
-        <View style={[styles.statCard, statCardStyle]}>
-          <Text style={[styles.statTitle, statTitleStyle]}>Total staked</Text>
+        <View
+          style={[
+            styles.statCard,
+            { backgroundColor: colors.bgFaint },
+            statCardStyle,
+          ]}
+        >
+          <Text
+            style={[
+              text.headline,
+              styles.statTitle,
+              { color: colors.fgDefault },
+              statTitleStyle,
+            ]}
+          >
+            Total staked
+          </Text>
 
           <View style={[styles.statValueRow, statValueRowStyle]}>
-            <Text style={[styles.statIcon, statIconStyle]}>₴</Text>
-            <Text style={[styles.statValue, statValueStyle]}>
+            <Text
+              style={[
+                text.headline,
+                styles.statIcon,
+                { color: colors.fgSubtle },
+                statIconStyle,
+              ]}
+            >
+              ₴
+            </Text>
+            <Text
+              style={[text.callout, { color: colors.fgSubtle }, statValueStyle]}
+            >
               {formatStake(totalStake)}
             </Text>
           </View>
@@ -95,58 +174,46 @@ export function FinalizerCard({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#222223',
-    borderRadius: 28,
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+    borderRadius: radiusCard,
+    paddingHorizontal: space.xl,
+    paddingVertical: space.xl,
   },
 
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: space.xl,
   },
 
   avatar: {
     width: 50,
     height: 50,
-    borderRadius: 48,
+    borderRadius: radiusPill,
     marginRight: 22,
-    backgroundColor: '#2E2E32',
   },
 
   title: {
     flex: 1,
-    color: '#FFFFFF',
-    fontSize: 20,
-    lineHeight: 40,
-    fontWeight: '600',
-    letterSpacing: -0.8,
   },
 
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 10,
+    gap: space.sm,
   },
 
   statCard: {
     flex: 1,
-    backgroundColor: '#1C1C1E',
-    borderRadius: 26,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    borderRadius: radiusCard,
+    paddingHorizontal: space.md,
+    paddingVertical: space.xs,
     minHeight: 52,
     justifyContent: 'center',
     alignItems: 'center',
   },
 
   statTitle: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    lineHeight: 32,
-    fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: space.xs,
   },
 
   statValueRow: {
@@ -156,17 +223,7 @@ const styles = StyleSheet.create({
   },
 
   statIcon: {
-    color: '#8B8C96',
-    fontSize: 18,
-    marginRight: 0,
     width: 30,
     textAlign: 'center',
-  },
-
-  statValue: {
-    color: '#8B8C96',
-    fontSize: 16,
-    lineHeight: 32,
-    fontWeight: '400',
   },
 });

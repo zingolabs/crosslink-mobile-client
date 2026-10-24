@@ -1,12 +1,11 @@
-/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import SettingsIcon from '../../../assets/icons/settings.svg';
 import ChartPieIcon from '../../../assets/icons/chart-pie.svg';
 
 import { RouteEnum, ScreenEnum } from '../../../app/AppState';
-import { useTheme } from '../../../app/theme';
+import { space, useTheme } from '../../../app/theme';
 
 type SettingsButtonProps = {
   screenName: ScreenEnum;
@@ -17,16 +16,7 @@ const SettingsButton: React.FC<SettingsButtonProps> = ({ screenName }) => {
   const { colors } = useTheme();
 
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: 50,
-        paddingHorizontal: 20,
-        gap: 10,
-      }}
-    >
+    <View style={styles.wrap}>
       {screenName === ScreenEnum.StakingHome && (
         <TouchableOpacity
           testID="header.finalizers"
@@ -48,5 +38,16 @@ const SettingsButton: React.FC<SettingsButtonProps> = ({ screenName }) => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  wrap: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 50,
+    paddingHorizontal: space.xl,
+    gap: space.md,
+  },
+});
 
 export default SettingsButton;

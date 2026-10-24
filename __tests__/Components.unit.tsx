@@ -158,7 +158,9 @@ describe('Component Components - test', () => {
     const element = getByText('Bold Text');
     expect(element).toBeTruthy();
     expect(element.props.style).toEqual(
-      expect.objectContaining({ backgroundColor: 'red' }),
+      expect.arrayContaining([
+        expect.objectContaining({ backgroundColor: 'red' }),
+      ]),
     );
   });
 
@@ -169,7 +171,9 @@ describe('Component Components - test', () => {
     const element = getByText('Fade Text');
     expect(element).toBeTruthy();
     expect(element.props.style).toEqual(
-      expect.objectContaining({ backgroundColor: 'red' }),
+      expect.arrayContaining([
+        expect.objectContaining({ backgroundColor: 'red' }),
+      ]),
     );
   });
 

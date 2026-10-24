@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
 import React, {
   useState,
   ReactNode,
@@ -7,7 +6,13 @@ import React, {
   useMemo,
   useCallback,
 } from 'react';
-import { Dimensions, Keyboard, ScrollView, View } from 'react-native';
+import {
+  Dimensions,
+  Keyboard,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import {
   TabView,
   SceneRendererProps,
@@ -49,7 +54,7 @@ import ExpandedAddress from './components/ExpandedAddress';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../Header';
-import { useTheme } from '../../app/theme';
+import { space, useTheme } from '../../app/theme';
 
 type ReceiveProps = NativeStackScreenProps<
   LoadedAppStackParamList,
@@ -233,21 +238,12 @@ const Receive: React.FunctionComponent<ReceiveProps> = (
       <>
         <ScrollView
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{
-            flexGrow: 1,
-            paddingBottom: insets.bottom + 8,
-            paddingHorizontal: 16,
-          }}
+          contentContainerStyle={[
+            styles.scene,
+            { paddingBottom: insets.bottom + space.sm },
+          ]}
         >
-          <View
-            style={{
-              flexGrow: 1,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            {component}
-          </View>
+          <View style={styles.center}>{component}</View>
         </ScrollView>
       </>
     );
@@ -318,12 +314,12 @@ const Receive: React.FunctionComponent<ReceiveProps> = (
         onChange={handleSheetChanges}
         enablePanDownToClose
         keyboardBehavior={'interactive'}
-        handleStyle={{ display: 'none' }}
+        handleStyle={styles.sheetHandle}
         backgroundStyle={{ backgroundColor: colors.bgCanvas }}
         backdropComponent={renderBackdrop}
       >
         <BottomSheetView
-          style={{ backgroundColor: colors.bgCanvas, height: '100%' }}
+          style={[styles.sheetContent, { backgroundColor: colors.bgCanvas }]}
         >
           {sheetType === 'NA' && (
             <NewAddress
@@ -375,5 +371,23 @@ const Receive: React.FunctionComponent<ReceiveProps> = (
 
   return returnPage;
 };
+
+const styles = StyleSheet.create({
+  scene: {
+    flexGrow: 1,
+    paddingHorizontal: space.lg,
+  },
+  center: {
+    flexGrow: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sheetHandle: {
+    display: 'none',
+  },
+  sheetContent: {
+    height: '100%',
+  },
+});
 
 export default Receive;

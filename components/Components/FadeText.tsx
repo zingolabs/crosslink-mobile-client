@@ -1,16 +1,16 @@
-/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import { Text, TextStyle } from 'react-native';
-import { useTheme } from '../../app/theme';
+import { StyleProp, StyleSheet, Text, TextStyle } from 'react-native';
+import { text, useTheme } from '../../app/theme';
 
 type FadeTextProps = {
-  style?: TextStyle;
+  style?: StyleProp<TextStyle>;
   children: string | string[];
   numberOfLines?: number;
   ellipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
   selectable?: boolean;
 };
 
+/** Muted secondary text: labels beside values, captions under rows. */
 const FadeText: React.FunctionComponent<FadeTextProps> = ({
   style,
   children,
@@ -24,12 +24,18 @@ const FadeText: React.FunctionComponent<FadeTextProps> = ({
     <Text
       numberOfLines={numberOfLines}
       ellipsizeMode={ellipsizeMode}
-      style={{ opacity: 0.65, color: colors.fgDefault, ...style }}
+      style={[styles.base, { color: colors.fgMuted }, style]}
       selectable={selectable}
     >
       {children}
     </Text>
   );
 };
+
+const styles = StyleSheet.create({
+  base: {
+    ...text.body,
+  },
+});
 
 export default FadeText;

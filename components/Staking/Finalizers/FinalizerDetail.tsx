@@ -27,7 +27,7 @@ import { useAppLoadedWallet } from '../../../app/context';
 import { FinalizerPosition } from './FinalizerPosition';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import StakingDayBubble from '../StakingDayBubble';
-import { useTheme } from '../../../app/theme';
+import { useTheme, text, space } from '../../../app/theme';
 
 type ModalState = 'idle' | 'sending' | 'success';
 
@@ -112,7 +112,7 @@ export function FinalizerDetail({ route }: FinalizerDetailProps) {
     }
   };
 
-  const renderSeparator = () => <View style={{ height: 8 }} />;
+  const renderSeparator = () => <View style={{ height: space.sm }} />;
 
   const renderStakedTxItem = ({ item }: { item: WalletBondsType }) => {
     return (
@@ -148,7 +148,7 @@ export function FinalizerDetail({ route }: FinalizerDetailProps) {
       style={{
         flex: 1,
         backgroundColor: colors.bgCanvas,
-        gap: 20,
+        gap: space.xl,
       }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={
@@ -167,7 +167,7 @@ export function FinalizerDetail({ route }: FinalizerDetailProps) {
 
       <FinalizerCard
         containerStyle={{
-          marginHorizontal: 20,
+          marginHorizontal: space.xl,
         }}
         lifehash={lifehash || ''}
         finalizerId={finalizer || ''}
@@ -179,17 +179,15 @@ export function FinalizerDetail({ route }: FinalizerDetailProps) {
       <View
         style={{
           flex: 1,
-          paddingHorizontal: 24,
+          paddingHorizontal: space.xxl,
         }}
       >
         {/* Staked TX list */}
         <Text
-          style={{
-            fontSize: 16,
-            fontWeight: '600',
-            color: colors.fgDefault,
-            marginBottom: 8,
-          }}
+          style={[
+            text.headline,
+            { color: colors.fgDefault, marginBottom: space.sm },
+          ]}
         >
           Staking positions
         </Text>
@@ -197,7 +195,7 @@ export function FinalizerDetail({ route }: FinalizerDetailProps) {
         <View
           style={{
             flex: 1,
-            marginBottom: 16,
+            marginBottom: space.lg,
           }}
         >
           <FlatList
@@ -207,12 +205,14 @@ export function FinalizerDetail({ route }: FinalizerDetailProps) {
             ItemSeparatorComponent={renderSeparator}
             ListEmptyComponent={
               <Text
-                style={{
-                  color: colors.fgSubtle,
-                  fontSize: 13,
-                  textAlign: 'center',
-                  marginTop: 16,
-                }}
+                style={[
+                  text.footnote,
+                  {
+                    color: colors.fgSubtle,
+                    textAlign: 'center',
+                    marginTop: space.lg,
+                  },
+                ]}
               >
                 You don&apos;t have any staking positions that match the
                 currently selected filters.
@@ -247,12 +247,14 @@ export function FinalizerDetail({ route }: FinalizerDetailProps) {
               <>
                 <ActivityIndicator size="large" color={colors.fgDefault} />
                 <Text
-                  style={{
-                    marginTop: 16,
-                    color: colors.fgDefault,
-                    fontSize: 16,
-                    textAlign: 'center',
-                  }}
+                  style={[
+                    text.callout,
+                    {
+                      marginTop: space.lg,
+                      color: colors.fgDefault,
+                      textAlign: 'center',
+                    },
+                  ]}
                 >
                   Sending unstaking transaction…
                 </Text>
@@ -267,18 +269,19 @@ export function FinalizerDetail({ route }: FinalizerDetailProps) {
                   color={colors.fgAccent}
                 />
                 <Text
-                  style={{
-                    marginTop: 16,
-                    color: colors.fgDefault,
-                    fontSize: 18,
-                    fontWeight: '600',
-                    textAlign: 'center',
-                  }}
+                  style={[
+                    text.headline,
+                    {
+                      marginTop: space.lg,
+                      color: colors.fgDefault,
+                      textAlign: 'center',
+                    },
+                  ]}
                 >
                   Unstaking request transaction sent!
                 </Text>
 
-                <View style={{ marginTop: 24, alignSelf: 'stretch' }}>
+                <View style={{ marginTop: space.xxl, alignSelf: 'stretch' }}>
                   <LiquidPrimaryButton
                     title="View movements"
                     onPress={handleViewMovements}
@@ -305,17 +308,9 @@ const styles = StyleSheet.create({
     width: '80%',
     maxWidth: 320,
     borderRadius: 18,
-    paddingHorizontal: 20,
-    paddingVertical: 24,
+    paddingHorizontal: space.xl,
+    paddingVertical: space.xxl,
     alignItems: 'center',
     borderWidth: StyleSheet.hairlineWidth,
-  },
-  txRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
   },
 });
