@@ -3,13 +3,20 @@
 exports[`Component Components - test BoldText - snapshot 1`] = `
 <Text
   style={
-    {
-      "backgroundColor": "red",
-      "color": "#c3c3c3",
-      "fontSize": 18,
-      "fontWeight": "bold",
-      "opacity": 0.87,
-    }
+    [
+      {
+        "fontSize": 17,
+        "fontWeight": "600",
+        "letterSpacing": -0.41,
+        "lineHeight": 22,
+      },
+      {
+        "color": "#c3c3c3",
+      },
+      {
+        "backgroundColor": "red",
+      },
+    ]
   }
 >
   bold text
@@ -168,11 +175,20 @@ exports[`Component Components - test ErrorText - snapshot 1`] = `
 exports[`Component Components - test FadeText - snapshot 1`] = `
 <Text
   style={
-    {
-      "backgroundColor": "red",
-      "color": "#c3c3c3",
-      "opacity": 0.65,
-    }
+    [
+      {
+        "fontSize": 17,
+        "fontWeight": "400",
+        "letterSpacing": -0.41,
+        "lineHeight": 22,
+      },
+      {
+        "color": "#888888",
+      },
+      {
+        "backgroundColor": "red",
+      },
+    ]
   }
 >
   fade text
@@ -185,10 +201,13 @@ exports[`Component Components - test RegText - snapshot 1`] = `
   style={
     [
       {
+        "fontSize": 17,
+        "fontWeight": "400",
+        "letterSpacing": -0.41,
+        "lineHeight": 22,
+      },
+      {
         "color": "red",
-        "fontSize": 18,
-        "fontWeight": "600",
-        "opacity": 1,
       },
       {
         "backgroundColor": "white",

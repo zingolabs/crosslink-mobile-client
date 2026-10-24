@@ -1,6 +1,6 @@
 import React from 'react';
-import { Text, TextStyle } from 'react-native';
-import { useTheme } from '../../app/theme';
+import { StyleSheet, Text, TextStyle } from 'react-native';
+import { text, useTheme } from '../../app/theme';
 
 type BoldTextProps = {
   style?: TextStyle;
@@ -9,6 +9,7 @@ type BoldTextProps = {
   selectable?: boolean;
 };
 
+/** Emphasized text: the ramp's `headline` weight. */
 const BoldText: React.FunctionComponent<BoldTextProps> = ({
   style,
   children,
@@ -16,19 +17,22 @@ const BoldText: React.FunctionComponent<BoldTextProps> = ({
   selectable,
 }) => {
   const { colors } = useTheme();
-  const totalStyle: TextStyle = {
-    color: colors.fgDefault,
-    fontSize: 18,
-    fontWeight: 'bold',
-    opacity: 0.87,
-    ...style,
-  };
 
   return (
-    <Text testID={testID} style={totalStyle} selectable={selectable}>
+    <Text
+      testID={testID}
+      style={[styles.base, { color: colors.fgDefault }, style]}
+      selectable={selectable}
+    >
       {children}
     </Text>
   );
 };
+
+const styles = StyleSheet.create({
+  base: {
+    ...text.headline,
+  },
+});
 
 export default BoldText;

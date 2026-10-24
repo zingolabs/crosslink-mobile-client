@@ -172,10 +172,18 @@ exports[`Component Memo - test Memo - snapshot 1`] = `
                 </View>
                 <Text
                   style={
-                    {
-                      "color": "#c3c3c3",
-                      "opacity": 0.65,
-                    }
+                    [
+                      {
+                        "fontSize": 17,
+                        "fontWeight": "400",
+                        "letterSpacing": -0.41,
+                        "lineHeight": 22,
+                      },
+                      {
+                        "color": "#888888",
+                      },
+                      undefined,
+                    ]
                   }
                 >
                   Send
@@ -269,10 +277,18 @@ exports[`Component Memo - test Memo - snapshot 1`] = `
                 </View>
                 <Text
                   style={
-                    {
-                      "color": "#c3c3c3",
-                      "opacity": 0.65,
-                    }
+                    [
+                      {
+                        "fontSize": 17,
+                        "fontWeight": "400",
+                        "letterSpacing": -0.41,
+                        "lineHeight": 22,
+                      },
+                      {
+                        "color": "#888888",
+                      },
+                      undefined,
+                    ]
                   }
                 >
                   Receive
@@ -355,10 +371,18 @@ exports[`Component Memo - test Memo - snapshot 1`] = `
                 </View>
                 <Text
                   style={
-                    {
-                      "color": "#c3c3c3",
-                      "opacity": 0.65,
-                    }
+                    [
+                      {
+                        "fontSize": 17,
+                        "fontWeight": "400",
+                        "letterSpacing": -0.41,
+                        "lineHeight": 22,
+                      },
+                      {
+                        "color": "#888888",
+                      },
+                      undefined,
+                    ]
                   }
                 >
                   Faucet
@@ -508,34 +532,62 @@ exports[`Component Memo - test Memo - snapshot 1`] = `
           >
             <Text
               style={
-                {
-                  "color": "#c3c3c3",
-                  "fontWeight": "bold",
-                  "marginTop": 0,
-                  "opacity": 0.65,
-                }
+                [
+                  {
+                    "fontSize": 17,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.41,
+                    "lineHeight": 22,
+                  },
+                  {
+                    "color": "#888888",
+                  },
+                  {
+                    "color": "#c3c3c3",
+                    "fontWeight": "bold",
+                    "marginTop": 0,
+                  },
+                ]
               }
             >
               12 
             </Text>
             <Text
               style={
-                {
-                  "color": "#c3c3c3",
-                  "marginTop": 0,
-                  "opacity": 0.65,
-                }
+                [
+                  {
+                    "fontSize": 17,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.41,
+                    "lineHeight": 22,
+                  },
+                  {
+                    "color": "#888888",
+                  },
+                  {
+                    "marginTop": 0,
+                  },
+                ]
               }
             >
               text translated
             </Text>
             <Text
               style={
-                {
-                  "color": "#c3c3c3",
-                  "marginTop": 0,
-                  "opacity": 0.65,
-                }
+                [
+                  {
+                    "fontSize": 17,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.41,
+                    "lineHeight": 22,
+                  },
+                  {
+                    "color": "#888888",
+                  },
+                  {
+                    "marginTop": 0,
+                  },
+                ]
               }
             >
                511 

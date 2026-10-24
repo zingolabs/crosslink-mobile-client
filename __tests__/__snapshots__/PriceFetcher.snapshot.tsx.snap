@@ -57,10 +57,13 @@ exports[`Component PriceFetcher - test PriceFetcher - snapshot 1`] = `
       style={
         [
           {
+            "fontSize": 17,
+            "fontWeight": "400",
+            "letterSpacing": -0.41,
+            "lineHeight": 22,
+          },
+          {
             "color": "#c3c3c3",
-            "fontSize": 18,
-            "fontWeight": "600",
-            "opacity": 1,
           },
           {
             "color": "#c3c3c3",

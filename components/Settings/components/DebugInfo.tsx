@@ -1,6 +1,5 @@
-/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import { View, ScrollView } from 'react-native';
+import { StyleSheet, ScrollView, View } from 'react-native';
 
 import { LoadedAppStackParamList } from '../../../app/types';
 import {
@@ -19,7 +18,7 @@ import { createAlert } from '../../../app/createAlert';
 import { sendEmail } from '../../../app/sendEmail';
 import { HeaderTitle } from '../../Header';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
-import { useTheme } from '../../../app/theme';
+import { radiusCard, space, useTheme } from '../../../app/theme';
 
 type DebugInfoProps = NativeStackScreenProps<
   LoadedAppStackParamList,
@@ -76,52 +75,19 @@ const DebugInfo: React.FunctionComponent<DebugInfoProps> = ({ navigation }) => {
 
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{
-          flexGrow: 1,
-          paddingBottom: insets.bottom + 8,
-          paddingHorizontal: 16,
-        }}
+        contentContainerStyle={[
+          styles.screen,
+          { paddingBottom: insets.bottom + space.sm },
+        ]}
       >
-        <View
-          style={{
-            flexGrow: 1,
-            alignItems: 'flex-start',
-            justifyContent: 'center',
-          }}
-        >
-          <View
-            style={{
-              borderRadius: 26,
-              backgroundColor: colors.bgSurface,
-              width: '100%',
-              marginTop: 20,
-              paddingVertical: 10,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-                marginVertical: 20,
-                marginHorizontal: 30,
-                width: '85%',
-              }}
-            >
-              <FadeText>
-                {lastError ? lastError : 'No errors detected'}
-              </FadeText>
-            </View>
+        <View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
+          <View style={styles.row}>
+            <FadeText>{lastError ? lastError : 'No errors detected'}</FadeText>
           </View>
         </View>
       </ScrollView>
       <View
-        style={{
-          marginTop: 'auto',
-          alignItems: 'center',
-          justifyContent: 'center',
-          paddingTop: 10,
-          paddingBottom: 20,
-        }}
+        style={[styles.footer, { paddingBottom: insets.bottom + space.xl }]}
       >
         {!!lastError && (
           <LiquidPrimaryButton
@@ -135,5 +101,28 @@ const DebugInfo: React.FunctionComponent<DebugInfoProps> = ({ navigation }) => {
     </ToastProvider>
   );
 };
+
+const styles = StyleSheet.create({
+  screen: {
+    flexGrow: 1,
+    paddingHorizontal: space.lg,
+  },
+  card: {
+    borderRadius: radiusCard,
+    width: '100%',
+    marginTop: space.xl,
+    paddingVertical: space.sm,
+  },
+  row: {
+    paddingHorizontal: space.xl,
+    paddingVertical: space.lg,
+  },
+  footer: {
+    marginTop: 'auto',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: space.sm,
+  },
+});
 
 export default DebugInfo;

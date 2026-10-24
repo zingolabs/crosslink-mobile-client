@@ -1,15 +1,13 @@
-/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import { View, ScrollView } from 'react-native';
+import { StyleSheet, ScrollView, View } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 
-import {} from '../../../app/context';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FadeText from '../../Components/FadeText';
 import { HeaderTitle } from '../../Header';
-import { useTheme } from '../../../app/theme';
+import { radiusCard, space, useTheme } from '../../../app/theme';
 
 export const Notes: React.FunctionComponent = () => {
   const navigation = useNavigation();
@@ -33,42 +31,36 @@ export const Notes: React.FunctionComponent = () => {
 
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{
-          flexGrow: 1,
-          paddingBottom: insets.bottom + 8,
-          paddingHorizontal: 16,
-        }}
+        contentContainerStyle={[
+          styles.screen,
+          { paddingBottom: insets.bottom + space.sm },
+        ]}
       >
-        <View
-          style={{
-            flexGrow: 1,
-            alignItems: 'flex-start',
-            justifyContent: 'center',
-          }}
-        >
-          <View
-            style={{
-              borderRadius: 26,
-              backgroundColor: colors.bgSurface,
-              width: '100%',
-              marginTop: 20,
-              paddingVertical: 10,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-                marginVertical: 20,
-                marginHorizontal: 30,
-                width: '85%',
-              }}
-            >
-              <FadeText>Under construction</FadeText>
-            </View>
+        <View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
+          <View style={styles.row}>
+            <FadeText>Under construction</FadeText>
           </View>
         </View>
       </ScrollView>
     </ToastProvider>
   );
 };
+
+const styles = StyleSheet.create({
+  screen: {
+    flexGrow: 1,
+    paddingHorizontal: space.lg,
+  },
+  card: {
+    borderRadius: radiusCard,
+    width: '100%',
+    marginTop: space.xl,
+    paddingVertical: space.sm,
+  },
+  row: {
+    paddingHorizontal: space.xl,
+    paddingVertical: space.lg,
+  },
+});
+
+export default Notes;

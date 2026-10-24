@@ -1,6 +1,10 @@
-/* eslint-disable react-native/no-inline-styles */
-import React from 'react';
-import { View, TouchableOpacity, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, {
+  CSSTransitionProperties,
+  cubicBezier,
+  useReducedMotion,
+} from 'react-native-reanimated';
 
 import { LoadingAppNavigationState } from '../../app/types';
 import { useAppLoadedActions } from '../../app/context';
@@ -12,16 +16,26 @@ import {
   faInfo,
   faSeedling,
   faServer,
-  faChevronLeft,
 } from '@fortawesome/free-solid-svg-icons';
-import RegText from '../Components/RegText';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../Header';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SettingsStackParamList } from './SettingsNavigator';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
-import { useTheme } from '../../app/theme';
+import {
+  curve,
+  duration,
+  radiusCard,
+  space,
+  text,
+  useTheme,
+} from '../../app/theme';
+
+const EASE_OUT = cubicBezier(curve[0], curve[1], curve[2], curve[3]);
+
+/** Menu rows share the list-row rhythm. */
+const ROW_HEIGHT = 60;
 
 type SettingsMenuProps = NativeStackScreenProps<
   SettingsStackParamList,
@@ -37,8 +51,17 @@ const SettingsMenu: React.FunctionComponent<SettingsMenuProps> = ({
   const { translate } = useAppLoadedActions();
   const { colors } = useTheme();
   const { clear } = useToast();
+  const reduced = useReducedMotion();
+  const [pressed, setPressed] = useState<string | null>(null);
 
   const insets = useSafeAreaInsets();
+
+  const goBack = () => {
+    clear();
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    }
+  };
 
   const restoreWallet = () => {
     Alert.alert(
@@ -92,142 +115,121 @@ const SettingsMenu: React.FunctionComponent<SettingsMenuProps> = ({
     },
   ];
 
+  const press: CSSTransitionProperties = {
+    transitionProperty: ['backgroundColor'],
+    transitionDuration: reduced ? '0ms' : `${duration.press}ms`,
+    transitionTimingFunction: EASE_OUT,
+  };
+
   return (
     <ToastProvider>
-      <HeaderTitle
-        title="Settings"
-        goBack={() => {
-          clear();
-          if (navigation.canGoBack()) {
-            navigation.goBack();
-          }
-        }}
-      />
+      <HeaderTitle title="Settings" goBack={goBack} />
 
       <View
-        style={{
-          flexGrow: 1,
-          paddingBottom: insets.bottom + 8,
-          paddingHorizontal: 16,
-        }}
+        style={[styles.screen, { paddingBottom: insets.bottom + space.sm }]}
       >
-        <View
-          style={{
-            flexGrow: 1,
-            alignItems: 'flex-start',
-            justifyContent: 'flex-start',
-          }}
-        >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}
-          >
-            <View style={{ flex: 1 }}>
-              <View
-                style={{
-                  borderRadius: 25,
-                  borderColor: colors.fgDefault,
-                  borderWidth: 1,
-                  padding: 10,
-                  margin: 10,
-                  backgroundColor: colors.bgCanvas,
-                  alignSelf: 'flex-start',
-                }}
+        <View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
+          {routes.map((item, index) => (
+            <React.Fragment key={item.label}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={item.label}
+                onPress={() => navigation?.navigate(item.route)}
+                onPressIn={() => setPressed(item.label)}
+                onPressOut={() => setPressed(null)}
+                pressRetentionOffset={space.lg}
               >
-                <TouchableOpacity
-                  onPress={() => {
-                    clear();
-                    if (navigation.canGoBack()) {
-                      navigation.goBack();
-                    }
-                  }}
+                <Animated.View
+                  style={[
+                    styles.row,
+                    pressed === item.label
+                      ? { backgroundColor: colors.bgPress }
+                      : styles.rowIdle,
+                    press,
+                  ]}
                 >
-                  <FontAwesomeIcon
-                    size={30}
-                    icon={faChevronLeft}
-                    color={colors.fgDefault}
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <View
-              style={{
-                borderRadius: 26,
-                backgroundColor: colors.bgSurface,
-                width: '100%',
-                marginTop: 20,
-                paddingVertical: 5,
-              }}
-            >
-              {routes.map((item, index) => (
-                <React.Fragment key={item.label}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'center',
-                      marginVertical: 18,
-                      marginHorizontal: 40,
-                      width: '80%',
-                    }}
-                  >
-                    <TouchableOpacity
-                      style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        width: '100%',
-                      }}
-                      onPress={() => navigation?.navigate(item.route)}
-                    >
-                      <View style={{ flexDirection: 'row', gap: 15 }}>
-                        <FontAwesomeIcon
-                          size={20}
-                          icon={item.icon}
-                          color={colors.fgDefault}
-                        />
-                        <RegText>{item.label}</RegText>
-                      </View>
-                      <FontAwesomeIcon
-                        size={20}
-                        icon={faChevronRight}
-                        color={colors.fgDefault}
-                      />
-                    </TouchableOpacity>
-                  </View>
-
-                  {index < routes.length - 1 && (
-                    <View
-                      style={{ height: 1, backgroundColor: colors.bgFaint }}
+                  <View style={styles.label}>
+                    <FontAwesomeIcon
+                      size={20}
+                      icon={item.icon}
+                      color={colors.fgDefault}
                     />
-                  )}
-                </React.Fragment>
-              ))}
-            </View>
-          </View>
+                    <Text style={[text.body, { color: colors.fgDefault }]}>
+                      {item.label}
+                    </Text>
+                  </View>
+                  <FontAwesomeIcon
+                    size={16}
+                    icon={faChevronRight}
+                    color={colors.fgSubtle}
+                  />
+                </Animated.View>
+              </Pressable>
+              {index < routes.length - 1 && (
+                <View
+                  style={[
+                    styles.hairline,
+                    { backgroundColor: colors.borderFaint },
+                  ]}
+                />
+              )}
+            </React.Fragment>
+          ))}
         </View>
       </View>
       <View
-        style={{
-          marginTop: 'auto',
-          alignItems: 'center',
-          justifyContent: 'center',
-          paddingTop: 10,
-          paddingBottom: 20,
-          paddingHorizontal: 20,
-        }}
+        style={[styles.footer, { paddingBottom: insets.bottom + space.xl }]}
       >
         <LiquidPrimaryButton
           tintColor={colors.bgDanger}
           title={'Switch to different wallet'}
           onPress={restoreWallet}
-          style={{ alignSelf: 'stretch' }}
+          style={styles.footerButton}
         />
       </View>
     </ToastProvider>
   );
 };
+
+const styles = StyleSheet.create({
+  screen: {
+    flexGrow: 1,
+    paddingHorizontal: space.lg,
+  },
+  card: {
+    borderRadius: radiusCard,
+    marginTop: space.xl,
+    paddingVertical: space.sm,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: ROW_HEIGHT,
+    paddingHorizontal: space.xl,
+  },
+  rowIdle: {
+    backgroundColor: 'transparent',
+  },
+  label: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.lg,
+  },
+  hairline: {
+    height: StyleSheet.hairlineWidth,
+    marginLeft: space.xl,
+  },
+  footer: {
+    marginTop: 'auto',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: space.sm,
+    paddingHorizontal: space.xl,
+  },
+  footerButton: {
+    alignSelf: 'stretch',
+  },
+});
 
 export default SettingsMenu;
