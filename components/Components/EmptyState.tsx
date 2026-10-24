@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleProp, StyleSheet, Text, ViewStyle } from 'react-native';
 import Animated, {
   CSSAnimationProperties,
@@ -23,16 +23,22 @@ const EmptyState: React.FC<EmptyStateProps> = ({ art, title, body, style }) => {
   const { colors } = useTheme();
   const reducedMotion = useReducedMotion();
 
-  const appear: CSSAnimationProperties = {
-    animationName: reducedMotion
-      ? { from: { opacity: 0 }, to: { opacity: 1 } }
-      : {
-          from: { opacity: 0, transform: [{ translateY: 12 }] },
-          to: { opacity: 1, transform: [{ translateY: 0 }] },
-        },
-    animationDuration: reducedMotion ? 200 : 450,
-    animationTimingFunction: EASE_OUT,
-  };
+  // Stable across renders: a rebuilt animation object would restart the
+  // CSS animation on every parent re-render (sync ticks) and blink.
+  const appear: CSSAnimationProperties = useMemo(
+    () => ({
+      animationName: reducedMotion
+        ? { from: { opacity: 0 }, to: { opacity: 1 } }
+        : {
+            from: { opacity: 0, transform: [{ translateY: 12 }] },
+            to: { opacity: 1, transform: [{ translateY: 0 }] },
+          },
+      animationDuration: reducedMotion ? 200 : 450,
+      animationTimingFunction: EASE_OUT,
+      animationFillMode: 'both',
+    }),
+    [reducedMotion],
+  );
 
   return (
     <Animated.View style={[styles.root, style, appear]}>
