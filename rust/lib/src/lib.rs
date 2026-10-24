@@ -2711,3 +2711,18 @@ mod tests {
         );
     }
 }
+#[cfg(test)]
+mod inspect_probe {
+    use super::*;
+
+    #[test]
+    #[ignore = "needs the network"]
+    fn inspect_the_planted_wallet() {
+        let _ = set_crypto_default_provider_to_ring();
+        let data = std::fs::read_to_string("/tmp/ios_wallet.dat").unwrap();
+        let out = inspect_wallet(data, "http://88.198.67.189:18234".to_string()).unwrap();
+        println!("inspect: {out}");
+    }
+}
+
+

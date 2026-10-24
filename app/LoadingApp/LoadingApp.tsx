@@ -77,7 +77,7 @@ import ListedIndexers from './components/ListedIndexers';
 import CustomIndexer from './components/CustomIndexer';
 import ScheduledActionsFileImpl from '../../components/ScheduledActions/ScheduledActionsFileImpl';
 import { discoverIndexers, probeIndexer, selectBestIndexer } from '../indexers';
-import { quarantineLegacyWallet as quarantineLegacyWalletIfNeeded } from '../legacyWallet';
+import { quarantineLegacyWalletIfNeeded } from '../legacyWallet';
 import notifee from '@notifee/react-native';
 import { useTheme, AppTheme } from '../theme';
 import { LoadingAppEntryEnum } from '../AppState/enums/LoadingAppEntryEnum';
