@@ -1,7 +1,5 @@
-/* eslint-disable react-native/no-inline-styles */
 import {
   faBars,
-  faCloudDownload,
   faArrowUp,
   faArrowDown,
   faFaucet,
@@ -9,7 +7,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useRef, useState } from 'react';
-import { TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View, StyleSheet, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   NetInfoType,
@@ -25,14 +23,12 @@ import {
   useAppLoadedWallet,
 } from '../../app/context';
 import ZecAmount from '../Components/ZecAmount';
-import { NetInfoStateType } from '@react-native-community/netinfo/src/index';
-import { Animated } from 'react-native';
 import FadeText from '../Components/FadeText';
 import simpleBiometrics from '../../app/simpleBiometrics';
 import { RPCSyncStatusType } from '../../app/rpc/types/RPCSyncStatusType';
 import { isEqual } from 'lodash';
 import SettingsIcon from '../../assets/icons/settings.svg';
-import { useTheme } from '../../app/theme';
+import { radiusPill, space, text, useTheme } from '../../app/theme';
 
 type HeaderProps = {
   // general
@@ -176,29 +172,31 @@ const Header: React.FunctionComponent<HeaderProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [syncInProgress, noSyncingStatus]);
 
+  const statusChip = {
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    marginHorizontal: 2.5,
+    padding: 1,
+    minWidth: 25,
+    minHeight: 25,
+  };
+
   return (
     <>
       <View>
         <View
           testID="header"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            paddingBottom: 0,
-            backgroundColor: colors.bgCanvas,
-            paddingTop: insets.top + 10,
-            minHeight: !noDrawMenu ? 60 : 25,
-          }}
+          style={[
+            styles.header,
+            !noDrawMenu ? styles.headerTall : styles.headerShort,
+            {
+              backgroundColor: colors.bgCanvas,
+              paddingTop: insets.top + 10,
+            },
+          ]}
         >
           {!noBalance && (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: 0,
-              }}
-            >
+            <View style={styles.balanceRow}>
               <ZecAmount
                 currencyName={info.currencyName}
                 color={colors.fgDefault}
@@ -216,132 +214,75 @@ const Header: React.FunctionComponent<HeaderProps> = ({
             </View>
           )}
 
-          <View
-            style={{
-              display: 'flex',
-              justifyContent: 'flex-start',
-              width: '30%',
-              height: 5,
-              marginTop: 10,
-              borderRadius: 3,
-            }}
-          >
+          <View style={styles.progressArea}>
             {netInfo.isConnected && !(percentageOutputsScanned === 0) && (
               <>
                 <View
-                  style={{
-                    height: 5,
-                    width: '100%',
-                    borderRadius: 3,
-                    backgroundColor: colors.bgSurface,
-                  }}
+                  style={[
+                    styles.progressBar,
+                    { backgroundColor: colors.bgSurface },
+                  ]}
                 />
                 <View
-                  style={{
-                    height: 5,
-                    width: `${percentageOutputsScanned}%`,
-                    borderRadius: 3,
-                    backgroundColor: 'green',
-                    marginTop: -5,
-                  }}
+                  style={[
+                    styles.progressBar,
+                    styles.progressFill,
+                    { backgroundColor: colors.fgSuccess },
+                  ]}
                 />
               </>
             )}
             {netInfo.isConnected && percentageOutputsScanned === 0 && (
               <View
-                style={{
-                  height: 5,
-                  width: '100%',
-                  borderRadius: 3,
-                  backgroundColor: colors.bgSyncing,
-                }}
+                style={[
+                  styles.progressBar,
+                  { backgroundColor: colors.bgSyncing },
+                ]}
               />
             )}
           </View>
 
-          <View
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexWrap: 'wrap',
-              marginTop: 0,
-              marginHorizontal: 5,
-            }}
-          >
+          <View style={styles.statusRow}>
             {!noSyncingStatus &&
               selectIndexerServer !== SelectServerEnum.offline && (
-                <View style={{ minHeight: 29, flexDirection: 'row' }}>
+                <View style={styles.statusChipRow}>
                   {netInfo.isConnected && !(percentageOutputsScanned === 0) ? (
                     <>
                       {!syncInProgress && (
-                        <View
-                          style={{
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            margin: 0,
-                            marginHorizontal: 2.5,
-                            padding: 1,
-                            minWidth: 25,
-                            minHeight: 25,
-                          }}
-                        >
+                        <View style={statusChip}>
                           <View
                             testID="header.checkicon"
-                            style={{
-                              flexDirection: 'row',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              padding: 3,
-                            }}
+                            style={styles.statusChipInner}
                           >
-                            <FadeText style={{ fontSize: 10, marginLeft: 2 }}>
+                            <FadeText style={[text.caption2, styles.chipText]}>
                               {translate('synced') as string}
                             </FadeText>
                           </View>
                         </View>
                       )}
                       {syncInProgress && (
-                        <View
-                          style={{
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            margin: 0,
-                            marginHorizontal: 2.5,
-                            padding: 1,
-                            minWidth: 25,
-                            minHeight: 25,
-                          }}
-                        >
+                        <View style={statusChip}>
                           <Animated.View
-                            style={{
-                              opacity: opacityValue,
-                              flexDirection: 'row',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              padding: 3,
-                            }}
+                            style={[
+                              styles.statusChipInner,
+                              { opacity: opacityValue },
+                            ]}
                           >
-                            <View
-                              style={{
-                                flexDirection: 'row',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                              }}
-                            >
-                              <FadeText style={{ fontSize: 10, marginLeft: 2 }}>
+                            <View style={styles.statusChipInner}>
+                              <FadeText
+                                style={[text.caption2, styles.chipText]}
+                              >
                                 {translate('syncing') as string}
                               </FadeText>
                               {percentageOutputsScanned > 0 && (
                                 <>
                                   <FadeText
-                                    style={{ fontSize: 10, marginLeft: 2 }}
+                                    style={[text.caption2, styles.chipText]}
                                   >
                                     {' - '}
                                   </FadeText>
                                   <FadeText
-                                    style={{ fontSize: 10, marginLeft: 2 }}
+                                    style={[text.caption2, styles.chipText]}
                                   >
                                     {` ${percentageOutputsScanned}%`}
                                   </FadeText>
@@ -355,17 +296,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
                   ) : (
                     <>
                       {netInfo.isConnected && (
-                        <View
-                          style={{
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            margin: 0,
-                            marginHorizontal: 2.5,
-                            padding: 1,
-                            minWidth: 25,
-                            minHeight: 25,
-                          }}
-                        >
+                        <View style={statusChip}>
                           <TouchableOpacity
                             onPress={() => {
                               navigation.navigate(RouteEnum.SyncReport);
@@ -373,14 +304,11 @@ const Header: React.FunctionComponent<HeaderProps> = ({
                           >
                             <View
                               testID="header.wifiicon"
-                              style={{
-                                flexDirection: 'row',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                padding: 3,
-                              }}
+                              style={styles.statusChipInner}
                             >
-                              <FadeText style={{ fontSize: 10, marginLeft: 2 }}>
+                              <FadeText
+                                style={[text.caption2, styles.chipText]}
+                              >
                                 {translate('connecting') as string}
                               </FadeText>
                             </View>
@@ -389,62 +317,20 @@ const Header: React.FunctionComponent<HeaderProps> = ({
                       )}
                     </>
                   )}
-                  {(!netInfo.isConnected ||
-                    netInfo.type === NetInfoStateType.cellular ||
-                    netInfo.isConnectionExpensive) &&
-                    false && (
-                      <View
-                        style={{
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          margin: 0,
-                          marginHorizontal: 2.5,
-                          padding: 0,
-                          minWidth: 25,
-                          minHeight: 25,
-                        }}
-                      >
-                        <TouchableOpacity
-                          onPress={() => {
-                            navigation.navigate(RouteEnum.SyncReport);
-                          }}
-                        >
-                          <FontAwesomeIcon
-                            icon={faCloudDownload}
-                            color={!netInfo.isConnected ? 'red' : 'yellow'}
-                            size={20}
-                          />
-                        </TouchableOpacity>
-                      </View>
-                    )}
                 </View>
               )}
             {selectIndexerServer === SelectServerEnum.offline && (
               <View
-                style={{
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: 0,
-                  marginHorizontal: 2.5,
-                  paddingHorizontal: 5,
-                  paddingVertical: 1,
-                  borderColor: colors.borderMuted,
-                  borderWidth: 1,
-                  borderRadius: 10,
-                  minWidth: 25,
-                  minHeight: 25,
-                }}
+                style={[
+                  styles.offlineChip,
+                  { borderColor: colors.borderMuted },
+                ]}
               >
                 <View
                   testID="header.offlineicon"
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    paddingHorizontal: 3,
-                  }}
+                  style={styles.offlineChipInner}
                 >
-                  <FadeText style={{ fontSize: 10, marginLeft: 2 }}>
+                  <FadeText style={[text.caption2, styles.chipText]}>
                     {translate('settings.server-offline') as string}
                   </FadeText>
                 </View>
@@ -452,103 +338,67 @@ const Header: React.FunctionComponent<HeaderProps> = ({
             )}
           </View>
 
-          <View
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexWrap: 'wrap',
-              marginTop: 10,
-            }}
-          >
-            <View
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexWrap: 'wrap',
-              }}
-            >
+          <View style={styles.actionsRow}>
+            <View style={styles.actionGroup}>
               <TouchableOpacity
-                style={{ justifyContent: 'center', alignItems: 'center' }}
+                style={styles.actionButton}
                 onPress={() => {
                   navigation.navigate(RouteEnum.Send);
                 }}
               >
                 <View
-                  style={{
-                    borderRadius: 35,
-                    backgroundColor: colors.bgSurface,
-                    padding: 20,
-                    margin: 10,
-                  }}
+                  style={[
+                    styles.actionDisc,
+                    { backgroundColor: colors.bgSurface },
+                  ]}
                 >
                   <FontAwesomeIcon
                     size={30}
                     icon={faArrowUp}
                     color={colors.fgDefault}
-                    style={{ transform: [{ rotate: '45deg' }] }}
+                    style={styles.actionIconUp}
                   />
                 </View>
                 <FadeText>Send</FadeText>
               </TouchableOpacity>
             </View>
 
-            <View
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexWrap: 'wrap',
-              }}
-            >
+            <View style={styles.actionGroup}>
               <TouchableOpacity
-                style={{ justifyContent: 'center', alignItems: 'center' }}
+                style={styles.actionButton}
                 onPress={() => {
                   navigation.navigate(RouteEnum.Receive);
                 }}
               >
                 <View
-                  style={{
-                    borderRadius: 35,
-                    backgroundColor: colors.bgSurface,
-                    padding: 20,
-                    margin: 10,
-                  }}
+                  style={[
+                    styles.actionDisc,
+                    { backgroundColor: colors.bgSurface },
+                  ]}
                 >
                   <FontAwesomeIcon
                     size={30}
                     icon={faArrowDown}
                     color={colors.fgDefault}
-                    style={{ transform: [{ rotate: '45deg' }] }}
+                    style={styles.actionIconDown}
                   />
                 </View>
                 <FadeText>Receive</FadeText>
               </TouchableOpacity>
             </View>
 
-            <View
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexWrap: 'wrap',
-              }}
-            >
+            <View style={styles.actionGroup}>
               <TouchableOpacity
-                style={{ justifyContent: 'center', alignItems: 'center' }}
+                style={styles.actionButton}
                 onPress={() => {
                   navigation.navigate(RouteEnum.Faucet);
                 }}
               >
                 <View
-                  style={{
-                    borderRadius: 35,
-                    backgroundColor: colors.bgSurface,
-                    padding: 20,
-                    margin: 10,
-                  }}
+                  style={[
+                    styles.actionDisc,
+                    { backgroundColor: colors.bgSurface },
+                  ]}
                 >
                   <FontAwesomeIcon
                     size={30}
@@ -561,20 +411,11 @@ const Header: React.FunctionComponent<HeaderProps> = ({
             </View>
           </View>
 
-          <View
-            style={{
-              padding: 11.5,
-              position: 'absolute',
-              top: insets.top,
-              left: 0,
-            }}
-          >
-            <View
-              style={{ alignItems: 'center', flexDirection: 'row', height: 40 }}
-            >
+          <View style={[styles.menuButtonWrap, { top: insets.top }]}>
+            <View style={styles.menuButtonRow}>
               {!noDrawMenu && (
                 <TouchableOpacity
-                  style={{ marginRight: 5 }}
+                  style={styles.menuButton}
                   testID="header.drawmenu"
                   accessible={true}
                   accessibilityLabel={translate('menudrawer-acc') as string}
@@ -591,16 +432,9 @@ const Header: React.FunctionComponent<HeaderProps> = ({
           </View>
         </View>
 
-        <View
-          style={{
-            padding: 13,
-            position: 'absolute',
-            top: insets.top,
-            right: 0,
-          }}
-        >
+        <View style={[styles.settingsButtonWrap, { top: insets.top }]}>
           <TouchableOpacity
-            style={{ marginRight: 5 }}
+            style={styles.menuButton}
             testID="header.drawmenu"
             onPress={async () => {
               const resultBio = security.settingsScreen
@@ -635,5 +469,126 @@ const Header: React.FunctionComponent<HeaderProps> = ({
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  header: {
+    display: 'flex',
+    alignItems: 'center',
+    paddingBottom: 0,
+  },
+  headerTall: {
+    minHeight: 60,
+  },
+  headerShort: {
+    minHeight: 25,
+  },
+  balanceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: 0,
+  },
+  progressArea: {
+    display: 'flex',
+    justifyContent: 'flex-start',
+    width: '30%',
+    height: 5,
+    marginTop: 10,
+  },
+  progressBar: {
+    height: 5,
+    width: '100%',
+    borderRadius: 3,
+  },
+  progressFill: {
+    marginTop: -5,
+  },
+  statusRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    marginTop: 0,
+    marginHorizontal: 5,
+  },
+  statusChipRow: {
+    minHeight: 29,
+    flexDirection: 'row',
+  },
+  statusChipInner: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 3,
+  },
+  chipText: {
+    marginLeft: 2,
+  },
+  offlineChip: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 2.5,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    borderWidth: 1,
+    borderRadius: 10,
+    minWidth: 25,
+    minHeight: 25,
+  },
+  offlineChipInner: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 3,
+  },
+  actionsRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    marginTop: 10,
+  },
+  actionGroup: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+  },
+  actionButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  actionDisc: {
+    borderRadius: radiusPill,
+    padding: space.xl,
+    margin: 10,
+  },
+  actionIconUp: {
+    transform: [{ rotate: '45deg' }],
+  },
+  actionIconDown: {
+    transform: [{ rotate: '45deg' }],
+  },
+  menuButtonWrap: {
+    padding: 11.5,
+    position: 'absolute',
+    left: 0,
+  },
+  menuButtonRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    height: 40,
+  },
+  menuButton: {
+    marginRight: 5,
+  },
+  settingsButtonWrap: {
+    padding: 13,
+    position: 'absolute',
+    right: 0,
+  },
+});
 
 export default Header;

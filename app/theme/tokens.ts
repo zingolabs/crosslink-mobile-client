@@ -30,7 +30,11 @@ export type ThemeColors = {
   bgAccentTint: string;
   borderAccentDisabled: string;
 
+  /** A raised, lighter take on the surface: focused fields. */
+  bgSurfaceRaised: string;
+
   fgSuccess: string;
+  bgSuccessTint: string;
 
   fgSyncing: string;
   bgSyncing: string;
@@ -40,10 +44,12 @@ export type ThemeColors = {
   fgWarningMuted: string;
   borderWarning: string;
   bgWarning: string;
+  bgWarningTint: string;
 
   fgDanger: string;
   borderDanger: string;
   bgDanger: string;
+  bgDangerTint: string;
 };
 
 export const tokens: ThemeColors = {
@@ -72,7 +78,10 @@ export const tokens: ThemeColors = {
   fgAccentDisabled: '#b4b4b4',
   borderAccentDisabled: '#b4b4b4',
 
+  bgSurfaceRaised: '#2c2c2e',
+
   fgSuccess: '#30D158',
+  bgSuccessTint: '#30d15833',
 
   fgSyncing: '#ebff5a',
   bgSyncing: '#ebff5a',
@@ -82,8 +91,10 @@ export const tokens: ThemeColors = {
   fgWarningMuted: '#FEE587',
   borderWarning: '#65491C',
   bgWarning: '#262527',
+  bgWarningTint: '#f99d004d',
 
   fgDanger: '#FE383C',
   borderDanger: '#FE383C',
   bgDanger: '#FE383C',
+  bgDangerTint: '#fe383c33',
 };

@@ -1,9 +1,9 @@
 import React from 'react';
-import { StyleSheet, Text, TextStyle } from 'react-native';
+import { StyleProp, StyleSheet, Text, TextStyle } from 'react-native';
 import { text, useTheme } from '../../app/theme';
 
 type FadeTextProps = {
-  style?: TextStyle;
+  style?: StyleProp<TextStyle>;
   children: string | string[];
   numberOfLines?: number;
   ellipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';

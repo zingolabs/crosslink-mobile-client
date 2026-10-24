@@ -1,9 +1,9 @@
 import React from 'react';
-import { StyleSheet, Text, TextStyle } from 'react-native';
+import { StyleProp, StyleSheet, Text, TextStyle } from 'react-native';
 import { text, useTheme } from '../../app/theme';
 
 type BoldTextProps = {
-  style?: TextStyle;
+  style?: StyleProp<TextStyle>;
   children: string | string[];
   testID?: string;
   selectable?: boolean;
