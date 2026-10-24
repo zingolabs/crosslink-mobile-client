@@ -1,6 +1,5 @@
-/* eslint-disable react-native/no-inline-styles */
 import React, { useEffect, useState } from 'react';
-import { View, TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCheck, faQrcode, faXmark } from '@fortawesome/free-solid-svg-icons';
@@ -10,7 +9,7 @@ import ErrorText from './ErrorText';
 import RegText from './RegText';
 import Utils from '../../app/utils';
 import { RouteEnum, ScreenEnum } from '../../app/AppState';
-import { useTheme } from '../../app/theme';
+import { space, text, useTheme } from '../../app/theme';
 
 type TextInputAddressProps = {
   address: string;
@@ -67,16 +66,10 @@ const TextInputAddress: React.FunctionComponent<TextInputAddressProps> = ({
   //console.log('render input text address');
 
   return (
-    <View style={{ display: 'flex', flexDirection: 'column' }}>
-      <View style={{ display: 'flex', padding: 10, marginTop: 10 }}>
+    <View style={styles.column}>
+      <View style={styles.field}>
         {showLabel && (
-          <View
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-            }}
-          >
+          <View style={styles.labelRow}>
             <RegText>{translate('send.toaddress') as string}</RegText>
             {validAddress === 1 && (
               <FontAwesomeIcon icon={faCheck} color={colors.fgAccent} />
@@ -88,47 +81,24 @@ const TextInputAddress: React.FunctionComponent<TextInputAddressProps> = ({
             )}
           </View>
         )}
-        <View
-          style={{
-            borderWidth: 1,
-            borderRadius: 5,
-            borderColor: colors.fgDefault,
-            marginTop: 5,
-          }}
-        >
-          <View style={{ flexDirection: 'row' }}>
+        <View style={[styles.inputWrap, { borderColor: colors.fgDefault }]}>
+          <View style={styles.inputRow}>
             <View
               accessible={true}
               accessibilityLabel={translate('send.address-acc') as string}
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-              }}
+              style={styles.inputArea}
             >
               <TextInput
                 testID="send.addressplaceholder"
                 placeholder={translate('send.addressplaceholder') as string}
                 placeholderTextColor={colors.fgSubtle}
-                style={{
-                  color: colors.fgDefault,
-                  fontWeight: '600',
-                  fontSize: 14,
-                  marginLeft: 5,
-                  backgroundColor: 'transparent',
-                }}
+                style={[styles.input, { color: colors.fgDefault }]}
                 value={address}
-                onChangeText={(text: string) => setAddress(text)}
+                onChangeText={(t: string) => setAddress(t)}
                 editable={!disabled}
               />
             </View>
-            <View
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
+            <View style={styles.iconRow}>
               {address && !disabled && (
                 <TouchableOpacity
                   onPress={() => {
@@ -136,7 +106,7 @@ const TextInputAddress: React.FunctionComponent<TextInputAddressProps> = ({
                   }}
                 >
                   <FontAwesomeIcon
-                    style={{ marginRight: 5 }}
+                    style={styles.iconMargin}
                     size={25}
                     icon={faXmark}
                     color={colors.fgAccentDisabled}
@@ -153,7 +123,7 @@ const TextInputAddress: React.FunctionComponent<TextInputAddressProps> = ({
                 }}
               >
                 <FontAwesomeIcon
-                  style={{ marginRight: 5 }}
+                  style={styles.iconMargin}
                   size={35}
                   icon={faQrcode}
                   color={colors.fgFaint}
@@ -166,5 +136,48 @@ const TextInputAddress: React.FunctionComponent<TextInputAddressProps> = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  column: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  field: {
+    display: 'flex',
+    padding: space.md,
+    marginTop: space.md,
+  },
+  labelRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  inputWrap: {
+    borderWidth: 1,
+    borderRadius: 5,
+    marginTop: space.xs,
+  },
+  inputRow: {
+    flexDirection: 'row',
+  },
+  inputArea: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  input: {
+    ...text.subheadline,
+    marginLeft: space.xs,
+    backgroundColor: 'transparent',
+  },
+  iconRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconMargin: {
+    marginRight: space.xs,
+  },
+});
 
 export default TextInputAddress;

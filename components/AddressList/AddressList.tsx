@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
 import React, {
   useState,
   useEffect,
@@ -13,6 +12,7 @@ import {
   NativeSyntheticEvent,
   ActivityIndicator,
   Pressable,
+  StyleSheet,
 } from 'react-native';
 
 import { useScrollToTop } from '@react-navigation/native';
@@ -39,7 +39,7 @@ import { ToastProvider, useToast } from 'react-native-toastier';
 import { RPCAddressScopeEnum } from '../../app/rpc/enums/RPCAddressScopeEnum';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
-import { useTheme } from '../../app/theme';
+import { radiusPill, space, useTheme } from '../../app/theme';
 
 type AddressListProps = NativeStackScreenProps<
   LoadedAppStackParamList,
@@ -177,12 +177,7 @@ const AddressList: React.FunctionComponent<AddressListProps> = ({
         screenName={screenName}
       />
 
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: colors.bgCanvas,
-        }}
-      >
+      <View style={[styles.screen, { backgroundColor: colors.bgCanvas }]}>
         <Header
           title={`${translate('addresslist.title')} - ${
             addressKind === AddressKindEnum.u
@@ -208,23 +203,11 @@ const AddressList: React.FunctionComponent<AddressListProps> = ({
           scrollEventThrottle={100}
           testID="address.scroll-view"
           keyboardShouldPersistTaps="handled"
-          style={{ height: '80%', maxHeight: '80%' }}
-          contentContainerStyle={{
-            flexDirection: 'column',
-            alignItems: 'stretch',
-            justifyContent: 'flex-start',
-          }}
+          style={styles.list}
+          contentContainerStyle={styles.content}
         >
           {addressesSliced.length === 0 && !loading && (
-            <View
-              style={{
-                height: 150,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                marginTop: 30,
-              }}
-            >
+            <View style={styles.emptyStateTop}>
               <FadeText style={{ color: colors.fgAccent }}>
                 {translate('history.empty') as string}
               </FadeText>
@@ -232,7 +215,7 @@ const AddressList: React.FunctionComponent<AddressListProps> = ({
           )}
           {loading ? (
             <ActivityIndicator
-              style={{ marginTop: 7, marginRight: 7 }}
+              style={styles.spinner}
               size={25}
               color={colors.fgAccentDisabled}
             />
@@ -260,16 +243,7 @@ const AddressList: React.FunctionComponent<AddressListProps> = ({
             </>
           )}
           {loadMoreButton ? (
-            <View
-              style={{
-                height: 150,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                marginTop: 5,
-                marginBottom: 30,
-              }}
-            >
+            <View style={styles.loadMoreWrap}>
               <LiquidPrimaryButton
                 tintColor={colors.bgSurface}
                 title={translate('history.loadmore') as string}
@@ -279,16 +253,7 @@ const AddressList: React.FunctionComponent<AddressListProps> = ({
           ) : (
             <>
               {!!addressesSliced && !!addressesSliced.length && !loading && (
-                <View
-                  style={{
-                    height: 150,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-start',
-                    marginTop: 5,
-                    marginBottom: 30,
-                  }}
-                >
+                <View style={styles.loadMoreWrap}>
                   <FadeText style={{ color: colors.fgAccent }}>
                     {translate('history.end') as string}
                   </FadeText>
@@ -301,22 +266,18 @@ const AddressList: React.FunctionComponent<AddressListProps> = ({
           <Pressable
             onPress={handleScrollToTop}
             disabled={isScrollingToTop}
-            style={({ pressed }) => ({
-              position: 'absolute',
-              bottom: 105,
-              right: 10,
-              paddingHorizontal: 5,
-              paddingVertical: 10,
-              backgroundColor: colors.bgChrome,
-              borderRadius: 50,
-              transform: [{ scale: pressed ? 0.9 : 1 }],
-              borderWidth: 1,
-              borderColor: colors.borderMuted,
-              opacity: isScrollingToTop ? 0.5 : 1,
-            })}
+            style={({ pressed }) => [
+              styles.fab,
+              {
+                backgroundColor: colors.bgChrome,
+                borderColor: colors.borderMuted,
+                opacity: isScrollingToTop ? 0.5 : 1,
+              },
+              { transform: [{ scale: pressed ? 0.9 : 1 }] },
+            ]}
           >
             <FontAwesomeIcon
-              style={{ marginLeft: 5, marginRight: 5, marginTop: 0 }}
+              style={styles.fabIcon}
               size={20}
               icon={faAngleUp}
               color={colors.fgMuted}
@@ -329,3 +290,50 @@ const AddressList: React.FunctionComponent<AddressListProps> = ({
 };
 
 export default React.memo(AddressList);
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+  list: {
+    height: '80%',
+    maxHeight: '80%',
+  },
+  content: {
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    justifyContent: 'flex-start',
+  },
+  emptyStateTop: {
+    height: 150,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    marginTop: space.xxxl,
+  },
+  loadMoreWrap: {
+    height: 150,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    marginTop: space.xs,
+    marginBottom: space.xxxl,
+  },
+  spinner: {
+    marginTop: space.sm,
+    marginRight: space.sm,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 105,
+    right: 10,
+    paddingHorizontal: space.xs,
+    paddingVertical: space.md,
+    borderRadius: radiusPill,
+    borderWidth: 1,
+  },
+  fabIcon: {
+    marginLeft: space.xs,
+    marginRight: space.xs,
+  },
+});

@@ -1,12 +1,12 @@
-/* eslint-disable react-native/no-inline-styles */
 import React, { useState } from 'react';
 import {
   View,
   TextInput,
   NativeSyntheticEvent,
+  Platform,
+  StyleSheet,
   TouchableOpacity,
   Keyboard,
-  Platform,
 } from 'react-native';
 
 import {
@@ -27,7 +27,7 @@ import ContextMenu, {
 } from 'react-native-context-menu-view';
 import RPCModule from '../../../app/RPCModule';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
-import { useTheme } from '../../../app/theme';
+import { space, text, useTheme } from '../../../app/theme';
 
 type NewAddressProps = {
   addressKind: AddressKindEnum;
@@ -108,9 +108,7 @@ const NewAddress: React.FunctionComponent<NewAddressProps> = ({
         //console.log('LAYOUTTT', height);
         setHeightLayout(height + 80);
       }}
-      style={{
-        backgroundColor: colors.bgCanvas,
-      }}
+      style={{ backgroundColor: colors.bgCanvas }}
     >
       <TouchableOpacity
         onPress={() => {
@@ -126,57 +124,29 @@ const NewAddress: React.FunctionComponent<NewAddressProps> = ({
           size={30}
           icon={faXmark}
           color={colors.fgDefault}
-          style={{ marginTop: 10, marginRight: 20, alignSelf: 'flex-end' }}
+          style={styles.close}
         />
       </TouchableOpacity>
-      <RegText
-        style={{ marginTop: 0, paddingHorizontal: 10, alignSelf: 'center' }}
-      >
+      <RegText style={styles.title}>
         {
           (addressKind === AddressKindEnum.u
             ? translate('receive.newu-option')
             : translate('receive.transparent.newt-option')) as string
         }
       </RegText>
-      <View style={{ display: 'flex', flexDirection: 'column', margin: 10 }}>
-        <RegText style={{ marginTop: 10, paddingHorizontal: 10 }}>
-          {'Tag (Optional)'}
-        </RegText>
-        <View
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'flex-start',
-            paddingHorizontal: 10,
-            marginTop: 10,
-          }}
-        >
+      <View style={styles.form}>
+        <RegText style={styles.label}>{'Tag (Optional)'}</RegText>
+        <View style={styles.fieldRow}>
           <View
             accessible={true}
-            style={{
-              flexGrow: 1,
-              borderWidth: 1,
-              borderRadius: 5,
-              borderColor: colors.fgDefault,
-              minWidth: 48,
-              minHeight: 48,
-              maxHeight: 150,
-            }}
+            style={[styles.inputWrap, { borderColor: colors.fgDefault }]}
           >
             <TextInput
-              style={{
-                color: colors.fgDefault,
-                fontWeight: '600',
-                fontSize: 14,
-                minWidth: 48,
-                minHeight: 48,
-                marginLeft: 5,
-                backgroundColor: 'transparent',
-              }}
+              style={[styles.input, { color: colors.fgDefault }]}
               placeholder={translate('history.label-placeholder') as string}
               placeholderTextColor={colors.fgSubtle}
               value={label}
-              onChangeText={(text: string) => setLabel(text)}
+              onChangeText={(t: string) => setLabel(t)}
               maxLength={50}
             />
           </View>
@@ -184,25 +154,12 @@ const NewAddress: React.FunctionComponent<NewAddressProps> = ({
 
         {addressKind === AddressKindEnum.u && (
           <>
-            <RegText style={{ marginTop: 30, paddingHorizontal: 10 }}>
-              {'Type of Address'}
-            </RegText>
-            <View
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-                paddingHorizontal: 10,
-                marginTop: 10,
-              }}
-            >
+            <RegText style={styles.typeLabel}>{'Type of Address'}</RegText>
+            <View style={styles.typeRow}>
               <ContextMenu
                 title={translate('loadedapp.options') as string}
                 dropdownMenuMode={true}
-                style={{
-                  flexGrow: 1,
-                }}
+                style={styles.menu}
                 actions={[
                   { title: translate('receive.shielded-orchard') as string },
                   {
@@ -225,32 +182,16 @@ const NewAddress: React.FunctionComponent<NewAddressProps> = ({
                 }}
               >
                 <View
-                  style={{
-                    flexGrow: 1,
-                    flexDirection: 'row',
-                    borderWidth: 1,
-                    borderRadius: 5,
-                    borderColor: colors.fgDefault,
-                    backgroundColor: '#303d4f',
-                    minWidth: 48,
-                    minHeight: 48,
-                    maxHeight: 48,
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
+                  style={[
+                    styles.selectWrap,
+                    {
+                      borderColor: colors.fgDefault,
+                      backgroundColor: colors.bgSurface,
+                    },
+                  ]}
                 >
                   <RegText
-                    style={{
-                      color: colors.fgDefault,
-                      fontWeight: '600',
-                      minWidth: 48,
-                      minHeight: 48,
-                      maxHeight: 48,
-                      marginLeft: 20,
-                      marginTop:
-                        Platform.OS === GlobalConst.platformOSandroid ? 17 : 25,
-                      backgroundColor: 'transparent',
-                    }}
+                    style={[styles.selectText, { color: colors.fgDefault }]}
                   >
                     {type === AddressUnifiedTypeEnum.orchard
                       ? (translate('receive.shielded-orchard') as string)
@@ -266,7 +207,7 @@ const NewAddress: React.FunctionComponent<NewAddressProps> = ({
                     size={15}
                     icon={faChevronDown}
                     color={colors.fgDefault}
-                    style={{ marginRight: 20 }}
+                    style={styles.chevron}
                   />
                 </View>
               </ContextMenu>
@@ -274,17 +215,7 @@ const NewAddress: React.FunctionComponent<NewAddressProps> = ({
           </>
         )}
 
-        <View
-          style={{
-            flexGrow: 1,
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginVertical: 5,
-            marginTop: 30,
-            gap: 10,
-          }}
-        >
+        <View style={styles.actions}>
           <LiquidPrimaryButton
             title={translate('save') as string}
             onPress={() => {
@@ -308,5 +239,95 @@ const NewAddress: React.FunctionComponent<NewAddressProps> = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  close: {
+    marginTop: space.md,
+    marginRight: space.xl,
+    alignSelf: 'flex-end',
+  },
+  title: {
+    paddingHorizontal: space.md,
+    alignSelf: 'center',
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    margin: space.md,
+  },
+  label: {
+    marginTop: space.md,
+    paddingHorizontal: space.md,
+  },
+  fieldRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    paddingHorizontal: space.md,
+    marginTop: space.md,
+  },
+  inputWrap: {
+    flexGrow: 1,
+    borderWidth: 1,
+    borderRadius: 5,
+    minWidth: 48,
+    minHeight: 48,
+    maxHeight: 150,
+  },
+  input: {
+    ...text.subheadline,
+    minWidth: 48,
+    minHeight: 48,
+    marginLeft: space.xs,
+    backgroundColor: 'transparent',
+  },
+  typeLabel: {
+    marginTop: space.xxxl,
+    paddingHorizontal: space.md,
+  },
+  typeRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: space.md,
+    marginTop: space.md,
+  },
+  menu: {
+    flexGrow: 1,
+  },
+  selectWrap: {
+    flexGrow: 1,
+    flexDirection: 'row',
+    borderWidth: 1,
+    borderRadius: 5,
+    minWidth: 48,
+    minHeight: 48,
+    maxHeight: 48,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  selectText: {
+    ...text.headline,
+    minWidth: 48,
+    minHeight: 48,
+    maxHeight: 48,
+    marginLeft: space.xl,
+    backgroundColor: 'transparent',
+    marginTop: Platform.select({ android: 17, default: 25 }),
+  },
+  chevron: {
+    marginRight: space.xl,
+  },
+  actions: {
+    flexGrow: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: space.xs,
+    marginTop: space.xxxl,
+    gap: space.md,
+  },
+});
 
 export default React.memo(NewAddress);

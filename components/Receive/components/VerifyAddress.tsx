@@ -1,6 +1,5 @@
-/* eslint-disable react-native/no-inline-styles */
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Keyboard } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Keyboard } from 'react-native';
 
 import {
   GlobalConst,
@@ -23,7 +22,7 @@ import { RPCCheckAddressType } from '../../../app/rpc/types/RPCCheckAddressType'
 import { VerifyCheckIcon } from '../../Components/Icons/VerifyCheckIcon';
 import { VerifyXIcon } from '../../Components/Icons/VerifyXIcon';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
-import { useTheme } from '../../../app/theme';
+import { space, useTheme } from '../../../app/theme';
 
 type VerifyAddressProps = {
   closeSheet: () => void;
@@ -116,9 +115,7 @@ const VerifyAddress: React.FunctionComponent<VerifyAddressProps> = ({
         //console.log('LAYOUTTT', height);
         setHeightLayout(height + 70);
       }}
-      style={{
-        backgroundColor: colors.bgCanvas,
-      }}
+      style={{ backgroundColor: colors.bgCanvas }}
     >
       <TouchableOpacity
         onPress={() => {
@@ -134,12 +131,10 @@ const VerifyAddress: React.FunctionComponent<VerifyAddressProps> = ({
           size={30}
           icon={faXmark}
           color={colors.fgDefault}
-          style={{ marginTop: 10, marginRight: 20, alignSelf: 'flex-end' }}
+          style={styles.close}
         />
       </TouchableOpacity>
-      <RegText
-        style={{ marginTop: 0, paddingHorizontal: 10, alignSelf: 'center' }}
-      >
+      <RegText style={styles.title}>
         {translate('receive.verify') as string}
       </RegText>
       <TextInputAddress
@@ -151,58 +146,25 @@ const VerifyAddress: React.FunctionComponent<VerifyAddressProps> = ({
         screenName={screenName}
       />
       {!!errorAddress && (
-        <View
-          style={{
-            flexGrow: 1,
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginVertical: 5,
-          }}
-        >
-          <FadeText style={{ color: colors.fgAccent }}>{errorAddress}</FadeText>
+        <View style={styles.row}>
+          <FadeText style={{ color: colors.fgDanger }}>{errorAddress}</FadeText>
         </View>
       )}
       {verifyOK !== null && (
-        <View
-          style={{
-            flexGrow: 1,
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginVertical: 5,
-          }}
-        >
+        <View style={styles.row}>
           {verifyOK ? (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                width: '90%',
-              }}
-            >
+            <View style={styles.result}>
               <VerifyCheckIcon
                 color={colors.fgAccent}
-                style={{ marginRight: 10 }}
+                style={styles.resultIcon}
               />
               <FadeText style={{ color: colors.fgDefault }}>
                 {translate('receive.verification-success') as string}
               </FadeText>
             </View>
           ) : (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                width: '90%',
-              }}
-            >
-              <VerifyXIcon
-                color={colors.fgDanger}
-                style={{ marginRight: 10 }}
-              />
+            <View style={styles.result}>
+              <VerifyXIcon color={colors.fgDanger} style={styles.resultIcon} />
               <FadeText style={{ color: colors.fgDefault }}>
                 {translate('receive.verification-failure') as string}
               </FadeText>
@@ -210,18 +172,8 @@ const VerifyAddress: React.FunctionComponent<VerifyAddressProps> = ({
           )}
         </View>
       )}
-      <View style={{ display: 'flex', flexDirection: 'column', margin: 0 }}>
-        <View
-          style={{
-            flexGrow: 1,
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginVertical: 5,
-            marginTop: 30,
-            gap: 10,
-          }}
-        >
+      <View>
+        <View style={styles.actions}>
           <LiquidPrimaryButton
             title={translate('verify') as string}
             onPress={() => {
@@ -246,5 +198,42 @@ const VerifyAddress: React.FunctionComponent<VerifyAddressProps> = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  close: {
+    marginTop: space.md,
+    marginRight: space.xl,
+    alignSelf: 'flex-end',
+  },
+  title: {
+    paddingHorizontal: space.md,
+    alignSelf: 'center',
+  },
+  row: {
+    flexGrow: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: space.xs,
+  },
+  result: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    width: '90%',
+  },
+  resultIcon: {
+    marginRight: space.md,
+  },
+  actions: {
+    flexGrow: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: space.xs,
+    marginTop: space.xxxl,
+    gap: space.md,
+  },
+});
 
 export default React.memo(VerifyAddress);
