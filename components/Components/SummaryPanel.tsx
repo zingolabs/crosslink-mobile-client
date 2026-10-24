@@ -136,11 +136,13 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const gradient = `linear-gradient(to bottom, ${colors.bgSurface}, ${colors.bgChrome})`;
+  const [panelHeight, setPanelHeight] = useState(0);
   const figure = privacy ? MASK : formatBalance(amount);
 
   return (
     <View
       testID={testID}
+      onLayout={e => setPanelHeight(e.nativeEvent.layout.height)}
       style={[
         styles.panel,
         {
@@ -154,11 +156,11 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
             : { experimental_backgroundImage: gradient },
       ]}
     >
-      {Platform.OS === 'android' && (
+      {Platform.OS === 'android' && panelHeight > 0 && (
         <Image
           source={PANEL_GRADIENT}
           resizeMode="stretch"
-          style={styles.panelGradient}
+          style={[styles.panelGradient, { height: panelHeight }]}
         />
       )}
       <View style={[styles.bar, { top: insets.top }]}>
@@ -215,8 +217,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
-    bottom: 0,
-    right: 0,
     width: '100%',
   },
   bar: {

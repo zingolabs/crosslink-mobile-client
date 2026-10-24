@@ -1,19 +1,20 @@
-// Generates assets/images/panel-gradient.png: a pre-rendered, dithered
-// vertical gradient used by SummaryPanel on Android.
+// Generates assets/images/panel-gradient.png: a pre-rendered vertical
+// gradient used by SummaryPanel on Android.
 //
+/* eslint-env node */
 // Why: Android's gradient shader (and CSS experimental_backgroundImage)
 // bands badly on dark, low-contrast ramps. A tiny PNG with per-row error
 // diffusion (fractional channel carry) stretches smoothly instead.
 // Ported from zingolabs/0xramp-reference-app scripts/build-panel-gradient.mts.
 //
-// Usage: node scripts/build-panel-gradient.mjs
-// Reads bgSurface -> bgChrome from app/theme/tokens.ts.
-import { deflateSync } from 'node:zlib';
-import { readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+// The ramp mirrors the iOS panel exactly: linear bgSurface -> bgChrome.
+//
+// Usage: node scripts/build-panel-gradient.cjs
+const { deflateSync } = require('node:zlib');
+const { readFileSync, writeFileSync } = require('node:fs');
+const { dirname, join, resolve } = require('node:path');
 
-const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
+const SCRIPT_DIR = dirname(__filename);
 const REPO_DIR = resolve(SCRIPT_DIR, '..');
 const TOKENS = join(REPO_DIR, 'app', 'theme', 'tokens.ts');
 const OUT = join(REPO_DIR, 'assets', 'images', 'panel-gradient.png');
