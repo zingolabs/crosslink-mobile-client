@@ -6,6 +6,7 @@ const colors: ThemeColors = {
   bgCanvas: '#011401',
   bgSurface: '#222223',
   bgChrome: '#040C17',
+  bgPress: 'rgba(255, 255, 255, 0.06)',
 
   fgDefault: '#c3c3c3',
 

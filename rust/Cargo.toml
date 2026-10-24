@@ -10,15 +10,15 @@ nursery = { level = "deny", priority = -1 }
 
 [workspace.dependencies]
 
-zingo_common_components = { git = "https://github.com/zingolabs/zingolib-crosslink", rev = "222747f745abf17bc7cbb0c70310359749529611" }
-zingo-netutils = { git = "https://github.com/zingolabs/zingolib-crosslink", rev = "222747f745abf17bc7cbb0c70310359749529611" }
+zingo_common_components = { git = "https://github.com/zingolabs/zingolib-crosslink", branch = "feat/crosslink-main" }
+zingo-netutils = { git = "https://github.com/zingolabs/zingolib-crosslink", branch = "feat/crosslink-main" }
 
-zingolib = { git = "https://github.com/zingolabs/zingolib-crosslink", rev = "222747f745abf17bc7cbb0c70310359749529611", default-features = true, features = [
+zingolib = { git = "https://github.com/zingolabs/zingolib-crosslink", branch = "feat/crosslink-main", default-features = true, features = [
     "testutils",
 ] }
-pepper-sync = { git = "https://github.com/zingolabs/zingolib-crosslink", rev = "222747f745abf17bc7cbb0c70310359749529611" }
+pepper-sync = { git = "https://github.com/zingolabs/zingolib-crosslink", branch = "feat/crosslink-main" }
 
-zingolib_testutils = { git = "https://github.com/zingolabs/zingolib-crosslink", rev = "222747f745abf17bc7cbb0c70310359749529611", features = [
+zingolib_testutils = { git = "https://github.com/zingolabs/zingolib-crosslink", branch = "feat/crosslink-main", features = [
     "test_lwd_zcashd",
 ] }
 regchest_utils = { git = "https://github.com/zingolabs/zingo-regchest", branch = "dev" }

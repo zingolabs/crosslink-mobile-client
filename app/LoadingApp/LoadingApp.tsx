@@ -718,19 +718,27 @@ export class LoadingAppClass extends Component<
       return { kind: 'error', message: resultJson.error, title };
     }
 
+    // Indexer selection probes every known indexer and can stall for a long
+    // time when some of them don't answer. It only optimizes the endpoint —
+    // the wallet is already open against the configured one, and the rust
+    // side re-points the client when a better one wins — so it must never
+    // gate opening. Run it in the background; failures are non-fatal.
     if (!this.state.indexerServerPinned && this.state.netInfo.isConnected) {
-      const best = await selectBestIndexer(this.state.indexerNetwork);
-      if (best && best !== this.state.indexerServer.uri) {
-        const winner: ServerType = {
-          uri: best,
-          chainName: this.state.indexerServer.chainName,
-        };
-        this.setState({ indexerServer: winner });
-        await SettingsFileImpl.writeSettings(
-          SettingsNameEnum.indexerServer,
-          winner,
-        );
-      }
+      selectBestIndexer(this.state.indexerNetwork)
+        .then(async best => {
+          if (best && best !== this.state.indexerServer.uri) {
+            const winner: ServerType = {
+              uri: best,
+              chainName: this.state.indexerServer.chainName,
+            };
+            this.setState({ indexerServer: winner });
+            await SettingsFileImpl.writeSettings(
+              SettingsNameEnum.indexerServer,
+              winner,
+            );
+          }
+        })
+        .catch(() => {});
     }
 
     const wallet = await this.readWalletKind();

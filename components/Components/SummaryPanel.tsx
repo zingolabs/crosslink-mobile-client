@@ -15,12 +15,19 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WifiOff } from 'lucide-react-native';
 
-import { useTheme } from '../../app/theme';
+import {
+  useTheme,
+  text,
+  space,
+  radiusCard,
+  curve,
+  duration,
+} from '../../app/theme';
 
-export const SUMMARY_RADIUS = 28;
+export const SUMMARY_RADIUS = radiusCard;
 
 const HEADER_H = 44;
-const EASE_OUT = cubicBezier(0.23, 1, 0.32, 1);
+const EASE_OUT = cubicBezier(curve[0], curve[1], curve[2], curve[3]);
 const MASK = '••••';
 const ZATS = 1e8;
 const DISPLAY_STEP_ZATS = 1e4;
@@ -62,7 +69,7 @@ export const IconAction: React.FC<IconActionProps> = ({
   const [pressed, setPressed] = useState(false);
   const press: CSSTransitionProperties = {
     transitionProperty: ['transform'],
-    transitionDuration: reduced ? '0ms' : '120ms',
+    transitionDuration: reduced ? '0ms' : `${duration.press}ms`,
     transitionTimingFunction: EASE_OUT,
   };
   return (
@@ -87,7 +94,7 @@ export const IconAction: React.FC<IconActionProps> = ({
       >
         {icon}
       </Animated.View>
-      <Text style={[styles.caption, { color: colors.fgDefault }]}>{title}</Text>
+      <Text style={[text.caption, { color: colors.fgDefault }]}>{title}</Text>
     </Pressable>
   );
 };
@@ -153,6 +160,7 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
           adjustsFontSizeToFit
           accessibilityLabel={`${figure} ${unit}${settled ? '' : ', syncing'}`}
           style={[
+            text.display,
             styles.figure,
             { color: colors.fgDefault },
             !settled && styles.unsettled,
@@ -160,7 +168,7 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
         >
           {figure}
           <Text
-            style={[styles.unit, { color: colors.fgMuted }]}
+            style={[text.unit, { color: colors.fgMuted }]}
           >{` ${unit}`}</Text>
         </Text>
         <View style={styles.accessory}>
@@ -184,7 +192,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
     overflow: 'hidden',
     alignItems: 'center',
-    paddingBottom: 32,
+    paddingBottom: space.xxxl,
     borderBottomLeftRadius: SUMMARY_RADIUS,
     borderBottomRightRadius: SUMMARY_RADIUS,
     borderCurve: 'continuous',
@@ -203,7 +211,7 @@ const styles = StyleSheet.create({
   barSide: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: space.sm,
   },
   barTrailing: {
     justifyContent: 'flex-end',
@@ -211,8 +219,8 @@ const styles = StyleSheet.create({
   figureRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 20,
+    gap: space.sm,
+    paddingHorizontal: space.xl,
   },
   accessory: {
     width: 28,
@@ -220,44 +228,30 @@ const styles = StyleSheet.create({
   },
   figure: {
     flexShrink: 1,
-    fontSize: 56,
-    lineHeight: 64,
-    fontWeight: '700',
-    letterSpacing: -1.5,
-    fontVariant: ['tabular-nums'],
   },
   unsettled: {
     opacity: 0.4,
   },
-  unit: {
-    fontSize: 20,
-    fontWeight: '600',
-    letterSpacing: 0,
-  },
   actions: {
     flexDirection: 'row',
-    gap: 20,
-    marginTop: 24,
+    gap: space.xl,
+    marginTop: space.xxl,
   },
   action: {
     width: 72,
     alignItems: 'center',
-    gap: 8,
+    gap: space.sm,
   },
   circle: {
     width: 56,
     height: 56,
-    borderRadius: 28,
+    borderRadius: radiusCard,
     alignItems: 'center',
     justifyContent: 'center',
     transform: [{ scale: 1 }],
   },
   circlePressed: {
     transform: [{ scale: 0.97 }],
-  },
-  caption: {
-    fontSize: 13,
-    fontWeight: '500',
   },
 });
 

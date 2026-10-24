@@ -10,7 +10,7 @@ import {
   useAppLoadedSettings,
   useAppLoadedWallet,
 } from '../../../app/context';
-import { useTheme } from '../../../app/theme';
+import { useTheme, text, space } from '../../../app/theme';
 import { HeaderIconButton } from '../../Header';
 import SummaryPanel, {
   IconAction,
@@ -68,7 +68,13 @@ const HomeSummary: React.FC = () => {
             style={styles.unshielded}
           >
             <ShieldOff size={13} strokeWidth={2.4} color={colors.fgMuted} />
-            <Text style={[styles.unshieldedAmount, { color: colors.fgMuted }]}>
+            <Text
+              style={[
+                text.caption,
+                styles.unshieldedAmount,
+                { color: colors.fgMuted },
+              ]}
+            >
               {privacy ? '••••' : formatBalance(unshielded)}
             </Text>
           </View>
@@ -102,12 +108,10 @@ const styles = StyleSheet.create({
   unshielded: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: space.xs,
     marginTop: 2,
   },
   unshieldedAmount: {
-    fontSize: 13,
-    fontWeight: '500',
     fontVariant: ['tabular-nums'],
   },
 });

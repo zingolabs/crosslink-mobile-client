@@ -351,8 +351,10 @@ class RPCModule: NSObject {
     performancelevel: String, 
     minconfirmations: String
   ) throws -> String {
+    NSLog("[Native] loadExistingWallet: opening wallet against \(serveruri) (\(chainhint))")
     let seed = try initFromB64(base64Data: try self.readWalletUtf8String(), serverUri: serveruri, chainHint: chainhint, performanceLevel: performancelevel, minConfirmations: UInt32(minconfirmations) ?? 0)
     let seedStr = String(seed)
+    NSLog("[Native] loadExistingWallet: opened OK")
     return seedStr
   }
 
@@ -637,7 +639,7 @@ class RPCModule: NSObject {
     }
   }
 
-  @objc(inspectWallet:serveruri:platform:reject:)
+  @objc(inspectWallet:serveruri:platform:resolve:reject:)
   func inspectWalletInfo(_ walletb64: String, serveruri: String, platform: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
       let dict: [String: Any] = ["walletb64": walletb64, "serveruri": serveruri, "platform": platform, "resolve": resolve]
       DispatchQueue.global(qos: .userInitiated).async { [weak self] in

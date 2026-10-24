@@ -4,9 +4,10 @@
 // It ships optical sizing and tracking tables, so `fontFamily` stays unset.
 // Only the monospace face is named, per platform.
 //
-// Text styles: Apple's Dynamic Type styles at the default (Large) size.
-// Tracking is size-specific: negative around body size, positive on titles
-// and captions. Line heights are the system values.
+// Text styles: Apple's Dynamic Type styles at the default (Large) size,
+// plus the home screen's figure styles. Tracking is size-specific:
+// negative around body size, positive on titles and captions. Line
+// heights are the system values.
 import { Platform, TextStyle } from 'react-native';
 
 export const fontFamily = {
@@ -20,13 +21,17 @@ export type TextStyleName =
   | 'title1'
   | 'title2'
   | 'title3'
+  | 'display'
+  | 'unit'
   | 'headline'
   | 'body'
   | 'callout'
   | 'subheadline'
   | 'footnote'
+  | 'caption'
   | 'caption1'
-  | 'caption2';
+  | 'caption2'
+  | 'numeral';
 
 export const text: Record<TextStyleName, TextStyle> = {
   largeTitle: {
@@ -52,6 +57,21 @@ export const text: Record<TextStyleName, TextStyle> = {
     lineHeight: 25,
     fontWeight: '600',
     letterSpacing: 0.38,
+  },
+  /** The balance figure on the home summary. Big, tight, tabular. */
+  display: {
+    fontSize: 56,
+    lineHeight: 64,
+    fontWeight: '700',
+    letterSpacing: -1.5,
+    fontVariant: ['tabular-nums'],
+  },
+  /** The currency unit beside the display figure. */
+  unit: {
+    fontSize: 20,
+    lineHeight: 24,
+    fontWeight: '600',
+    letterSpacing: 0,
   },
   headline: {
     fontSize: 17,
@@ -83,6 +103,11 @@ export const text: Record<TextStyleName, TextStyle> = {
     fontWeight: '400',
     letterSpacing: -0.08,
   },
+  /** Short labels under icons and beside values. */
+  caption: {
+    fontSize: 13,
+    fontWeight: '500',
+  },
   caption1: {
     fontSize: 12,
     lineHeight: 16,
@@ -94,6 +119,14 @@ export const text: Record<TextStyleName, TextStyle> = {
     lineHeight: 13,
     fontWeight: '400',
     letterSpacing: 0.07,
+  },
+  /** Amounts at body size: headline weight, digits that line up. */
+  numeral: {
+    fontSize: 17,
+    lineHeight: 22,
+    fontWeight: '600',
+    letterSpacing: -0.41,
+    fontVariant: ['tabular-nums'],
   },
 };
 

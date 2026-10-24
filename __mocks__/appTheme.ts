@@ -12,5 +12,7 @@ export const tokens = mockTheme.colors;
 
 // Not themed, so re-export the real value: the mock shadows the whole
 // `app/theme` barrel, and a missing export would render as `undefined`.
-export { radiusPill } from '../app/theme/radii';
+export { radiusPill, radiusCard } from '../app/theme/radii';
+export { space } from '../app/theme/spacing';
+export { curve, duration } from '../app/theme/motion';
 export { fontFamily, text, mono } from '../app/theme/typography';
