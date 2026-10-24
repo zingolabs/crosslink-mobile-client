@@ -655,6 +655,7 @@ export class LoadingAppClass extends Component<
     ) {
       const quarantined = await quarantineLegacyWalletIfNeeded(
         this.state.indexerServer.uri,
+        Platform.OS,
       );
       if (quarantined) {
         await SettingsFileImpl.writeSettings(

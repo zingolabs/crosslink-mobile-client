@@ -1,13 +1,10 @@
 import 'react-native';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import { quarantineLegacyWalletIfNeeded } from '../app/legacyWallet';
 import RPCModule from '../app/RPCModule';
 
 const path = '/docs/wallet.dat';
 const legacyPath = '/docs/wallet.legacy.dat';
-const storageState: Record<string, string> = {};
 
 jest.mock('react-native-fs', () => ({
   DocumentDirectoryPath: '/docs',
@@ -15,19 +12,6 @@ jest.mock('react-native-fs', () => ({
   readFile: jest.fn(),
   moveFile: jest.fn(),
   writeFile: jest.fn(),
-}));
-
-jest.mock('@react-native-async-storage/async-storage', () => ({
-  __esModule: true,
-  default: {
-    getItem: jest.fn(async (key: string) => storageState[key] ?? null),
-    setItem: jest.fn(async (key: string, value: string) => {
-      storageState[key] = value;
-    }),
-    removeItem: jest.fn(async (key: string) => {
-      delete storageState[key];
-    }),
-  },
 }));
 
 import * as RNFS from 'react-native-fs';
@@ -39,26 +23,29 @@ const mocked = RNFS as unknown as {
   writeFile: jest.Mock;
 };
 
-const mockedStorage = AsyncStorage as unknown as {
-  getItem: jest.Mock;
-  setItem: jest.Mock;
-  removeItem: jest.Mock;
-};
-
 const inspect = (response: string) =>
   (RPCModule.inspectWallet as jest.Mock).mockResolvedValue(response);
 
 const READABLE_MATCH = JSON.stringify({
   readable: true,
-  format_version: 32,
-  newest_height: 82900,
+  format_version: 40,
+  newest_height: 83544,
   chain_match: true,
+  normalize_to: null,
 });
 const READABLE_MISMATCH = JSON.stringify({
   readable: true,
-  format_version: 32,
-  newest_height: 50000,
+  format_version: 40,
+  newest_height: 4534722,
   chain_match: false,
+  normalize_to: null,
+});
+const READABLE_NORMALIZABLE = JSON.stringify({
+  readable: true,
+  format_version: 40,
+  newest_height: 83544,
+  chain_match: true,
+  normalize_to: 'd2FsbGV0',
 });
 const UNREADABLE = JSON.stringify({
   readable: false,
@@ -70,14 +57,14 @@ const UNREADABLE = JSON.stringify({
 describe('Legacy wallet quarantine - test', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    Object.keys(storageState).forEach(key => delete storageState[key]);
     mocked.exists.mockResolvedValue(true);
     mocked.readFile.mockResolvedValue('d2FsbGV0');
     mocked.moveFile.mockResolvedValue(undefined);
+    mocked.writeFile.mockResolvedValue(undefined);
   });
 
-  test('quarantines an unreadable wallet file immediately', async () => {
-    inspect(UNREADABLE);
+  test('quarantines a wallet from another chain immediately', async () => {
+    inspect(READABLE_MISMATCH);
     expect(
       await quarantineLegacyWalletIfNeeded('http://indexer:18234', 'android'),
     ).toBe(true);
@@ -87,21 +74,18 @@ describe('Legacy wallet quarantine - test', () => {
       'android',
     );
     expect(mocked.moveFile).toHaveBeenCalledWith(path, legacyPath);
-    expect(mockedStorage.removeItem).toHaveBeenCalledWith(
-      'legacyChainMismatch',
-    );
+  });
+
+  test('quarantines an unreadable wallet file immediately', async () => {
+    inspect(UNREADABLE);
+    expect(
+      await quarantineLegacyWalletIfNeeded('http://indexer:18234', 'android'),
+    ).toBe(true);
+    expect(mocked.moveFile).toHaveBeenCalledWith(path, legacyPath);
   });
 
   test('normalizes a wallet file stored in the other platform shape', async () => {
-    inspect(
-      JSON.stringify({
-        readable: true,
-        format_version: 32,
-        newest_height: 82900,
-        chain_match: true,
-        normalize_to: 'd2FsbGV0',
-      }),
-    );
+    inspect(READABLE_NORMALIZABLE);
     expect(
       await quarantineLegacyWalletIfNeeded('http://indexer:18234', 'android'),
     ).toBe(false);
@@ -111,37 +95,6 @@ describe('Legacy wallet quarantine - test', () => {
       'android',
     );
     expect(mocked.writeFile).toHaveBeenCalledWith(path, 'd2FsbGV0', 'base64');
-    expect(mocked.moveFile).not.toHaveBeenCalled();
-  });
-
-  test('quarantines a chain mismatch on the second consecutive boot', async () => {
-    inspect(READABLE_MISMATCH);
-    expect(
-      await quarantineLegacyWalletIfNeeded('http://indexer:18234', 'android'),
-    ).toBe(false);
-    expect(mocked.moveFile).not.toHaveBeenCalled();
-    expect(mockedStorage.setItem).toHaveBeenCalledWith(
-      'legacyChainMismatch',
-      'true',
-    );
-    expect(
-      await quarantineLegacyWalletIfNeeded('http://indexer:18234', 'android'),
-    ).toBe(true);
-    expect(mocked.moveFile).toHaveBeenCalledWith(path, legacyPath);
-  });
-
-  test('a good boot clears the mismatch strike', async () => {
-    inspect(READABLE_MISMATCH);
-    await quarantineLegacyWalletIfNeeded('http://indexer:18234', 'android');
-    inspect(READABLE_MATCH);
-    await quarantineLegacyWalletIfNeeded('http://indexer:18234', 'android');
-    expect(mockedStorage.removeItem).toHaveBeenCalledWith(
-      'legacyChainMismatch',
-    );
-    inspect(READABLE_MISMATCH);
-    expect(
-      await quarantineLegacyWalletIfNeeded('http://indexer:18234', 'android'),
-    ).toBe(false);
     expect(mocked.moveFile).not.toHaveBeenCalled();
   });
 
@@ -157,9 +110,10 @@ describe('Legacy wallet quarantine - test', () => {
     inspect(
       JSON.stringify({
         readable: true,
-        format_version: 32,
+        format_version: 40,
         newest_height: 82900,
         chain_match: null,
+        normalize_to: null,
       }),
     );
     expect(await quarantineLegacyWalletIfNeeded('', 'android')).toBe(false);

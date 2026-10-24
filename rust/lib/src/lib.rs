@@ -2741,6 +2741,96 @@ mod tests {
     }
 }
 #[cfg(test)]
+mod nightly_wallet_maker {
+    use super::*;
+
+    /// Mints a wallet file whose synced blocks belong to the nightly chain.
+    #[test]
+    #[ignore = "needs the network"]
+    fn make_a_nightly_wallet_file() {
+        let _ = set_crypto_default_provider_to_ring();
+        init_from_seed(
+            "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+                .to_string(),
+            9700,
+            "http://45.32.186.234:18234".to_string(),
+            "test".to_string(),
+            "Medium".to_string(),
+            1,
+        )
+        .unwrap();
+        run_sync().unwrap();
+        for _ in 0..36 {
+            let status = status_sync().unwrap();
+            let json = json::parse(&status).unwrap_or(json::JsonValue::Null);
+            let pct = json["percentage_total_blocks_scanned"]
+                .as_f64()
+                .unwrap_or(0.0);
+            println!("scanned {pct}%");
+            if pct >= 100.0 {
+                break;
+            }
+            std::thread::sleep(std::time::Duration::from_secs(5));
+        }
+        let b64 = save_to_b64().unwrap();
+        std::fs::write("/tmp/nightly_wallet.b64", &b64).unwrap();
+        println!("nightly wallet written: {} bytes", b64.len());
+    }
+}
+#[cfg(test)]
+mod old_chain_probe {
+    use super::*;
+
+    #[test]
+    #[ignore = "needs the network"]
+    fn old_testnet_indexer_is_alive() {
+        let _ = set_crypto_default_provider_to_ring();
+        let uri: http::Uri = "https://testnet.zec.rocks:443".parse().unwrap();
+        let tip = RT
+            .block_on(async move { zingolib::grpc_connector::get_latest_block(uri.clone()).await })
+            .expect("tip");
+        let height = u32::try_from(tip.height).unwrap();
+        let birthday = height.saturating_sub(100);
+        init_from_seed(
+            "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+                .to_string(),
+            birthday,
+            "https://testnet.zec.rocks:443".to_string(),
+            "test".to_string(),
+            "Medium".to_string(),
+            1,
+        )
+        .unwrap();
+        run_sync().unwrap();
+        for _ in 0..36 {
+            let status = status_sync().unwrap();
+            let json = json::parse(&status).unwrap_or(json::JsonValue::Null);
+            let pct = json["percentage_total_blocks_scanned"]
+                .as_f64()
+                .unwrap_or(0.0);
+            println!("scanned {pct}%");
+            if pct >= 100.0 {
+                break;
+            }
+            std::thread::sleep(std::time::Duration::from_secs(5));
+        }
+        let b64 = save_to_b64().unwrap();
+        std::fs::write("/tmp/oldtestnet_wallet.b64", &b64).unwrap();
+        println!(
+            "legacy wallet written: {} bytes, birthday {birthday}, tip {height}",
+            b64.len()
+        );
+        let inspect = inspect_wallet(
+            b64,
+            "http://88.198.67.189:18234".to_string(),
+            "android".to_string(),
+        )
+        .unwrap();
+        println!("inspect vs stable: {inspect}");
+    }
+}
+
+#[cfg(test)]
 mod inspect_probe {
     use super::*;
 
