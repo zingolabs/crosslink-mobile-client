@@ -90,6 +90,8 @@ const SettingsMenu: React.FunctionComponent<SettingsMenuProps> = ({
       | RouteEnum.SettingsServers
       | RouteEnum.DebugInfo
       | RouteEnum.Notes;
+    /** Under construction: rendered dimmed and inert. */
+    disabled?: boolean;
   };
 
   const routes: SettingsRouteItem[] = [
@@ -112,6 +114,7 @@ const SettingsMenu: React.FunctionComponent<SettingsMenuProps> = ({
       label: 'Notes',
       icon: faInfo,
       route: RouteEnum.Notes,
+      disabled: true,
     },
   ];
 
@@ -134,6 +137,8 @@ const SettingsMenu: React.FunctionComponent<SettingsMenuProps> = ({
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={item.label}
+                accessibilityState={{ disabled: !!item.disabled }}
+                disabled={item.disabled}
                 onPress={() => navigation?.navigate(item.route)}
                 onPressIn={() => setPressed(item.label)}
                 onPressOut={() => setPressed(null)}
@@ -142,7 +147,7 @@ const SettingsMenu: React.FunctionComponent<SettingsMenuProps> = ({
                 <Animated.View
                   style={[
                     styles.row,
-                    pressed === item.label
+                    !item.disabled && pressed === item.label
                       ? { backgroundColor: colors.bgPress }
                       : styles.rowIdle,
                     press,
@@ -152,17 +157,28 @@ const SettingsMenu: React.FunctionComponent<SettingsMenuProps> = ({
                     <FontAwesomeIcon
                       size={20}
                       icon={item.icon}
-                      color={colors.fgDefault}
+                      color={item.disabled ? colors.fgFaint : colors.fgDefault}
                     />
-                    <Text style={[text.body, { color: colors.fgDefault }]}>
+                    <Text
+                      style={[
+                        text.body,
+                        {
+                          color: item.disabled
+                            ? colors.fgFaint
+                            : colors.fgDefault,
+                        },
+                      ]}
+                    >
                       {item.label}
                     </Text>
                   </View>
-                  <FontAwesomeIcon
-                    size={16}
-                    icon={faChevronRight}
-                    color={colors.fgSubtle}
-                  />
+                  {!item.disabled && (
+                    <FontAwesomeIcon
+                      size={16}
+                      icon={faChevronRight}
+                      color={colors.fgSubtle}
+                    />
+                  )}
                 </Animated.View>
               </Pressable>
               {index < routes.length - 1 && (
@@ -200,6 +216,7 @@ const styles = StyleSheet.create({
     borderRadius: radiusCard,
     marginTop: space.xl,
     paddingVertical: space.sm,
+    overflow: 'hidden',
   },
   row: {
     flexDirection: 'row',

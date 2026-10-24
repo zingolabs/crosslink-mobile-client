@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, ScrollView, View } from 'react-native';
+import { StyleSheet, ScrollView, Text, View } from 'react-native';
 
 import { LoadedAppStackParamList } from '../../../app/types';
 import {
@@ -13,18 +13,18 @@ import { ToastProvider, useToast } from 'react-native-toastier';
 import { RouteEnum, ScreenEnum } from '../../../app/AppState';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import FadeText from '../../Components/FadeText';
 import { createAlert } from '../../../app/createAlert';
 import { sendEmail } from '../../../app/sendEmail';
 import { HeaderTitle } from '../../Header';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
-import { radiusCard, space, useTheme } from '../../../app/theme';
+import { mono, radiusCard, space, useTheme } from '../../../app/theme';
 
 type DebugInfoProps = NativeStackScreenProps<
   LoadedAppStackParamList,
   RouteEnum.DebugInfo
 >;
 
+/** Last error, presented as a terminal: mono text on a dark panel. */
 const DebugInfo: React.FunctionComponent<DebugInfoProps> = ({ navigation }) => {
   const {
     removeFirstSnackbar,
@@ -80,10 +80,19 @@ const DebugInfo: React.FunctionComponent<DebugInfoProps> = ({ navigation }) => {
           { paddingBottom: insets.bottom + space.sm },
         ]}
       >
-        <View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
-          <View style={styles.row}>
-            <FadeText>{lastError ? lastError : 'No errors detected'}</FadeText>
-          </View>
+        <View style={[styles.terminal, { backgroundColor: colors.bgChrome }]}>
+          <Text style={[styles.line, { color: colors.fgFaint }]}>
+            $ debug --last-error
+          </Text>
+          {lastError ? (
+            <Text selectable style={[styles.line, { color: colors.fgDefault }]}>
+              {lastError}
+            </Text>
+          ) : (
+            <Text style={[styles.line, { color: colors.fgMuted }]}>
+              no errors detected
+            </Text>
+          )}
         </View>
       </ScrollView>
       <View
@@ -107,15 +116,16 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: space.lg,
   },
-  card: {
+  terminal: {
     borderRadius: radiusCard,
     width: '100%',
     marginTop: space.xl,
-    paddingVertical: space.sm,
+    padding: space.xl,
+    minHeight: 220,
   },
-  row: {
-    paddingHorizontal: space.xl,
-    paddingVertical: space.lg,
+  line: {
+    ...mono,
+    lineHeight: 22,
   },
   footer: {
     marginTop: 'auto',
