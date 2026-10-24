@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
   Platform,
   Pressable,
   StyleSheet,
@@ -27,6 +28,9 @@ import {
 export const SUMMARY_RADIUS = radiusCard;
 
 const HEADER_H = 44;
+// Pre-rendered, dithered bgSurface->bgChrome ramp (scripts/build-panel-gradient.mjs).
+// Android's gradient shader bands on this dark ramp; the PNG stretches smooth.
+const PANEL_GRADIENT = require('../../assets/images/panel-gradient.png');
 const EASE_OUT = cubicBezier(curve[0], curve[1], curve[2], curve[3]);
 const MASK = '••••';
 const ZATS = 1e8;
@@ -143,11 +147,20 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
           paddingTop: insets.top + HEADER_H + 20,
           backgroundColor: colors.bgSurface,
         },
-        Platform.OS === 'web'
-          ? ({ backgroundImage: gradient } as object)
-          : { experimental_backgroundImage: gradient },
+        Platform.OS === 'android'
+          ? null
+          : Platform.OS === 'web'
+            ? ({ backgroundImage: gradient } as object)
+            : { experimental_backgroundImage: gradient },
       ]}
     >
+      {Platform.OS === 'android' && (
+        <Image
+          source={PANEL_GRADIENT}
+          resizeMode="stretch"
+          style={styles.panelGradient}
+        />
+      )}
       <View style={[styles.bar, { top: insets.top }]}>
         <View style={styles.barSide}>{leading}</View>
         <View style={[styles.barSide, styles.barTrailing]}>{trailing}</View>
@@ -197,6 +210,9 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: SUMMARY_RADIUS,
     borderCurve: 'continuous',
     boxShadow: '0 6px 16px -10px rgba(0, 0, 0, 0.45)',
+  },
+  panelGradient: {
+    ...StyleSheet.absoluteFillObject,
   },
   bar: {
     position: 'absolute',
