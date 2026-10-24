@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { StyleProp, StyleSheet, Text, ViewStyle } from 'react-native';
 import Animated, {
   CSSAnimationProperties,
   cubicBezier,
@@ -16,10 +16,11 @@ type EmptyStateProps = {
   art: ChalkLoopName;
   title: string;
   body?: string;
+  style?: StyleProp<ViewStyle>;
 };
 
 /** Centered chalk loop with a headline and one optional line under it. */
-const EmptyState: React.FC<EmptyStateProps> = ({ art, title, body }) => {
+const EmptyState: React.FC<EmptyStateProps> = ({ art, title, body, style }) => {
   const { colors } = useTheme();
   const reducedMotion = useReducedMotion();
 
@@ -35,7 +36,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({ art, title, body }) => {
   };
 
   return (
-    <Animated.View style={[styles.root, appear]}>
+    <Animated.View style={[styles.root, style, appear]}>
       <ChalkLoop name={art} />
       <Text style={[text.headline, styles.title, { color: colors.fgDefault }]}>
         {title}
@@ -58,7 +59,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 40,
     paddingTop: SUMMARY_RADIUS,
-    paddingBottom: 80,
+    paddingBottom: SUMMARY_RADIUS,
   },
   title: {
     marginTop: 4,

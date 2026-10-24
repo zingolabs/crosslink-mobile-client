@@ -446,6 +446,7 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
               <EmptyState
                 art="pair"
                 title="There are no scheduled actions yet."
+                style={styles.emptyState}
               />
             )}
 
@@ -453,6 +454,7 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
               <EmptyState
                 art="pair"
                 title="There are no active staking positions yet."
+                style={styles.emptyState}
               />
             )}
 
@@ -460,6 +462,7 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
               <EmptyState
                 art="pair"
                 title="There are no active finalizers yet."
+                style={styles.emptyState}
               />
             )}
 
@@ -1071,6 +1074,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  emptyState: {
+    paddingBottom: 90,
   },
 });
 
