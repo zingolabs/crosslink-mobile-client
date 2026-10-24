@@ -917,7 +917,7 @@ pub fn inspect_wallet(
         };
         let format_version = wallet_format_version(&wallet_bytes);
         let platform_wants_binary = platform == "android";
-        let normalize_to = if needs_normalizing == platform_wants_binary {
+        let normalize_to = if needs_normalizing != platform_wants_binary {
             json::JsonValue::Null
         } else {
             json::JsonValue::from(STANDARD.encode(&wallet_bytes))
