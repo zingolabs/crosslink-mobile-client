@@ -14,6 +14,7 @@ jest.mock('react-native-fs', () => ({
   exists: jest.fn(),
   readFile: jest.fn(),
   moveFile: jest.fn(),
+  writeFile: jest.fn(),
 }));
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
@@ -35,6 +36,7 @@ const mocked = RNFS as unknown as {
   exists: jest.Mock;
   readFile: jest.Mock;
   moveFile: jest.Mock;
+  writeFile: jest.Mock;
 };
 
 const mockedStorage = AsyncStorage as unknown as {
@@ -76,12 +78,13 @@ describe('Legacy wallet quarantine - test', () => {
 
   test('quarantines an unreadable wallet file immediately', async () => {
     inspect(UNREADABLE);
-    expect(await quarantineLegacyWalletIfNeeded('http://indexer:18234')).toBe(
-      true,
-    );
+    expect(
+      await quarantineLegacyWalletIfNeeded('http://indexer:18234', 'android'),
+    ).toBe(true);
     expect(RPCModule.inspectWallet).toHaveBeenCalledWith(
       'd2FsbGV0',
       'http://indexer:18234',
+      'android',
     );
     expect(mocked.moveFile).toHaveBeenCalledWith(path, legacyPath);
     expect(mockedStorage.removeItem).toHaveBeenCalledWith(
@@ -89,42 +92,64 @@ describe('Legacy wallet quarantine - test', () => {
     );
   });
 
+  test('normalizes a wallet file stored in the other platform shape', async () => {
+    inspect(
+      JSON.stringify({
+        readable: true,
+        format_version: 32,
+        newest_height: 82900,
+        chain_match: true,
+        normalize_to: 'd2FsbGV0',
+      }),
+    );
+    expect(
+      await quarantineLegacyWalletIfNeeded('http://indexer:18234', 'android'),
+    ).toBe(false);
+    expect(RPCModule.inspectWallet).toHaveBeenCalledWith(
+      'd2FsbGV0',
+      'http://indexer:18234',
+      'android',
+    );
+    expect(mocked.writeFile).toHaveBeenCalledWith(path, 'd2FsbGV0', 'base64');
+    expect(mocked.moveFile).not.toHaveBeenCalled();
+  });
+
   test('quarantines a chain mismatch on the second consecutive boot', async () => {
     inspect(READABLE_MISMATCH);
-    expect(await quarantineLegacyWalletIfNeeded('http://indexer:18234')).toBe(
-      false,
-    );
+    expect(
+      await quarantineLegacyWalletIfNeeded('http://indexer:18234', 'android'),
+    ).toBe(false);
     expect(mocked.moveFile).not.toHaveBeenCalled();
     expect(mockedStorage.setItem).toHaveBeenCalledWith(
       'legacyChainMismatch',
       'true',
     );
-    expect(await quarantineLegacyWalletIfNeeded('http://indexer:18234')).toBe(
-      true,
-    );
+    expect(
+      await quarantineLegacyWalletIfNeeded('http://indexer:18234', 'android'),
+    ).toBe(true);
     expect(mocked.moveFile).toHaveBeenCalledWith(path, legacyPath);
   });
 
   test('a good boot clears the mismatch strike', async () => {
     inspect(READABLE_MISMATCH);
-    await quarantineLegacyWalletIfNeeded('http://indexer:18234');
+    await quarantineLegacyWalletIfNeeded('http://indexer:18234', 'android');
     inspect(READABLE_MATCH);
-    await quarantineLegacyWalletIfNeeded('http://indexer:18234');
+    await quarantineLegacyWalletIfNeeded('http://indexer:18234', 'android');
     expect(mockedStorage.removeItem).toHaveBeenCalledWith(
       'legacyChainMismatch',
     );
     inspect(READABLE_MISMATCH);
-    expect(await quarantineLegacyWalletIfNeeded('http://indexer:18234')).toBe(
-      false,
-    );
+    expect(
+      await quarantineLegacyWalletIfNeeded('http://indexer:18234', 'android'),
+    ).toBe(false);
     expect(mocked.moveFile).not.toHaveBeenCalled();
   });
 
   test('keeps a wallet that reads and matches the served chain', async () => {
     inspect(READABLE_MATCH);
-    expect(await quarantineLegacyWalletIfNeeded('http://indexer:18234')).toBe(
-      false,
-    );
+    expect(
+      await quarantineLegacyWalletIfNeeded('http://indexer:18234', 'android'),
+    ).toBe(false);
     expect(mocked.moveFile).not.toHaveBeenCalled();
   });
 
@@ -137,15 +162,15 @@ describe('Legacy wallet quarantine - test', () => {
         chain_match: null,
       }),
     );
-    expect(await quarantineLegacyWalletIfNeeded('')).toBe(false);
+    expect(await quarantineLegacyWalletIfNeeded('', 'android')).toBe(false);
     expect(mocked.moveFile).not.toHaveBeenCalled();
   });
 
   test('does nothing without a wallet file', async () => {
     mocked.exists.mockResolvedValue(false);
-    expect(await quarantineLegacyWalletIfNeeded('http://indexer:18234')).toBe(
-      false,
-    );
+    expect(
+      await quarantineLegacyWalletIfNeeded('http://indexer:18234', 'android'),
+    ).toBe(false);
     expect(RPCModule.inspectWallet).not.toHaveBeenCalled();
   });
 
@@ -153,9 +178,9 @@ describe('Legacy wallet quarantine - test', () => {
     (RPCModule.inspectWallet as jest.Mock).mockRejectedValue(
       new Error('native boom'),
     );
-    expect(await quarantineLegacyWalletIfNeeded('http://indexer:18234')).toBe(
-      false,
-    );
+    expect(
+      await quarantineLegacyWalletIfNeeded('http://indexer:18234', 'android'),
+    ).toBe(false);
     expect(mocked.moveFile).not.toHaveBeenCalled();
   });
 });

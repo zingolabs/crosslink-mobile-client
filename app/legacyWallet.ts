@@ -1,6 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as RNFS from 'react-native-fs';
 
+import { Platform } from 'react-native';
+
 import RPCModule from './RPCModule';
 
 const WALLET_FILE = 'wallet.dat';
@@ -12,6 +14,7 @@ type InspectResponse = {
   format_version?: number;
   newest_height?: number | null;
   chain_match?: boolean | null;
+  normalize_to?: string | null;
   reason?: string;
 };
 
@@ -31,9 +34,16 @@ const isLegacy = (r: InspectResponse) =>
  * A chain mismatch must confirm on two consecutive boots before the wallet
  * moves — one flaky answer from an indexer never does. A file the current
  * reader cannot parse at all is unambiguous and moves on the first boot.
+ *
+ * The two platforms also keep the file in different shapes: Android stores
+ * the decoded wallet binary, iOS its base64 text. When the file arrives in
+ * the other shape, it is valid — inspect answers the bytes to write back and
+ * this rewrites the file in place instead of quarantining it, so a wallet
+ * moved between devices keeps working.
  */
 export const quarantineLegacyWalletIfNeeded = async (
   serverUri: string,
+  platform: string = Platform.OS,
 ): Promise<boolean> => {
   try {
     const path = `${RNFS.DocumentDirectoryPath}/${WALLET_FILE}`;
@@ -46,8 +56,17 @@ export const quarantineLegacyWalletIfNeeded = async (
       return false;
     }
     const resp: InspectResponse = await JSON.parse(
-      await RPCModule.inspectWallet(data, serverUri),
+      await RPCModule.inspectWallet(data, serverUri, platform),
     );
+    if (resp.normalize_to) {
+      await RNFS.writeFile(
+        path,
+        resp.normalize_to,
+        platform === 'android' ? 'base64' : 'utf8',
+      );
+      await AsyncStorage.removeItem(MISMATCH_KEY);
+      return false;
+    }
     if (!isLegacy(resp)) {
       await AsyncStorage.removeItem(MISMATCH_KEY);
       return false;

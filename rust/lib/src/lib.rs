@@ -806,18 +806,18 @@ fn wallet_format_version(decoded: &[u8]) -> u64 {
     }
 }
 
-/// The wallet bytes behind a file's bytes. Android stores the decoded wallet
-/// binary; iOS stores its base64 text — try both, one layer apart.
-fn wallet_bytes(file_bytes: &[u8]) -> Option<Vec<u8>> {
+/// The wallet bytes behind a file's bytes, and whether an extra base64 layer
+/// was needed: Android stores the decoded wallet binary; iOS stores its
+/// base64 text — try both, one layer apart.
+fn wallet_bytes(file_bytes: &[u8]) -> Option<(Vec<u8>, bool)> {
     let version = wallet_format_version(file_bytes);
     if (1..=40).contains(&version) {
-        return Some(file_bytes.to_vec());
+        return Some((file_bytes.to_vec(), false));
     }
-    if let Ok(decoded) = STANDARD.decode(file_bytes) {
-        let version = wallet_format_version(&decoded);
-        if (1..=40).contains(&version) {
-            return Some(decoded);
-        }
+    let decoded = STANDARD.decode(file_bytes).ok()?;
+    let version = wallet_format_version(&decoded);
+    if (1..=40).contains(&version) {
+        return Some((decoded, true));
     }
     None
 }
@@ -877,8 +877,17 @@ async fn indexer_has_block(server_uri: http::Uri, height: u32, hash: [u8; 32]) -
 /// parse it, and — when it can and the wallet has synced blocks — whether those blocks belong
 /// to the chain the indexer serves. A wallet from the previous network reads fine (the chain
 /// names coincide) but its blocks do not, so the hash comparison is the only real test.
+///
+/// The platforms keep the file in different shapes: Android stores the decoded binary, iOS
+/// its base64 text. When the file is in the other platform's shape but is otherwise a valid
+/// wallet, `normalize_to` carries the wallet bytes base64-encoded, ready for the caller to
+/// write back in its own platform's shape.
 #[uniffi::export]
-pub fn inspect_wallet(base64_data: String, server_uri: String) -> Result<String, ZingolibError> {
+pub fn inspect_wallet(
+    base64_data: String,
+    server_uri: String,
+    platform: String,
+) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let file_bytes = match STANDARD.decode(&base64_data) {
             Ok(file_bytes) => file_bytes,
@@ -887,33 +896,41 @@ pub fn inspect_wallet(base64_data: String, server_uri: String) -> Result<String,
                     "readable" => false,
                     "format_version" => 0,
                     "chain_match" => json::JsonValue::Null,
+                    "normalize_to" => json::JsonValue::Null,
                     "reason" => format!("base64 decode: {e}"),
                 }
                 .dump());
             }
         };
-        let (wallet, format_version) = match wallet_bytes(&file_bytes) {
-            Some(wallet_bytes) => match LightWallet::read(&wallet_bytes[..], stable_chain()) {
-                Ok(wallet) => {
-                    let format_version = wallet_format_version(&wallet_bytes);
-                    (wallet, format_version)
-                }
-                Err(e) => {
-                    return Ok(object! {
-                        "readable" => false,
-                        "format_version" => wallet_format_version(&wallet_bytes),
-                        "chain_match" => json::JsonValue::Null,
-                        "reason" => e.to_string(),
-                    }
-                    .dump());
-                }
-            },
+        let (wallet_bytes, needs_normalizing) = match wallet_bytes(&file_bytes) {
+            Some(pair) => pair,
             None => {
                 return Ok(object! {
                     "readable" => false,
                     "format_version" => wallet_format_version(&file_bytes),
                     "chain_match" => json::JsonValue::Null,
+                    "normalize_to" => json::JsonValue::Null,
                     "reason" => "not a wallet file in any known encoding",
+                }
+                .dump());
+            }
+        };
+        let format_version = wallet_format_version(&wallet_bytes);
+        let platform_wants_binary = platform == "android";
+        let normalize_to = if needs_normalizing == platform_wants_binary {
+            json::JsonValue::Null
+        } else {
+            json::JsonValue::from(STANDARD.encode(&wallet_bytes))
+        };
+        let wallet = match LightWallet::read(&wallet_bytes[..], stable_chain()) {
+            Ok(wallet) => wallet,
+            Err(e) => {
+                return Ok(object! {
+                    "readable" => false,
+                    "format_version" => format_version,
+                    "chain_match" => json::JsonValue::Null,
+                    "normalize_to" => normalize_to,
+                    "reason" => e.to_string(),
                 }
                 .dump());
             }
@@ -946,6 +963,7 @@ pub fn inspect_wallet(base64_data: String, server_uri: String) -> Result<String,
             "format_version" => format_version,
             "newest_height" => newest_height,
             "chain_match" => chain_match,
+            "normalize_to" => normalize_to,
         }
         .dump())
     })
@@ -2510,12 +2528,23 @@ mod tests {
         }
         let b64 = save_to_b64().unwrap();
         let stable = json::parse(
-            &inspect_wallet(b64.clone(), "http://88.198.67.189:18234".to_string()).unwrap(),
+            &inspect_wallet(
+                b64.clone(),
+                "http://88.198.67.189:18234".to_string(),
+                "android".to_string(),
+            )
+            .unwrap(),
         )
         .unwrap();
-        let nightly =
-            json::parse(&inspect_wallet(b64, "http://45.32.186.234:18234".to_string()).unwrap())
-                .unwrap();
+        let nightly = json::parse(
+            &inspect_wallet(
+                b64,
+                "http://45.32.186.234:18234".to_string(),
+                "android".to_string(),
+            )
+            .unwrap(),
+        )
+        .unwrap();
         println!("stable: {stable}");
         println!("nightly: {nightly}");
         assert_eq!(stable["readable"], true);
@@ -2720,9 +2749,12 @@ mod inspect_probe {
     fn inspect_the_planted_wallet() {
         let _ = set_crypto_default_provider_to_ring();
         let data = std::fs::read_to_string("/tmp/ios_wallet.dat").unwrap();
-        let out = inspect_wallet(data, "http://88.198.67.189:18234".to_string()).unwrap();
+        let out = inspect_wallet(
+            data,
+            "http://88.198.67.189:18234".to_string(),
+            "ios".to_string(),
+        )
+        .unwrap();
         println!("inspect: {out}");
     }
 }
-
-

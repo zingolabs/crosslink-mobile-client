@@ -586,11 +586,11 @@ class RPCModule internal constructor(private val reactContext: ReactApplicationC
     }
 
     @ReactMethod
-    fun inspectWallet(walletb64: String, serveruri: String, promise: Promise) {
+    fun inspectWallet(walletb64: String, serveruri: String, platform: String, promise: Promise) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 uniffi.zingo.initLogging()
-                val resp = uniffi.zingo.inspectWallet(walletb64, serveruri)
+                val resp = uniffi.zingo.inspectWallet(walletb64, serveruri, platform)
 
                 withContext(Dispatchers.Main) {
                     promise.resolve(resp)

@@ -611,9 +611,10 @@ class RPCModule: NSObject {
   func fnInspectWallet(_ dict: [AnyHashable: Any]) {
     if let walletb64 = dict["walletb64"] as? String,
        let serveruri = dict["serveruri"] as? String,
+       let platform = dict["platform"] as? String,
        let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
       do {
-        let resp = try inspectWallet(base64Data: walletb64, serverUri: serveruri)
+        let resp = try inspectWallet(base64Data: walletb64, serverUri: serveruri, platform: platform)
         let respStr = String(resp)
         DispatchQueue.main.async {
           resolve(respStr)
@@ -636,9 +637,9 @@ class RPCModule: NSObject {
     }
   }
 
-  @objc(inspectWallet:serveruri:reject:)
-  func inspectWalletInfo(_ walletb64: String, serveruri: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-      let dict: [String: Any] = ["walletb64": walletb64, "serveruri": serveruri, "resolve": resolve]
+  @objc(inspectWallet:serveruri:platform:reject:)
+  func inspectWalletInfo(_ walletb64: String, serveruri: String, platform: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+      let dict: [String: Any] = ["walletb64": walletb64, "serveruri": serveruri, "platform": platform, "resolve": resolve]
       DispatchQueue.global(qos: .userInitiated).async { [weak self] in
           if let self = self {
               self.fnInspectWallet(dict)
