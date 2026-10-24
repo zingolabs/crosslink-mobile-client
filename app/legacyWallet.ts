@@ -34,7 +34,7 @@ export const quarantineLegacyWallet = async (
     if (!(await RNFS.exists(path))) {
       return false;
     }
-    const data = await RNFS.readFile(path, 'utf8');
+    const data = await RNFS.readFile(path, 'base64');
     if (!data) {
       return false;
     }

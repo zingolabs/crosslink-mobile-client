@@ -806,6 +806,22 @@ fn wallet_format_version(decoded: &[u8]) -> u64 {
     }
 }
 
+/// The wallet bytes behind a file's bytes. Android stores the decoded wallet
+/// binary; iOS stores its base64 text — try both, one layer apart.
+fn wallet_bytes(file_bytes: &[u8]) -> Option<Vec<u8>> {
+    let version = wallet_format_version(file_bytes);
+    if (1..=40).contains(&version) {
+        return Some(file_bytes.to_vec());
+    }
+    if let Ok(decoded) = STANDARD.decode(file_bytes) {
+        let version = wallet_format_version(&decoded);
+        if (1..=40).contains(&version) {
+            return Some(decoded);
+        }
+    }
+    None
+}
+
 /// Whether the indexer's chain contains the block at `height` and its hash matches.
 ///
 /// A wallet claiming a block beyond the served tip is on another chain. Unreachable
@@ -864,8 +880,8 @@ async fn indexer_has_block(server_uri: http::Uri, height: u32, hash: [u8; 32]) -
 #[uniffi::export]
 pub fn inspect_wallet(base64_data: String, server_uri: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
-        let decoded = match STANDARD.decode(&base64_data) {
-            Ok(decoded) => decoded,
+        let file_bytes = match STANDARD.decode(&base64_data) {
+            Ok(file_bytes) => file_bytes,
             Err(e) => {
                 return Ok(object! {
                     "readable" => false,
@@ -876,15 +892,28 @@ pub fn inspect_wallet(base64_data: String, server_uri: String) -> Result<String,
                 .dump());
             }
         };
-        let format_version = wallet_format_version(&decoded);
-        let wallet = match LightWallet::read(&decoded[..], stable_chain()) {
-            Ok(wallet) => wallet,
-            Err(e) => {
+        let (wallet, format_version) = match wallet_bytes(&file_bytes) {
+            Some(wallet_bytes) => match LightWallet::read(&wallet_bytes[..], stable_chain()) {
+                Ok(wallet) => {
+                    let format_version = wallet_format_version(&wallet_bytes);
+                    (wallet, format_version)
+                }
+                Err(e) => {
+                    return Ok(object! {
+                        "readable" => false,
+                        "format_version" => wallet_format_version(&wallet_bytes),
+                        "chain_match" => json::JsonValue::Null,
+                        "reason" => e.to_string(),
+                    }
+                    .dump());
+                }
+            },
+            None => {
                 return Ok(object! {
                     "readable" => false,
-                    "format_version" => format_version,
+                    "format_version" => wallet_format_version(&file_bytes),
                     "chain_match" => json::JsonValue::Null,
-                    "reason" => e.to_string(),
+                    "reason" => "not a wallet file in any known encoding",
                 }
                 .dump());
             }
@@ -2505,6 +2534,18 @@ mod tests {
             matches!(no_wallet, ZingolibError::LightclientNotInitialized),
             "expected LightclientNotInitialized, got: {no_wallet:?}"
         );
+    }
+
+    #[test]
+    fn wallet_bytes_takes_both_platform_encodings() {
+        let mut binary = vec![];
+        binary.extend_from_slice(&40u64.to_le_bytes());
+        binary.extend_from_slice(b"wallet bytes go here");
+        assert!(wallet_bytes(&binary).is_some());
+        let as_text = STANDARD.encode(&binary);
+        assert!(wallet_bytes(as_text.as_bytes()).is_some());
+        let garbage = b"this is not a wallet file at all";
+        assert!(wallet_bytes(garbage).is_none());
     }
 
     #[test]
