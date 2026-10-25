@@ -175,324 +175,883 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
           }
         }
       >
-        <Text
-          style={
-            [
-              {
-                "fontSize": 17,
-                "fontWeight": "400",
-                "letterSpacing": -0.41,
-                "lineHeight": 22,
-              },
-              {
-                "color": "#888888",
-              },
-              {
-                "fontSize": 17,
-                "padding": 10,
-                "textAlign": "center",
-              },
-            ]
-          }
-        >
-          Your seed phrase is the key to your wallet. Back it up so you can restore your wallet if you lose or damage your device 
-        </Text>
         <View
           style={
             {
               "borderRadius": 20,
               "marginTop": 10,
               "overflow": "hidden",
+              "padding": 8,
               "position": "relative",
+              "rowGap": 8,
             }
           }
         >
           <View
+            accessibilityElementsHidden={true}
+            importantForAccessibility="no-hide-descendants"
+            pointerEvents="none"
             style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
+              [
+                {
+                  "opacity": 0,
+                  "rowGap": 8,
+                  "transform": [
+                    {
+                      "scale": 0.98,
+                    },
+                  ],
+                  "transitionDuration": "280ms",
+                  "transitionProperty": [
+                    "opacity",
+                    "transform",
+                  ],
+                  "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                },
+              ]
             }
           >
             <View
               style={
                 {
-                  "alignItems": "center",
-                  "backgroundColor": "#222223",
-                  "borderColor": "#ffffff",
-                  "borderRadius": 25,
-                  "borderWidth": 1,
+                  "columnGap": 8,
                   "flexDirection": "row",
-                  "justifyContent": "flex-start",
-                  "marginBottom": 5,
-                  "minWidth": "30%",
-                  "paddingHorizontal": 10,
-                  "paddingVertical": 5,
-                  "width": "30%",
+                  "justifyContent": "center",
                 }
               }
             >
-              <Text
-                style={
-                  [
-                    {
-                      "fontSize": 17,
-                      "fontWeight": "400",
-                      "letterSpacing": -0.41,
-                      "lineHeight": 22,
-                    },
-                    {
-                      "color": "#888888",
-                    },
-                    undefined,
-                  ]
-                }
-              >
-                1
-                .
-              </Text>
-              <TextInput
-                autoCapitalize="none"
-                autoCorrect={false}
-                editable={false}
-                keyboardType="default"
-                returnKeyType="done"
+              <View
                 style={
                   {
-                    "backgroundColor": "transparent",
-                    "color": "#c3c3c3",
-                    "flexGrow": 1,
-                    "flexShrink": 1,
-                    "fontSize": 15,
-                    "fontWeight": "400",
-                    "lineHeight": 15,
-                    "marginLeft": 3,
-                    "marginTop": 5,
+                    "alignItems": "center",
+                    "backgroundColor": "#222223",
+                    "borderColor": "#ffffff",
+                    "borderRadius": 25,
+                    "borderWidth": 1,
+                    "flexDirection": "row",
+                    "justifyContent": "flex-start",
+                    "minWidth": "30%",
+                    "paddingHorizontal": 10,
+                    "paddingVertical": 5,
+                    "width": "30%",
                   }
                 }
-                value="pepe"
-              />
+              >
+                <Text
+                  style={
+                    [
+                      {
+                        "fontSize": 17,
+                        "fontWeight": "400",
+                        "letterSpacing": -0.41,
+                        "lineHeight": 22,
+                      },
+                      {
+                        "color": "#888888",
+                      },
+                      undefined,
+                    ]
+                  }
+                >
+                  1
+                  .
+                </Text>
+                <TextInput
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={false}
+                  keyboardType="default"
+                  returnKeyType="done"
+                  style={
+                    {
+                      "backgroundColor": "transparent",
+                      "color": "#c3c3c3",
+                      "flexGrow": 1,
+                      "flexShrink": 1,
+                      "fontSize": 15,
+                      "fontWeight": "400",
+                      "lineHeight": 15,
+                      "marginLeft": 3,
+                      "marginTop": 5,
+                    }
+                  }
+                  value="pepe"
+                />
+              </View>
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#222223",
+                    "borderColor": "#ffffff",
+                    "borderRadius": 25,
+                    "borderWidth": 1,
+                    "flexDirection": "row",
+                    "justifyContent": "flex-start",
+                    "minWidth": "30%",
+                    "paddingHorizontal": 10,
+                    "paddingVertical": 5,
+                    "width": "30%",
+                  }
+                }
+              >
+                <Text
+                  style={
+                    [
+                      {
+                        "fontSize": 17,
+                        "fontWeight": "400",
+                        "letterSpacing": -0.41,
+                        "lineHeight": 22,
+                      },
+                      {
+                        "color": "#888888",
+                      },
+                      undefined,
+                    ]
+                  }
+                >
+                  2
+                  .
+                </Text>
+                <TextInput
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={false}
+                  keyboardType="default"
+                  returnKeyType="done"
+                  style={
+                    {
+                      "backgroundColor": "transparent",
+                      "color": "#c3c3c3",
+                      "flexGrow": 1,
+                      "flexShrink": 1,
+                      "fontSize": 15,
+                      "fontWeight": "400",
+                      "lineHeight": 15,
+                      "marginLeft": 3,
+                      "marginTop": 5,
+                    }
+                  }
+                  value="lolo"
+                />
+              </View>
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#222223",
+                    "borderColor": "#ffffff",
+                    "borderRadius": 25,
+                    "borderWidth": 1,
+                    "flexDirection": "row",
+                    "justifyContent": "flex-start",
+                    "minWidth": "30%",
+                    "paddingHorizontal": 10,
+                    "paddingVertical": 5,
+                    "width": "30%",
+                  }
+                }
+              >
+                <Text
+                  style={
+                    [
+                      {
+                        "fontSize": 17,
+                        "fontWeight": "400",
+                        "letterSpacing": -0.41,
+                        "lineHeight": 22,
+                      },
+                      {
+                        "color": "#888888",
+                      },
+                      undefined,
+                    ]
+                  }
+                >
+                  3
+                  .
+                </Text>
+                <TextInput
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={false}
+                  keyboardType="default"
+                  returnKeyType="done"
+                  style={
+                    {
+                      "backgroundColor": "transparent",
+                      "color": "#c3c3c3",
+                      "flexGrow": 1,
+                      "flexShrink": 1,
+                      "fontSize": 15,
+                      "fontWeight": "400",
+                      "lineHeight": 15,
+                      "marginLeft": 3,
+                      "marginTop": 5,
+                    }
+                  }
+                  value="titi"
+                />
+              </View>
             </View>
             <View
               style={
                 {
-                  "alignItems": "center",
-                  "backgroundColor": "#222223",
-                  "borderColor": "#ffffff",
-                  "borderRadius": 25,
-                  "borderWidth": 1,
+                  "columnGap": 8,
                   "flexDirection": "row",
-                  "justifyContent": "flex-start",
-                  "marginBottom": 5,
-                  "minWidth": "30%",
-                  "paddingHorizontal": 10,
-                  "paddingVertical": 5,
-                  "width": "30%",
+                  "justifyContent": "center",
                 }
-              }
-            >
-              <Text
-                style={
-                  [
-                    {
-                      "fontSize": 17,
-                      "fontWeight": "400",
-                      "letterSpacing": -0.41,
-                      "lineHeight": 22,
-                    },
-                    {
-                      "color": "#888888",
-                    },
-                    undefined,
-                  ]
-                }
-              >
-                2
-                .
-              </Text>
-              <TextInput
-                autoCapitalize="none"
-                autoCorrect={false}
-                editable={false}
-                keyboardType="default"
-                returnKeyType="done"
-                style={
-                  {
-                    "backgroundColor": "transparent",
-                    "color": "#c3c3c3",
-                    "flexGrow": 1,
-                    "flexShrink": 1,
-                    "fontSize": 15,
-                    "fontWeight": "400",
-                    "lineHeight": 15,
-                    "marginLeft": 3,
-                    "marginTop": 5,
-                  }
-                }
-                value="lolo"
-              />
-            </View>
-            <View
-              style={
-                {
-                  "alignItems": "center",
-                  "backgroundColor": "#222223",
-                  "borderColor": "#ffffff",
-                  "borderRadius": 25,
-                  "borderWidth": 1,
-                  "flexDirection": "row",
-                  "justifyContent": "flex-start",
-                  "marginBottom": 5,
-                  "minWidth": "30%",
-                  "paddingHorizontal": 10,
-                  "paddingVertical": 5,
-                  "width": "30%",
-                }
-              }
-            >
-              <Text
-                style={
-                  [
-                    {
-                      "fontSize": 17,
-                      "fontWeight": "400",
-                      "letterSpacing": -0.41,
-                      "lineHeight": 22,
-                    },
-                    {
-                      "color": "#888888",
-                    },
-                    undefined,
-                  ]
-                }
-              >
-                3
-                .
-              </Text>
-              <TextInput
-                autoCapitalize="none"
-                autoCorrect={false}
-                editable={false}
-                keyboardType="default"
-                returnKeyType="done"
-                style={
-                  {
-                    "backgroundColor": "transparent",
-                    "color": "#c3c3c3",
-                    "flexGrow": 1,
-                    "flexShrink": 1,
-                    "fontSize": 15,
-                    "fontWeight": "400",
-                    "lineHeight": 15,
-                    "marginLeft": 3,
-                    "marginTop": 5,
-                  }
-                }
-                value="titi"
-              />
-            </View>
-          </View>
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "alignItems": "center",
-                "bottom": 0,
-                "justifyContent": "center",
-                "left": 0,
-                "position": "absolute",
-                "right": 0,
-                "top": 0,
-              }
-            }
-          >
-            <BlurView
-              blurAmount={2}
-              blurType="dark"
-              reducedTransparencyFallbackColor="rgba(0,0,0,0.3)"
-              style={
-                [
-                  {
-                    "backgroundColor": "transparent",
-                  },
-                  {
-                    "bottom": 0,
-                    "left": 0,
-                    "position": "absolute",
-                    "right": 0,
-                    "top": 0,
-                  },
-                ]
               }
             />
             <View
               style={
                 {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+          </View>
+          <View
+            accessibilityElementsHidden={false}
+            importantForAccessibility="auto"
+            pointerEvents="auto"
+            style={
+              [
+                {
+                  "alignItems": "center",
                   "bottom": 0,
+                  "justifyContent": "center",
                   "left": 0,
+                  "opacity": 1,
                   "position": "absolute",
                   "right": 0,
                   "top": 0,
-                }
-              }
-            />
+                  "transitionDuration": "280ms",
+                  "transitionProperty": [
+                    "opacity",
+                  ],
+                  "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                },
+              ]
+            }
+          >
             <View
+              accessible={false}
+              importantForAccessibility="no-hide-descendants"
+              style={
+                [
+                  {
+                    "overflow": "hidden",
+                  },
+                  {
+                    "height": 240,
+                    "width": 240,
+                  },
+                ]
+              }
+            >
+              <View
+                style={
+                  {
+                    "animationDuration": 2000,
+                    "animationIterationCount": "infinite",
+                    "animationName": {
+                      "0.0000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "10.4167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "12.5000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "14.5833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "16.6667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "18.7500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "2.0833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "20.8333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "22.9167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "25.0000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "27.0833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "29.1667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "31.2500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "33.3333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "35.4167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "37.5000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "39.5833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "4.1667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "41.6667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "43.7500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "45.8333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "47.9167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "50.0000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "52.0833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "54.1667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "56.2500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "58.3333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "6.2500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "60.4167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "62.5000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "64.5833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "66.6667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "68.7500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "70.8333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "72.9167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "75.0000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "77.0833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "79.1667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "8.3333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "81.2500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "83.3333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "85.4167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "87.5000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "89.5833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "91.6667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "93.7500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "95.8333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "97.9167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                    },
+                    "animationPlayState": "running",
+                  }
+                }
+              >
+                <Image
+                  accessibilityIgnoresInvertColors={true}
+                  blurRadius={2}
+                  source="test-file-stub"
+                  style={
+                    {
+                      "height": 1440,
+                      "width": 1920,
+                    }
+                  }
+                />
+              </View>
+            </View>
+            <div
+              accessibilityRole="button"
               accessibilityState={
                 {
                   "busy": undefined,
@@ -502,17 +1061,11 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
                   "selected": undefined,
                 }
               }
-              accessibilityValue={
-                {
-                  "max": undefined,
-                  "min": undefined,
-                  "now": undefined,
-                  "text": undefined,
-                }
-              }
               accessible={true}
-              collapsable={false}
+              colorScheme="system"
+              effect="clear"
               focusable={true}
+              interactive={true}
               onClick={[Function]}
               onResponderGrant={[Function]}
               onResponderMove={[Function]}
@@ -521,113 +1074,122 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
               onResponderTerminationRequest={[Function]}
               onStartShouldSetResponder={[Function]}
               style={
-                {
-                  "alignSelf": "center",
-                  "backgroundColor": "#18bd18",
-                  "borderRadius": 20,
-                  "opacity": 1,
-                  "paddingHorizontal": 18,
-                  "paddingVertical": 10,
-                }
-              }
-            >
-              <Text
-                style={
-                  [
-                    {
-                      "fontSize": 17,
-                      "fontWeight": "400",
-                      "letterSpacing": -0.41,
-                      "lineHeight": 22,
-                    },
-                    {
-                      "color": "#c3c3c3",
-                    },
-                    {
-                      "color": "white",
-                      "fontSize": 16,
-                      "fontWeight": 600,
-                    },
-                  ]
-                }
-              >
-                View seed phrase
-              </Text>
-            </View>
-          </View>
-        </View>
-        <View
-          accessibilityState={
-            {
-              "busy": undefined,
-              "checked": undefined,
-              "disabled": undefined,
-              "expanded": undefined,
-              "selected": undefined,
-            }
-          }
-          accessibilityValue={
-            {
-              "max": undefined,
-              "min": undefined,
-              "now": undefined,
-              "text": undefined,
-            }
-          }
-          accessible={true}
-          collapsable={false}
-          focusable={true}
-          onClick={[Function]}
-          onResponderGrant={[Function]}
-          onResponderMove={[Function]}
-          onResponderRelease={[Function]}
-          onResponderTerminate={[Function]}
-          onResponderTerminationRequest={[Function]}
-          onStartShouldSetResponder={[Function]}
-          style={
-            {
-              "alignSelf": "center",
-              "opacity": 1,
-            }
-          }
-        >
-          <View
-            style={
-              {
-                "alignItems": "center",
-                "backgroundColor": "#222223",
-                "borderColor": "#ffffff",
-                "borderRadius": 16,
-                "borderWidth": 1,
-                "justifyContent": "center",
-                "marginVertical": 10,
-                "paddingHorizontal": 20,
-                "paddingVertical": 10,
-              }
-            }
-          >
-            <Text
-              style={
                 [
                   {
-                    "fontSize": 17,
-                    "fontWeight": "400",
-                    "letterSpacing": -0.41,
-                    "lineHeight": 22,
+                    "alignItems": "center",
+                    "alignSelf": "stretch",
+                    "borderRadius": 9999,
+                    "justifyContent": "center",
+                    "minWidth": 160,
+                    "paddingHorizontal": 20,
+                    "paddingVertical": 14,
+                    "shadowColor": "#000",
+                    "shadowOffset": {
+                      "height": 10,
+                      "width": 0,
+                    },
+                    "shadowOpacity": 0.35,
+                    "shadowRadius": 16,
                   },
                   {
-                    "color": "#c3c3c3",
+                    "alignSelf": "center",
+                    "borderRadius": 20,
+                    "minWidth": 0,
+                    "paddingHorizontal": 18,
+                    "paddingVertical": 10,
                   },
-                  {
-                    "color": "#c3c3c3",
-                    "fontSize": 16,
-                    "fontWeight": 600,
-                  },
+                  undefined,
                 ]
               }
+              tintColor="rgba(255,255,255,0.10)"
             >
-              Copy
-            </Text>
+              <View>
+                <Text
+                  numberOfLines={1}
+                  style={
+                    [
+                      [
+                        {
+                          "color": "white",
+                          "fontSize": 18,
+                          "fontWeight": "600",
+                        },
+                        {
+                          "fontSize": 16,
+                        },
+                      ],
+                      {
+                        "opacity": 1,
+                      },
+                      {
+                        "animationDuration": 350,
+                        "animationName": {
+                          "from": {
+                            "opacity": 0,
+                          },
+                          "to": {
+                            "opacity": 1,
+                          },
+                        },
+                        "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                      },
+                    ]
+                  }
+                >
+                  View seed phrase
+                </Text>
+                <Text
+                  accessible={false}
+                  importantForAccessibility="no-hide-descendants"
+                  numberOfLines={1}
+                  style={
+                    [
+                      [
+                        {
+                          "color": "white",
+                          "fontSize": 18,
+                          "fontWeight": "600",
+                        },
+                        {
+                          "fontSize": 16,
+                        },
+                      ],
+                      {
+                        "bottom": 0,
+                        "color": "transparent",
+                        "left": 0,
+                        "opacity": 0,
+                        "position": "absolute",
+                        "right": 0,
+                        "textShadowOffset": {
+                          "height": 0,
+                          "width": 0,
+                        },
+                        "top": 0,
+                      },
+                      {
+                        "textShadowColor": "white",
+                        "textShadowRadius": 6,
+                      },
+                      {
+                        "animationDuration": 350,
+                        "animationName": {
+                          "from": {
+                            "opacity": 1,
+                          },
+                          "to": {
+                            "opacity": 0,
+                          },
+                        },
+                        "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                      },
+                    ]
+                  }
+                >
+                  View seed phrase
+                </Text>
+              </View>
+            </div>
           </View>
         </View>
         <View
@@ -932,324 +1494,883 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
           }
         }
       >
-        <Text
-          style={
-            [
-              {
-                "fontSize": 17,
-                "fontWeight": "400",
-                "letterSpacing": -0.41,
-                "lineHeight": 22,
-              },
-              {
-                "color": "#888888",
-              },
-              {
-                "fontSize": 17,
-                "padding": 10,
-                "textAlign": "center",
-              },
-            ]
-          }
-        >
-          Your seed phrase is the key to your wallet. Back it up so you can restore your wallet if you lose or damage your device 
-        </Text>
         <View
           style={
             {
               "borderRadius": 20,
               "marginTop": 10,
               "overflow": "hidden",
+              "padding": 8,
               "position": "relative",
+              "rowGap": 8,
             }
           }
         >
           <View
+            accessibilityElementsHidden={true}
+            importantForAccessibility="no-hide-descendants"
+            pointerEvents="none"
             style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
+              [
+                {
+                  "opacity": 0,
+                  "rowGap": 8,
+                  "transform": [
+                    {
+                      "scale": 0.98,
+                    },
+                  ],
+                  "transitionDuration": "280ms",
+                  "transitionProperty": [
+                    "opacity",
+                    "transform",
+                  ],
+                  "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                },
+              ]
             }
           >
             <View
               style={
                 {
-                  "alignItems": "center",
-                  "backgroundColor": "#222223",
-                  "borderColor": "#ffffff",
-                  "borderRadius": 25,
-                  "borderWidth": 1,
+                  "columnGap": 8,
                   "flexDirection": "row",
-                  "justifyContent": "flex-start",
-                  "marginBottom": 5,
-                  "minWidth": "30%",
-                  "paddingHorizontal": 10,
-                  "paddingVertical": 5,
-                  "width": "30%",
+                  "justifyContent": "center",
                 }
               }
             >
-              <Text
-                style={
-                  [
-                    {
-                      "fontSize": 17,
-                      "fontWeight": "400",
-                      "letterSpacing": -0.41,
-                      "lineHeight": 22,
-                    },
-                    {
-                      "color": "#888888",
-                    },
-                    undefined,
-                  ]
-                }
-              >
-                1
-                .
-              </Text>
-              <TextInput
-                autoCapitalize="none"
-                autoCorrect={false}
-                editable={false}
-                keyboardType="default"
-                returnKeyType="done"
+              <View
                 style={
                   {
-                    "backgroundColor": "transparent",
-                    "color": "#c3c3c3",
-                    "flexGrow": 1,
-                    "flexShrink": 1,
-                    "fontSize": 15,
-                    "fontWeight": "400",
-                    "lineHeight": 15,
-                    "marginLeft": 3,
-                    "marginTop": 5,
+                    "alignItems": "center",
+                    "backgroundColor": "#222223",
+                    "borderColor": "#ffffff",
+                    "borderRadius": 25,
+                    "borderWidth": 1,
+                    "flexDirection": "row",
+                    "justifyContent": "flex-start",
+                    "minWidth": "30%",
+                    "paddingHorizontal": 10,
+                    "paddingVertical": 5,
+                    "width": "30%",
                   }
                 }
-                value="pepe"
-              />
+              >
+                <Text
+                  style={
+                    [
+                      {
+                        "fontSize": 17,
+                        "fontWeight": "400",
+                        "letterSpacing": -0.41,
+                        "lineHeight": 22,
+                      },
+                      {
+                        "color": "#888888",
+                      },
+                      undefined,
+                    ]
+                  }
+                >
+                  1
+                  .
+                </Text>
+                <TextInput
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={false}
+                  keyboardType="default"
+                  returnKeyType="done"
+                  style={
+                    {
+                      "backgroundColor": "transparent",
+                      "color": "#c3c3c3",
+                      "flexGrow": 1,
+                      "flexShrink": 1,
+                      "fontSize": 15,
+                      "fontWeight": "400",
+                      "lineHeight": 15,
+                      "marginLeft": 3,
+                      "marginTop": 5,
+                    }
+                  }
+                  value="pepe"
+                />
+              </View>
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#222223",
+                    "borderColor": "#ffffff",
+                    "borderRadius": 25,
+                    "borderWidth": 1,
+                    "flexDirection": "row",
+                    "justifyContent": "flex-start",
+                    "minWidth": "30%",
+                    "paddingHorizontal": 10,
+                    "paddingVertical": 5,
+                    "width": "30%",
+                  }
+                }
+              >
+                <Text
+                  style={
+                    [
+                      {
+                        "fontSize": 17,
+                        "fontWeight": "400",
+                        "letterSpacing": -0.41,
+                        "lineHeight": 22,
+                      },
+                      {
+                        "color": "#888888",
+                      },
+                      undefined,
+                    ]
+                  }
+                >
+                  2
+                  .
+                </Text>
+                <TextInput
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={false}
+                  keyboardType="default"
+                  returnKeyType="done"
+                  style={
+                    {
+                      "backgroundColor": "transparent",
+                      "color": "#c3c3c3",
+                      "flexGrow": 1,
+                      "flexShrink": 1,
+                      "fontSize": 15,
+                      "fontWeight": "400",
+                      "lineHeight": 15,
+                      "marginLeft": 3,
+                      "marginTop": 5,
+                    }
+                  }
+                  value="lolo"
+                />
+              </View>
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#222223",
+                    "borderColor": "#ffffff",
+                    "borderRadius": 25,
+                    "borderWidth": 1,
+                    "flexDirection": "row",
+                    "justifyContent": "flex-start",
+                    "minWidth": "30%",
+                    "paddingHorizontal": 10,
+                    "paddingVertical": 5,
+                    "width": "30%",
+                  }
+                }
+              >
+                <Text
+                  style={
+                    [
+                      {
+                        "fontSize": 17,
+                        "fontWeight": "400",
+                        "letterSpacing": -0.41,
+                        "lineHeight": 22,
+                      },
+                      {
+                        "color": "#888888",
+                      },
+                      undefined,
+                    ]
+                  }
+                >
+                  3
+                  .
+                </Text>
+                <TextInput
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={false}
+                  keyboardType="default"
+                  returnKeyType="done"
+                  style={
+                    {
+                      "backgroundColor": "transparent",
+                      "color": "#c3c3c3",
+                      "flexGrow": 1,
+                      "flexShrink": 1,
+                      "fontSize": 15,
+                      "fontWeight": "400",
+                      "lineHeight": 15,
+                      "marginLeft": 3,
+                      "marginTop": 5,
+                    }
+                  }
+                  value="titi"
+                />
+              </View>
             </View>
             <View
               style={
                 {
-                  "alignItems": "center",
-                  "backgroundColor": "#222223",
-                  "borderColor": "#ffffff",
-                  "borderRadius": 25,
-                  "borderWidth": 1,
+                  "columnGap": 8,
                   "flexDirection": "row",
-                  "justifyContent": "flex-start",
-                  "marginBottom": 5,
-                  "minWidth": "30%",
-                  "paddingHorizontal": 10,
-                  "paddingVertical": 5,
-                  "width": "30%",
+                  "justifyContent": "center",
                 }
-              }
-            >
-              <Text
-                style={
-                  [
-                    {
-                      "fontSize": 17,
-                      "fontWeight": "400",
-                      "letterSpacing": -0.41,
-                      "lineHeight": 22,
-                    },
-                    {
-                      "color": "#888888",
-                    },
-                    undefined,
-                  ]
-                }
-              >
-                2
-                .
-              </Text>
-              <TextInput
-                autoCapitalize="none"
-                autoCorrect={false}
-                editable={false}
-                keyboardType="default"
-                returnKeyType="done"
-                style={
-                  {
-                    "backgroundColor": "transparent",
-                    "color": "#c3c3c3",
-                    "flexGrow": 1,
-                    "flexShrink": 1,
-                    "fontSize": 15,
-                    "fontWeight": "400",
-                    "lineHeight": 15,
-                    "marginLeft": 3,
-                    "marginTop": 5,
-                  }
-                }
-                value="lolo"
-              />
-            </View>
-            <View
-              style={
-                {
-                  "alignItems": "center",
-                  "backgroundColor": "#222223",
-                  "borderColor": "#ffffff",
-                  "borderRadius": 25,
-                  "borderWidth": 1,
-                  "flexDirection": "row",
-                  "justifyContent": "flex-start",
-                  "marginBottom": 5,
-                  "minWidth": "30%",
-                  "paddingHorizontal": 10,
-                  "paddingVertical": 5,
-                  "width": "30%",
-                }
-              }
-            >
-              <Text
-                style={
-                  [
-                    {
-                      "fontSize": 17,
-                      "fontWeight": "400",
-                      "letterSpacing": -0.41,
-                      "lineHeight": 22,
-                    },
-                    {
-                      "color": "#888888",
-                    },
-                    undefined,
-                  ]
-                }
-              >
-                3
-                .
-              </Text>
-              <TextInput
-                autoCapitalize="none"
-                autoCorrect={false}
-                editable={false}
-                keyboardType="default"
-                returnKeyType="done"
-                style={
-                  {
-                    "backgroundColor": "transparent",
-                    "color": "#c3c3c3",
-                    "flexGrow": 1,
-                    "flexShrink": 1,
-                    "fontSize": 15,
-                    "fontWeight": "400",
-                    "lineHeight": 15,
-                    "marginLeft": 3,
-                    "marginTop": 5,
-                  }
-                }
-                value="titi"
-              />
-            </View>
-          </View>
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "alignItems": "center",
-                "bottom": 0,
-                "justifyContent": "center",
-                "left": 0,
-                "position": "absolute",
-                "right": 0,
-                "top": 0,
-              }
-            }
-          >
-            <BlurView
-              blurAmount={2}
-              blurType="dark"
-              reducedTransparencyFallbackColor="rgba(0,0,0,0.3)"
-              style={
-                [
-                  {
-                    "backgroundColor": "transparent",
-                  },
-                  {
-                    "bottom": 0,
-                    "left": 0,
-                    "position": "absolute",
-                    "right": 0,
-                    "top": 0,
-                  },
-                ]
               }
             />
             <View
               style={
                 {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+          </View>
+          <View
+            accessibilityElementsHidden={false}
+            importantForAccessibility="auto"
+            pointerEvents="auto"
+            style={
+              [
+                {
+                  "alignItems": "center",
                   "bottom": 0,
+                  "justifyContent": "center",
                   "left": 0,
+                  "opacity": 1,
                   "position": "absolute",
                   "right": 0,
                   "top": 0,
-                }
-              }
-            />
+                  "transitionDuration": "280ms",
+                  "transitionProperty": [
+                    "opacity",
+                  ],
+                  "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                },
+              ]
+            }
+          >
             <View
+              accessible={false}
+              importantForAccessibility="no-hide-descendants"
+              style={
+                [
+                  {
+                    "overflow": "hidden",
+                  },
+                  {
+                    "height": 240,
+                    "width": 240,
+                  },
+                ]
+              }
+            >
+              <View
+                style={
+                  {
+                    "animationDuration": 2000,
+                    "animationIterationCount": "infinite",
+                    "animationName": {
+                      "0.0000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "10.4167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "12.5000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "14.5833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "16.6667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "18.7500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "2.0833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "20.8333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "22.9167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "25.0000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "27.0833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "29.1667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "31.2500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "33.3333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "35.4167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "37.5000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "39.5833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "4.1667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "41.6667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "43.7500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "45.8333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "47.9167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "50.0000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "52.0833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "54.1667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "56.2500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "58.3333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "6.2500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "60.4167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "62.5000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "64.5833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "66.6667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "68.7500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "70.8333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "72.9167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "75.0000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "77.0833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "79.1667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "8.3333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "81.2500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "83.3333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "85.4167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "87.5000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "89.5833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "91.6667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "93.7500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "95.8333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "97.9167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                    },
+                    "animationPlayState": "running",
+                  }
+                }
+              >
+                <Image
+                  accessibilityIgnoresInvertColors={true}
+                  blurRadius={2}
+                  source="test-file-stub"
+                  style={
+                    {
+                      "height": 1440,
+                      "width": 1920,
+                    }
+                  }
+                />
+              </View>
+            </View>
+            <div
+              accessibilityRole="button"
               accessibilityState={
                 {
                   "busy": undefined,
@@ -1259,17 +2380,11 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
                   "selected": undefined,
                 }
               }
-              accessibilityValue={
-                {
-                  "max": undefined,
-                  "min": undefined,
-                  "now": undefined,
-                  "text": undefined,
-                }
-              }
               accessible={true}
-              collapsable={false}
+              colorScheme="system"
+              effect="clear"
               focusable={true}
+              interactive={true}
               onClick={[Function]}
               onResponderGrant={[Function]}
               onResponderMove={[Function]}
@@ -1278,113 +2393,122 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
               onResponderTerminationRequest={[Function]}
               onStartShouldSetResponder={[Function]}
               style={
-                {
-                  "alignSelf": "center",
-                  "backgroundColor": "#18bd18",
-                  "borderRadius": 20,
-                  "opacity": 1,
-                  "paddingHorizontal": 18,
-                  "paddingVertical": 10,
-                }
-              }
-            >
-              <Text
-                style={
-                  [
-                    {
-                      "fontSize": 17,
-                      "fontWeight": "400",
-                      "letterSpacing": -0.41,
-                      "lineHeight": 22,
-                    },
-                    {
-                      "color": "#c3c3c3",
-                    },
-                    {
-                      "color": "white",
-                      "fontSize": 16,
-                      "fontWeight": 600,
-                    },
-                  ]
-                }
-              >
-                View seed phrase
-              </Text>
-            </View>
-          </View>
-        </View>
-        <View
-          accessibilityState={
-            {
-              "busy": undefined,
-              "checked": undefined,
-              "disabled": undefined,
-              "expanded": undefined,
-              "selected": undefined,
-            }
-          }
-          accessibilityValue={
-            {
-              "max": undefined,
-              "min": undefined,
-              "now": undefined,
-              "text": undefined,
-            }
-          }
-          accessible={true}
-          collapsable={false}
-          focusable={true}
-          onClick={[Function]}
-          onResponderGrant={[Function]}
-          onResponderMove={[Function]}
-          onResponderRelease={[Function]}
-          onResponderTerminate={[Function]}
-          onResponderTerminationRequest={[Function]}
-          onStartShouldSetResponder={[Function]}
-          style={
-            {
-              "alignSelf": "center",
-              "opacity": 1,
-            }
-          }
-        >
-          <View
-            style={
-              {
-                "alignItems": "center",
-                "backgroundColor": "#222223",
-                "borderColor": "#ffffff",
-                "borderRadius": 16,
-                "borderWidth": 1,
-                "justifyContent": "center",
-                "marginVertical": 10,
-                "paddingHorizontal": 20,
-                "paddingVertical": 10,
-              }
-            }
-          >
-            <Text
-              style={
                 [
                   {
-                    "fontSize": 17,
-                    "fontWeight": "400",
-                    "letterSpacing": -0.41,
-                    "lineHeight": 22,
+                    "alignItems": "center",
+                    "alignSelf": "stretch",
+                    "borderRadius": 9999,
+                    "justifyContent": "center",
+                    "minWidth": 160,
+                    "paddingHorizontal": 20,
+                    "paddingVertical": 14,
+                    "shadowColor": "#000",
+                    "shadowOffset": {
+                      "height": 10,
+                      "width": 0,
+                    },
+                    "shadowOpacity": 0.35,
+                    "shadowRadius": 16,
                   },
                   {
-                    "color": "#c3c3c3",
+                    "alignSelf": "center",
+                    "borderRadius": 20,
+                    "minWidth": 0,
+                    "paddingHorizontal": 18,
+                    "paddingVertical": 10,
                   },
-                  {
-                    "color": "#c3c3c3",
-                    "fontSize": 16,
-                    "fontWeight": 600,
-                  },
+                  undefined,
                 ]
               }
+              tintColor="rgba(255,255,255,0.10)"
             >
-              Copy
-            </Text>
+              <View>
+                <Text
+                  numberOfLines={1}
+                  style={
+                    [
+                      [
+                        {
+                          "color": "white",
+                          "fontSize": 18,
+                          "fontWeight": "600",
+                        },
+                        {
+                          "fontSize": 16,
+                        },
+                      ],
+                      {
+                        "opacity": 1,
+                      },
+                      {
+                        "animationDuration": 350,
+                        "animationName": {
+                          "from": {
+                            "opacity": 0,
+                          },
+                          "to": {
+                            "opacity": 1,
+                          },
+                        },
+                        "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                      },
+                    ]
+                  }
+                >
+                  View seed phrase
+                </Text>
+                <Text
+                  accessible={false}
+                  importantForAccessibility="no-hide-descendants"
+                  numberOfLines={1}
+                  style={
+                    [
+                      [
+                        {
+                          "color": "white",
+                          "fontSize": 18,
+                          "fontWeight": "600",
+                        },
+                        {
+                          "fontSize": 16,
+                        },
+                      ],
+                      {
+                        "bottom": 0,
+                        "color": "transparent",
+                        "left": 0,
+                        "opacity": 0,
+                        "position": "absolute",
+                        "right": 0,
+                        "textShadowOffset": {
+                          "height": 0,
+                          "width": 0,
+                        },
+                        "top": 0,
+                      },
+                      {
+                        "textShadowColor": "white",
+                        "textShadowRadius": 6,
+                      },
+                      {
+                        "animationDuration": 350,
+                        "animationName": {
+                          "from": {
+                            "opacity": 1,
+                          },
+                          "to": {
+                            "opacity": 0,
+                          },
+                        },
+                        "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                      },
+                    ]
+                  }
+                >
+                  View seed phrase
+                </Text>
+              </View>
+            </div>
           </View>
         </View>
         <View
@@ -2583,324 +3707,883 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
           }
         }
       >
-        <Text
-          style={
-            [
-              {
-                "fontSize": 17,
-                "fontWeight": "400",
-                "letterSpacing": -0.41,
-                "lineHeight": 22,
-              },
-              {
-                "color": "#888888",
-              },
-              {
-                "fontSize": 17,
-                "padding": 10,
-                "textAlign": "center",
-              },
-            ]
-          }
-        >
-          Your seed phrase is the key to your wallet. Back it up so you can restore your wallet if you lose or damage your device 
-        </Text>
         <View
           style={
             {
               "borderRadius": 20,
               "marginTop": 10,
               "overflow": "hidden",
+              "padding": 8,
               "position": "relative",
+              "rowGap": 8,
             }
           }
         >
           <View
+            accessibilityElementsHidden={true}
+            importantForAccessibility="no-hide-descendants"
+            pointerEvents="none"
             style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
+              [
+                {
+                  "opacity": 0,
+                  "rowGap": 8,
+                  "transform": [
+                    {
+                      "scale": 0.98,
+                    },
+                  ],
+                  "transitionDuration": "280ms",
+                  "transitionProperty": [
+                    "opacity",
+                    "transform",
+                  ],
+                  "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                },
+              ]
             }
           >
             <View
               style={
                 {
-                  "alignItems": "center",
-                  "backgroundColor": "#222223",
-                  "borderColor": "#ffffff",
-                  "borderRadius": 25,
-                  "borderWidth": 1,
+                  "columnGap": 8,
                   "flexDirection": "row",
-                  "justifyContent": "flex-start",
-                  "marginBottom": 5,
-                  "minWidth": "30%",
-                  "paddingHorizontal": 10,
-                  "paddingVertical": 5,
-                  "width": "30%",
+                  "justifyContent": "center",
                 }
               }
             >
-              <Text
-                style={
-                  [
-                    {
-                      "fontSize": 17,
-                      "fontWeight": "400",
-                      "letterSpacing": -0.41,
-                      "lineHeight": 22,
-                    },
-                    {
-                      "color": "#888888",
-                    },
-                    undefined,
-                  ]
-                }
-              >
-                1
-                .
-              </Text>
-              <TextInput
-                autoCapitalize="none"
-                autoCorrect={false}
-                editable={false}
-                keyboardType="default"
-                returnKeyType="done"
+              <View
                 style={
                   {
-                    "backgroundColor": "transparent",
-                    "color": "#c3c3c3",
-                    "flexGrow": 1,
-                    "flexShrink": 1,
-                    "fontSize": 15,
-                    "fontWeight": "400",
-                    "lineHeight": 15,
-                    "marginLeft": 3,
-                    "marginTop": 5,
+                    "alignItems": "center",
+                    "backgroundColor": "#222223",
+                    "borderColor": "#ffffff",
+                    "borderRadius": 25,
+                    "borderWidth": 1,
+                    "flexDirection": "row",
+                    "justifyContent": "flex-start",
+                    "minWidth": "30%",
+                    "paddingHorizontal": 10,
+                    "paddingVertical": 5,
+                    "width": "30%",
                   }
                 }
-                value="pepe"
-              />
+              >
+                <Text
+                  style={
+                    [
+                      {
+                        "fontSize": 17,
+                        "fontWeight": "400",
+                        "letterSpacing": -0.41,
+                        "lineHeight": 22,
+                      },
+                      {
+                        "color": "#888888",
+                      },
+                      undefined,
+                    ]
+                  }
+                >
+                  1
+                  .
+                </Text>
+                <TextInput
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={false}
+                  keyboardType="default"
+                  returnKeyType="done"
+                  style={
+                    {
+                      "backgroundColor": "transparent",
+                      "color": "#c3c3c3",
+                      "flexGrow": 1,
+                      "flexShrink": 1,
+                      "fontSize": 15,
+                      "fontWeight": "400",
+                      "lineHeight": 15,
+                      "marginLeft": 3,
+                      "marginTop": 5,
+                    }
+                  }
+                  value="pepe"
+                />
+              </View>
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#222223",
+                    "borderColor": "#ffffff",
+                    "borderRadius": 25,
+                    "borderWidth": 1,
+                    "flexDirection": "row",
+                    "justifyContent": "flex-start",
+                    "minWidth": "30%",
+                    "paddingHorizontal": 10,
+                    "paddingVertical": 5,
+                    "width": "30%",
+                  }
+                }
+              >
+                <Text
+                  style={
+                    [
+                      {
+                        "fontSize": 17,
+                        "fontWeight": "400",
+                        "letterSpacing": -0.41,
+                        "lineHeight": 22,
+                      },
+                      {
+                        "color": "#888888",
+                      },
+                      undefined,
+                    ]
+                  }
+                >
+                  2
+                  .
+                </Text>
+                <TextInput
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={false}
+                  keyboardType="default"
+                  returnKeyType="done"
+                  style={
+                    {
+                      "backgroundColor": "transparent",
+                      "color": "#c3c3c3",
+                      "flexGrow": 1,
+                      "flexShrink": 1,
+                      "fontSize": 15,
+                      "fontWeight": "400",
+                      "lineHeight": 15,
+                      "marginLeft": 3,
+                      "marginTop": 5,
+                    }
+                  }
+                  value="lolo"
+                />
+              </View>
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#222223",
+                    "borderColor": "#ffffff",
+                    "borderRadius": 25,
+                    "borderWidth": 1,
+                    "flexDirection": "row",
+                    "justifyContent": "flex-start",
+                    "minWidth": "30%",
+                    "paddingHorizontal": 10,
+                    "paddingVertical": 5,
+                    "width": "30%",
+                  }
+                }
+              >
+                <Text
+                  style={
+                    [
+                      {
+                        "fontSize": 17,
+                        "fontWeight": "400",
+                        "letterSpacing": -0.41,
+                        "lineHeight": 22,
+                      },
+                      {
+                        "color": "#888888",
+                      },
+                      undefined,
+                    ]
+                  }
+                >
+                  3
+                  .
+                </Text>
+                <TextInput
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={false}
+                  keyboardType="default"
+                  returnKeyType="done"
+                  style={
+                    {
+                      "backgroundColor": "transparent",
+                      "color": "#c3c3c3",
+                      "flexGrow": 1,
+                      "flexShrink": 1,
+                      "fontSize": 15,
+                      "fontWeight": "400",
+                      "lineHeight": 15,
+                      "marginLeft": 3,
+                      "marginTop": 5,
+                    }
+                  }
+                  value="titi"
+                />
+              </View>
             </View>
             <View
               style={
                 {
-                  "alignItems": "center",
-                  "backgroundColor": "#222223",
-                  "borderColor": "#ffffff",
-                  "borderRadius": 25,
-                  "borderWidth": 1,
+                  "columnGap": 8,
                   "flexDirection": "row",
-                  "justifyContent": "flex-start",
-                  "marginBottom": 5,
-                  "minWidth": "30%",
-                  "paddingHorizontal": 10,
-                  "paddingVertical": 5,
-                  "width": "30%",
+                  "justifyContent": "center",
                 }
-              }
-            >
-              <Text
-                style={
-                  [
-                    {
-                      "fontSize": 17,
-                      "fontWeight": "400",
-                      "letterSpacing": -0.41,
-                      "lineHeight": 22,
-                    },
-                    {
-                      "color": "#888888",
-                    },
-                    undefined,
-                  ]
-                }
-              >
-                2
-                .
-              </Text>
-              <TextInput
-                autoCapitalize="none"
-                autoCorrect={false}
-                editable={false}
-                keyboardType="default"
-                returnKeyType="done"
-                style={
-                  {
-                    "backgroundColor": "transparent",
-                    "color": "#c3c3c3",
-                    "flexGrow": 1,
-                    "flexShrink": 1,
-                    "fontSize": 15,
-                    "fontWeight": "400",
-                    "lineHeight": 15,
-                    "marginLeft": 3,
-                    "marginTop": 5,
-                  }
-                }
-                value="lolo"
-              />
-            </View>
-            <View
-              style={
-                {
-                  "alignItems": "center",
-                  "backgroundColor": "#222223",
-                  "borderColor": "#ffffff",
-                  "borderRadius": 25,
-                  "borderWidth": 1,
-                  "flexDirection": "row",
-                  "justifyContent": "flex-start",
-                  "marginBottom": 5,
-                  "minWidth": "30%",
-                  "paddingHorizontal": 10,
-                  "paddingVertical": 5,
-                  "width": "30%",
-                }
-              }
-            >
-              <Text
-                style={
-                  [
-                    {
-                      "fontSize": 17,
-                      "fontWeight": "400",
-                      "letterSpacing": -0.41,
-                      "lineHeight": 22,
-                    },
-                    {
-                      "color": "#888888",
-                    },
-                    undefined,
-                  ]
-                }
-              >
-                3
-                .
-              </Text>
-              <TextInput
-                autoCapitalize="none"
-                autoCorrect={false}
-                editable={false}
-                keyboardType="default"
-                returnKeyType="done"
-                style={
-                  {
-                    "backgroundColor": "transparent",
-                    "color": "#c3c3c3",
-                    "flexGrow": 1,
-                    "flexShrink": 1,
-                    "fontSize": 15,
-                    "fontWeight": "400",
-                    "lineHeight": 15,
-                    "marginLeft": 3,
-                    "marginTop": 5,
-                  }
-                }
-                value="titi"
-              />
-            </View>
-          </View>
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "alignItems": "center",
-                "bottom": 0,
-                "justifyContent": "center",
-                "left": 0,
-                "position": "absolute",
-                "right": 0,
-                "top": 0,
-              }
-            }
-          >
-            <BlurView
-              blurAmount={2}
-              blurType="dark"
-              reducedTransparencyFallbackColor="rgba(0,0,0,0.3)"
-              style={
-                [
-                  {
-                    "backgroundColor": "transparent",
-                  },
-                  {
-                    "bottom": 0,
-                    "left": 0,
-                    "position": "absolute",
-                    "right": 0,
-                    "top": 0,
-                  },
-                ]
               }
             />
             <View
               style={
                 {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+          </View>
+          <View
+            accessibilityElementsHidden={false}
+            importantForAccessibility="auto"
+            pointerEvents="auto"
+            style={
+              [
+                {
+                  "alignItems": "center",
                   "bottom": 0,
+                  "justifyContent": "center",
                   "left": 0,
+                  "opacity": 1,
                   "position": "absolute",
                   "right": 0,
                   "top": 0,
-                }
-              }
-            />
+                  "transitionDuration": "280ms",
+                  "transitionProperty": [
+                    "opacity",
+                  ],
+                  "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                },
+              ]
+            }
+          >
             <View
+              accessible={false}
+              importantForAccessibility="no-hide-descendants"
+              style={
+                [
+                  {
+                    "overflow": "hidden",
+                  },
+                  {
+                    "height": 240,
+                    "width": 240,
+                  },
+                ]
+              }
+            >
+              <View
+                style={
+                  {
+                    "animationDuration": 2000,
+                    "animationIterationCount": "infinite",
+                    "animationName": {
+                      "0.0000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "10.4167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "12.5000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "14.5833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "16.6667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "18.7500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "2.0833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "20.8333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "22.9167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "25.0000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "27.0833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "29.1667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "31.2500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "33.3333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "35.4167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "37.5000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "39.5833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "4.1667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "41.6667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "43.7500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "45.8333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "47.9167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "50.0000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "52.0833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "54.1667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "56.2500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "58.3333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "6.2500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "60.4167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "62.5000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "64.5833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "66.6667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "68.7500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "70.8333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "72.9167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "75.0000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "77.0833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "79.1667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "8.3333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "81.2500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "83.3333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "85.4167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "87.5000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "89.5833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "91.6667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "93.7500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "95.8333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "97.9167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                    },
+                    "animationPlayState": "running",
+                  }
+                }
+              >
+                <Image
+                  accessibilityIgnoresInvertColors={true}
+                  blurRadius={2}
+                  source="test-file-stub"
+                  style={
+                    {
+                      "height": 1440,
+                      "width": 1920,
+                    }
+                  }
+                />
+              </View>
+            </View>
+            <div
+              accessibilityRole="button"
               accessibilityState={
                 {
                   "busy": undefined,
@@ -2910,17 +4593,11 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
                   "selected": undefined,
                 }
               }
-              accessibilityValue={
-                {
-                  "max": undefined,
-                  "min": undefined,
-                  "now": undefined,
-                  "text": undefined,
-                }
-              }
               accessible={true}
-              collapsable={false}
+              colorScheme="system"
+              effect="clear"
               focusable={true}
+              interactive={true}
               onClick={[Function]}
               onResponderGrant={[Function]}
               onResponderMove={[Function]}
@@ -2929,113 +4606,122 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
               onResponderTerminationRequest={[Function]}
               onStartShouldSetResponder={[Function]}
               style={
-                {
-                  "alignSelf": "center",
-                  "backgroundColor": "#18bd18",
-                  "borderRadius": 20,
-                  "opacity": 1,
-                  "paddingHorizontal": 18,
-                  "paddingVertical": 10,
-                }
-              }
-            >
-              <Text
-                style={
-                  [
-                    {
-                      "fontSize": 17,
-                      "fontWeight": "400",
-                      "letterSpacing": -0.41,
-                      "lineHeight": 22,
-                    },
-                    {
-                      "color": "#c3c3c3",
-                    },
-                    {
-                      "color": "white",
-                      "fontSize": 16,
-                      "fontWeight": 600,
-                    },
-                  ]
-                }
-              >
-                View seed phrase
-              </Text>
-            </View>
-          </View>
-        </View>
-        <View
-          accessibilityState={
-            {
-              "busy": undefined,
-              "checked": undefined,
-              "disabled": undefined,
-              "expanded": undefined,
-              "selected": undefined,
-            }
-          }
-          accessibilityValue={
-            {
-              "max": undefined,
-              "min": undefined,
-              "now": undefined,
-              "text": undefined,
-            }
-          }
-          accessible={true}
-          collapsable={false}
-          focusable={true}
-          onClick={[Function]}
-          onResponderGrant={[Function]}
-          onResponderMove={[Function]}
-          onResponderRelease={[Function]}
-          onResponderTerminate={[Function]}
-          onResponderTerminationRequest={[Function]}
-          onStartShouldSetResponder={[Function]}
-          style={
-            {
-              "alignSelf": "center",
-              "opacity": 1,
-            }
-          }
-        >
-          <View
-            style={
-              {
-                "alignItems": "center",
-                "backgroundColor": "#222223",
-                "borderColor": "#ffffff",
-                "borderRadius": 16,
-                "borderWidth": 1,
-                "justifyContent": "center",
-                "marginVertical": 10,
-                "paddingHorizontal": 20,
-                "paddingVertical": 10,
-              }
-            }
-          >
-            <Text
-              style={
                 [
                   {
-                    "fontSize": 17,
-                    "fontWeight": "400",
-                    "letterSpacing": -0.41,
-                    "lineHeight": 22,
+                    "alignItems": "center",
+                    "alignSelf": "stretch",
+                    "borderRadius": 9999,
+                    "justifyContent": "center",
+                    "minWidth": 160,
+                    "paddingHorizontal": 20,
+                    "paddingVertical": 14,
+                    "shadowColor": "#000",
+                    "shadowOffset": {
+                      "height": 10,
+                      "width": 0,
+                    },
+                    "shadowOpacity": 0.35,
+                    "shadowRadius": 16,
                   },
                   {
-                    "color": "#c3c3c3",
+                    "alignSelf": "center",
+                    "borderRadius": 20,
+                    "minWidth": 0,
+                    "paddingHorizontal": 18,
+                    "paddingVertical": 10,
                   },
-                  {
-                    "color": "#c3c3c3",
-                    "fontSize": 16,
-                    "fontWeight": 600,
-                  },
+                  undefined,
                 ]
               }
+              tintColor="rgba(255,255,255,0.10)"
             >
-              Copy
-            </Text>
+              <View>
+                <Text
+                  numberOfLines={1}
+                  style={
+                    [
+                      [
+                        {
+                          "color": "white",
+                          "fontSize": 18,
+                          "fontWeight": "600",
+                        },
+                        {
+                          "fontSize": 16,
+                        },
+                      ],
+                      {
+                        "opacity": 1,
+                      },
+                      {
+                        "animationDuration": 350,
+                        "animationName": {
+                          "from": {
+                            "opacity": 0,
+                          },
+                          "to": {
+                            "opacity": 1,
+                          },
+                        },
+                        "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                      },
+                    ]
+                  }
+                >
+                  View seed phrase
+                </Text>
+                <Text
+                  accessible={false}
+                  importantForAccessibility="no-hide-descendants"
+                  numberOfLines={1}
+                  style={
+                    [
+                      [
+                        {
+                          "color": "white",
+                          "fontSize": 18,
+                          "fontWeight": "600",
+                        },
+                        {
+                          "fontSize": 16,
+                        },
+                      ],
+                      {
+                        "bottom": 0,
+                        "color": "transparent",
+                        "left": 0,
+                        "opacity": 0,
+                        "position": "absolute",
+                        "right": 0,
+                        "textShadowOffset": {
+                          "height": 0,
+                          "width": 0,
+                        },
+                        "top": 0,
+                      },
+                      {
+                        "textShadowColor": "white",
+                        "textShadowRadius": 6,
+                      },
+                      {
+                        "animationDuration": 350,
+                        "animationName": {
+                          "from": {
+                            "opacity": 1,
+                          },
+                          "to": {
+                            "opacity": 0,
+                          },
+                        },
+                        "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                      },
+                    ]
+                  }
+                >
+                  View seed phrase
+                </Text>
+              </View>
+            </div>
           </View>
         </View>
         <View
@@ -3340,324 +5026,883 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
           }
         }
       >
-        <Text
-          style={
-            [
-              {
-                "fontSize": 17,
-                "fontWeight": "400",
-                "letterSpacing": -0.41,
-                "lineHeight": 22,
-              },
-              {
-                "color": "#888888",
-              },
-              {
-                "fontSize": 17,
-                "padding": 10,
-                "textAlign": "center",
-              },
-            ]
-          }
-        >
-          Your seed phrase is the key to your wallet. Back it up so you can restore your wallet if you lose or damage your device 
-        </Text>
         <View
           style={
             {
               "borderRadius": 20,
               "marginTop": 10,
               "overflow": "hidden",
+              "padding": 8,
               "position": "relative",
+              "rowGap": 8,
             }
           }
         >
           <View
+            accessibilityElementsHidden={true}
+            importantForAccessibility="no-hide-descendants"
+            pointerEvents="none"
             style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
+              [
+                {
+                  "opacity": 0,
+                  "rowGap": 8,
+                  "transform": [
+                    {
+                      "scale": 0.98,
+                    },
+                  ],
+                  "transitionDuration": "280ms",
+                  "transitionProperty": [
+                    "opacity",
+                    "transform",
+                  ],
+                  "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                },
+              ]
             }
           >
             <View
               style={
                 {
-                  "alignItems": "center",
-                  "backgroundColor": "#222223",
-                  "borderColor": "#ffffff",
-                  "borderRadius": 25,
-                  "borderWidth": 1,
+                  "columnGap": 8,
                   "flexDirection": "row",
-                  "justifyContent": "flex-start",
-                  "marginBottom": 5,
-                  "minWidth": "30%",
-                  "paddingHorizontal": 10,
-                  "paddingVertical": 5,
-                  "width": "30%",
+                  "justifyContent": "center",
                 }
               }
             >
-              <Text
-                style={
-                  [
-                    {
-                      "fontSize": 17,
-                      "fontWeight": "400",
-                      "letterSpacing": -0.41,
-                      "lineHeight": 22,
-                    },
-                    {
-                      "color": "#888888",
-                    },
-                    undefined,
-                  ]
-                }
-              >
-                1
-                .
-              </Text>
-              <TextInput
-                autoCapitalize="none"
-                autoCorrect={false}
-                editable={false}
-                keyboardType="default"
-                returnKeyType="done"
+              <View
                 style={
                   {
-                    "backgroundColor": "transparent",
-                    "color": "#c3c3c3",
-                    "flexGrow": 1,
-                    "flexShrink": 1,
-                    "fontSize": 15,
-                    "fontWeight": "400",
-                    "lineHeight": 15,
-                    "marginLeft": 3,
-                    "marginTop": 5,
+                    "alignItems": "center",
+                    "backgroundColor": "#222223",
+                    "borderColor": "#ffffff",
+                    "borderRadius": 25,
+                    "borderWidth": 1,
+                    "flexDirection": "row",
+                    "justifyContent": "flex-start",
+                    "minWidth": "30%",
+                    "paddingHorizontal": 10,
+                    "paddingVertical": 5,
+                    "width": "30%",
                   }
                 }
-                value="pepe"
-              />
+              >
+                <Text
+                  style={
+                    [
+                      {
+                        "fontSize": 17,
+                        "fontWeight": "400",
+                        "letterSpacing": -0.41,
+                        "lineHeight": 22,
+                      },
+                      {
+                        "color": "#888888",
+                      },
+                      undefined,
+                    ]
+                  }
+                >
+                  1
+                  .
+                </Text>
+                <TextInput
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={false}
+                  keyboardType="default"
+                  returnKeyType="done"
+                  style={
+                    {
+                      "backgroundColor": "transparent",
+                      "color": "#c3c3c3",
+                      "flexGrow": 1,
+                      "flexShrink": 1,
+                      "fontSize": 15,
+                      "fontWeight": "400",
+                      "lineHeight": 15,
+                      "marginLeft": 3,
+                      "marginTop": 5,
+                    }
+                  }
+                  value="pepe"
+                />
+              </View>
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#222223",
+                    "borderColor": "#ffffff",
+                    "borderRadius": 25,
+                    "borderWidth": 1,
+                    "flexDirection": "row",
+                    "justifyContent": "flex-start",
+                    "minWidth": "30%",
+                    "paddingHorizontal": 10,
+                    "paddingVertical": 5,
+                    "width": "30%",
+                  }
+                }
+              >
+                <Text
+                  style={
+                    [
+                      {
+                        "fontSize": 17,
+                        "fontWeight": "400",
+                        "letterSpacing": -0.41,
+                        "lineHeight": 22,
+                      },
+                      {
+                        "color": "#888888",
+                      },
+                      undefined,
+                    ]
+                  }
+                >
+                  2
+                  .
+                </Text>
+                <TextInput
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={false}
+                  keyboardType="default"
+                  returnKeyType="done"
+                  style={
+                    {
+                      "backgroundColor": "transparent",
+                      "color": "#c3c3c3",
+                      "flexGrow": 1,
+                      "flexShrink": 1,
+                      "fontSize": 15,
+                      "fontWeight": "400",
+                      "lineHeight": 15,
+                      "marginLeft": 3,
+                      "marginTop": 5,
+                    }
+                  }
+                  value="lolo"
+                />
+              </View>
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#222223",
+                    "borderColor": "#ffffff",
+                    "borderRadius": 25,
+                    "borderWidth": 1,
+                    "flexDirection": "row",
+                    "justifyContent": "flex-start",
+                    "minWidth": "30%",
+                    "paddingHorizontal": 10,
+                    "paddingVertical": 5,
+                    "width": "30%",
+                  }
+                }
+              >
+                <Text
+                  style={
+                    [
+                      {
+                        "fontSize": 17,
+                        "fontWeight": "400",
+                        "letterSpacing": -0.41,
+                        "lineHeight": 22,
+                      },
+                      {
+                        "color": "#888888",
+                      },
+                      undefined,
+                    ]
+                  }
+                >
+                  3
+                  .
+                </Text>
+                <TextInput
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={false}
+                  keyboardType="default"
+                  returnKeyType="done"
+                  style={
+                    {
+                      "backgroundColor": "transparent",
+                      "color": "#c3c3c3",
+                      "flexGrow": 1,
+                      "flexShrink": 1,
+                      "fontSize": 15,
+                      "fontWeight": "400",
+                      "lineHeight": 15,
+                      "marginLeft": 3,
+                      "marginTop": 5,
+                    }
+                  }
+                  value="titi"
+                />
+              </View>
             </View>
             <View
               style={
                 {
-                  "alignItems": "center",
-                  "backgroundColor": "#222223",
-                  "borderColor": "#ffffff",
-                  "borderRadius": 25,
-                  "borderWidth": 1,
+                  "columnGap": 8,
                   "flexDirection": "row",
-                  "justifyContent": "flex-start",
-                  "marginBottom": 5,
-                  "minWidth": "30%",
-                  "paddingHorizontal": 10,
-                  "paddingVertical": 5,
-                  "width": "30%",
+                  "justifyContent": "center",
                 }
-              }
-            >
-              <Text
-                style={
-                  [
-                    {
-                      "fontSize": 17,
-                      "fontWeight": "400",
-                      "letterSpacing": -0.41,
-                      "lineHeight": 22,
-                    },
-                    {
-                      "color": "#888888",
-                    },
-                    undefined,
-                  ]
-                }
-              >
-                2
-                .
-              </Text>
-              <TextInput
-                autoCapitalize="none"
-                autoCorrect={false}
-                editable={false}
-                keyboardType="default"
-                returnKeyType="done"
-                style={
-                  {
-                    "backgroundColor": "transparent",
-                    "color": "#c3c3c3",
-                    "flexGrow": 1,
-                    "flexShrink": 1,
-                    "fontSize": 15,
-                    "fontWeight": "400",
-                    "lineHeight": 15,
-                    "marginLeft": 3,
-                    "marginTop": 5,
-                  }
-                }
-                value="lolo"
-              />
-            </View>
-            <View
-              style={
-                {
-                  "alignItems": "center",
-                  "backgroundColor": "#222223",
-                  "borderColor": "#ffffff",
-                  "borderRadius": 25,
-                  "borderWidth": 1,
-                  "flexDirection": "row",
-                  "justifyContent": "flex-start",
-                  "marginBottom": 5,
-                  "minWidth": "30%",
-                  "paddingHorizontal": 10,
-                  "paddingVertical": 5,
-                  "width": "30%",
-                }
-              }
-            >
-              <Text
-                style={
-                  [
-                    {
-                      "fontSize": 17,
-                      "fontWeight": "400",
-                      "letterSpacing": -0.41,
-                      "lineHeight": 22,
-                    },
-                    {
-                      "color": "#888888",
-                    },
-                    undefined,
-                  ]
-                }
-              >
-                3
-                .
-              </Text>
-              <TextInput
-                autoCapitalize="none"
-                autoCorrect={false}
-                editable={false}
-                keyboardType="default"
-                returnKeyType="done"
-                style={
-                  {
-                    "backgroundColor": "transparent",
-                    "color": "#c3c3c3",
-                    "flexGrow": 1,
-                    "flexShrink": 1,
-                    "fontSize": 15,
-                    "fontWeight": "400",
-                    "lineHeight": 15,
-                    "marginLeft": 3,
-                    "marginTop": 5,
-                  }
-                }
-                value="titi"
-              />
-            </View>
-          </View>
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "columnGap": 8,
-                "flexDirection": "row",
-              }
-            }
-          />
-          <View
-            style={
-              {
-                "alignItems": "center",
-                "bottom": 0,
-                "justifyContent": "center",
-                "left": 0,
-                "position": "absolute",
-                "right": 0,
-                "top": 0,
-              }
-            }
-          >
-            <BlurView
-              blurAmount={2}
-              blurType="dark"
-              reducedTransparencyFallbackColor="rgba(0,0,0,0.3)"
-              style={
-                [
-                  {
-                    "backgroundColor": "transparent",
-                  },
-                  {
-                    "bottom": 0,
-                    "left": 0,
-                    "position": "absolute",
-                    "right": 0,
-                    "top": 0,
-                  },
-                ]
               }
             />
             <View
               style={
                 {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "columnGap": 8,
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            />
+          </View>
+          <View
+            accessibilityElementsHidden={false}
+            importantForAccessibility="auto"
+            pointerEvents="auto"
+            style={
+              [
+                {
+                  "alignItems": "center",
                   "bottom": 0,
+                  "justifyContent": "center",
                   "left": 0,
+                  "opacity": 1,
                   "position": "absolute",
                   "right": 0,
                   "top": 0,
-                }
-              }
-            />
+                  "transitionDuration": "280ms",
+                  "transitionProperty": [
+                    "opacity",
+                  ],
+                  "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                },
+              ]
+            }
+          >
             <View
+              accessible={false}
+              importantForAccessibility="no-hide-descendants"
+              style={
+                [
+                  {
+                    "overflow": "hidden",
+                  },
+                  {
+                    "height": 240,
+                    "width": 240,
+                  },
+                ]
+              }
+            >
+              <View
+                style={
+                  {
+                    "animationDuration": 2000,
+                    "animationIterationCount": "infinite",
+                    "animationName": {
+                      "0.0000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "10.4167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "12.5000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "14.5833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "16.6667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "18.7500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "2.0833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "20.8333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "22.9167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "25.0000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "27.0833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "29.1667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "31.2500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -240,
+                          },
+                        ],
+                      },
+                      "33.3333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "35.4167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "37.5000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "39.5833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "4.1667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "41.6667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "43.7500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "45.8333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "47.9167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -480,
+                          },
+                        ],
+                      },
+                      "50.0000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "52.0833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "54.1667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "56.2500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "58.3333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "6.2500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "60.4167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "62.5000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "64.5833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -720,
+                          },
+                        ],
+                      },
+                      "66.6667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "68.7500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "70.8333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "72.9167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "75.0000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "77.0833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "79.1667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "8.3333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -0,
+                          },
+                        ],
+                      },
+                      "81.2500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -960,
+                          },
+                        ],
+                      },
+                      "83.3333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -0,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "85.4167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -240,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "87.5000%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -480,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "89.5833%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -720,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "91.6667%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -960,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "93.7500%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1200,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "95.8333%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1440,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                      "97.9167%": {
+                        "animationTimingFunction": "steps(1)",
+                        "transform": [
+                          {
+                            "translateX": -1680,
+                          },
+                          {
+                            "translateY": -1200,
+                          },
+                        ],
+                      },
+                    },
+                    "animationPlayState": "running",
+                  }
+                }
+              >
+                <Image
+                  accessibilityIgnoresInvertColors={true}
+                  blurRadius={2}
+                  source="test-file-stub"
+                  style={
+                    {
+                      "height": 1440,
+                      "width": 1920,
+                    }
+                  }
+                />
+              </View>
+            </View>
+            <div
+              accessibilityRole="button"
               accessibilityState={
                 {
                   "busy": undefined,
@@ -3667,17 +5912,11 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
                   "selected": undefined,
                 }
               }
-              accessibilityValue={
-                {
-                  "max": undefined,
-                  "min": undefined,
-                  "now": undefined,
-                  "text": undefined,
-                }
-              }
               accessible={true}
-              collapsable={false}
+              colorScheme="system"
+              effect="clear"
               focusable={true}
+              interactive={true}
               onClick={[Function]}
               onResponderGrant={[Function]}
               onResponderMove={[Function]}
@@ -3686,113 +5925,122 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
               onResponderTerminationRequest={[Function]}
               onStartShouldSetResponder={[Function]}
               style={
-                {
-                  "alignSelf": "center",
-                  "backgroundColor": "#18bd18",
-                  "borderRadius": 20,
-                  "opacity": 1,
-                  "paddingHorizontal": 18,
-                  "paddingVertical": 10,
-                }
-              }
-            >
-              <Text
-                style={
-                  [
-                    {
-                      "fontSize": 17,
-                      "fontWeight": "400",
-                      "letterSpacing": -0.41,
-                      "lineHeight": 22,
-                    },
-                    {
-                      "color": "#c3c3c3",
-                    },
-                    {
-                      "color": "white",
-                      "fontSize": 16,
-                      "fontWeight": 600,
-                    },
-                  ]
-                }
-              >
-                View seed phrase
-              </Text>
-            </View>
-          </View>
-        </View>
-        <View
-          accessibilityState={
-            {
-              "busy": undefined,
-              "checked": undefined,
-              "disabled": undefined,
-              "expanded": undefined,
-              "selected": undefined,
-            }
-          }
-          accessibilityValue={
-            {
-              "max": undefined,
-              "min": undefined,
-              "now": undefined,
-              "text": undefined,
-            }
-          }
-          accessible={true}
-          collapsable={false}
-          focusable={true}
-          onClick={[Function]}
-          onResponderGrant={[Function]}
-          onResponderMove={[Function]}
-          onResponderRelease={[Function]}
-          onResponderTerminate={[Function]}
-          onResponderTerminationRequest={[Function]}
-          onStartShouldSetResponder={[Function]}
-          style={
-            {
-              "alignSelf": "center",
-              "opacity": 1,
-            }
-          }
-        >
-          <View
-            style={
-              {
-                "alignItems": "center",
-                "backgroundColor": "#222223",
-                "borderColor": "#ffffff",
-                "borderRadius": 16,
-                "borderWidth": 1,
-                "justifyContent": "center",
-                "marginVertical": 10,
-                "paddingHorizontal": 20,
-                "paddingVertical": 10,
-              }
-            }
-          >
-            <Text
-              style={
                 [
                   {
-                    "fontSize": 17,
-                    "fontWeight": "400",
-                    "letterSpacing": -0.41,
-                    "lineHeight": 22,
+                    "alignItems": "center",
+                    "alignSelf": "stretch",
+                    "borderRadius": 9999,
+                    "justifyContent": "center",
+                    "minWidth": 160,
+                    "paddingHorizontal": 20,
+                    "paddingVertical": 14,
+                    "shadowColor": "#000",
+                    "shadowOffset": {
+                      "height": 10,
+                      "width": 0,
+                    },
+                    "shadowOpacity": 0.35,
+                    "shadowRadius": 16,
                   },
                   {
-                    "color": "#c3c3c3",
+                    "alignSelf": "center",
+                    "borderRadius": 20,
+                    "minWidth": 0,
+                    "paddingHorizontal": 18,
+                    "paddingVertical": 10,
                   },
-                  {
-                    "color": "#c3c3c3",
-                    "fontSize": 16,
-                    "fontWeight": 600,
-                  },
+                  undefined,
                 ]
               }
+              tintColor="rgba(255,255,255,0.10)"
             >
-              Copy
-            </Text>
+              <View>
+                <Text
+                  numberOfLines={1}
+                  style={
+                    [
+                      [
+                        {
+                          "color": "white",
+                          "fontSize": 18,
+                          "fontWeight": "600",
+                        },
+                        {
+                          "fontSize": 16,
+                        },
+                      ],
+                      {
+                        "opacity": 1,
+                      },
+                      {
+                        "animationDuration": 350,
+                        "animationName": {
+                          "from": {
+                            "opacity": 0,
+                          },
+                          "to": {
+                            "opacity": 1,
+                          },
+                        },
+                        "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                      },
+                    ]
+                  }
+                >
+                  View seed phrase
+                </Text>
+                <Text
+                  accessible={false}
+                  importantForAccessibility="no-hide-descendants"
+                  numberOfLines={1}
+                  style={
+                    [
+                      [
+                        {
+                          "color": "white",
+                          "fontSize": 18,
+                          "fontWeight": "600",
+                        },
+                        {
+                          "fontSize": 16,
+                        },
+                      ],
+                      {
+                        "bottom": 0,
+                        "color": "transparent",
+                        "left": 0,
+                        "opacity": 0,
+                        "position": "absolute",
+                        "right": 0,
+                        "textShadowOffset": {
+                          "height": 0,
+                          "width": 0,
+                        },
+                        "top": 0,
+                      },
+                      {
+                        "textShadowColor": "white",
+                        "textShadowRadius": 6,
+                      },
+                      {
+                        "animationDuration": 350,
+                        "animationName": {
+                          "from": {
+                            "opacity": 1,
+                          },
+                          "to": {
+                            "opacity": 0,
+                          },
+                        },
+                        "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                      },
+                    ]
+                  }
+                >
+                  View seed phrase
+                </Text>
+              </View>
+            </div>
           </View>
         </View>
         <View
