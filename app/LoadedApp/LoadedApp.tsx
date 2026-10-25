@@ -21,6 +21,7 @@ import {
 
 import RPC from '../rpc';
 import RPCModule from '../RPCModule';
+import { StakingDayActivitySync } from '../StakingDayActivity';
 import {
   AppStateLoaded,
   TotalBalanceClass,
@@ -1946,6 +1947,7 @@ export class LoadedAppClass extends Component<
         />
 
         <ContextAppLoadedProvider value={context}>
+          <StakingDayActivitySync />
           <GestureHandlerRootView>
             <LoadedAppStack.Navigator
               screenOptions={{
