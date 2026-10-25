@@ -3482,7 +3482,7 @@ dependencies = [
 [[package]]
 name = "pepper-sync"
 version = "0.3.0"
-source = "git+https://github.com/zingolabs/zingolib-crosslink?rev=222747f745abf17bc7cbb0c70310359749529611#222747f745abf17bc7cbb0c70310359749529611"
+source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fcrosslink-main#91b2a15fdac726327119cbd94d9180bd60680b18"
 dependencies = [
  "bip32",
  "byteorder",
@@ -3510,7 +3510,7 @@ dependencies = [
  "zcash_protocol",
  "zcash_transparent",
  "zingo-memo",
- "zingo-netutils 2.0.2 (git+https://github.com/zingolabs/zingolib-crosslink?rev=222747f745abf17bc7cbb0c70310359749529611)",
+ "zingo-netutils",
  "zingo-status",
  "zip32",
 ]
@@ -8157,7 +8157,7 @@ dependencies = [
  "zcash_proofs",
  "zcash_protocol",
  "zcash_transparent",
- "zingo-netutils 2.0.2 (git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fcrosslink-main)",
+ "zingo-netutils",
  "zingo_common_components",
  "zingolib",
 ]
@@ -8165,7 +8165,7 @@ dependencies = [
 [[package]]
 name = "zingo-memo"
 version = "0.1.0"
-source = "git+https://github.com/zingolabs/zingolib-crosslink?rev=222747f745abf17bc7cbb0c70310359749529611#222747f745abf17bc7cbb0c70310359749529611"
+source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fcrosslink-main#91b2a15fdac726327119cbd94d9180bd60680b18"
 dependencies = [
  "zcash_address",
  "zcash_encoding 0.5.0",
@@ -8176,25 +8176,7 @@ dependencies = [
 [[package]]
 name = "zingo-netutils"
 version = "2.0.2"
-source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fcrosslink-main#e1ca69e0d05d891e0ae4ee6467a72cdc1f5fef5f"
-dependencies = [
- "http",
- "hyper",
- "hyper-rustls",
- "hyper-util",
- "sha2 0.10.9",
- "thiserror 2.0.18",
- "tokio",
- "tokio-rustls",
- "tonic",
- "tracing",
- "zcash_client_backend",
-]
-
-[[package]]
-name = "zingo-netutils"
-version = "2.0.2"
-source = "git+https://github.com/zingolabs/zingolib-crosslink?rev=222747f745abf17bc7cbb0c70310359749529611#222747f745abf17bc7cbb0c70310359749529611"
+source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fcrosslink-main#91b2a15fdac726327119cbd94d9180bd60680b18"
 dependencies = [
  "http",
  "hyper",
@@ -8212,7 +8194,7 @@ dependencies = [
 [[package]]
 name = "zingo-price"
 version = "0.0.1"
-source = "git+https://github.com/zingolabs/zingolib-crosslink?rev=222747f745abf17bc7cbb0c70310359749529611#222747f745abf17bc7cbb0c70310359749529611"
+source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fcrosslink-main#91b2a15fdac726327119cbd94d9180bd60680b18"
 dependencies = [
  "byteorder",
  "reqwest",
@@ -8227,7 +8209,7 @@ dependencies = [
 [[package]]
 name = "zingo-status"
 version = "0.2.0"
-source = "git+https://github.com/zingolabs/zingolib-crosslink?rev=222747f745abf17bc7cbb0c70310359749529611#222747f745abf17bc7cbb0c70310359749529611"
+source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fcrosslink-main#91b2a15fdac726327119cbd94d9180bd60680b18"
 dependencies = [
  "byteorder",
  "zcash_primitives",
@@ -8237,12 +8219,12 @@ dependencies = [
 [[package]]
 name = "zingo_common_components"
 version = "0.3.0"
-source = "git+https://github.com/zingolabs/zingolib-crosslink?rev=222747f745abf17bc7cbb0c70310359749529611#222747f745abf17bc7cbb0c70310359749529611"
+source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fcrosslink-main#91b2a15fdac726327119cbd94d9180bd60680b18"
 
 [[package]]
 name = "zingo_test_vectors"
 version = "0.0.1"
-source = "git+https://github.com/zingolabs/zingolib-crosslink?rev=222747f745abf17bc7cbb0c70310359749529611#222747f745abf17bc7cbb0c70310359749529611"
+source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fcrosslink-main#91b2a15fdac726327119cbd94d9180bd60680b18"
 dependencies = [
  "bip0039",
 ]
@@ -8250,7 +8232,7 @@ dependencies = [
 [[package]]
 name = "zingolib"
 version = "3.0.1"
-source = "git+https://github.com/zingolabs/zingolib-crosslink?rev=222747f745abf17bc7cbb0c70310359749529611#222747f745abf17bc7cbb0c70310359749529611"
+source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fcrosslink-main#91b2a15fdac726327119cbd94d9180bd60680b18"
 dependencies = [
  "append-only-vec",
  "bech32",
@@ -8305,7 +8287,7 @@ dependencies = [
  "zcash_protocol",
  "zcash_transparent",
  "zingo-memo",
- "zingo-netutils 2.0.2 (git+https://github.com/zingolabs/zingolib-crosslink?rev=222747f745abf17bc7cbb0c70310359749529611)",
+ "zingo-netutils",
  "zingo-price",
  "zingo-status",
  "zingo_common_components",
