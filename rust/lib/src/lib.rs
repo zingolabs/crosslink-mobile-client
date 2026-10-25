@@ -388,7 +388,7 @@ pub fn init_new(
 ) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         reset_lightclient();
-        let (config, lightwalletd_uri) = match construct_uri_load_config(
+        let (config, _lightwalletd_uri) = match construct_uri_load_config(
             server_uri,
             chain_hint,
             performance_level,
@@ -397,28 +397,15 @@ pub fn init_new(
             Ok(c) => c,
             Err(e) => return Ok(format!("Error: {e}")),
         };
-        let chain_height = match RT.block_on(async move {
-            zingolib::grpc_connector::get_latest_block(lightwalletd_uri)
-                .await
-                .map(|block_id| BlockHeight::from_u32(block_id.height as u32))
-        }) {
-            Ok(h) => h,
-            Err(e) => return Ok(format!("Error: {e}")),
-        };
-        let birthday = match RT.block_on(LightClient::fresh_wallet_birthday(&config, chain_height))
-        {
-            Ok(birthday) => birthday,
-            Err(e) => return Ok(format!("Error: {e}")),
-        };
-        let lightclient = match LightClient::new_with_birthday(
-            config,
-            birthday,
-            false,
-            SeedDerivation::Zip32Standard,
-        ) {
-            Ok(l) => l,
-            Err(e) => return Ok(format!("Error: {e}")),
-        };
+        // Offline: a fresh wallet needs no indexer contact. Its birthday is the
+        // chain's Sapling activation height, so the first online sync scans the
+        // whole shielded history but the wallet is correct regardless of which
+        // note commitment tree state the indexer later serves.
+        let lightclient =
+            match LightClient::new_offline(config, false, SeedDerivation::Zip32Standard) {
+                Ok(l) => l,
+                Err(e) => return Ok(format!("Error: {e}")),
+            };
         let _ = store_client(lightclient);
 
         get_seed()
