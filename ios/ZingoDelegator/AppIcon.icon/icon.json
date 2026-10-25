@@ -71,18 +71,6 @@
               573.4541521611212
             ]
           }
-        },
-        {
-          "hidden" : true,
-          "image-name" : "pendrake-onboarding.png",
-          "name" : "pendrake-onboarding",
-          "position" : {
-            "scale" : 1.0100000000000002,
-            "translation-in-points" : [
-              0,
-              -49.4199999999999
-            ]
-          }
         }
       ],
       "shadow" : {
