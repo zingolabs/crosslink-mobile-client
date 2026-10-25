@@ -28,6 +28,7 @@ exports[`Component Button - test Button Primary - snapshot 1`] = `
     [
       {
         "alignItems": "center",
+        "alignSelf": "stretch",
         "borderRadius": 9999,
         "justifyContent": "center",
         "minWidth": 160,
@@ -160,6 +161,7 @@ exports[`Component Button - test Button Secondary - snapshot 1`] = `
     [
       {
         "alignItems": "center",
+        "alignSelf": "stretch",
         "borderRadius": 9999,
         "justifyContent": "center",
         "minWidth": 160,

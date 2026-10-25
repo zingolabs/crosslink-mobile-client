@@ -39,7 +39,7 @@ const LiquidPrimaryButton: React.FC<Props> = ({
 
   if (!isLiquidGlassSupported) {
     return (
-      <View style={style}>
+      <View style={[styles.fallback, style]}>
         <NativePrimaryFallback
           title={title}
           onPress={onPress}
@@ -81,6 +81,7 @@ const styles = StyleSheet.create({
     borderRadius: radiusPill,
     paddingHorizontal: 20,
     paddingVertical: 14,
+    alignSelf: 'stretch',
     minWidth: 160,
     alignItems: 'center',
     justifyContent: 'center',
@@ -91,7 +92,6 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
   },
   fallback: {
-    backgroundColor: '#4f8cff',
     alignSelf: 'stretch',
   },
   disabled: {
