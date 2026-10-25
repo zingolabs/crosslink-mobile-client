@@ -674,6 +674,7 @@ exports[`Component Memo - test Memo - snapshot 1`] = `
             [
               {
                 "alignItems": "center",
+                "alignSelf": "stretch",
                 "borderRadius": 9999,
                 "justifyContent": "center",
                 "minWidth": 160,

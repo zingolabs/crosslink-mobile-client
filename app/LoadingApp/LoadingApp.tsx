@@ -1107,16 +1107,9 @@ export class LoadingAppClass extends Component<
   };
 
   createNewWallet = async (): Promise<void> => {
-    if (
-      !this.state.netInfo.isConnected ||
-      this.state.selectIndexerServer === SelectServerEnum.offline
-    ) {
-      this.addLastSnackbar({
-        message: this.state.translate('loadedapp.connection-error') as string,
-        screenName: [this.screenName],
-      });
-      return;
-    }
+    // creating a wallet works offline: the native side derives the seed and sets
+    // the birthday without contacting the indexer. the first sync needs the
+    // network, not the creation itself.
     this.setState({ actionButtonsDisabled: true });
     let seed: string = await RPCModule.createNewWallet(
       this.state.indexerServer.uri,

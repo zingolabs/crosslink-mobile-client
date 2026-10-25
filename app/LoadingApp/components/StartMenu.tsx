@@ -194,9 +194,9 @@ const StartMenu: React.FunctionComponent<StartMenuProps> = ({
             />
           </Animated.View>
 
-          <View style={styles.fill}>
-            <Animated.View style={enter}>
-              <Animated.View style={glass}>
+          <View style={[styles.fill, styles.stretch]}>
+            <Animated.View style={[enter, styles.stretch]}>
+              <Animated.View style={[glass, styles.stretch]}>
                 <LiquidPrimaryButton
                   title={'Create new wallet'}
                   disabled={actionButtonsDisabled}
@@ -238,6 +238,9 @@ const styles = StyleSheet.create({
   },
   fill: {
     flex: 1,
+  },
+  stretch: {
+    alignSelf: 'stretch',
   },
   headerRow: {
     height: 48,
