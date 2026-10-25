@@ -29,6 +29,13 @@
 		636F67D21F11DB913699C327 /* libPods-ZingoDelegator-ZingoDelegatorTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 27E949F1F804CCF45A946383 /* libPods-ZingoDelegator-ZingoDelegatorTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		98FA38B42F735F5100BBEC14 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 98FA38B32F735F5100BBEC14 /* libsqlite3.tbd */; };
+		7DA1E0A10000000000000001 /* StakingDayActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA1E0C10000000000000001 /* StakingDayActivityAttributes.swift */; };
+		7DA1E0A10000000000000002 /* StakingDayActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA1E0C10000000000000001 /* StakingDayActivityAttributes.swift */; };
+		7DA1E0A10000000000000003 /* StakingDayActivityModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA1E0C10000000000000002 /* StakingDayActivityModule.swift */; };
+		7DA1E0A10000000000000004 /* StakingDayActivityBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DA1E0C10000000000000003 /* StakingDayActivityBridge.m */; };
+		7DA1E0A10000000000000005 /* StakingDayWidgetLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA1E0C10000000000000004 /* StakingDayWidgetLiveActivity.swift */; };
+		7DA1E0A10000000000000006 /* StakingDayWidgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 7DA1E0C10000000000000006 /* StakingDayWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, CodeSignOnCopy, ); }; };
+		7DA1E0A10000000000000007 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7DA1E0C10000000000000007 /* Media.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,6 +45,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
 			remoteInfo = ZingoDelegator;
+		};
+		7DA1E0B10000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7DA1E0F10000000000000001;
+			remoteInfo = StakingDayWidgetExtension;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -69,6 +83,13 @@
 		E23A5F91E7AF3121B1C28726 /* Pods-ZingoDelegator.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ZingoDelegator.debug.xcconfig"; path = "Target Support Files/Pods-ZingoDelegator/Pods-ZingoDelegator.debug.xcconfig"; sourceTree = "<group>"; };
 		E2956C7E9A66C701169F867A /* Pods-ZingoDelegator-ZingoDelegatorTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ZingoDelegator-ZingoDelegatorTests.release.xcconfig"; path = "Target Support Files/Pods-ZingoDelegator-ZingoDelegatorTests/Pods-ZingoDelegator-ZingoDelegatorTests.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		7DA1E0C10000000000000001 /* StakingDayActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StakingDayActivityAttributes.swift; sourceTree = "<group>"; };
+		7DA1E0C10000000000000002 /* StakingDayActivityModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StakingDayActivityModule.swift; sourceTree = "<group>"; };
+		7DA1E0C10000000000000003 /* StakingDayActivityBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StakingDayActivityBridge.m; sourceTree = "<group>"; };
+		7DA1E0C10000000000000004 /* StakingDayWidgetLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StakingDayWidgetLiveActivity.swift; sourceTree = "<group>"; };
+		7DA1E0C10000000000000005 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7DA1E0C10000000000000006 /* StakingDayWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = StakingDayWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		7DA1E0C10000000000000007 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,6 +112,13 @@
 				1F7D321D2B71D44800D2879C /* SystemConfiguration.framework in Frameworks */,
 				1F8815602BD31176006490E1 /* Zingolib.xcframework in Frameworks */,
 				53B35B50EB3644BA29BB1977 /* libPods-ZingoDelegator.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7DA1E0D10000000000000002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -121,6 +149,8 @@
 				1F70326429905E6A001D70A2 /* ZingoDelegator.entitlements */,
 				1F5569262BBCB4D900F2CD6C /* RPCModule.swift */,
 				1F5569282BBCB98100F2CD6C /* RPCModuleBridge.m */,
+				7DA1E0C10000000000000002 /* StakingDayActivityModule.swift */,
+				7DA1E0C10000000000000003 /* StakingDayActivityBridge.m */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
@@ -156,8 +186,10 @@
 			isa = PBXGroup;
 			children = (
 				1F5E677A2BD30D0A007B17AA /* zingo.swift */,
+				7DA1E0C10000000000000001 /* StakingDayActivityAttributes.swift */,
 				1F0893FE2BA4C4380089FD88 /* PrivacyInfo.xcprivacy */,
 				13B07FAE1A68108700A75B9A /* ZingoDelegator */,
+				7DA1E0E10000000000000001 /* StakingDayWidget */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* ZingoDelegatorTests */,
 				83CBBA001A601CBA00E9B192 /* Products */,
@@ -174,8 +206,19 @@
 			children = (
 				13B07F961A680F5B00A75B9A /* ZingoDelegator.app */,
 				00E356EE1AD99517003FC87E /* ZingoDelegatorTests.xctest */,
+				7DA1E0C10000000000000006 /* StakingDayWidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		7DA1E0E10000000000000001 /* StakingDayWidget */ = {
+			isa = PBXGroup;
+			children = (
+				7DA1E0C10000000000000004 /* StakingDayWidgetLiveActivity.swift */,
+				7DA1E0C10000000000000007 /* Media.xcassets */,
+				7DA1E0C10000000000000005 /* Info.plist */,
+			);
+			path = StakingDayWidget;
 			sourceTree = "<group>";
 		};
 		8BB7EBE9935B479E64CBB9A8 /* Pods */ = {
@@ -222,6 +265,7 @@
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
+				7DA1E0D10000000000000004 /* Embed App Extensions */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				1F67CE4E2E6798530075192B /* ShellScript */,
 				47D36ACE517188BDAA5E1090 /* [CP] Embed Pods Frameworks */,
@@ -230,11 +274,29 @@
 			buildRules = (
 			);
 			dependencies = (
+				7DA1E0F10000000000000002 /* PBXTargetDependency */,
 			);
 			name = ZingoDelegator;
 			productName = ZingoDelegator;
 			productReference = 13B07F961A680F5B00A75B9A /* ZingoDelegator.app */;
 			productType = "com.apple.product-type.application";
+		};
+		7DA1E0F10000000000000001 /* StakingDayWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7DA1E0010000000000000003 /* Build configuration list for PBXNativeTarget "StakingDayWidgetExtension" */;
+			buildPhases = (
+				7DA1E0D10000000000000001 /* Sources */,
+				7DA1E0D10000000000000002 /* Frameworks */,
+				7DA1E0D10000000000000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = StakingDayWidgetExtension;
+			productName = StakingDayWidgetExtension;
+			productReference = 7DA1E0C10000000000000006 /* StakingDayWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -251,6 +313,9 @@
 					};
 					13B07F861A680F5B00A75B9A = {
 						LastSwiftMigration = 1530;
+					};
+					7DA1E0F10000000000000001 = {
+						CreatedOnToolsVersion = 26.5;
 					};
 				};
 			};
@@ -269,6 +334,7 @@
 			targets = (
 				13B07F861A680F5B00A75B9A /* ZingoDelegator */,
 				00E356ED1AD99517003FC87E /* ZingoDelegatorTests */,
+				7DA1E0F10000000000000001 /* StakingDayWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -292,7 +358,29 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		7DA1E0D10000000000000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7DA1E0A10000000000000007 /* Media.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		7DA1E0D10000000000000004 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				7DA1E0A10000000000000006 /* StakingDayWidgetExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
 		00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */ = {
@@ -479,8 +567,20 @@
 				1F0338192C48782D00A3FC49 /* Constants.swift in Sources */,
 				1F5CEBBB2BBF025700E2551A /* AppDelegate.swift in Sources */,
 				1F5E677B2BD30D0A007B17AA /* zingo.swift in Sources */,
+				7DA1E0A10000000000000001 /* StakingDayActivityAttributes.swift in Sources */,
+				7DA1E0A10000000000000003 /* StakingDayActivityModule.swift in Sources */,
+				7DA1E0A10000000000000004 /* StakingDayActivityBridge.m in Sources */,
 				1F5569272BBCB4D900F2CD6C /* RPCModule.swift in Sources */,
 				1F5569292BBCB98100F2CD6C /* RPCModuleBridge.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7DA1E0D10000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7DA1E0A10000000000000002 /* StakingDayActivityAttributes.swift in Sources */,
+				7DA1E0A10000000000000005 /* StakingDayWidgetLiveActivity.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -491,6 +591,11 @@
 			isa = PBXTargetDependency;
 			target = 13B07F861A680F5B00A75B9A /* ZingoDelegator */;
 			targetProxy = 00E356F41AD99517003FC87E /* PBXContainerItemProxy */;
+		};
+		7DA1E0F10000000000000002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7DA1E0F10000000000000001 /* StakingDayWidgetExtension */;
+			targetProxy = 7DA1E0B10000000000000001 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -643,6 +748,55 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+		7DA1E0010000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 38;
+				DEVELOPMENT_TEAM = 788KRST4S8;
+				INFOPLIST_FILE = StakingDayWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = org.ZingoLabs.ZingoDelegator.StakingDayWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		7DA1E0010000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 38;
+				DEVELOPMENT_TEAM = 788KRST4S8;
+				INFOPLIST_FILE = StakingDayWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = org.ZingoLabs.ZingoDelegator.StakingDayWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -819,6 +973,15 @@
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
 				13B07F951A680F5B00A75B9A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7DA1E0010000000000000003 /* Build configuration list for PBXNativeTarget "StakingDayWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7DA1E0010000000000000001 /* Debug */,
+				7DA1E0010000000000000002 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
