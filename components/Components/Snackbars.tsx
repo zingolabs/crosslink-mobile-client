@@ -1,13 +1,13 @@
-/* eslint-disable react-native/no-inline-styles */
-import React, { useEffect, useCallback, useState, useRef } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import {
   SnackbarDurationEnum,
   SnackbarType,
   ScreenEnum,
 } from '../../app/AppState';
 import { useToast } from 'react-native-toastier';
-import { useTheme } from '../../app/theme';
+import { radiusPill, space, text, useTheme } from '../../app/theme';
+import type { ThemeColors } from '../../app/theme';
 
 type SnackbarProps = {
   snackbars: SnackbarType[];
@@ -15,18 +15,73 @@ type SnackbarProps = {
   screenName: ScreenEnum;
 };
 
+// short  - 1 sec
+// long   - 4 sec
+// longer - 8 sec
+const durationToMs = (duration: SnackbarDurationEnum | undefined): number => {
+  switch (duration) {
+    case SnackbarDurationEnum.short:
+      return 1000;
+    case SnackbarDurationEnum.longer:
+      return 8000;
+    default:
+      return 4000;
+  }
+};
+
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    // toastier shrink-wraps the pill and centers it; keep it compact
+    content: {
+      backgroundColor: colors.bgSurfaceRaised,
+      borderColor: colors.borderFaint,
+      borderWidth: 1,
+      borderRadius: radiusPill,
+      // keeps the pill above the tab bar
+      marginBottom: 100,
+      paddingLeft: space.lg,
+      paddingRight: space.sm,
+      paddingVertical: space.sm,
+    },
+    textContainer: {
+      flex: 0,
+      padding: 0,
+      margin: 0,
+    },
+    message: {
+      ...text.footnote,
+      color: colors.fgDefault,
+      padding: 0,
+      margin: 0,
+    },
+    close: {
+      justifyContent: 'center',
+      paddingLeft: space.md,
+      paddingVertical: space.sm,
+    },
+    closeText: {
+      ...text.footnote,
+      fontWeight: '600',
+      color: colors.fgMuted,
+    },
+  });
+
 const Snackbars: React.FunctionComponent<SnackbarProps> = ({
   snackbars,
   removeFirstSnackbar,
   screenName,
 }) => {
   const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const snacking = useRef<boolean>(false);
   const snackingMessage = useRef<string>(undefined);
   const [duration, setDuration] = useState<number>(4000);
   const toast = useToast();
-  const snackbarsFiltered = snackbars.filter((s: SnackbarType) =>
-    s.screenName.includes(screenName),
+
+  const snackbarsFiltered = useMemo(
+    () =>
+      snackbars.filter((s: SnackbarType) => s.screenName.includes(screenName)),
+    [snackbars, screenName],
   );
 
   const handleSnackbarClose = useCallback(() => {
@@ -35,7 +90,6 @@ const Snackbars: React.FunctionComponent<SnackbarProps> = ({
     }
     // we need some time between messages
     setTimeout(() => {
-      //console.log('remove first snackbar', snackbarsFiltered[0]?.message, snackingMessage.current);
       snacking.current = false;
       snackingMessage.current = undefined;
       removeFirstSnackbar(screenName);
@@ -43,67 +97,29 @@ const Snackbars: React.FunctionComponent<SnackbarProps> = ({
     }, 0);
   }, [removeFirstSnackbar, screenName, snackbarsFiltered]);
 
-  // short  - 1 sec
-  // long   - 4 sec
-  // longer - 8 sec
-
   useEffect(() => {
-    if (snackbarsFiltered.length > 0 && !snacking.current) {
-      const currentSnackbar = snackbarsFiltered[0];
-      snacking.current = true;
-      snackingMessage.current = currentSnackbar.message;
-      setDuration(
-        currentSnackbar.duration === SnackbarDurationEnum.longer
-          ? 8000
-          : currentSnackbar.duration === SnackbarDurationEnum.short
-            ? 1000
-            : 4000,
-      );
-      //console.log('show snackbar', currentSnackbar);
-      toast.show({
-        message: currentSnackbar.message,
-        animation: 'zoomIn',
-        duration,
-        right: (
-          <Pressable onPress={() => toast.clear()} style={{ padding: 10 }}>
-            <Text style={{ fontSize: 18 }}>✕</Text>
-          </Pressable>
-        ),
-        textContainerStyle: {
-          padding: 0,
-          margin: 0,
-          paddingVertical: 10,
-        },
-        messageStyle: {
-          color: colors.bgCanvas,
-          fontSize: 15,
-          padding: 0,
-          margin: 0,
-        },
-        titleStyle: {
-          fontSize: 15,
-          fontWeight: 'normal',
-          padding: 0,
-          margin: 0,
-        },
-        contentContainerStyle: {
-          flex: 0.999,
-          backgroundColor: colors.bgMuted,
-          marginBottom: 100,
-          padding: 0,
-          paddingLeft: 20,
-          paddingRight: 15,
-        },
-      });
+    if (snackbarsFiltered.length === 0 || snacking.current) {
+      return;
     }
-  }, [
-    colors.bgCanvas,
-    colors.bgMuted,
-    snackbarsFiltered,
-    snackbarsFiltered.length,
-    duration,
-    toast,
-  ]);
+    const currentSnackbar = snackbarsFiltered[0];
+    snacking.current = true;
+    snackingMessage.current = currentSnackbar.message;
+    const ms = durationToMs(currentSnackbar.duration);
+    setDuration(ms);
+    toast.show({
+      message: currentSnackbar.message,
+      animation: 'zoomIn',
+      duration: ms,
+      right: (
+        <Pressable onPress={() => toast.clear()} style={styles.close}>
+          <Text style={styles.closeText}>✕</Text>
+        </Pressable>
+      ),
+      textContainerStyle: styles.textContainer,
+      messageStyle: styles.message,
+      contentContainerStyle: styles.content,
+    });
+  }, [snackbarsFiltered, toast, styles]);
 
   useEffect(() => {
     if (snackbarsFiltered.length > 0 && snacking.current) {
@@ -120,17 +136,6 @@ const Snackbars: React.FunctionComponent<SnackbarProps> = ({
     snackbarsFiltered,
     snackbarsFiltered.length,
   ]);
-
-  useEffect(() => {
-    //console.log('MOUNTING - snackbar');
-    return () => {
-      setTimeout(() => {
-        //console.log('CLOSING - waiting for some message');
-      }, 2 * 1000);
-    };
-  }, [toast]);
-
-  //console.log('snackbars', screenName, snackbarsFiltered);
 
   return <View />;
 };

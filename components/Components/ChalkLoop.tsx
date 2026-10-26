@@ -22,6 +22,11 @@ const SHEETS = {
     frames: 48,
     cols: 8,
   },
+  knot: {
+    source: require('../../assets/art/knot-24.png'),
+    frames: 48,
+    cols: 8,
+  },
 } as const;
 
 export type ChalkLoopName = keyof typeof SHEETS;
@@ -31,6 +36,10 @@ const CYCLE_MS = 2000;
 type ChalkLoopProps = {
   name: ChalkLoopName;
   size?: number;
+  /**
+   * Softens the chalk (iOS Image.blurRadius). Android ignores it.
+   */
+  blurRadius?: number;
 };
 
 /**
@@ -40,7 +49,7 @@ type ChalkLoopProps = {
  * cell whenever the row and column clocks drifted apart.
  * Reduced motion holds the first frame.
  */
-const ChalkLoop: React.FC<ChalkLoopProps> = ({ name, size = 200 }) => {
+const ChalkLoop: React.FC<ChalkLoopProps> = ({ name, size = 200, blurRadius }) => {
   const reduced = useReducedMotion();
   const sheet = SHEETS[name];
   const rows = sheet.frames / sheet.cols;
@@ -76,6 +85,7 @@ const ChalkLoop: React.FC<ChalkLoopProps> = ({ name, size = 200 }) => {
         <Image
           source={sheet.source}
           accessibilityIgnoresInvertColors
+          blurRadius={blurRadius}
           style={{ width: size * sheet.cols, height: size * rows }}
         />
       </Animated.View>

@@ -31,13 +31,21 @@ import { ToastProvider, useToast } from 'react-native-toastier';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../Header';
-import { BlurView } from '@react-native-community/blur';
-import { useTheme } from '../../app/theme';
+import ChalkLoop from '../Components/ChalkLoop';
+import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
+import Animated, {
+  cubicBezier,
+  useReducedMotion,
+} from 'react-native-reanimated';
+import type { CSSTransitionProperties } from 'react-native-reanimated';
+import { curve, duration as motionDuration, useTheme } from '../../app/theme';
 
 type SeedProps = NativeStackScreenProps<
   LoadedAppStackParamList,
   RouteEnum.Seed
 >;
+
+const EASE_OUT = cubicBezier(curve[0], curve[1], curve[2], curve[3]);
 
 const Seed: React.FunctionComponent<SeedProps> = ({}) => {
   const navigation: any = useNavigation();
@@ -60,6 +68,21 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
   const [expandSeed, setExpandSeed] = useState<boolean>(true);
   const [expandBirthday, setExpandBithday] = useState<boolean>(true);
   const [seedBlurred, setSeedBlurred] = useState<boolean>(true);
+  const reducedMotion = useReducedMotion();
+
+  const gridTransition: CSSTransitionProperties = {
+    transitionProperty: reducedMotion
+      ? ['opacity']
+      : ['opacity', 'transform'],
+    transitionDuration: reducedMotion ? '120ms' : `${motionDuration.enter}ms`,
+    transitionTimingFunction: EASE_OUT,
+  };
+
+  const chalkTransition: CSSTransitionProperties = {
+    transitionProperty: ['opacity'],
+    transitionDuration: reducedMotion ? '120ms' : `${motionDuration.enter}ms`,
+    transitionTimingFunction: EASE_OUT,
+  };
 
   const seedPhrase = wallet.seed || '';
   const birthdayNumber = (wallet.birthday && wallet.birthday.toString()) || '';
@@ -162,12 +185,6 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
             justifyContent: 'flex-start',
           }}
         >
-          <FadeText style={{ padding: 10, textAlign: 'center', fontSize: 17 }}>
-            {
-              'Your seed phrase is the key to your wallet. Back it up so you can restore your wallet if you lose or damage your device '
-            }
-          </FadeText>
-
           {rows.length > 0 && !!seedPhrase && (
             <View
               style={{
@@ -175,71 +192,94 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                 position: 'relative',
                 borderRadius: 20,
                 overflow: 'hidden',
+                padding: 8,
+                rowGap: 8,
               }}
             >
-              {rows.map((row, rowIndex) => (
-                <View
-                  key={rowIndex}
-                  style={{ flexDirection: 'row', columnGap: 8 }}
-                >
-                  {row.map((word, colIndex) => {
-                    const index = rowIndex * 3 + colIndex;
-                    return (
-                      <View
-                        key={index}
-                        style={{
-                          flexDirection: 'row',
-                          justifyContent: 'flex-start',
-                          borderColor: colors.borderFaint,
-                          borderWidth: 1,
-                          borderRadius: 25,
-                          backgroundColor: colors.bgSurface,
-                          width: '30%',
-                          minWidth: '30%',
-                          alignItems: 'center',
-                          paddingHorizontal: 10,
-                          paddingVertical:
-                            Platform.OS === GlobalConst.platformOSandroid
-                              ? 0
-                              : 5,
-                          marginBottom: 5,
-                        }}
-                      >
-                        <FadeText>{`${index + 1}`}.</FadeText>
-                        <TextInput
+              <Animated.View
+                style={[
+                  {
+                    rowGap: 8,
+                    opacity: seedBlurred ? 0 : 1,
+                    transform: [
+                      { scale: reducedMotion ? 1 : seedBlurred ? 0.98 : 1 },
+                    ],
+                    ...gridTransition,
+                  },
+                ]}
+                pointerEvents={seedBlurred ? 'none' : 'auto'}
+                accessibilityElementsHidden={seedBlurred}
+                importantForAccessibility={
+                  seedBlurred ? 'no-hide-descendants' : 'auto'
+                }
+              >
+                {rows.map((row, rowIndex) => (
+                  <View
+                    key={rowIndex}
+                    style={{
+                      flexDirection: 'row',
+                      columnGap: 8,
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {row.map((word, colIndex) => {
+                      const index = rowIndex * 3 + colIndex;
+                      return (
+                        <View
+                          key={index}
                           style={{
-                            flexGrow: 1,
-                            flexShrink: 1,
-                            color: colors.fgDefault,
-                            fontWeight: '400',
-                            fontSize: 15,
-                            lineHeight: 15,
-                            backgroundColor: 'transparent',
-                            marginTop:
+                            flexDirection: 'row',
+                            justifyContent: 'flex-start',
+                            borderColor: colors.borderFaint,
+                            borderWidth: 1,
+                            borderRadius: 25,
+                            backgroundColor: colors.bgSurface,
+                            width: '30%',
+                            minWidth: '30%',
+                            alignItems: 'center',
+                            paddingHorizontal: 10,
+                            paddingVertical:
                               Platform.OS === GlobalConst.platformOSandroid
                                 ? 0
                                 : 5,
-                            marginLeft:
-                              Platform.OS === GlobalConst.platformOSandroid
-                                ? 0
-                                : 3,
                           }}
-                          value={word}
-                          editable={false}
-                          keyboardType="default"
-                          autoCapitalize="none"
-                          autoCorrect={false}
-                          returnKeyType="done"
-                        />
-                      </View>
-                    );
-                  })}
-                </View>
-              ))}
+                        >
+                          <FadeText>{`${index + 1}`}.</FadeText>
+                          <TextInput
+                            style={{
+                              flexGrow: 1,
+                              flexShrink: 1,
+                              color: colors.fgDefault,
+                              fontWeight: '400',
+                              fontSize: 15,
+                              lineHeight: 15,
+                              backgroundColor: 'transparent',
+                              marginTop:
+                                Platform.OS === GlobalConst.platformOSandroid
+                                  ? 0
+                                  : 5,
+                              marginLeft:
+                                Platform.OS === GlobalConst.platformOSandroid
+                                  ? 0
+                                  : 3,
+                            }}
+                            value={word}
+                            editable={false}
+                            keyboardType="default"
+                            autoCapitalize="none"
+                            autoCorrect={false}
+                            returnKeyType="done"
+                          />
+                        </View>
+                      );
+                    })}
+                  </View>
+                ))}
+              </Animated.View>
 
-              {seedBlurred && (
-                <View
-                  style={{
+              <Animated.View
+                style={[
+                  {
                     position: 'absolute',
                     top: 0,
                     left: 0,
@@ -247,57 +287,36 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                     bottom: 0,
                     justifyContent: 'center',
                     alignItems: 'center',
-                  }}
-                >
-                  <BlurView
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                    }}
-                    blurType="dark"
-                    blurAmount={2}
-                    reducedTransparencyFallbackColor="rgba(0,0,0,0.3)"
-                  />
+                    opacity: seedBlurred ? 1 : 0,
+                    ...chalkTransition,
+                  },
+                ]}
+                pointerEvents={seedBlurred ? 'auto' : 'none'}
+                accessibilityElementsHidden={!seedBlurred}
+                importantForAccessibility={
+                  !seedBlurred ? 'no-hide-descendants' : 'auto'
+                }
+              >
+                  <ChalkLoop name="knot" size={240} blurRadius={2} />
 
-                  <View
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                    }}
-                  />
-
-                  <TouchableOpacity
+                  <LiquidPrimaryButton
+                    title="View seed phrase"
                     onPress={() => setSeedBlurred(false)}
+                    tintColor="rgba(255,255,255,0.10)"
                     style={{
-                      backgroundColor: colors.bgAccent,
+                      alignSelf: 'center',
                       borderRadius: 20,
                       paddingHorizontal: 18,
                       paddingVertical: 10,
-                      alignSelf: 'center',
+                      minWidth: 0,
                     }}
-                  >
-                    <RegText
-                      style={{
-                        color: 'white',
-                        fontSize: 16,
-                        fontWeight: 600,
-                      }}
-                    >
-                      View seed phrase
-                    </RegText>
-                  </TouchableOpacity>
-                </View>
-              )}
+                    textStyle={{ fontSize: 16 }}
+                  />
+              </Animated.View>
             </View>
           )}
 
-          {!!seedPhrase && (
+          {!seedBlurred && !!seedPhrase && (
             <TouchableOpacity
               style={{ alignSelf: 'center' }}
               onPress={() => {
