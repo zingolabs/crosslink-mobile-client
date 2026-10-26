@@ -12,9 +12,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>ZingoDelegator</string>
-	<key>NSSupportsLiveActivities</key>
-	<true/>
+	<string>Delegator</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -65,6 +63,8 @@
 	<string>Zingo Delegator does not use any Location Features</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Zingo Delegator export/share address QRCodes as images</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UIBackgroundModes</key>
