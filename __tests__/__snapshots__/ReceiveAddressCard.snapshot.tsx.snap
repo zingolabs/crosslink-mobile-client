@@ -1,0 +1,270 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`Component ReceiveAddressCard - test ReceiveAddressCard - snapshot 1`] = `
+<View
+  style={
+    {
+      "flexDirection": "column",
+      "width": "100%",
+    }
+  }
+>
+  <RCTScrollView
+    contentContainerStyle={
+      {
+        "alignItems": "center",
+        "paddingBottom": 20,
+      }
+    }
+    style={
+      {
+        "width": "100%",
+      }
+    }
+  >
+    <View>
+      <View
+        style={
+          [
+            {
+              "borderRadius": 15,
+              "marginHorizontal": 20,
+              "marginTop": 20,
+              "padding": 12,
+            },
+            {
+              "backgroundColor": "#c3c3c3",
+            },
+          ]
+        }
+      >
+        <mockQRCode />
+      </View>
+      <View
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 20,
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "marginHorizontal": 20,
+              "marginTop": 16,
+              "paddingHorizontal": 12,
+              "paddingVertical": 4,
+            },
+            {
+              "backgroundColor": "#222223",
+            },
+          ]
+        }
+      >
+        <View
+          accessibilityLabel="copy"
+          accessibilityRole="button"
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            {
+              "flexShrink": 1,
+            }
+          }
+        >
+          <Text
+            numberOfLines={1}
+            style={
+              [
+                {
+                  "fontFamily": "Menlo",
+                  "fontSize": 16,
+                  "fontWeight": "400",
+                  "letterSpacing": 0,
+                  "lineHeight": 21,
+                },
+                {
+                  "color": "#888888",
+                },
+              ]
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 17,
+                    "fontWeight": "400",
+                    "letterSpacing": -0.41,
+                    "lineHeight": 22,
+                  },
+                  {
+                    "color": "#18bd18",
+                  },
+                ]
+              }
+            >
+              UA-orchard-sapling1
+            </Text>
+            <Text
+              style={
+                {
+                  "fontSize": 6.800000000000001,
+                }
+              }
+            >
+               
+            </Text>
+            <Text>
+              234567...567890
+            </Text>
+          </Text>
+        </View>
+        <View
+          accessibilityLabel="copy"
+          accessibilityRole="button"
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            {
+              "paddingLeft": 8,
+              "paddingVertical": 4,
+            }
+          }
+        >
+          <RNSVGSvgView
+            align="xMidYMid"
+            bbHeight={18}
+            bbWidth={18}
+            fill="none"
+            focusable={false}
+            height={18}
+            meetOrSlice={0}
+            minX={0}
+            minY={0}
+            stroke="#888888"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            style={
+              [
+                {
+                  "backgroundColor": "transparent",
+                  "borderWidth": 0,
+                },
+                {
+                  "flex": 0,
+                  "height": 18,
+                  "opacity": 0.9,
+                  "width": 18,
+                },
+              ]
+            }
+            vbHeight={24}
+            vbWidth={24}
+            width={18}
+          >
+            <RNSVGGroup
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeLinecap",
+                  "strokeLinejoin",
+                ]
+              }
+              stroke={
+                {
+                  "payload": 4287137928,
+                  "type": 0,
+                }
+              }
+              strokeLinecap={1}
+              strokeLinejoin={1}
+              strokeWidth={2}
+            >
+              <RNSVGRect
+                fill={
+                  {
+                    "payload": 4278190080,
+                    "type": 0,
+                  }
+                }
+                height={14}
+                rx={2}
+                ry={2}
+                width={14}
+                x={8}
+                y={8}
+              />
+              <RNSVGPath
+                d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
+                fill={
+                  {
+                    "payload": 4278190080,
+                    "type": 0,
+                  }
+                }
+              />
+            </RNSVGGroup>
+          </RNSVGSvgView>
+        </View>
+      </View>
+    </View>
+  </RCTScrollView>
+</View>
+`;

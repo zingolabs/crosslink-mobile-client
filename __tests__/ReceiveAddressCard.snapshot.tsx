@@ -19,7 +19,6 @@ describe('Component ReceiveAddressCard - test', () => {
       <ReceiveAddressCard
         address={mockAddresses[0]}
         screenName={ScreenEnum.Receive}
-        show={set}
         onChangeTab={set}
       />,
     );

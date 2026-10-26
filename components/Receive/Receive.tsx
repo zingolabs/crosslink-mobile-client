@@ -21,8 +21,7 @@ import {
 } from 'react-native-tab-view';
 import { useNavigation } from '@react-navigation/native';
 
-import Clipboard from '@react-native-clipboard/clipboard';
-import SingleAddress from '../Components/SingleAddress';
+import ReceiveAddressCard from './components/ReceiveAddressCard';
 import { LoadedAppStackParamList } from '../../app/types';
 import {
   useAppLoadedActions,
@@ -36,7 +35,6 @@ import {
   UnifiedAddressClass,
   TransparentAddressClass,
   ScreenEnum,
-  SnackbarDurationEnum,
   RouteEnum,
 } from '../../app/AppState';
 import { RPCAddressScopeEnum } from '../../app/rpc/enums/RPCAddressScopeEnum';
@@ -50,7 +48,6 @@ import VerifyAddress from './components/VerifyAddress';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import Snackbars from '../Components/Snackbars';
 import TransparentWarning from './components/TransparentWarning';
-import ExpandedAddress from './components/ExpandedAddress';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../Header';
@@ -73,8 +70,7 @@ const Receive: React.FunctionComponent<ReceiveProps> = (
   },
 ) => {
   const navigation: any = useNavigation();
-  const { translate, removeFirstSnackbar, addLastSnackbar } =
-    useAppLoadedActions();
+  const { translate, removeFirstSnackbar } = useAppLoadedActions();
   const { addresses, defaultUnifiedAddress } = useAppLoadedWallet();
   const { snackbars } = useAppLoadedUi();
   const { colors } = useTheme();
@@ -88,13 +84,12 @@ const Receive: React.FunctionComponent<ReceiveProps> = (
   );
 
   const [uAddr, setUAddr] = useState<UnifiedAddressClass[]>([]);
-  const [tAddr, setTAddr] = useState<TransparentAddressClass[]>([]);
+  const [, setTAddr] = useState<TransparentAddressClass[]>([]);
   const [uAddrIndex, setUAddrIndex] = useState<number | null>(null);
-  const [tAddrIndex, setTAddrIndex] = useState<number | null>(null);
+  const [, setTAddrIndex] = useState<number | null>(null);
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [indexBottomSheet, setIndexBottomSheet] = useState<number>(-1);
-  const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [heightLayout, setHeightLayout] = useState<number>(10);
 
   const insets = useSafeAreaInsets();
@@ -110,12 +105,6 @@ const Receive: React.FunctionComponent<ReceiveProps> = (
     }
     return [`${snap1}%`, `${snap2}%`];
   }, [heightLayout]);
-
-  const show = useCallback((_sheetType: 'NA' | 'VA' | 'TW' | 'EA') => {
-    setSheetType(_sheetType);
-    bottomSheetRef.current?.snapToIndex(0);
-    setIndexBottomSheet(0);
-  }, []);
 
   const hide = useCallback(() => {
     setSheetType(null);
@@ -214,20 +203,11 @@ const Receive: React.FunctionComponent<ReceiveProps> = (
         component = (
           <>
             {!!addresses && !!defaultUnifiedAddress && (
-              <>
-                <SingleAddress
-                  address={uAddress}
-                  screenName={screenName}
-                  index={uAddrIndex ? uAddrIndex : 0}
-                  setIndex={setUAddrIndex}
-                  total={uAddr.length}
-                  show={show}
-                  changeIndex={setIndex}
-                  hasTransparent={tAddr && tAddr.length > 0}
-                  showMoreOptions={showMoreOptions}
-                  setShowMoreOptions={setShowMoreOptions}
-                />
-              </>
+              <ReceiveAddressCard
+                address={uAddress}
+                screenName={screenName}
+                onChangeTab={setIndex}
+              />
             )}
           </>
         );
@@ -275,21 +255,6 @@ const Receive: React.FunctionComponent<ReceiveProps> = (
       pressBehavior="close"
     />
   );
-
-  const doCopy = () => {
-    Clipboard.setString(
-      index === 0 && uAddrIndex !== null
-        ? uAddr[uAddrIndex].address
-        : index === 1 && tAddrIndex !== null
-          ? tAddr[tAddrIndex].address
-          : '',
-    );
-    addLastSnackbar({
-      message: translate('history.addresscopied') as string,
-      duration: SnackbarDurationEnum.short,
-      screenName: [screenName],
-    });
-  };
 
   const returnPage = (
     <ToastProvider>
@@ -340,25 +305,8 @@ const Receive: React.FunctionComponent<ReceiveProps> = (
             <TransparentWarning
               closeSheet={hide}
               onSuccess={() => {
-                setShowMoreOptions(false);
                 setIndex(1);
               }}
-              setHeightLayout={setHeightLayout}
-            />
-          )}
-          {sheetType === 'EA' && (
-            <ExpandedAddress
-              onCopy={doCopy}
-              closeSheet={hide}
-              title={translate('receive.title-address') as string}
-              button={translate('receive.copy-address-button') as string}
-              address={
-                index === 0 && uAddrIndex !== null
-                  ? uAddr[uAddrIndex].address
-                  : index === 1 && tAddrIndex !== null
-                    ? tAddr[tAddrIndex].address
-                    : ''
-              }
               setHeightLayout={setHeightLayout}
             />
           )}

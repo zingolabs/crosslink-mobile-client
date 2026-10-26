@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextStyle } from 'react-native';
+import { StyleProp, TextStyle, ViewStyle } from 'react-native';
 import Button from '../Button';
 import { mono } from '../../../app/theme';
 
@@ -8,7 +8,9 @@ type AddressProps = {
   startLength?: number;
   endLength?: number;
   onPress?: () => void;
-  style?: TextStyle;
+  style?: StyleProp<TextStyle>;
+  // Overrides the button surface (e.g. to inline it in a compact row).
+  containerStyle?: StyleProp<ViewStyle>;
 };
 
 const Address: React.FunctionComponent<AddressProps> = ({
@@ -17,6 +19,7 @@ const Address: React.FunctionComponent<AddressProps> = ({
   endLength = 10,
   onPress,
   style,
+  containerStyle,
 }) => {
   if (!address) {
     return null;
@@ -31,6 +34,7 @@ const Address: React.FunctionComponent<AddressProps> = ({
       onPress={onPress ? onPress : () => console.log('onPress')}
       title={shortAddress}
       textStyle={[mono, style]}
+      style={containerStyle}
     />
   );
 };
