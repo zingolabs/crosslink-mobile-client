@@ -6,25 +6,23 @@ import 'react-native';
 import React from 'react';
 
 import { render } from '@testing-library/react-native';
-import SingleAddress from '../components/Components/SingleAddress';
+import ReceiveAddressCard from '../components/Receive/components/ReceiveAddressCard';
 import { mockAddresses } from '../__mocks__/dataMocks/mockAddresses';
 import { ScreenEnum } from '../app/AppState';
 
 // test suite
-describe('Component SingleAddress - test', () => {
+describe('Component ReceiveAddressCard - test', () => {
   //snapshot test
-  test('SingleAddress - snapshot', () => {
+  test('ReceiveAddressCard - snapshot', () => {
     const set = jest.fn();
-    const single = render(
-      <SingleAddress
+    const card = render(
+      <ReceiveAddressCard
         address={mockAddresses[0]}
         screenName={ScreenEnum.Receive}
-        index={0}
-        setIndex={set}
-        total={1}
         show={set}
+        onChangeTab={set}
       />,
     );
-    expect(single.toJSON()).toMatchSnapshot();
+    expect(card.toJSON()).toMatchSnapshot();
   });
 });
