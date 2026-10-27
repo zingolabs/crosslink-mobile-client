@@ -1,6 +1,6 @@
 import 'react-native';
 
-import { quarantineLegacyWalletIfNeeded } from '../app/legacyWallet';
+import { quarantineLegacyWalletIfNeeded, quarantineUnreadableWallet } from '../app/legacyWallet';
 import RPCModule from '../app/RPCModule';
 
 const path = '/docs/wallet.dat';
@@ -153,6 +153,31 @@ describe('Legacy wallet quarantine - test', () => {
     expect(
       await quarantineLegacyWalletIfNeeded('http://indexer:18234', 'android'),
     ).toBe(false);
+    expect(mocked.moveFile).not.toHaveBeenCalled();
+  });
+
+  test('the unreadable check asks no server', async () => {
+    inspect(UNREADABLE);
+    expect(await quarantineUnreadableWallet('android')).toBe(true);
+    expect(RPCModule.inspectWallet).toHaveBeenCalledWith(
+      'd2FsbGV0',
+      '',
+      'android',
+    );
+    expect(mocked.moveFile).toHaveBeenCalledWith(path, legacyPath);
+  });
+
+  test('the unreadable check keeps a readable wallet, even unverified', async () => {
+    inspect(
+      JSON.stringify({
+        readable: true,
+        format_version: 40,
+        newest_height: 82900,
+        chain_match: null,
+        normalize_to: null,
+      }),
+    );
+    expect(await quarantineUnreadableWallet('ios')).toBe(false);
     expect(mocked.moveFile).not.toHaveBeenCalled();
   });
 });
