@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Easing,
   SharedValue,
@@ -13,8 +13,11 @@ export const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
 const START = 300;
 const UI_DELAY = 350;
 const SECONDARY_DELAY = 200;
+// last chain (secondary) finishes here; add a small buffer
+const SETTLE_MS = START + 3400 + UI_DELAY + SECONDARY_DELAY + 650 + 100;
 
 export type ChalkReveal = {
+  frozen: boolean;
   lights: SharedValue<number>;
   columns: SharedValue<number>;
   line: SharedValue<number>;
@@ -27,6 +30,7 @@ export type ChalkReveal = {
 export const useChalkIntro = (ready = true, still = false): ChalkReveal => {
   const reducedMotion = useReducedMotion();
   const skip = reducedMotion || still;
+  const [frozen, setFrozen] = useState<boolean>(skip);
   const lights = useSharedValue(skip ? 1 : 0);
   const columns = useSharedValue(skip ? 1 : 0);
   const line = useSharedValue(skip ? 1 : 0);
@@ -44,6 +48,7 @@ export const useChalkIntro = (ready = true, still = false): ChalkReveal => {
       title.value = 1;
       ui.value = 1;
       secondary.value = 1;
+      setFrozen(true);
       return;
     }
     if (!ready) {
@@ -80,10 +85,21 @@ export const useChalkIntro = (ready = true, still = false): ChalkReveal => {
       START + 3400 + UI_DELAY + SECONDARY_DELAY,
       withTiming(1, { duration: 650, easing: EASE_OUT }),
     );
+    const t = setTimeout(() => setFrozen(true), SETTLE_MS);
+    return () => clearTimeout(t);
   }, [skip, ready, lights, columns, line, flash, title, ui, secondary]);
 
   return useMemo(
-    () => ({ lights, columns, line, flash, title, ui, secondary }),
-    [lights, columns, line, flash, title, ui, secondary],
+    () => ({
+      frozen,
+      lights,
+      columns,
+      line,
+      flash,
+      title,
+      ui,
+      secondary,
+    }),
+    [frozen, lights, columns, line, flash, title, ui, secondary],
   );
 };

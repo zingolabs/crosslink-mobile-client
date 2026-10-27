@@ -6,6 +6,7 @@ import { useTimeline } from '../../prototypes/motion/useTimeline';
 type Channel = { value: number };
 
 export type ChalkReveal = {
+  frozen: boolean;
   paper: Channel;
   lights: Channel;
   columns: Channel;
@@ -40,6 +41,7 @@ export const useChalkIntro = (ready = true, still = false): ChalkReveal => {
     time: still ? tl.duration : 0,
   });
   return {
+    frozen: true,
     paper: { value: values.paper ?? 0 },
     lights: { value: values.lights ?? 0 },
     columns: { value: values.columns ?? 0 },

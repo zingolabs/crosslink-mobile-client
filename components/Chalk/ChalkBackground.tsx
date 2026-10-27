@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { PixelRatio, StyleSheet } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { PixelRatio, StyleSheet, View } from 'react-native';
 import {
   Canvas,
   Fill,
@@ -23,6 +23,8 @@ export const TITLE_GAP = 56;
 export const LINE_ABOVE_TITLE = 22;
 const PAPER_HOLD = 0.25;
 const PAPER_FADE = 1.2;
+// surface pixels per logical point; device pixel ratio above this gets upscaled
+const RENDER_SCALE = 2;
 
 export type ChalkBackgroundProps = {
   width: number;
@@ -89,11 +91,21 @@ const ChalkBackground: React.FC<ChalkBackgroundProps> = ({
   );
   const { titleTop, baseline } = chalkLayout(height, actionsHeight);
   const pixelRatio = PixelRatio.get();
+  const scale = Math.min(1, RENDER_SCALE / pixelRatio);
+  const surfaceWidth = Math.round(width * scale);
+  const surfaceHeight = Math.round(height * scale);
+  const [frozen, setFrozen] = useState(false);
+
+  useEffect(() => {
+    if (reveal.frozen) {
+      setFrozen(true);
+    }
+  }, [reveal.frozen]);
 
   const uniforms = useDerivedValue(
     () => ({
       ...STATIC,
-      u_resolution: [width, height],
+      u_resolution: [surfaceWidth, surfaceHeight],
       u_pixelRatio: pixelRatio,
       u_time: clock.value / 1000,
       u_paper: paperAt(clock.value / 1000),
@@ -103,7 +115,23 @@ const ChalkBackground: React.FC<ChalkBackgroundProps> = ({
       u_line: reveal.line.value,
       u_flash: reveal.flash.value,
     }),
-    [width, height, baseline, pixelRatio],
+    [surfaceWidth, surfaceHeight, baseline, pixelRatio],
+  );
+
+  const staticUniforms = useMemo(
+    () => ({
+      ...STATIC,
+      u_resolution: [surfaceWidth, surfaceHeight],
+      u_pixelRatio: pixelRatio,
+      u_time: 0,
+      u_paper: 1,
+      u_baseline: baseline,
+      u_lights: 1,
+      u_columns: 1,
+      u_line: 1,
+      u_flash: 0,
+    }),
+    [surfaceWidth, surfaceHeight, baseline, pixelRatio],
   );
 
   const titleX = font ? (width - font.measureText(title).width) / 2 : 0;
@@ -114,30 +142,57 @@ const ChalkBackground: React.FC<ChalkBackgroundProps> = ({
   }
 
   return (
-    <Canvas style={styles.canvas}>
+    <View style={styles.canvasWrap} pointerEvents="none">
       {effect ? (
-        <Fill>
-          <Shader source={effect} uniforms={uniforms} />
-        </Fill>
+        <Canvas
+          style={[
+            styles.canvasBg,
+            {
+              width: surfaceWidth,
+              height: surfaceHeight,
+              left: (width - surfaceWidth) / 2,
+              top: (height - surfaceHeight) / 2,
+              transform: [{ scale: 1 / scale }],
+            },
+          ]}
+        >
+          <Fill>
+            <Shader
+              source={effect}
+              uniforms={frozen ? staticUniforms : uniforms}
+            />
+          </Fill>
+        </Canvas>
       ) : (
-        <Fill color={tokens.bgCanvas} />
+        <Canvas style={styles.canvas}>
+          <Fill color={tokens.bgCanvas} />
+        </Canvas>
       )}
       {font && (
-        <Group opacity={reveal.title}>
-          <SkiaText
-            x={titleX}
-            y={titleY}
-            text={title}
-            font={font}
-            color={CHALK_INK}
-          />
-        </Group>
+        <Canvas style={styles.canvas}>
+          <Group opacity={frozen ? 1 : reveal.title}>
+            <SkiaText
+              x={titleX}
+              y={titleY}
+              text={title}
+              font={font}
+              color={CHALK_INK}
+            />
+          </Group>
+        </Canvas>
       )}
-    </Canvas>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  canvasWrap: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
+  },
+  canvasBg: {
+    position: 'absolute',
+  },
   canvas: StyleSheet.absoluteFillObject,
 });
 
