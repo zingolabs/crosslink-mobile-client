@@ -103,3 +103,5 @@ debug-storybook.log
 .sbtmp
 
 .scratch/
+fastlane/report.xml
+fastlane/README.md
