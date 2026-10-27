@@ -82,3 +82,15 @@ export const quarantineLegacyWalletIfNeeded = async (
     return false;
   }
 };
+
+/**
+ * The load-failure counterpart of the check above, for files that slip past
+ * it: when opening the wallet fails, this asks — with no server contact, so
+ * it also works offline — whether the file is one this build can read at
+ * all, and moves it aside when it is not. Answers whether it quarantined
+ * anything, so the caller can start clean instead of showing a dead-end
+ * error for a file that could never have opened.
+ */
+export const quarantineUnreadableWallet = async (
+  platform: string,
+): Promise<boolean> => quarantineLegacyWalletIfNeeded('', platform);

@@ -77,7 +77,10 @@ import ListedIndexers from './components/ListedIndexers';
 import CustomIndexer from './components/CustomIndexer';
 import ScheduledActionsFileImpl from '../../components/ScheduledActions/ScheduledActionsFileImpl';
 import { discoverIndexers, probeIndexer, selectBestIndexer } from '../indexers';
-import { quarantineLegacyWalletIfNeeded } from '../legacyWallet';
+import {
+  quarantineLegacyWalletIfNeeded,
+  quarantineUnreadableWallet,
+} from '../legacyWallet';
 import notifee from '@notifee/react-native';
 import { useTheme, AppTheme } from '../theme';
 import { LoadingAppEntryEnum } from '../AppState/enums/LoadingAppEntryEnum';
@@ -589,6 +592,24 @@ export class LoadingAppClass extends Component<
     await this.applyBootResult(result);
   };
 
+  // The wallet file was moved aside (quarantine or load failure): start
+  // clean — the seed stays recoverable through Import — or restore it right
+  // away when the seed is already in hand.
+  startCleanAfterRemoval = async (): Promise<BootResult> => {
+    await SettingsFileImpl.writeSettings(
+      SettingsNameEnum.basicFirstViewSeed,
+      true,
+    );
+    if (!this.state.startingApp && !!this.state.walletSeed) {
+      return {
+        kind: 'restore',
+        seed: this.state.walletSeed,
+        birthday: this.state.walletBirthday,
+      };
+    }
+    return { kind: 'noWallet' };
+  };
+
   boot = async (): Promise<BootResult> => {
     const netInfoState = await NetInfo.fetch();
     this.setState({
@@ -647,29 +668,58 @@ export class LoadingAppClass extends Component<
 
     // a wallet from the previous network can no longer be used: move it aside
     // and start clean — the seed stays recoverable through Import.
-    if (
-      exists &&
-      exists !== GlobalConst.false &&
-      this.state.netInfo.isConnected &&
-      this.state.selectIndexerServer !== SelectServerEnum.offline
-    ) {
+    if (exists && exists !== GlobalConst.false) {
+      // The hash check below asks a server whether the wallet's newest block
+      // exists on its chain. A server left over from a previous network
+      // either cannot answer (dead — the check answers "unknown") or answers
+      // "match" (it still serves the old chain), and both leave the stale
+      // wallet in place to fail later. So when online, verify the configured
+      // indexer against the expected chain first; when it doesn't answer for
+      // this chain, fall back to discovery and abandon it, the same way
+      // selectTheBestServer does.
+      if (
+        this.state.netInfo.isConnected &&
+        this.state.selectIndexerServer !== SelectServerEnum.offline &&
+        this.state.indexerServer.uri
+      ) {
+        const probed = await probeIndexer(
+          this.state.indexerServer.uri,
+          this.state.indexerNetwork,
+        ).catch(() => null);
+        if (!probed) {
+          const { indexers } = await discoverIndexers(
+            this.state.indexerNetwork,
+          );
+          const best = indexers[0];
+          if (best && best.uri !== this.state.indexerServer.uri) {
+            const server: ServerType = {
+              uri: best.uri,
+              chainName: ChainNameEnum.testChainName,
+            };
+            this.setState({
+              indexerServer: server,
+              indexerServerPinned: false,
+            });
+            await SettingsFileImpl.writeSettings(
+              SettingsNameEnum.indexerServer,
+              server,
+            );
+            await SettingsFileImpl.writeSettings(
+              SettingsNameEnum.indexerServerPinned,
+              false,
+            );
+          }
+        }
+      }
+      // The check runs with or without connectivity: without a server the
+      // inspect is local (readability and platform shape) and still moves
+      // aside a file this build cannot read.
       const quarantined = await quarantineLegacyWalletIfNeeded(
         this.state.indexerServer.uri,
         Platform.OS,
       );
       if (quarantined) {
-        await SettingsFileImpl.writeSettings(
-          SettingsNameEnum.basicFirstViewSeed,
-          true,
-        );
-        if (!this.state.startingApp && !!this.state.walletSeed) {
-          return {
-            kind: 'restore',
-            seed: this.state.walletSeed,
-            birthday: this.state.walletBirthday,
-          };
-        }
-        return { kind: 'noWallet' };
+        return this.startCleanAfterRemoval();
       }
     }
 
@@ -702,6 +752,13 @@ export class LoadingAppClass extends Component<
       'loadingapp.readingwallet-label',
     ) as string;
     if (!result || result.toLowerCase().startsWith(GlobalConst.error)) {
+      // A file this build cannot read fails on every attempt: move it aside
+      // (kept as wallet.legacy.dat) and start clean, like the quarantine
+      // above, instead of a dead-end error. The check is local, so files
+      // that do read keep the regular error handling.
+      if (await quarantineUnreadableWallet(Platform.OS)) {
+        return this.startCleanAfterRemoval();
+      }
       return { kind: 'error', message: result, title };
     }
     let resultJson: RPCSeedType & RPCUfvkType;
