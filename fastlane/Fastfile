@@ -9,6 +9,6 @@ platform :ios do
       configuration: "Release",
       output_directory: "build"
     )
-    sh("xcodebuild -exportArchive -archivePath '#{lane_context[SharedValues::XCODEBUILD_ARCHIVE]}' -exportOptionsPlist 'fastlane/ExportOptions.plist' -exportPath 'build' -allowProvisioningUpdates")
+    sh("xcodebuild -exportArchive -archivePath '#{lane_context[SharedValues::XCODEBUILD_ARCHIVE]}' -exportOptionsPlist '#{File.expand_path('ExportOptions.plist', __dir__)}' -exportPath '#{File.expand_path('../build', __dir__)}' -allowProvisioningUpdates")
   end
 end
