@@ -14,7 +14,7 @@ import {
   UfvkActionEnum,
   ValueTransferType,
 } from '../AppState';
-import { RPCParseAddressType } from '../rpc/types/RPCParseAddressType';
+import { RPCParseAddressType } from '../wallet/types/RPCParseAddressType';
 
 export type LoadedAppRouteParams =
   | LoadedAppNavigationState

@@ -4,7 +4,7 @@ import History from './History';
 import { RouteEnum } from '../../app/AppState';
 import { screenProps } from '../../.storybook/screenProps';
 import { mockValueTransfers } from '../../__mocks__/dataMocks/mockValueTransfers';
-import { RPCValueTransferStatusEnum } from '../../app/rpc/enums/RPCValueTransferStatusEnum';
+import { RPCValueTransferStatusEnum } from '../../app/wallet/enums/RPCValueTransferStatusEnum';
 
 /** The Home tab. */
 const meta = {

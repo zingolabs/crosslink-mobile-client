@@ -1,8 +1,8 @@
 /**
  * Web stub for the Rust wallet bridge (`NativeModules.RPCModule`).
  *
- * Every method resolves to '{}' — the shape RPC.ts JSON.parses. Stories are
- * expected to supply data through the context decorator, never through RPC.
+ * Every method resolves to '{}' — the shape WalletService.ts JSON.parses. Stories are
+ * expected to supply data through the context decorator, never through the wallet service.
  * A call reaching here is logged so an accidental dependency is visible.
  */
 const RPCModule = new Proxy(

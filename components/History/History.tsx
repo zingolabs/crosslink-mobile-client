@@ -36,7 +36,7 @@ import {
   useAppLoadedWallet,
 } from '../../app/context';
 import Utils from '../../app/utils';
-import { RPCValueTransferStatusEnum } from '../../app/rpc/enums/RPCValueTransferStatusEnum';
+import { RPCValueTransferStatusEnum } from '../../app/wallet/enums/RPCValueTransferStatusEnum';
 import { MainTabParamList } from '../../app/types/NavigationTypes';
 import { text, curve, duration, useTheme } from '../../app/theme';
 import EmptyState from '../Components/EmptyState';

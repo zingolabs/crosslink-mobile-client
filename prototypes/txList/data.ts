@@ -3,7 +3,7 @@ import {
   ValueTransferKindEnum as K,
   ValueTransferType,
 } from '../../app/AppState';
-import { RPCValueTransferStatusEnum as S } from '../../app/rpc/enums/RPCValueTransferStatusEnum';
+import { RPCValueTransferStatusEnum as S } from '../../app/wallet/enums/RPCValueTransferStatusEnum';
 
 const MIN = 60;
 const HOUR = 60 * MIN;

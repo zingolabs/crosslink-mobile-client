@@ -39,7 +39,7 @@ import {
 } from '../../../app/context';
 import { KindIcon, isIncoming } from './TxRow';
 import { Copy as CopyIcon } from 'lucide-react-native';
-import { RPCValueTransferStatusEnum } from '../../../app/rpc/enums/RPCValueTransferStatusEnum';
+import { RPCValueTransferStatusEnum } from '../../../app/wallet/enums/RPCValueTransferStatusEnum';
 import Snackbars from '../../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';

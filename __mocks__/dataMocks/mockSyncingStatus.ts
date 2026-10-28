@@ -1,5 +1,5 @@
-import { RPCSyncScanRangePriorityStatusEnum } from '../../app/rpc/enums/RPCSyncScanRangePriorityStatusEnum';
-import { RPCSyncStatusType } from '../../app/rpc/types/RPCSyncStatusType';
+import { RPCSyncScanRangePriorityStatusEnum } from '../../app/wallet/enums/RPCSyncScanRangePriorityStatusEnum';
+import { RPCSyncStatusType } from '../../app/wallet/types/RPCSyncStatusType';
 
 export const mockSyncingStatus: RPCSyncStatusType = {} as RPCSyncStatusType;
 

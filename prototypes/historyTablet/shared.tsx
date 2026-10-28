@@ -20,7 +20,7 @@ import {
   ValueTransferKindEnum as K,
   ValueTransferType,
 } from '../../app/AppState';
-import { RPCValueTransferStatusEnum } from '../../app/rpc/enums/RPCValueTransferStatusEnum';
+import { RPCValueTransferStatusEnum } from '../../app/wallet/enums/RPCValueTransferStatusEnum';
 import {
   useAppLoadedActions,
   useAppLoadedSettings,

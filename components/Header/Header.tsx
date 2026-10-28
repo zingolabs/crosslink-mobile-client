@@ -25,7 +25,7 @@ import {
 import ZecAmount from '../Components/ZecAmount';
 import FadeText from '../Components/FadeText';
 import simpleBiometrics from '../../app/simpleBiometrics';
-import { RPCSyncStatusType } from '../../app/rpc/types/RPCSyncStatusType';
+import { RPCSyncStatusType } from '../../app/wallet/types/RPCSyncStatusType';
 import { isEqual } from 'lodash';
 import SettingsIcon from '../../assets/icons/settings.svg';
 import { radiusPill, space, text, useTheme } from '../../app/theme';

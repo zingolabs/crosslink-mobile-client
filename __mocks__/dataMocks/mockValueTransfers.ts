@@ -3,7 +3,7 @@ import {
   ValueTransferType,
   ValueTransferKindEnum,
 } from '../../app/AppState';
-import { RPCValueTransferStatusEnum } from '../../app/rpc/enums/RPCValueTransferStatusEnum';
+import { RPCValueTransferStatusEnum } from '../../app/wallet/enums/RPCValueTransferStatusEnum';
 
 export const mockValueTransfers: ValueTransferType[] = [
   {

@@ -19,8 +19,8 @@ import {
   ScheduledActionType,
 } from '../AppState';
 
-import { RPCSyncStatusType } from '../rpc/types/RPCSyncStatusType';
-import { RPCPerformanceLevelEnum } from '../rpc/enums/RPCPerformanceLevelEnum';
+import { RPCSyncStatusType } from '../wallet/types/RPCSyncStatusType';
+import { RPCPerformanceLevelEnum } from '../wallet/enums/RPCPerformanceLevelEnum';
 
 export const defaultAppContextLoaded: AppContextLoaded = {
   netInfo: {} as NetInfoType,

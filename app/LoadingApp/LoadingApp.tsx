@@ -46,14 +46,14 @@ import {
   LaunchingModeEnum,
 } from '../AppState';
 import SettingsFileImpl from '../../components/Settings/SettingsFileImpl';
-import RPC from '../rpc';
+import WalletService from '../wallet';
 import { ContextAppLoadingProvider } from '../context';
 import BackgroundFileImpl from '../../components/Background';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAlert } from '../createAlert';
-import { RPCWalletKindType } from '../rpc/types/RPCWalletKindType';
+import { RPCWalletKindType } from '../wallet/types/RPCWalletKindType';
 import Snackbars from '../../components/Components/Snackbars';
-import { RPCSeedType } from '../rpc/types/RPCSeedType';
+import { RPCSeedType } from '../wallet/types/RPCSeedType';
 import Launching from './components/Launching';
 import simpleBiometrics from '../simpleBiometrics';
 import { isEqual } from 'lodash';
@@ -66,11 +66,11 @@ import {
 
 // no lazy load because slowing down screens.
 import Import from './components/Import';
-import { RPCWalletKindEnum } from '../rpc/enums/RPCWalletKindEnum';
+import { RPCWalletKindEnum } from '../wallet/enums/RPCWalletKindEnum';
 import StartMenu from './components/StartMenu';
 import { ToastProvider } from 'react-native-toastier';
-import { RPCUfvkType } from '../rpc/types/RPCUfvkType';
-import { RPCPerformanceLevelEnum } from '../rpc/enums/RPCPerformanceLevelEnum';
+import { RPCUfvkType } from '../wallet/types/RPCUfvkType';
+import { RPCPerformanceLevelEnum } from '../wallet/enums/RPCPerformanceLevelEnum';
 import { AppStackParamList, LoadingAppStackParamList } from '../types';
 import ChooseIndexer from './components/ChooseIndexer';
 import ListedIndexers from './components/ListedIndexers';
@@ -880,7 +880,7 @@ export class LoadingAppClass extends Component<
 
   syncRecoveryWalletInfo = async (readOnly: boolean) => {
     if (this.state.recoveryWalletInfoOnDevice) {
-      const wallet: WalletType = await RPC.rpcFetchWallet(readOnly);
+      const wallet: WalletType = await WalletService.rpcFetchWallet(readOnly);
       await createUpdateRecoveryWalletInfo(wallet);
     } else if (this.state.hasRecoveryWalletInfoSaved) {
       await removeRecoveryWalletInfo();

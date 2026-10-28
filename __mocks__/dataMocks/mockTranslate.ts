@@ -1,5 +1,5 @@
 import { CurrencyEnum, LanguageEnum } from '../../app/AppState';
-import { RPCPerformanceLevelEnum } from '../../app/rpc/enums/RPCPerformanceLevelEnum';
+import { RPCPerformanceLevelEnum } from '../../app/wallet/enums/RPCPerformanceLevelEnum';
 
 export const mockTranslate = (p: string) => {
   if (p === 'about.copyright') {
