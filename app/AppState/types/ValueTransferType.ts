@@ -1,6 +1,6 @@
 import { ValueTransferKindEnum } from '../enums/ValueTransferKindEnum';
 import { PoolEnum } from '../enums/PoolEnum';
-import { RPCValueTransferStatusEnum } from '../../rpc/enums/RPCValueTransferStatusEnum';
+import { RPCValueTransferStatusEnum } from '../../wallet/enums/RPCValueTransferStatusEnum';
 import StakingActionType from './StakingActionType';
 
 export default interface ValueTransferType {

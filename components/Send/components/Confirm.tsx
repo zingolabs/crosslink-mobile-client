@@ -25,13 +25,13 @@ import {
   RouteEnum,
   SendPageStateClass,
 } from '../../../app/AppState';
-import { RPCAddressKindEnum } from '../../../app/rpc/enums/RPCAddressKindEnum';
-import { RPCReceiversEnum } from '../../../app/rpc/enums/RPCReceiversEnum';
-import { RPCParseAddressStatusEnum } from '../../../app/rpc/enums/RPCParseAddressStatusEnum';
+import { RPCAddressKindEnum } from '../../../app/wallet/enums/RPCAddressKindEnum';
+import { RPCReceiversEnum } from '../../../app/wallet/enums/RPCReceiversEnum';
+import { RPCParseAddressStatusEnum } from '../../../app/wallet/enums/RPCParseAddressStatusEnum';
 import Snackbars from '../../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RPCParseAddressType } from '../../../app/rpc/types/RPCParseAddressType';
+import { RPCParseAddressType } from '../../../app/wallet/types/RPCParseAddressType';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../../Header';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';

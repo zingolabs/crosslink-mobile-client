@@ -9,7 +9,7 @@ import {
   useAppLoadedWallet,
 } from '../../../app/context';
 import { RouteEnum, SelectServerEnum } from '../../../app/AppState';
-import { RPCSyncStatusType } from '../../../app/rpc/types/RPCSyncStatusType';
+import { RPCSyncStatusType } from '../../../app/wallet/types/RPCSyncStatusType';
 import ZecAmount from '../../Components/ZecAmount';
 import FadeText from '../../Components/FadeText';
 import { space, text, useTheme } from '../../../app/theme';

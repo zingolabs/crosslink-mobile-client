@@ -45,7 +45,7 @@ import { RPCStakedType } from './types/RPCStakedType';
 import { reverseHex32Bytes } from '../utils/hex';
 import { WalletBondsStatusEnum } from '../AppState/enums/WalletBondsStatusEnum';
 
-export default class RPC {
+export default class WalletService {
   fnSetInfo: (info: InfoType) => void;
   fnSetTotalBalance: (totalBalance: TotalBalanceClass) => void;
   fnSetStaked: (staked: StakeType[]) => void;
@@ -1405,7 +1405,7 @@ export default class RPC {
         return;
       }
       this.fetchWalletBirthdaySeedUfvkLock = true;
-      const wallet = await RPC.rpcFetchWallet(this.readOnly);
+      const wallet = await WalletService.rpcFetchWallet(this.readOnly);
 
       if (wallet) {
         this.walletBirthday = wallet.birthday;

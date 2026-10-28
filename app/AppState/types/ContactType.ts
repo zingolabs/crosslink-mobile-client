@@ -1,4 +1,4 @@
-import { RPCValueTransferStatusEnum } from '../../rpc/enums/RPCValueTransferStatusEnum';
+import { RPCValueTransferStatusEnum } from '../../wallet/enums/RPCValueTransferStatusEnum';
 import { ValueTransferKindEnum } from '../enums/ValueTransferKindEnum';
 
 export default interface ContactType {

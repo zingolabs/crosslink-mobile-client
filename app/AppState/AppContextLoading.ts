@@ -12,7 +12,7 @@ import { CurrencyEnum } from './enums/CurrencyEnum';
 import { LanguageEnum } from './enums/LanguageEnum';
 import { SelectServerEnum } from './enums/SelectServerEnum';
 import { ScreenEnum } from './enums/ScreenEnum';
-import { RPCPerformanceLevelEnum } from '../rpc/enums/RPCPerformanceLevelEnum';
+import { RPCPerformanceLevelEnum } from '../wallet/enums/RPCPerformanceLevelEnum';
 
 export default interface AppContextLoading {
   // context

@@ -16,7 +16,7 @@ import {
   useAppLoadedWallet,
 } from '../../app/context';
 import moment from 'moment';
-import WalletSession from '../../app/rpc';
+import WalletService from '../../app/wallet';
 import RegText from './RegText';
 import { CurrencyEnum, ScreenEnum } from '../../app/AppState';
 import Utils from '../../app/utils';
@@ -77,7 +77,7 @@ const PriceFetcher: React.FunctionComponent<PriceFetcherProps> = ({
     let price: number;
     let error: string;
     // first attempt
-    ({ price, error } = await WalletSession.rpcGetZecPrice(withTor));
+    ({ price, error } = await WalletService.rpcGetZecPrice(withTor));
     //console.log('first price fetching', price, error);
     // values:
     // 0   - initial/default value
@@ -86,7 +86,7 @@ const PriceFetcher: React.FunctionComponent<PriceFetcherProps> = ({
     // > 0 - real value
     if (price <= 0) {
       // second attempt
-      ({ price, error } = await WalletSession.rpcGetZecPrice(withTor));
+      ({ price, error } = await WalletService.rpcGetZecPrice(withTor));
       //console.log('second price fetching', price, error);
     }
 

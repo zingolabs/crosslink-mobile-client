@@ -1,4 +1,4 @@
-import { RPCPerformanceLevelEnum } from '../../rpc/enums/RPCPerformanceLevelEnum';
+import { RPCPerformanceLevelEnum } from '../../wallet/enums/RPCPerformanceLevelEnum';
 import { CurrencyEnum } from '../enums/CurrencyEnum';
 import { IndexerNetworkEnum } from '../enums/IndexerNetworkEnum';
 import { LanguageEnum } from '../enums/LanguageEnum';

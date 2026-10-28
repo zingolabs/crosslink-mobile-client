@@ -27,7 +27,7 @@ import {
   useAppLoadedSettings,
   useAppLoadedWallet,
 } from '../../../app/context';
-import { RPCValueTransferStatusEnum } from '../../../app/rpc/enums/RPCValueTransferStatusEnum';
+import { RPCValueTransferStatusEnum } from '../../../app/wallet/enums/RPCValueTransferStatusEnum';
 import Utils from '../../../app/utils';
 import RegText from '../../Components/RegText';
 import Stake from '../../../assets/icons/stake-blue.svg';

@@ -49,8 +49,8 @@ import {
   useAppLoadedUi,
 } from '../../app/context';
 import { createAlert } from '../../app/createAlert';
-import { RPCSendProposeType } from '../../app/rpc/types/RPCSendProposeType';
-import { RPCSpendablebalanceType } from '../../app/rpc/types/RPCSpendablebalanceType';
+import { RPCSendProposeType } from '../../app/wallet/types/RPCSendProposeType';
+import { RPCSpendablebalanceType } from '../../app/wallet/types/RPCSpendablebalanceType';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import Snackbars from '../Components/Snackbars';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';

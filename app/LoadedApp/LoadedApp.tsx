@@ -19,7 +19,7 @@ import {
   deactivateKeepAwake,
 } from '@sayem314/react-native-keep-awake';
 
-import RPC from '../rpc';
+import WalletService from '../wallet';
 import RPCModule from '../RPCModule';
 import { StakingDayActivitySync } from '../StakingDayActivity';
 import {
@@ -69,7 +69,7 @@ import BackgroundFileImpl from '../../components/Background';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAlert } from '../createAlert';
 import Snackbars from '../../components/Components/Snackbars';
-import { RPCSeedType } from '../rpc/types/RPCSeedType';
+import { RPCSeedType } from '../wallet/types/RPCSeedType';
 import { Launching } from '../LoadingApp';
 import simpleBiometrics from '../simpleBiometrics';
 import ShowAddressAlertAsync from '../../components/Send/components/ShowAddressAlertAsync';
@@ -81,9 +81,9 @@ import notifee, { EventType } from '@notifee/react-native';
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ToastProvider } from 'react-native-toastier';
-import { RPCSyncStatusType } from '../rpc/types/RPCSyncStatusType';
-import { RPCUfvkType } from '../rpc/types/RPCUfvkType';
-import { RPCPerformanceLevelEnum } from '../rpc/enums/RPCPerformanceLevelEnum';
+import { RPCSyncStatusType } from '../wallet/types/RPCSyncStatusType';
+import { RPCUfvkType } from '../wallet/types/RPCUfvkType';
+import { RPCPerformanceLevelEnum } from '../wallet/enums/RPCPerformanceLevelEnum';
 import { AppStackParamList, LoadedAppStackParamList } from '../types';
 import { LoadingAppEntryEnum } from '../AppState/enums/LoadingAppEntryEnum';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -446,7 +446,7 @@ export class LoadedAppClass extends Component<
   LoadedAppClassProps,
   LoadedAppClassState
 > {
-  rpc: RPC;
+  walletService: WalletService;
   subscriptions: (() => void)[] = [];
   screenName = ScreenEnum.LoadedApp;
 
@@ -545,7 +545,7 @@ export class LoadedAppClass extends Component<
       scrollToBottom: false,
     };
 
-    this.rpc = new RPC(
+    this.walletService = new WalletService(
       this.setTotalBalance,
       this.setStaked,
       this.setGlobalStaked,
@@ -679,7 +679,7 @@ export class LoadedAppClass extends Component<
     // not for fresh installing
     if (this.props.firstLaunchingMessage !== LaunchingModeEnum.installing) {
       // migration from Z1 to Z2. Wallet version 32 (first of Z2).
-      const version = await this.rpc.getWalletVersion();
+      const version = await this.walletService.getWalletVersion();
       if (version && version < 32) {
         Alert.alert(
           `${this.state.translate('loadedapp.migration-title')} v:${version}`,
@@ -690,9 +690,9 @@ export class LoadedAppClass extends Component<
 
     //console.log('DID MOUNT APPLOADED...');
 
-    // Configure the RPC to start doing refreshes
-    await this.rpc.clearTimers();
-    await this.rpc.configure();
+    // Configure the wallet service to start doing refreshes
+    await this.walletService.clearTimers();
+    await this.walletService.configure();
 
     this.clearToAddr();
   };
@@ -746,7 +746,7 @@ export class LoadedAppClass extends Component<
         // setting value for background task Android
         await AsyncStorage.setItem(GlobalConst.background, GlobalConst.yes);
         //console.log('&&&&& background yes in storage &&&&&');
-        await this.rpc.clearTimers();
+        await this.walletService.clearTimers();
         //console.log('clear timers IOS');
         this.setSyncingStatus({} as RPCSyncStatusType);
         //console.log('clear sync status state');
@@ -795,8 +795,8 @@ export class LoadedAppClass extends Component<
         //console.log('&&&&& background no in storage &&&&&');
         // needs this because when the App go from back to fore
         // it have to re-launch all the tasks.
-        await this.rpc.clearTimers();
-        await this.rpc.configure();
+        await this.walletService.clearTimers();
+        await this.walletService.configure();
         //console.log('configure start timers Android & IOS');
         if (
           this.state.backgroundError &&
@@ -818,7 +818,7 @@ export class LoadedAppClass extends Component<
       // setting value for background task Android
       await AsyncStorage.setItem(GlobalConst.background, GlobalConst.yes);
       //console.log('&&&&& background yes in storage &&&&&');
-      await this.rpc.clearTimers();
+      await this.walletService.clearTimers();
       //console.log('clear timers');
       this.setSyncingStatus({} as RPCSyncStatusType);
       //console.log('clear sync status state');
@@ -880,8 +880,8 @@ export class LoadedAppClass extends Component<
         } else {
           //console.log('EVENT Loaded: YES internet connection.');
           // restart the interval process again...
-          await this.rpc.clearTimers();
-          await this.rpc.configure();
+          await this.walletService.clearTimers();
+          await this.walletService.configure();
         }
       }
     }
@@ -941,7 +941,7 @@ export class LoadedAppClass extends Component<
   componentWillUnmount = async () => {
     this.unsubscribe();
     this.keepAwake(false);
-    await this.rpc.clearTimers();
+    await this.walletService.clearTimers();
   };
 
   keepAwake = (keep: boolean): void => {
@@ -1399,7 +1399,7 @@ export class LoadedAppClass extends Component<
         donation,
       );
       //const start = Date.now();
-      const txid = await this.rpc.sendTransaction(sendJson);
+      const txid = await this.walletService.sendTransaction(sendJson);
       //console.log('&&&&&&&&&&&&&& send tx', Date.now() - start);
 
       return txid;
@@ -1420,7 +1420,7 @@ export class LoadedAppClass extends Component<
         receivers: [],
       };
 
-      const txid = await this.rpc.sendStakingTransaction(stakeJson);
+      const txid = await this.walletService.sendStakingTransaction(stakeJson);
       return txid;
     } catch (err) {
       throw err;
@@ -1429,7 +1429,7 @@ export class LoadedAppClass extends Component<
 
   beginUnstakeTransaction = async (createBondTxid: string): Promise<string> => {
     try {
-      const txid = await this.rpc.sendBeginUnstakingTx(createBondTxid);
+      const txid = await this.walletService.sendBeginUnstakingTx(createBondTxid);
       return txid;
     } catch (err) {
       throw err;
@@ -1438,7 +1438,7 @@ export class LoadedAppClass extends Component<
 
   withdrawBondTransaction = async (createBondTxid: string): Promise<string> => {
     try {
-      const txid = await this.rpc.sendWithdrawBondTx(createBondTxid);
+      const txid = await this.walletService.sendWithdrawBondTx(createBondTxid);
       return txid;
     } catch (err) {
       throw err;
@@ -1450,7 +1450,7 @@ export class LoadedAppClass extends Component<
     finalizer: string,
   ): Promise<string> => {
     try {
-      const txid = await this.rpc.sendRetargetBondTx(
+      const txid = await this.walletService.sendRetargetBondTx(
         bondKey,
         reverseHex32Bytes(finalizer),
       );
@@ -1462,7 +1462,7 @@ export class LoadedAppClass extends Component<
 
   requestFaucetFunds = async (address: string): Promise<string> => {
     try {
-      const resp = await this.rpc.requestFaucetFunds(address);
+      const resp = await this.walletService.requestFaucetFunds(address);
       return resp;
     } catch (err) {
       console.log(`Error: ${err}`);
@@ -1474,10 +1474,10 @@ export class LoadedAppClass extends Component<
     //console.log('================== MANUAL REFRESH ================== ', screen);
     if (screen === ScreenEnum.History || screen === ScreenEnum.ContactList) {
       // Value Transfers
-      this.rpc.fetchTandZandOValueTransfers();
+      this.walletService.fetchTandZandOValueTransfers();
     } else {
       // Messeges
-      this.rpc.fetchTandZandOMessages();
+      this.walletService.fetchTandZandOMessages();
     }
   };
 
@@ -1485,7 +1485,7 @@ export class LoadedAppClass extends Component<
     // in the rescan case if the shield button is visible
     // we need to hide it fast.
     this.setShieldingAmount(0);
-    await this.rpc.refreshSync(true);
+    await this.walletService.refreshSync(true);
   };
 
   setWallet = async (wallet: WalletType) => {
@@ -1504,7 +1504,7 @@ export class LoadedAppClass extends Component<
     sameServerChainName: boolean,
   ): Promise<void> => {
     // here I know the server was changed, clean all the tasks before anything.
-    await this.rpc.clearTimers();
+    await this.walletService.clearTimers();
     this.setSyncingStatus({} as RPCSyncStatusType);
     this.keepAwake(false);
     // First we need to check the `chainName` between servers, if this is different
@@ -1557,8 +1557,8 @@ export class LoadedAppClass extends Component<
               selectIndexerServer: selectServer,
             });
             // the server is changed, the App needs to restart the timeout tasks from the beginning
-            await this.rpc.clearTimers();
-            await this.rpc.configure();
+            await this.walletService.clearTimers();
+            await this.walletService.configure();
             // creating tor cliente if needed
             // we have two buttons to fetch -> we need tor client Just in case.
             if (
@@ -1686,7 +1686,7 @@ export class LoadedAppClass extends Component<
   };
 
   getUfvk = async (): Promise<string> => {
-    let wallet = await RPC.rpcFetchWallet(true);
+    let wallet = await WalletService.rpcFetchWallet(true);
     return wallet.ufvk || '';
   };
 
@@ -1704,7 +1704,7 @@ export class LoadedAppClass extends Component<
     if (!value) {
       await removeRecoveryWalletInfo();
     } else {
-      const wallet: WalletType = await RPC.rpcFetchWallet(this.state.readOnly);
+      const wallet: WalletType = await WalletService.rpcFetchWallet(this.state.readOnly);
       await createUpdateRecoveryWalletInfo(wallet);
     }
   };
@@ -1738,7 +1738,7 @@ export class LoadedAppClass extends Component<
   };
 
   navigateToLoadingApp = async (state: LoadingAppNavigationState) => {
-    await this.rpc.clearTimers();
+    await this.walletService.clearTimers();
     this.props.navigationApp.reset({
       index: 0,
       routes: [
@@ -1770,10 +1770,10 @@ export class LoadedAppClass extends Component<
     let resultStr = '';
     if (indexerServer.chainName === ChainNameEnum.mainChainName) {
       // backup
-      resultStr = (await this.rpc.changeWallet()) as string;
+      resultStr = (await this.walletService.changeWallet()) as string;
     } else {
       // no backup
-      resultStr = (await this.rpc.changeWalletNoBackup()) as string;
+      resultStr = (await this.walletService.changeWalletNoBackup()) as string;
     }
 
     //console.log("jc change", resultStr);
@@ -1800,7 +1800,7 @@ export class LoadedAppClass extends Component<
   };
 
   onClickOKRestoreBackup = async () => {
-    const resultStr = (await this.rpc.restoreBackup()) as string;
+    const resultStr = (await this.walletService.restoreBackup()) as string;
 
     //console.log("jc restore", resultStr);
     if (resultStr && resultStr.toLowerCase().startsWith(GlobalConst.error)) {
