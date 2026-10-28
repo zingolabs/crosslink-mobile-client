@@ -33,3 +33,8 @@ jobs:
         with:
           scope: changed
           blocking: error
+          # Pinned so the action runs its own toolchain binary directly.
+          # Without this it reuses the installed devDependency via `yarn exec`,
+          # and Yarn 1 strips `--json` as its own flag, so no JSON report is
+          # produced and the scan fails. Keep in sync with the devDependency.
+          version: 0.9.18
