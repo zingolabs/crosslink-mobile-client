@@ -1,0 +1,560 @@
+---
+import { readFileSync, writeFileSync } from 'node:fs';
+import '@fontsource-variable/space-grotesk';
+import '@fontsource-variable/bricolage-grotesque';
+import '../styles/tokens.css';
+
+const REPO = 'zingolabs/crosslink-mobile-client';
+const RELEASES_URL = `https://github.com/${REPO}/releases`;
+const API_URL = `https://api.github.com/repos/${REPO}/releases?per_page=8`;
+const CACHE_FILE = new URL('../../releases-cache.json', import.meta.url);
+
+type PlatformLink = { label: string; href: string };
+type Release = {
+  version: string;
+  date: string;
+  href: string;
+  latest?: boolean;
+  links?: PlatformLink[];
+};
+
+type GhAsset = { name: string; browser_download_url: string };
+type GhRelease = {
+  tag_name: string;
+  html_url: string;
+  published_at: string | null;
+  draft: boolean;
+  assets: GhAsset[];
+};
+
+const formatDate = (iso: string | null) =>
+  iso
+    ? new Date(iso).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })
+    : '';
+
+let releases: Release[] = [];
+const loadCache = (): Release[] => {
+  try {
+    return JSON.parse(readFileSync(CACHE_FILE, 'utf8')) as Release[];
+  } catch {
+    return [];
+  }
+};
+
+const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+try {
+  const res = await fetch(API_URL, {
+    headers: {
+      Accept: 'application/vnd.github+json',
+      'User-Agent': 'delegator-site',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+  if (res.ok) {
+    const data = (await res.json()) as GhRelease[];
+    releases = data
+      .filter((r) => !r.draft)
+      .map((r) => {
+        const apk = r.assets.find((a) => a.name.endsWith('.apk'));
+        const ipa = r.assets.find(
+          (a) =>
+            a.name.endsWith('.ipa') || a.name.toLowerCase().includes('ios'),
+        );
+        return {
+          version: r.tag_name,
+          date: formatDate(r.published_at),
+          href: r.html_url,
+          links: [
+            { label: 'iOS', href: ipa?.browser_download_url ?? r.html_url },
+            {
+              label: 'Android',
+              href: apk?.browser_download_url ?? r.html_url,
+            },
+          ],
+        };
+      });
+    if (releases.length > 0) {
+      writeFileSync(CACHE_FILE, JSON.stringify(releases, null, 2));
+    }
+  }
+} catch {
+  console.error('GitHub releases fetch failed');
+}
+
+if (releases.length === 0) {
+  releases = loadCache();
+}
+
+if (releases.length === 0) {
+  releases = [
+    {
+      version: 'Latest',
+      date: '',
+      href: RELEASES_URL + '/latest',
+      links: [
+        { label: 'iOS', href: RELEASES_URL + '/latest' },
+        { label: 'Android', href: RELEASES_URL + '/latest' },
+      ],
+    },
+  ];
+}
+releases[0].latest = true;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b0b0b" />
+    <title>ZingoLabs | Delegator</title>
+    <meta
+      name="description"
+      content="Delegator, the ZingoLabs wallet for the Zcash Crosslink featurenet. Download for iOS and Android."
+    />
+    <link rel="icon" type="image/png" href="/icon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <meta property="og:title" content="ZingoLabs | Delegator" />
+    <meta
+      property="og:description"
+      content="Delegator, the ZingoLabs wallet for the Zcash Crosslink featurenet. Download for iOS and Android."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/icon.png" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="ZingoLabs | Delegator" />
+    <meta
+      name="twitter:description"
+      content="Delegator, the ZingoLabs wallet for the Zcash Crosslink featurenet. Download for iOS and Android."
+    />
+    <meta name="twitter:image" content="/icon.png" />
+  </head>
+  <body>
+    <canvas id="board" aria-hidden="true"></canvas>
+    <main>
+      <section class="intro">
+        <div class="brand">
+          <img
+            class="brand-icon"
+            src="/icon.png"
+            alt=""
+            width="128"
+            height="128"
+            draggable="false"
+          />
+          <h1>Delegator</h1>
+        </div>
+        <a class="download" href={releases[0].href}>Download</a>
+      </section>
+
+      <section class="timeline" aria-label="Released versions">
+        <ul>
+          {
+            releases.map((r) => (
+              <li class:list={[{ latest: r.latest }]}>
+                <a class="version" href={r.href}>{r.version}</a>
+                <span class="date">{r.date}</span>
+                {r.links && (
+                  <span class="links">
+                    {r.links.map((l) => (
+                      <a href={l.href}>{l.label}</a>
+                    ))}
+                  </span>
+                )}
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>
+
+<script>
+  import { CHALK_COLUMNS_FRAGMENT } from '../shaders/chalkGlsl';
+  import { VERTEX_SHADER } from '../shaders/paperGlsl';
+
+  const canvas = document.getElementById('board') as HTMLCanvasElement;
+  const gl = canvas.getContext('webgl2');
+
+  const TEXTURE_ZOOM = 3;
+
+  if (gl) {
+    const compile = (type: number, src: string) => {
+      const sh = gl.createShader(type);
+      if (!sh) return null;
+      gl.shaderSource(sh, src);
+      gl.compileShader(sh);
+      if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+        console.error(gl.getShaderInfoLog(sh));
+        gl.deleteShader(sh);
+        return null;
+      }
+      return sh;
+    };
+
+    const vs = compile(gl.VERTEX_SHADER, VERTEX_SHADER);
+    const fs = compile(gl.FRAGMENT_SHADER, CHALK_COLUMNS_FRAGMENT);
+    const program = gl.createProgram();
+    if (vs && fs && program) {
+      gl.attachShader(program, vs);
+      gl.attachShader(program, fs);
+      gl.linkProgram(program);
+      gl.useProgram(program);
+
+      const buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]),
+        gl.STATIC_DRAW,
+      );
+      gl.enableVertexAttribArray(0);
+      gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+      const locations = new Map<string, WebGLUniformLocation | null>();
+      const u1f = (name: string, value: number) => {
+        if (!locations.has(name)) {
+          locations.set(name, gl.getUniformLocation(program, name));
+        }
+        const l = locations.get(name);
+        if (l) gl.uniform1f(l, value);
+      };
+      const u4fv = (name: string, value: number[]) => {
+        if (!locations.has(name)) {
+          locations.set(name, gl.getUniformLocation(program, name));
+        }
+        const l = locations.get(name);
+        if (l) gl.uniform4fv(l, new Float32Array(value));
+      };
+
+      u4fv('u_colorBack', [0.043, 0.043, 0.043, 1]);
+      u4fv('u_colorChalk', [0.894, 0.882, 0.847, 1]);
+      u1f('u_grain', 1);
+      u1f('u_roughness', 1.5);
+      u1f('u_pressure', 0.8);
+      u1f('u_density', 0.8);
+      u1f('u_spread', 1);
+      u1f('u_glow', 1);
+      u1f('u_baseline', 0.3);
+      u1f('u_columnTop', 0.56);
+      u1f('u_columnWidth', 6.5);
+      u1f('u_pairGap', 14);
+      u1f('u_spacing', 1);
+      u1f('u_rise', 0);
+      u1f('u_seed', 1);
+      u1f('u_spanTop', 0.18);
+      u1f('u_spanBottom', 0);
+      u1f('u_rainTop', 0.97);
+      u1f('u_mask', 0);
+      u1f('u_maskFeather', 0.12);
+      u1f('u_maskPad', 0.02);
+      u1f('u_time', 0);
+      u1f('u_lights', 0);
+      u1f('u_columns', 0);
+      u1f('u_line', 0);
+      u1f('u_rect', 0);
+      u1f('u_flash', 0);
+      u1f('u_imageAspectRatio', 1);
+      u1f('u_fit', 0);
+      u1f('u_scale', 1);
+      u1f('u_rotation', 0);
+      u1f('u_originX', 0.5);
+      u1f('u_originY', 0.5);
+      u1f('u_worldWidth', 0);
+      u1f('u_worldHeight', 0);
+
+      const draw = () => {
+        const dpr = window.devicePixelRatio || 1;
+        const w = Math.max(
+          1,
+          Math.round((canvas.clientWidth * dpr) / TEXTURE_ZOOM),
+        );
+        const h = Math.max(
+          1,
+          Math.round((canvas.clientHeight * dpr) / TEXTURE_ZOOM),
+        );
+        if (canvas.width !== w || canvas.height !== h) {
+          canvas.width = w;
+          canvas.height = h;
+        }
+        gl.viewport(0, 0, w, h);
+        const res = gl.getUniformLocation(program, 'u_resolution');
+        if (res) gl.uniform2f(res, w, h);
+        const pr = gl.getUniformLocation(program, 'u_pixelRatio');
+        if (pr) gl.uniform1f(pr, dpr);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+      };
+
+      new ResizeObserver(draw).observe(canvas);
+      draw();
+    }
+  }
+</script>
+
+<style>
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    font-family: 'Space Grotesk Variable', system-ui, sans-serif;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+
+  #board {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none;
+  }
+
+  main {
+    position: relative;
+    z-index: 1;
+    height: 100dvh;
+    max-width: 1040px;
+    margin-inline: auto;
+    padding-inline: clamp(28px, 6vw, 64px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    column-gap: clamp(48px, 8vw, 120px);
+  }
+
+  .intro {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .brand {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: clamp(16px, 2.4vh, 20px);
+  }
+
+  .brand-icon {
+    width: clamp(72px, 9vw, 96px);
+    height: auto;
+    border-radius: 22%;
+    user-select: none;
+    -webkit-user-drag: none;
+    -webkit-touch-callout: none;
+  }
+
+  h1 {
+    margin: 0;
+    font-family: 'Bricolage Grotesque Variable', system-ui, sans-serif;
+    font-size: clamp(48px, 6.5vw, 72px);
+    font-weight: 800;
+    font-variation-settings:
+      'opsz' 96,
+      'wdth' 100;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+    color: var(--ink);
+  }
+
+  .download {
+    margin-top: clamp(44px, 7vh, 56px);
+    font-family: 'Space Grotesk Variable', system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    color: var(--bg);
+    background: var(--ink);
+    border-radius: 999px;
+    padding: 16px 56px;
+    text-decoration: none;
+    transition:
+      transform 160ms cubic-bezier(0.23, 1, 0.32, 1),
+      background-color 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .download:hover {
+      background: var(--ink-bright);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(228, 225, 216, 0.1);
+    }
+  }
+
+  .download:active {
+    transform: scale(0.97);
+    box-shadow: none;
+  }
+
+  .download:focus-visible,
+  .timeline a:focus-visible {
+    outline: 2px solid var(--ink-soft);
+    outline-offset: 4px;
+    border-radius: 999px;
+  }
+
+  .timeline ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: relative;
+  }
+
+  .timeline ul::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 12px;
+    bottom: 12px;
+    width: 1px;
+    background: var(--line);
+  }
+
+  .timeline li {
+    position: relative;
+    padding-left: 36px;
+    padding-bottom: 44px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .timeline li:last-child {
+    padding-bottom: 0;
+  }
+
+  .timeline li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 7px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--dot);
+  }
+
+  .timeline li.latest::before {
+    border-color: var(--ink);
+  }
+
+  .version {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.1px;
+    color: var(--ink-soft);
+    text-decoration: none;
+    text-underline-offset: 5px;
+    text-decoration-thickness: 1px;
+    text-decoration-color: rgba(214, 211, 202, 0.35);
+    transition: text-decoration-color 160ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .version:hover {
+    text-decoration: underline;
+  }
+
+  .date {
+    margin-top: 4px;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.2px;
+    color: var(--ink-soft);
+  }
+
+  .latest .version {
+    font-family: 'Bricolage Grotesque Variable', system-ui, sans-serif;
+    font-size: 30px;
+    font-weight: 700;
+    font-variation-settings: 'opsz' 48;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+
+  .latest .date {
+    margin-top: 6px;
+    font-size: 15px;
+  }
+
+  .links {
+    margin-top: 18px;
+    display: flex;
+    gap: 28px;
+  }
+
+  .links a {
+    font-family: 'Space Grotesk Variable', system-ui, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 5px;
+    text-decoration-thickness: 1px;
+    text-decoration-color: rgba(228, 225, 216, 0.35);
+    transition: text-decoration-color 160ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .links a:hover {
+    text-decoration-color: var(--ink);
+  }
+
+  .links a:focus-visible {
+    border-radius: 4px;
+  }
+
+  .intro,
+  .timeline {
+    opacity: 1;
+    transition: opacity 500ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .timeline {
+    transition-delay: 60ms;
+  }
+
+  @starting-style {
+    .intro,
+    .timeline {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .download,
+    .links a,
+    .version {
+      transition: none;
+    }
+
+    .download:hover {
+      transform: none;
+    }
+  }
+
+  @media (max-width: 860px) {
+    main {
+      height: auto;
+      min-height: 100dvh;
+      grid-template-columns: 1fr;
+      row-gap: 88px;
+      padding-block: clamp(56px, 12vh, 96px);
+      align-content: center;
+    }
+  }
+</style>
