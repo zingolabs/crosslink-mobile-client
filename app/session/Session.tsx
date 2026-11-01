@@ -63,7 +63,7 @@ import Utils from '../utils';
 import { readSettings, writeSettings } from '../storage/settingsFile';
 import { LoadedDomains, SessionDomainsProvider } from '../context';
 import { parseZcashURI } from '../uris';
-import BackgroundFileImpl from '../../components/Background';
+import { readBackground } from '../storage/backgroundFile';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAlert } from '../createAlert';
 import Snackbars from '../../components/Components/Snackbars';
@@ -101,7 +101,11 @@ import Redelegate from '../../components/Staking/components/Redelegate';
 import Finalizers from '../../components/Finalizers/Finalizers';
 import { reverseHex32Bytes } from '../utils/hex';
 import SettingsNavigator from '../../components/Settings/SettingsNavigator';
-import ScheduledActionsFileImpl from '../../components/ScheduledActions/ScheduledActionsFileImpl';
+import {
+  readScheduledActions,
+  removeScheduledAction,
+  resetScheduledActions,
+} from '../storage/scheduledActionsFile';
 import ScheduledActionDetail from '../../components/ScheduledActions/ScheduledActionDetail';
 import { FinalizerDetail } from '../../components/Staking/Finalizers/FinalizerDetail';
 import { scheduleReminder } from '../../components/Staking/components/scheduleReminder';
@@ -365,16 +369,16 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
     const newSeconds = remaining * avgBlockTime;
 
     // delete any redelegation action if needed
-    let actions = await ScheduledActionsFileImpl.listActions();
+    let actions = await readScheduledActions();
     if (
       actions.filter(sa => sa.kind === StakingActionKindEnum.Move).length > 0
     ) {
       actions
         .filter(sa => sa.kind === StakingActionKindEnum.Move)
         .forEach(async sa => {
-          await ScheduledActionsFileImpl.removeAction(sa.id);
+          await removeScheduledAction(sa.id);
         });
-      actions = await ScheduledActionsFileImpl.listActions();
+      actions = await readScheduledActions();
     }
 
     // when the Staking day begins, the App re-schedule
@@ -424,7 +428,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
   startSession = async () => {
     await this.stakingDayCalculation();
 
-    this.setScheduledActions(await ScheduledActionsFileImpl.listActions());
+    this.setScheduledActions(await readScheduledActions());
 
     const netInfoState = await NetInfo.fetch();
     this.setState({
@@ -778,8 +782,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
   };
 
   fetchBackgroundSyncing = async () => {
-    const backgroundJson: BackgroundType =
-      await BackgroundFileImpl.readBackground();
+    const backgroundJson = await readBackground();
     if (!isEqual(this.state.background, backgroundJson)) {
       if (
         backgroundJson.error &&
@@ -1014,7 +1017,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
                   sa => sa.txid === vtNew[0].txid,
                 ).length > 0
               ) {
-                const list = await ScheduledActionsFileImpl.removeAction(
+                const list = await removeScheduledAction(
                   this.state.scheduledActions.filter(
                     sa => sa.txid === vtNew[0].txid,
                   )[0].id,
@@ -1541,7 +1544,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
       return;
     }
 
-    await ScheduledActionsFileImpl.resetSA();
+    await resetScheduledActions();
     this.setScheduledActions([]);
     await notifee.cancelAllNotifications();
 
@@ -1570,7 +1573,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
       return;
     }
 
-    await ScheduledActionsFileImpl.resetSA();
+    await resetScheduledActions();
     this.setScheduledActions([]);
     await notifee.cancelAllNotifications();
 
