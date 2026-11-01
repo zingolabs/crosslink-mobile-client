@@ -9,6 +9,7 @@ import {
   SelectServerEnum,
   SendPageState,
   ServerType,
+  ToAddr,
   UfvkActionEnum,
   ValueTransferType,
 } from '../AppState';
@@ -24,6 +25,10 @@ export type SetupStackParamList = {
   [RouteEnum.Import]: undefined;
 };
 
+export type SendNavigationState = {
+  toaddr: ToAddr;
+};
+
 export type MainTabParamList = {
   [RouteEnum.History]: undefined;
   [RouteEnum.StakingHome]: StakingHomeNavigationState | undefined;
@@ -32,7 +37,7 @@ export type MainTabParamList = {
 export type SessionStackParamList = {
   [RouteEnum.MainTabs]: NavigatorScreenParams<MainTabParamList> | undefined;
 
-  [RouteEnum.Send]: undefined;
+  [RouteEnum.Send]: SendNavigationState | undefined;
   [RouteEnum.Receive]: undefined;
   [RouteEnum.Messages]: undefined;
   [RouteEnum.ValueTransferDetailStack]: undefined;

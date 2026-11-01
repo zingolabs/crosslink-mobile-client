@@ -12,7 +12,6 @@ const meta = {
     setShieldingAmount: () => {},
     setScrollToTop: () => {},
     setScrollToBottom: () => {},
-    clearToAddr: () => {},
     sendTransaction: async () => 'storybook-txid',
     setServerOption: async () => {},
     setSecurityOption: async () => {},

@@ -3,7 +3,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import RegText from '../../../components/Components/RegText';
 import { SessionStackParamList } from '../../types';
-import { RouteEnum, SendPageState } from '../../AppState';
+import { RouteEnum, emptySendPageState } from '../../AppState';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Utils from '../../utils';
 import ZecAmount from '../../../components/Components/ZecAmount';
@@ -25,7 +25,7 @@ const Computing: React.FunctionComponent<ComputingProps> = ({ route }) => {
   const sendPageStatePar =
     !!route.params && route.params.sendPageStatePar !== undefined
       ? route.params.sendPageStatePar
-      : ({} as SendPageState);
+      : emptySendPageState();
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.bgCanvas }]}>
