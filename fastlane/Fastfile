@@ -33,8 +33,17 @@ platform :ios do
       key_filepath: key_path
     )
 
+    marketing_version = ENV.fetch("MARKETING_VERSION")
+    build_number = latest_testflight_build_number(
+      api_key: api_key,
+      app_identifier: "org.ZingoLabs.ZingoDelegator",
+      version: marketing_version,
+      initial_build_number: 0
+    ) + 1
+    UI.important("Archiving #{marketing_version} (#{build_number})")
+
     auth = "-allowProvisioningUpdates -authenticationKeyPath #{key_path} -authenticationKeyID #{key_id} -authenticationKeyIssuerID #{issuer_id}"
-    versions = "MARKETING_VERSION=#{ENV.fetch('MARKETING_VERSION')} CURRENT_PROJECT_VERSION=#{ENV.fetch('BUILD_NUMBER')}"
+    versions = "MARKETING_VERSION=#{marketing_version} CURRENT_PROJECT_VERSION=#{build_number}"
 
     build_app(
       workspace: "ios/ZingoDelegator.xcworkspace",
