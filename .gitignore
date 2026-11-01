@@ -111,3 +111,6 @@ fastlane/README.md
 
 # build-time env (report URL and token)
 /.env
+
+# local secrets for the release lane
+/.env.local
