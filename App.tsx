@@ -10,6 +10,7 @@ import Session from './app/session/Session';
 import { ThemeProvider, useTheme } from './app/theme';
 import { LifecycleProvider, useLifecycle } from './app/lifecycle';
 import ReactScanGate from './app/devtools/ReactScan';
+import { AppErrorBoundary } from './app/ErrorBoundary';
 import { unreachable } from './app/lifecycle/phase';
 
 LogBox.ignoreLogs([
@@ -23,21 +24,23 @@ const AppContent: React.FunctionComponent = () => {
   return (
     <>
       <StatusBar backgroundColor={colors.bgCanvas} />
-      {(() => {
-        switch (lifecycle.phase) {
-          case 'booting':
-            return <Boot />;
-          case 'setup':
-            return <Setup />;
-          case 'opening':
-            return <Opening />;
-          case 'active':
-          case 'locked':
-            return <Session />;
-          default:
-            return unreachable(lifecycle);
-        }
-      })()}
+      <AppErrorBoundary>
+        {(() => {
+          switch (lifecycle.phase) {
+            case 'booting':
+              return <Boot />;
+            case 'setup':
+              return <Setup />;
+            case 'opening':
+              return <Opening />;
+            case 'active':
+            case 'locked':
+              return <Session />;
+            default:
+              return unreachable(lifecycle);
+          }
+        })()}
+      </AppErrorBoundary>
     </>
   );
 };
