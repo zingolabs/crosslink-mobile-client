@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   AppState,
@@ -90,123 +90,160 @@ export default function Setup() {
   );
 }
 
-class SetupClass extends Component<SetupClassProps, SetupState> {
-  private appStateSubscription: NativeEventSubscription | null = null;
-  private netInfoSubscription: NetInfoSubscription | null = null;
-  screenName = ScreenEnum.Boot;
+const SetupClass: React.FC<SetupClassProps> = ({
+  boot,
+  walletExists,
+  coldStart,
+  openFailed,
+  translate,
+  startOpening,
+}) => {
+  const screenName = ScreenEnum.Boot;
 
-  constructor(props: SetupClassProps) {
-    super(props);
+  const setPrivacyOption = async (value: boolean): Promise<void> => {
+    await writeSettings('privacy', value);
+    patchState({
+      privacy: value as boolean,
+    });
+  };
 
-    this.state = {
-      // context
-      netInfo: {} as NetInfoType,
-      wallet: {} as WalletType,
-      zecPrice: {} as ZecPriceType,
-      background: {
-        batches: 0,
-        message: '',
-        date: 0,
-        dateEnd: 0,
-      } as BackgroundType,
-      translate: props.translate,
-      backgroundError: {} as BackgroundErrorType,
-      setBackgroundError: this.setBackgroundError,
-      readOnly: false,
-      orchardPool: true,
-      saplingPool: true,
-      transparentPool: true,
-      snackbars: [] as SnackbarType[],
-      addLastSnackbar: this.addLastSnackbar,
-      removeFirstSnackbar: this.removeFirstSnackbar,
-      zingolibVersion: '',
-      setPrivacyOption: this.setPrivacyOption,
+  const setBackgroundError = (title: string, error: string) => {
+    patchState({ backgroundError: { title, error } });
+  };
 
-      // context settings
-      ...props.boot.settings,
-
-      // state
-      appStateStatus: AppState.currentState,
-      firstLaunchingMessage: props.boot.launching,
-      walletExists: props.walletExists,
-      openWalletFailed: props.openFailed,
-      actionButtonsDisabled: false,
-      indexerNetwork: props.boot.indexerNetwork,
-      indexerServerPinned: props.boot.indexerServerPinned,
-    };
-  }
-
-  componentDidMount() {
-    this.appStateSubscription = AppState.addEventListener(
-      EventListenerEnum.change,
-      this.handleAppStateChange,
-    );
-    this.netInfoSubscription = NetInfo.addEventListener(
-      this.handleNetInfoChange,
-    );
-    this.fetchBackgroundSyncing();
-  }
-
-  componentWillUnmount() {
-    this.appStateSubscription?.remove();
-    this.netInfoSubscription?.();
-  }
-
-  handleAppStateChange = async (nextAppState: AppStateStatus) => {
-    const priorAppState = this.state.appStateStatus;
-    this.setState({ appStateStatus: nextAppState });
-    if (
-      (priorAppState === AppStateStatusEnum.inactive ||
-        priorAppState === AppStateStatusEnum.background) &&
-      nextAppState === AppStateStatusEnum.active
-    ) {
-      this.fetchBackgroundSyncing();
-      await AsyncStorage.setItem(GlobalConst.background, GlobalConst.no);
-      if (
-        this.state.backgroundError &&
-        (this.state.backgroundError.title || this.state.backgroundError.error)
-      ) {
-        Alert.alert(
-          this.state.backgroundError.title,
-          this.state.backgroundError.error,
-        );
-        this.setBackgroundError('', '');
+  const addLastSnackbar = (snackbar: SnackbarType) => {
+    setState(prev => {
+      const last = prev.snackbars[prev.snackbars.length - 1];
+      if (last && last.message === snackbar.message) {
+        return prev;
       }
-    }
-    if (
-      (nextAppState === AppStateStatusEnum.inactive ||
-        nextAppState === AppStateStatusEnum.background) &&
-      priorAppState === AppStateStatusEnum.active
-    ) {
-      await AsyncStorage.setItem(GlobalConst.background, GlobalConst.yes);
-    }
+      return { ...prev, snackbars: [...prev.snackbars, snackbar] };
+    });
   };
 
-  handleNetInfoChange = (state: NetInfoState) => {
-    const { isConnected, type, isConnectionExpensive } = this.state.netInfo;
-    if (
-      isConnected !== state.isConnected ||
-      type !== state.type ||
-      isConnectionExpensive !== state.details?.isConnectionExpensive
-    ) {
-      this.setState({
-        netInfo: {
-          isConnected: state.isConnected,
-          type: state.type,
-          isConnectionExpensive:
-            state.details && state.details.isConnectionExpensive,
-        },
-      });
-    }
+  const removeFirstSnackbar = () => {
+    setState(prev => ({ ...prev, snackbars: prev.snackbars.slice(1) }));
   };
 
-  fetchBackgroundSyncing = async () => {
-    const backgroundJson: BackgroundType =
-      await BackgroundFileImpl.readBackground();
-    this.setState({ background: backgroundJson });
-  };
+  const [state, setState] = useState<SetupState>({
+    // context
+    netInfo: {} as NetInfoType,
+    wallet: {} as WalletType,
+    zecPrice: {} as ZecPriceType,
+    background: {
+      batches: 0,
+      message: '',
+      date: 0,
+      dateEnd: 0,
+    } as BackgroundType,
+    translate: translate,
+    backgroundError: {} as BackgroundErrorType,
+    setBackgroundError: setBackgroundError,
+    readOnly: false,
+    orchardPool: true,
+    saplingPool: true,
+    transparentPool: true,
+    snackbars: [] as SnackbarType[],
+    addLastSnackbar: addLastSnackbar,
+    removeFirstSnackbar: removeFirstSnackbar,
+    zingolibVersion: '',
+    setPrivacyOption: setPrivacyOption,
 
-  setIndexerServer = async (
+    // context settings
+    ...boot.settings,
+
+    // state
+    appStateStatus: AppState.currentState,
+    firstLaunchingMessage: boot.launching,
+    walletExists: walletExists,
+    openWalletFailed: openFailed,
+    actionButtonsDisabled: false,
+    indexerNetwork: boot.indexerNetwork,
+    indexerServerPinned: boot.indexerServerPinned,
+  });
+  // async handlers read state across awaits; the ref mirrors it so reads
+  // stay live like this.state was in the class component.
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const patchState = (part: Partial<SetupState>) =>
+    setState(prev => ({ ...prev, ...part }));
+
+  const appStateSubscription = useRef<NativeEventSubscription | null>(null);
+  const netInfoSubscription = useRef<NetInfoSubscription | null>(null);
+
+  useEffect(() => {
+    const fetchBackgroundSyncing = async () => {
+      const backgroundJson: BackgroundType =
+        await BackgroundFileImpl.readBackground();
+      patchState({ background: backgroundJson });
+    };
+
+    const handleAppStateChange = async (nextAppState: AppStateStatus) => {
+      const priorAppState = stateRef.current.appStateStatus;
+      patchState({ appStateStatus: nextAppState });
+      if (
+        (priorAppState === AppStateStatusEnum.inactive ||
+          priorAppState === AppStateStatusEnum.background) &&
+        nextAppState === AppStateStatusEnum.active
+      ) {
+        fetchBackgroundSyncing();
+        await AsyncStorage.setItem(GlobalConst.background, GlobalConst.no);
+        if (
+          stateRef.current.backgroundError &&
+          (stateRef.current.backgroundError.title ||
+            stateRef.current.backgroundError.error)
+        ) {
+          Alert.alert(
+            stateRef.current.backgroundError.title,
+            stateRef.current.backgroundError.error,
+          );
+          setBackgroundError('', '');
+        }
+      }
+      if (
+        (nextAppState === AppStateStatusEnum.inactive ||
+          nextAppState === AppStateStatusEnum.background) &&
+        priorAppState === AppStateStatusEnum.active
+      ) {
+        await AsyncStorage.setItem(GlobalConst.background, GlobalConst.yes);
+      }
+    };
+
+    const handleNetInfoChange = (connectionState: NetInfoState) => {
+      const { isConnected, type, isConnectionExpensive } =
+        stateRef.current.netInfo;
+      if (
+        isConnected !== connectionState.isConnected ||
+        type !== connectionState.type ||
+        isConnectionExpensive !== connectionState.details?.isConnectionExpensive
+      ) {
+        patchState({
+          netInfo: {
+            isConnected: connectionState.isConnected,
+            type: connectionState.type,
+            isConnectionExpensive:
+              connectionState.details &&
+              connectionState.details.isConnectionExpensive,
+          },
+        });
+      }
+    };
+
+    appStateSubscription.current = AppState.addEventListener(
+      EventListenerEnum.change,
+      handleAppStateChange,
+    );
+    netInfoSubscription.current = NetInfo.addEventListener(handleNetInfoChange);
+    fetchBackgroundSyncing();
+
+    return () => {
+      appStateSubscription.current?.remove();
+      netInfoSubscription.current?.();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const setIndexerServer = async (
     indexerServerUri: string,
     indexerServerChainName: ChainNameEnum,
     indexerNetwork?: IndexerNetworkEnum,
@@ -215,10 +252,11 @@ class SetupClass extends Component<SetupClassProps, SetupState> {
       uri: indexerServerUri,
       chainName: indexerServerChainName,
     };
-    this.setState(state => ({
+    setState(prev => ({
+      ...prev,
       indexerServer: NewIndexerServer,
       indexerServerPinned: true,
-      indexerNetwork: indexerNetwork ?? state.indexerNetwork,
+      indexerNetwork: indexerNetwork ?? prev.indexerNetwork,
     }));
     await writeSettings('indexerServer', NewIndexerServer);
     await writeSettings('indexerServerPinned', true);
@@ -228,62 +266,38 @@ class SetupClass extends Component<SetupClassProps, SetupState> {
     await writeSettings('selectIndexerServer', SelectServerEnum.custom);
   };
 
-  closeServers = (
+  const closeServers = (
     navigation: NativeStackNavigationProp<SetupStackParamList>,
   ) => {
     navigation.popToTop();
   };
 
-  setPrivacyOption = async (value: boolean): Promise<void> => {
-    await writeSettings('privacy', value);
-    this.setState({
-      privacy: value as boolean,
-    });
-  };
-
-  setBackgroundError = (title: string, error: string) => {
-    this.setState({ backgroundError: { title, error } });
-  };
-
-  addLastSnackbar = (snackbar: SnackbarType) => {
-    this.setState(({ snackbars }) => {
-      const last = snackbars[snackbars.length - 1];
-      if (last && last.message === snackbar.message) {
-        return null;
-      }
-      return { snackbars: [...snackbars, snackbar] };
-    });
-  };
-
-  removeFirstSnackbar = () => {
-    this.setState(({ snackbars }) => ({ snackbars: snackbars.slice(1) }));
-  };
-
-  recoverRecoveryWalletInfo = async (security: boolean) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const recoverRecoveryWalletInfo = async (security: boolean) => {
     const wallet = await getRecoveryWalletInfo();
     if (wallet.seed || wallet.ufvk) {
       const txt = (wallet.seed || wallet.ufvk) + '\n\n' + wallet.birthday;
       setTimeout(() => {
         Alert.alert(
-          this.props.translate('loadedapp.walletseed-basic') as string,
+          translate('loadedapp.walletseed-basic') as string,
           (security
             ? ''
-            : ((this.props.translate('loadingapp.recoverkeysinstall') +
+            : ((translate('loadingapp.recoverkeysinstall') +
                 '\n\n') as string)) + txt,
           [
             {
-              text: this.props.translate('copy') as string,
+              text: translate('copy') as string,
               onPress: () => {
                 Clipboard.setString(txt);
-                this.addLastSnackbar({
-                  message: this.props.translate('txtcopied') as string,
+                addLastSnackbar({
+                  message: translate('txtcopied') as string,
                   duration: SnackbarDurationEnum.short,
-                  screenName: [this.screenName],
+                  screenName: [screenName],
                 });
               },
             },
             {
-              text: this.props.translate('cancel') as string,
+              text: translate('cancel') as string,
               style: 'cancel',
             },
           ],
@@ -293,133 +307,127 @@ class SetupClass extends Component<SetupClassProps, SetupState> {
     }
   };
 
-  getwalletToRestore = async () => {
-    this.setState({ wallet: {} as WalletType });
+  const getwalletToRestore = async () => {
+    patchState({ wallet: {} as WalletType });
   };
 
-  render() {
-    const { snackbars } = this.state;
+  const { snackbars } = state;
 
-    const context: SetupDomains = {
-      // context
-      netInfo: this.state.netInfo,
-      wallet: this.state.wallet,
-      zecPrice: this.state.zecPrice,
-      background: this.state.background,
-      translate: this.state.translate,
-      backgroundError: this.state.backgroundError,
-      setBackgroundError: this.state.setBackgroundError,
-      readOnly: this.state.readOnly,
-      orchardPool: this.state.orchardPool,
-      saplingPool: this.state.saplingPool,
-      transparentPool: this.state.transparentPool,
-      snackbars: this.state.snackbars,
-      addLastSnackbar: this.state.addLastSnackbar,
-      removeFirstSnackbar: this.removeFirstSnackbar,
-      zingolibVersion: this.state.zingolibVersion,
-      setPrivacyOption: this.setPrivacyOption,
+  const context: SetupDomains = {
+    // context
+    netInfo: state.netInfo,
+    wallet: state.wallet,
+    zecPrice: state.zecPrice,
+    background: state.background,
+    translate: state.translate,
+    backgroundError: state.backgroundError,
+    setBackgroundError: state.setBackgroundError,
+    readOnly: state.readOnly,
+    orchardPool: state.orchardPool,
+    saplingPool: state.saplingPool,
+    transparentPool: state.transparentPool,
+    snackbars: state.snackbars,
+    addLastSnackbar: state.addLastSnackbar,
+    removeFirstSnackbar: removeFirstSnackbar,
+    zingolibVersion: state.zingolibVersion,
+    setPrivacyOption: setPrivacyOption,
 
-      // settings
-      indexerServer: this.state.indexerServer,
-      selectIndexerServer: this.state.selectIndexerServer,
-      currency: this.state.currency,
-      language: this.state.language,
-      sendAll: this.state.sendAll,
-      donation: this.state.donation,
-      privacy: this.state.privacy,
-      security: this.state.security,
-      rescanMenu: this.state.rescanMenu,
-      recoveryWalletInfoOnDevice: this.state.recoveryWalletInfoOnDevice,
-      performanceLevel: this.state.performanceLevel,
-    };
+    // settings
+    indexerServer: state.indexerServer,
+    selectIndexerServer: state.selectIndexerServer,
+    currency: state.currency,
+    language: state.language,
+    sendAll: state.sendAll,
+    donation: state.donation,
+    privacy: state.privacy,
+    security: state.security,
+    rescanMenu: state.rescanMenu,
+    recoveryWalletInfoOnDevice: state.recoveryWalletInfoOnDevice,
+    performanceLevel: state.performanceLevel,
+  };
 
-    return (
-      <BackdropHost>
-        <ToastProvider>
-          <Snackbars
-            snackbars={snackbars}
-            removeFirstSnackbar={this.removeFirstSnackbar}
-            screenName={this.screenName}
-          />
+  return (
+    <BackdropHost>
+      <ToastProvider>
+        <Snackbars
+          snackbars={snackbars}
+          removeFirstSnackbar={removeFirstSnackbar}
+          screenName={screenName}
+        />
 
-          <SetupDomainsProvider value={context}>
-            <SetupStack.Navigator
-              initialRouteName={RouteEnum.StartMenu}
-              screenOptions={{ headerShown: false }}
+        <SetupDomainsProvider value={context}>
+          <SetupStack.Navigator
+            initialRouteName={RouteEnum.StartMenu}
+            screenOptions={{ headerShown: false }}
+          >
+            <SetupStack.Screen
+              name={RouteEnum.StartMenu}
+              options={{
+                contentStyle: { backgroundColor: 'transparent' },
+              }}
             >
-              <SetupStack.Screen
-                name={RouteEnum.StartMenu}
-                options={{
-                  contentStyle: { backgroundColor: 'transparent' },
-                }}
-              >
-                {({ navigation }) => (
-                  <StartMenu
-                    actionButtonsDisabled={this.state.actionButtonsDisabled}
-                    walletExists={this.state.walletExists}
-                    openWalletFailed={this.state.openWalletFailed}
-                    playIntro={this.props.coldStart && !this.state.walletExists}
-                    openCurrentWallet={() =>
-                      this.props.startOpening({ kind: 'open' })
+              {({ navigation }) => (
+                <StartMenu
+                  actionButtonsDisabled={state.actionButtonsDisabled}
+                  walletExists={state.walletExists}
+                  openWalletFailed={state.openWalletFailed}
+                  playIntro={coldStart && !state.walletExists}
+                  openCurrentWallet={() => startOpening({ kind: 'open' })}
+                  createNewWallet={() => startOpening({ kind: 'create' })}
+                  getwalletToRestore={() => {
+                    getwalletToRestore();
+                    navigation.navigate(RouteEnum.Import);
+                  }}
+                  openServers={() =>
+                    navigation.navigate(RouteEnum.ChooseIndexer)
+                  }
+                />
+              )}
+            </SetupStack.Screen>
+            <SetupStack.Screen name={RouteEnum.Import}>
+              {({ navigation }) => (
+                <Import
+                  actionButtonsDisabled={state.actionButtonsDisabled}
+                  onClickOK={(s: string, b: number) =>
+                    startOpening({
+                      kind: 'restore',
+                      seed: s,
+                      birthday: b,
+                    })
+                  }
+                  onClickCancel={() => {
+                    if (navigation.canGoBack()) {
+                      navigation.goBack();
+                      return;
                     }
-                    createNewWallet={() =>
-                      this.props.startOpening({ kind: 'create' })
-                    }
-                    getwalletToRestore={() => {
-                      this.getwalletToRestore();
-                      navigation.navigate(RouteEnum.Import);
-                    }}
-                    openServers={() =>
-                      navigation.navigate(RouteEnum.ChooseIndexer)
-                    }
-                  />
-                )}
-              </SetupStack.Screen>
-              <SetupStack.Screen name={RouteEnum.Import}>
-                {({ navigation }) => (
-                  <Import
-                    actionButtonsDisabled={this.state.actionButtonsDisabled}
-                    onClickOK={(s: string, b: number) =>
-                      this.props.startOpening({
-                        kind: 'restore',
-                        seed: s,
-                        birthday: b,
-                      })
-                    }
-                    onClickCancel={() => {
-                      if (navigation.canGoBack()) {
-                        navigation.goBack();
-                        return;
-                      }
-                      navigation.replace(RouteEnum.StartMenu);
-                    }}
-                  />
-                )}
-              </SetupStack.Screen>
-              <SetupStack.Screen name={RouteEnum.ChooseIndexer}>
-                {() => <ChooseIndexer />}
-              </SetupStack.Screen>
-              <SetupStack.Screen name={RouteEnum.ListedIndexers}>
-                {({ navigation }) => (
-                  <ListedIndexers
-                    setIndexerServer={this.setIndexerServer}
-                    closeServers={() => this.closeServers(navigation)}
-                    previousServer={this.state.indexerServer.uri}
-                  />
-                )}
-              </SetupStack.Screen>
-              <SetupStack.Screen name={RouteEnum.CustomIndexer}>
-                {({ navigation }) => (
-                  <CustomIndexer
-                    setIndexerServer={this.setIndexerServer}
-                    closeServers={() => this.closeServers(navigation)}
-                  />
-                )}
-              </SetupStack.Screen>
-            </SetupStack.Navigator>
-          </SetupDomainsProvider>
-        </ToastProvider>
-      </BackdropHost>
-    );
-  }
-}
+                    navigation.replace(RouteEnum.StartMenu);
+                  }}
+                />
+              )}
+            </SetupStack.Screen>
+            <SetupStack.Screen name={RouteEnum.ChooseIndexer}>
+              {() => <ChooseIndexer />}
+            </SetupStack.Screen>
+            <SetupStack.Screen name={RouteEnum.ListedIndexers}>
+              {({ navigation }) => (
+                <ListedIndexers
+                  setIndexerServer={setIndexerServer}
+                  closeServers={() => closeServers(navigation)}
+                  previousServer={state.indexerServer.uri}
+                />
+              )}
+            </SetupStack.Screen>
+            <SetupStack.Screen name={RouteEnum.CustomIndexer}>
+              {({ navigation }) => (
+                <CustomIndexer
+                  setIndexerServer={setIndexerServer}
+                  closeServers={() => closeServers(navigation)}
+                />
+              )}
+            </SetupStack.Screen>
+          </SetupStack.Navigator>
+        </SetupDomainsProvider>
+      </ToastProvider>
+    </BackdropHost>
+  );
+};
