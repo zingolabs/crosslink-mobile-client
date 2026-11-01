@@ -13,7 +13,7 @@ import {
 import { useToast } from 'react-native-toastier';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
-import RPCModule from '../../../app/RPCModule';
+import WalletService from '../../../app/wallet';
 import { parseZcashURI } from '../../../app/uris';
 import TextInputAddress from '../../Components/TextInputAddress';
 import FadeText from '../../Components/FadeText';
@@ -45,7 +45,7 @@ const VerifyAddress: React.FunctionComponent<VerifyAddressProps> = ({
 
   const verifyAddress = async () => {
     try {
-      const verifyAddressStr = await RPCModule.checkMyAddressInfo(address);
+      const verifyAddressStr = await WalletService.checkMyAddressInfo(address);
       //console.log(verifyAddressStr);
       if (verifyAddressStr) {
         if (verifyAddressStr.toLowerCase().startsWith(GlobalConst.error)) {

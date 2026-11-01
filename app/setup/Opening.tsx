@@ -11,7 +11,6 @@ import NetInfo, {
   NetInfoSubscription,
 } from '@react-native-community/netinfo/src/index';
 
-import RPCModule from '../RPCModule';
 import {
   BackgroundType,
   WalletType,
@@ -204,7 +203,7 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
 
     this.fetchZingolibVersion();
 
-    await RPCModule.setCryptoDefaultProvider();
+    await WalletService.setCryptoDefaultProvider();
 
     const has = await hasRecoveryWalletInfo();
     this.setState({ hasRecoveryWalletInfoSaved: has });
@@ -248,7 +247,7 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
   };
 
   openFlow = async () => {
-    const exists = await RPCModule.walletExists();
+    const exists = await WalletService.walletExists();
     if (!exists || exists === GlobalConst.false) {
       await this.finishToSetup();
       return;
@@ -292,7 +291,7 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
       return;
     }
 
-    const result: string = await RPCModule.loadExistingWallet(
+    const result: string = await WalletService.loadExistingWallet(
       this.state.indexerServer.uri,
       this.state.indexerServer.chainName,
       this.state.performanceLevel,
@@ -357,7 +356,7 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
     // creating a wallet works offline: the native side derives the seed and
     // sets the birthday without contacting the indexer. the first sync needs
     // the network, not the creation itself.
-    const seed: string = await RPCModule.createNewWallet(
+    const seed: string = await WalletService.createNewWallet(
       this.state.indexerServer.uri,
       this.state.indexerServer.chainName,
       this.state.performanceLevel,
@@ -460,7 +459,7 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
         ? '0'
         : String(parsedBirthday);
 
-    const result: string = await RPCModule.restoreWalletFromSeed(
+    const result: string = await WalletService.restoreWalletFromSeed(
       seed.toLowerCase(),
       walletBirthday,
       this.state.indexerServer.uri,
@@ -525,7 +524,7 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
       saplingPool: false,
       transparentPool: false,
     };
-    const walletKindStr: string = await RPCModule.walletKindInfo();
+    const walletKindStr: string = await WalletService.walletKindInfo();
     try {
       const walletKindJSON: WalletKindType = await JSON.parse(walletKindStr);
       kind.readOnly =
@@ -560,7 +559,7 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
       this.state.currency === CurrencyEnum.USDTORCurrency ||
       this.state.currency === CurrencyEnum.USDCurrency
     ) {
-      await RPCModule.createTorClientProcess();
+      await WalletService.createTorClientProcess();
     }
   };
 
@@ -736,7 +735,7 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
 
   async fetchZingolibVersion(): Promise<void> {
     try {
-      let zingolibStr: string = await RPCModule.getVersionInfo();
+      let zingolibStr: string = await WalletService.getVersionInfo();
       if (zingolibStr) {
         if (zingolibStr.toLowerCase().startsWith(GlobalConst.error)) {
           zingolibStr = GlobalConst.zingolibError;

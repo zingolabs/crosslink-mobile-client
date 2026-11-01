@@ -17,6 +17,7 @@ import {
   StakingActionType,
   WalletBondsType,
   StakingActionKindEnum,
+  IndexerNetworkEnum,
 } from '../AppState';
 import RPCModule from '../RPCModule';
 import { UnifiedAddressType } from './types/UnifiedAddressType';
@@ -321,6 +322,171 @@ export default class WalletService {
         return {} as WalletType;
       }
     }
+  }
+
+  static async walletExists(): Promise<string> {
+    return RPCModule.walletExists();
+  }
+
+  static async doSave(): Promise<string> {
+    return RPCModule.doSave();
+  }
+
+  static async setCryptoDefaultProvider(): Promise<string> {
+    return RPCModule.setCryptoDefaultProvider();
+  }
+
+  static async getVersionInfo(): Promise<string> {
+    return RPCModule.getVersionInfo();
+  }
+
+  static async walletKindInfo(): Promise<string> {
+    return RPCModule.walletKindInfo();
+  }
+
+  static async createTorClientProcess(): Promise<string> {
+    return RPCModule.createTorClientProcess();
+  }
+
+  static async removeTorClientProcess(): Promise<string> {
+    return RPCModule.removeTorClientProcess();
+  }
+
+  static async changeServerProcess(serverUri: string): Promise<string> {
+    return RPCModule.changeServerProcess(serverUri);
+  }
+
+  static async setConfigWalletToProdProcess(
+    performanceLevel: PerformanceLevelEnum,
+    minConfirmations: string,
+  ): Promise<string> {
+    return RPCModule.setConfigWalletToProdProcess(
+      performanceLevel,
+      minConfirmations,
+    );
+  }
+
+  static async loadExistingWallet(
+    serverUri: string,
+    chainName: string,
+    performanceLevel: PerformanceLevelEnum,
+    minConfirmations: string,
+  ): Promise<string> {
+    return RPCModule.loadExistingWallet(
+      serverUri,
+      chainName,
+      performanceLevel,
+      minConfirmations,
+    );
+  }
+
+  static async createNewWallet(
+    serverUri: string,
+    chainName: string,
+    performanceLevel: PerformanceLevelEnum,
+    minConfirmations: string,
+  ): Promise<string> {
+    return RPCModule.createNewWallet(
+      serverUri,
+      chainName,
+      performanceLevel,
+      minConfirmations,
+    );
+  }
+
+  static async restoreWalletFromSeed(
+    seed: string,
+    birthday: string,
+    serverUri: string,
+    chainName: string,
+    performanceLevel: PerformanceLevelEnum,
+    minConfirmations: string,
+  ): Promise<string> {
+    return RPCModule.restoreWalletFromSeed(
+      seed,
+      birthday,
+      serverUri,
+      chainName,
+      performanceLevel,
+      minConfirmations,
+    );
+  }
+
+  static async parseAddressInfo(address: string): Promise<string> {
+    return RPCModule.parseAddressInfo(address);
+  }
+
+  static async getDonationAddress(): Promise<string> {
+    return RPCModule.getDonationAddress();
+  }
+
+  static async getZenniesDonationAddress(): Promise<string> {
+    return RPCModule.getZenniesDonationAddress();
+  }
+
+  static async discoverIndexers(network: IndexerNetworkEnum): Promise<string> {
+    return RPCModule.discoverIndexers(network);
+  }
+
+  static async probeIndexer(
+    uri: string,
+    network: IndexerNetworkEnum,
+  ): Promise<string> {
+    return RPCModule.probeIndexer(uri, network);
+  }
+
+  static async selectBestIndexer(
+    network: IndexerNetworkEnum,
+  ): Promise<string> {
+    return RPCModule.selectBestIndexer(network);
+  }
+
+  static async inspectWallet(
+    data: string,
+    serverUri: string,
+    platform: string,
+  ): Promise<string> {
+    return RPCModule.inspectWallet(data, serverUri, platform);
+  }
+
+  static async getTotalValueToAddressInfo(): Promise<string> {
+    return RPCModule.getTotalValueToAddressInfo();
+  }
+
+  static async getTotalSpendsToAddressInfo(): Promise<string> {
+    return RPCModule.getTotalSpendsToAddressInfo();
+  }
+
+  static async getTotalMemobytesToAddressInfo(): Promise<string> {
+    return RPCModule.getTotalMemobytesToAddressInfo();
+  }
+
+  static async createNewUnifiedAddressProcess(
+    receivers: string,
+  ): Promise<string> {
+    return RPCModule.createNewUnifiedAddressProcess(receivers);
+  }
+
+  static async createNewTransparentAddressProcess(): Promise<string> {
+    return RPCModule.createNewTransparentAddressProcess();
+  }
+
+  static async checkMyAddressInfo(address: string): Promise<string> {
+    return RPCModule.checkMyAddressInfo(address);
+  }
+
+  static async sendProcess(proposeJSON: string): Promise<string> {
+    return RPCModule.sendProcess(proposeJSON);
+  }
+
+  static async getSpendableBalanceWithAddressInfo(
+    address: string,
+    zenniesForZingo: string,
+  ): Promise<string> {
+    return RPCModule.getSpendableBalanceWithAddressInfo(
+      address,
+      zenniesForZingo,
+    );
   }
 
   async runTaskPromises(): Promise<void> {

@@ -39,7 +39,7 @@ import {
   ScreenEnum,
 } from '../../app/AppState';
 import { parseZcashURI } from '../../app/uris';
-import RPCModule from '../../app/RPCModule';
+import WalletService from '../../app/wallet';
 import Utils from '../../app/utils';
 import { SessionStackParamList } from '../../app/types';
 import {
@@ -184,7 +184,7 @@ const Send: React.FunctionComponent<SendProps> = ({
 
   const runSendPropose = async (proposeJSON: string): Promise<string> => {
     try {
-      const proposeStr: string = await RPCModule.sendProcess(proposeJSON);
+      const proposeStr: string = await WalletService.sendProcess(proposeJSON);
       if (proposeStr) {
         if (proposeStr.toLowerCase().startsWith(GlobalConst.error)) {
           console.log(`Error propose ${proposeStr}`);
@@ -340,7 +340,7 @@ const Send: React.FunctionComponent<SendProps> = ({
 
       const start = Date.now();
       const runSpendableBalanceStr =
-        await RPCModule.getSpendableBalanceWithAddressInfo(
+        await WalletService.getSpendableBalanceWithAddressInfo(
           addressPar,
           zenniesForZingo ? 'true' : 'false',
         );

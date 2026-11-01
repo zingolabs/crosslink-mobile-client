@@ -1,6 +1,6 @@
 import * as RNFS from 'react-native-fs';
 
-import RPCModule from './RPCModule';
+import WalletService from './wallet';
 
 const WALLET_FILE = 'wallet.dat';
 const LEGACY_WALLET_FILE = 'wallet.legacy.dat';
@@ -54,7 +54,7 @@ export const quarantineLegacyWalletIfNeeded = async (
       return false;
     }
     const resp: InspectResponse = await JSON.parse(
-      await RPCModule.inspectWallet(data, serverUri, platform),
+      await WalletService.inspectWallet(data, serverUri, platform),
     );
     console.log('legacy wallet inspect:', JSON.stringify(resp));
     // the chain mismatch wins over the shape: a wallet whose blocks belong to

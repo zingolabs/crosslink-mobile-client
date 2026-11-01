@@ -18,7 +18,6 @@ import {
 } from '@sayem314/react-native-keep-awake';
 
 import WalletService from '../wallet';
-import RPCModule from '../RPCModule';
 import { StakingDayActivitySync } from '../StakingDayActivity';
 import {
   AppStateLoaded,
@@ -513,7 +512,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
         //console.log('LOADED SAVED IOS background', nextAppState);
         // We need to save the wallet file here because
         // sometimes the App can lose the last synced chunk
-        await RPCModule.doSave();
+        await WalletService.doSave();
         return;
       }
     }
@@ -572,7 +571,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
       //console.log('clear sync status state');
       // We need to save the wallet file here because
       // sometimes the App can lose the last synced chunk
-      await RPCModule.doSave();
+      await WalletService.doSave();
       if (Platform.OS === GlobalConst.platformOSios) {
         //console.log('LOADED SAVED IOS background', nextAppState);
         this.setState({ appStateStatus: nextAppState });
@@ -1289,7 +1288,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
       //   The App have to go to the initial screen
       // - the seed exists and the App can open the wallet in the new server.
       //   But I have to restart the sync if needed.
-      let result: string = await RPCModule.loadExistingWallet(
+      let result: string = await WalletService.loadExistingWallet(
         value.uri,
         // 'regtest',
         value.chainName,
@@ -1327,7 +1326,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
               this.state.currency === CurrencyEnum.USDTORCurrency ||
               this.state.currency === CurrencyEnum.USDCurrency
             ) {
-              const resp: string = await RPCModule.createTorClientProcess();
+              const resp: string = await WalletService.createTorClientProcess();
               if (resp && resp.toLowerCase().startsWith(GlobalConst.error)) {
                 this.setLastError(`Create tor client error: ${resp}`);
               }
@@ -1356,7 +1355,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
       // we need to restore the old server because the new one doesn't have the seed of the current wallet.
       const oldSettings = await readSettings();
       if (oldSettings.indexerServer && oldSettings.selectIndexerServer) {
-        await RPCModule.changeServerProcess(oldSettings.indexerServer.uri);
+        await WalletService.changeServerProcess(oldSettings.indexerServer.uri);
         this.setState({
           indexerServer: oldSettings.indexerServer,
           selectIndexerServer: oldSettings.selectIndexerServer,
@@ -1378,14 +1377,14 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
       // when the user select USD
       // the App have to create a Tor Client
       //console.log('before CREATE ------------------- TOR CLIENT');
-      const result = await RPCModule.createTorClientProcess();
+      const result = await WalletService.createTorClientProcess();
       //console.log('after CREATE ------------------- TOR CLIENT', result);
       if (result && result.toLowerCase().startsWith(GlobalConst.error)) {
         this.setLastError(`Create tor client error: ${result}`);
       }
     } else {
       //console.log('before REMOVE ------------------- TOR CLIENT');
-      const result = await RPCModule.removeTorClientProcess();
+      const result = await WalletService.removeTorClientProcess();
       //console.log('after REMOVE ------------------- TOR CLIENT', result);
       if (result && result.toLowerCase().startsWith(GlobalConst.error)) {
         this.setLastError(`Remove tor client error: ${result}`);
@@ -1477,7 +1476,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
     });
 
     // change it in zingolib as well.
-    const setConfigWallet = await RPCModule.setConfigWalletToProdProcess(
+    const setConfigWallet = await WalletService.setConfigWalletToProdProcess(
       this.state.performanceLevel,
       GlobalConst.minConfirmations.toString(),
     );

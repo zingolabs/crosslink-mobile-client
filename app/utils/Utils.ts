@@ -21,8 +21,8 @@ import {
 } from '../AppState';
 
 import randomColor from 'randomcolor';
-import RPCModule from '../RPCModule';
 import { Buffer } from 'buffer';
+import WalletService from '../wallet';
 import { ParseAddressType } from '../wallet/types/ParseAddressType';
 import { ParseAddressStatusEnum } from '../wallet/enums/ParseAddressStatusEnum';
 import { WalletAddressKindEnum } from '../wallet/enums/WalletAddressKindEnum';
@@ -86,7 +86,7 @@ export default class Utils {
     if (chainName === ChainNameEnum.mainChainName) {
       // UA -> we need a fresh one.
       //const start = Date.now();
-      const ua: string = await RPCModule.getDonationAddress();
+      const ua: string = await WalletService.getDonationAddress();
       //console.log('=========================================== > get donation address - ', Date.now() - start);
       return ua;
     }
@@ -111,7 +111,7 @@ export default class Utils {
     if (chainName === ChainNameEnum.mainChainName) {
       // UA -> we need a fresh one.
       //const start = Date.now();
-      const ua: string = await RPCModule.getZenniesDonationAddress();
+      const ua: string = await WalletService.getZenniesDonationAddress();
       //console.log('=========================================== > get zennies donation address - ', Date.now() - start);
       return ua;
     }
@@ -132,7 +132,7 @@ export default class Utils {
     if (chainName === ChainNameEnum.mainChainName) {
       // UA -> we need a fresh one.
       //const start = Date.now();
-      const ua: string = await RPCModule.getDonationAddress();
+      const ua: string = await WalletService.getDonationAddress();
       //console.log('=========================================== > get nym donation address - ', Date.now() - start);
       return ua;
     }
@@ -335,7 +335,7 @@ export default class Utils {
     serverChainName: string,
   ): Promise<{ isValid: boolean; onlyOrchardUA: string }> {
     //const start = Date.now();
-    const result: string = await RPCModule.parseAddressInfo(address);
+    const result: string = await WalletService.parseAddressInfo(address);
     //console.log('=========================================== > parse address - ', Date.now() - start);
     console.log('is valid address?', result, serverChainName);
     let isValid: boolean = false;
@@ -388,7 +388,7 @@ export default class Utils {
     serverChainName: string,
   ): Promise<boolean> {
     //const start = Date.now();
-    const result: string = await RPCModule.parseAddressInfo(address);
+    const result: string = await WalletService.parseAddressInfo(address);
     //console.log('=========================================== > parse address - ', Date.now() - start);
     //console.log(result);
     if (result) {
