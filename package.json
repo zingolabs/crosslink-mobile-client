@@ -8,7 +8,7 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest --verbose",
-    "lint": "eslint . --fix --ext .js,.jsx,.ts,.tsx",
+    "lint": "eslint . --fix --ext .js,.jsx,.ts,.tsx,.mts",
     "prettier": "prettier './**/*.{js,jsx,ts,tsx}' -w",
     "coverage": "jest --coverage",
     "postinstall": "patch-package",
@@ -35,7 +35,8 @@
     "start:scan": "REACT_SCAN=true react-native start --reset-cache",
     "storybook:ios": "STORYBOOK_ENABLED=true react-native run-ios --no-packager",
     "doctor": "react-doctor",
-    "doctor:changed": "react-doctor --scope changed"
+    "doctor:changed": "react-doctor --scope changed",
+    "crash-triage": "node scripts/crash-triage.mts"
   },
   "dependencies": {
     "@bottom-tabs/react-navigation": "^1.0.2",

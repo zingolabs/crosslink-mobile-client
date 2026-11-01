@@ -5,12 +5,12 @@
   "connectingserver": "Connecting to the server...",
   "wait": "Please wait...",
   "workingonit": "We are working on this feature.",
-  "updating" : {
+  "updating": {
     "firstlaunchingmessage-title": "Optimizing Zingo Delegator",
     "firstlaunchingmessage-body": "This may take a while, depending on the transaction history. Please keep the app open until the process finishes.",
     "firstlaunchingmessage-footer": "Thanks."
   },
-  "installing" : {
+  "installing": {
     "firstlaunchingmessage-title": "Creating a new wallet",
     "firstlaunchingmessage-body": "Please keep the app open until the process finishes.",
     "firstlaunchingmessage-footer": "Thanks."
@@ -31,7 +31,6 @@
   "copy": "Copy",
   "share": "Share",
   "confirm": "Confirm",
-  "support": "Send Email",
   "view-error": "View/Report Error",
   "menudrawer-acc": "Open Menu Drawer",
   "menu-acc": "Open Menu",
@@ -41,9 +40,6 @@
   "restarting": "Error connecting to the Server, the App will restart in a few seconds.",
   "change-privacy": "New privacy policy: ",
   "warning-binance": "WARNING: Binance is collecting and holding user funds without timely recourse. Do NOT deposit into Binance from this Wallet.",
-  "email": "zingo@zingolabs.org",
-  "subject": "Zingo Delegator Support...",
-  "body": "I need help with...",
   "connecting": "Connecting",
   "syncing": "Syncing",
   "synced": "Synced",
@@ -159,8 +155,6 @@
     "valuetransfer-confirmed": "Transaction confirmed\n",
     "payment-made": "Payment made\n",
     "valuetransfer-reverted": "The transaction was never confirmed by a validator.",
-    "email-error-title": "Error opening email client",
-    "email-error-body": "Go to your device's Settings and set a default email application to send the report.",
     "migration-title": "Wallet migration",
     "migration-body": "We are migrating your wallet to the new synchronization system. Keep your device connected to power and WiFi.\n\nYour balance will change as the migration progresses. Don't worry, your funds are safe!"
   },

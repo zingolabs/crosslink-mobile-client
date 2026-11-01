@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { BackHandler, LogBox, StatusBar } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -17,6 +17,7 @@ import { AppStackParamList } from './app/types';
 import { ThemeProvider, navigationTheme, useTheme } from './app/theme';
 import { RouteEnum } from './app/AppState';
 import ReactScanGate from './app/devtools/ReactScan';
+import { breadcrumb } from './app/reporting';
 
 LogBox.ignoreLogs([
   '[Reanimated] Reduced motion setting is enabled on this device.',
@@ -60,10 +61,23 @@ const AppContent: React.FunctionComponent = () => {
     return () => sub.remove();
   }, []);
 
+  const onStateChange = useCallback(() => {
+    const route = navigationRef.getCurrentRoute();
+    if (route) {
+      breadcrumb(`navigate ${route.name}`);
+    }
+  }, []);
+
   return (
     <SafeAreaProvider>
       <StatusBar backgroundColor={colors.bgCanvas} />
-      <NavigationContainer ref={navigationRef} theme={theme} linking={linking}>
+      <NavigationContainer
+        ref={navigationRef}
+        theme={theme}
+        linking={linking}
+        onReady={onStateChange}
+        onStateChange={onStateChange}
+      >
         <Stack.Navigator
           initialRouteName={RouteEnum.LoadingApp}
           screenOptions={{ headerShown: false, animation: 'fade' }}

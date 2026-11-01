@@ -60,6 +60,7 @@ import { HeaderTitle } from '../Header';
 import { XIcon } from '../Components/Icons/XIcon';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
 import { useTheme } from '../../app/theme';
+import { report } from '../../app/reporting';
 
 type SendProps = NativeStackScreenProps<
   LoadedAppStackParamList,
@@ -771,12 +772,12 @@ const Send: React.FunctionComponent<SendProps> = ({
         translate('send.confirm-title') as string,
         `${translate('send.Broadcast')} ${txid}`,
         true,
-        translate,
       );
 
       navigation.navigate(RouteEnum.ComputingOK, { txid });
       return;
     } catch (err) {
+      report(err);
       error = err as string;
       customError = interceptCustomError(error);
     }

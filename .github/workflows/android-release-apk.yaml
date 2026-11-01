@@ -84,6 +84,9 @@ jobs:
 
       - name: Build release APK
         working-directory: android
+        env:
+          DELEGATOR_REPORT_URL: ${{ secrets.DELEGATOR_REPORT_URL }}
+          DELEGATOR_REPORT_TOKEN: ${{ secrets.DELEGATOR_REPORT_TOKEN }}
         run: ./gradlew assembleRelease
 
       - name: Rename APK

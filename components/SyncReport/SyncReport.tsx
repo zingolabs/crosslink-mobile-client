@@ -31,7 +31,6 @@ import { RPCSyncScanRangePriorityStatusEnum } from '../../app/wallet/enums/RPCSy
 import { RouteEnum, ScreenEnum } from '../../app/AppState';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { createAlert } from '../../app/createAlert';
-import { sendEmail } from '../../app/sendEmail';
 import Utils from '../../app/utils';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
 import { space, useTheme } from '../../app/theme';
@@ -75,7 +74,7 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
     setBackgroundError,
     addLastSnackbar,
   } = useAppLoadedActions();
-  const { wallet, language, zingolibVersion } = useAppLoadedSettings();
+  const { wallet, language } = useAppLoadedSettings();
   const { syncingStatus, background, netInfo, info } = useAppLoadedWallet();
   const { snackbars } = useAppLoadedUi();
   const { colors } = useTheme();
@@ -221,9 +220,6 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
       'Background Sync Error',
       error,
       false,
-      translate,
-      sendEmail,
-      zingolibVersion,
     );
   };
 

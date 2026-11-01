@@ -5,12 +5,12 @@
   "connectingserver": "Conectando-se ao servidor...",
   "wait": "Aguarde um momento...",
   "workingonit": "Estamos trabalhando neste recurso.",
-  "updating" : {
+  "updating": {
     "firstlaunchingmessage-title": "Otimizando a Zingo Delegator",
     "firstlaunchingmessage-body": "Isso pode demorar um pouco, dependendo do histórico de transações. Por favor, mantenha o aplicativo aberto até que o processo termine",
     "firstlaunchingmessage-footer": "Obrigado."
   },
-  "installing" : {
+  "installing": {
     "firstlaunchingmessage-title": "Criando uma nova carteira",
     "firstlaunchingmessage-body": "Mantenha o aplicativo aberto até que o processo seja concluído.",
     "firstlaunchingmessage-footer": "Obrigado."
@@ -31,7 +31,6 @@
   "copy": "Cópia de",
   "share": "Compartilhar",
   "confirm": "Confirmar",
-  "support": "Enviar E-mail",
   "view-error": "Ver/Relatar Erro",
   "menudrawer-acc": "Abrir Menu Lateral",
   "menu-acc": "Abrir Menu",
@@ -41,9 +40,6 @@
   "restarting": "Erro ao conectar ao servidor, o aplicativo será reiniciado em alguns segundos.",
   "change-privacy": "Nova política de privacidade: ",
   "warning-binance": "AVISO: A Binance está coletando e mantendo fundos dos usuários sem recurso oportuno. NÃO deposite na Binance a partir desta Carteira.",
-  "email": "zingo@zingolabs.org",
-  "subject": "Suporte Zingo Delegator...",
-  "body": "Preciso de ajuda com...",
   "connecting": "Conectando",
   "syncing": "Sincronizando",
   "synced": "Sincronizada",
@@ -159,8 +155,6 @@
     "valuetransfer-confirmed": "Transação confirmada\n",
     "payment-made": "Pagamento efetuado\n",
     "valuetransfer-reverted": "A transação nunca foi confirmada por um validador.",
-    "email-error-title": "Erro ao abrir o cliente de e-mail",
-    "email-error-body": "Acesse as configurações do seu dispositivo e defina um aplicativo de e-mail padrão para enviar o relatório.",
     "migration-title": "Migração de carteira",
     "migration-body": "Estamos migrando sua carteira para o novo sistema de sincronização. Mantenha seu dispositivo conectado à energia e ao Wi-Fi.\n\nSeu saldo mudará conforme a migração avança. Não se preocupe, seus fundos estão seguros!"
   },
