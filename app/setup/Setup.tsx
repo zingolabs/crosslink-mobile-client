@@ -1,5 +1,10 @@
 import React, { Component } from 'react';
-import { Alert, AppState, AppStateStatus } from 'react-native';
+import {
+  Alert,
+  AppState,
+  AppStateStatus,
+  NativeEventSubscription,
+} from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 
 import {
@@ -8,6 +13,7 @@ import {
 } from '@react-navigation/native-stack';
 import NetInfo, {
   NetInfoState,
+  NetInfoSubscription,
 } from '@react-native-community/netinfo/src/index';
 
 import {
@@ -85,7 +91,8 @@ export default function Setup() {
 }
 
 class SetupClass extends Component<SetupClassProps, SetupState> {
-  subscriptions: (() => void)[] = [];
+  private appStateSubscription: NativeEventSubscription | null = null;
+  private netInfoSubscription: NetInfoSubscription | null = null;
   screenName = ScreenEnum.Boot;
 
   constructor(props: SetupClassProps) {
@@ -129,28 +136,21 @@ class SetupClass extends Component<SetupClassProps, SetupState> {
     };
   }
 
-  componentDidMount = async () => {
-    this.subscribe();
-    await this.fetchBackgroundSyncing();
-  };
-
-  componentWillUnmount = () => {
-    this.unsubscribe();
-  };
-
-  subscribe = () => {
-    const appState = AppState.addEventListener(
+  componentDidMount() {
+    this.appStateSubscription = AppState.addEventListener(
       EventListenerEnum.change,
       this.handleAppStateChange,
     );
-    const netInfo = NetInfo.addEventListener(this.handleNetInfoChange);
-    this.subscriptions = [() => appState?.remove?.(), netInfo];
-  };
+    this.netInfoSubscription = NetInfo.addEventListener(
+      this.handleNetInfoChange,
+    );
+    this.fetchBackgroundSyncing();
+  }
 
-  unsubscribe = () => {
-    this.subscriptions.forEach(off => typeof off === 'function' && off());
-    this.subscriptions = [];
-  };
+  componentWillUnmount() {
+    this.appStateSubscription?.remove();
+    this.netInfoSubscription?.();
+  }
 
   handleAppStateChange = async (nextAppState: AppStateStatus) => {
     const priorAppState = this.state.appStateStatus;

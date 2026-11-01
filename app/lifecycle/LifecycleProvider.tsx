@@ -3,7 +3,6 @@ import React, {
   ReactNode,
   useContext,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 
@@ -15,7 +14,6 @@ import {
   createI18n,
   createTranslate,
   bootstrapSettings,
-  BootstrappedSettings,
 } from '../settingsBootstrap';
 import { IndexerNetworkEnum } from '../AppState/enums/IndexerNetworkEnum';
 import {
@@ -73,11 +71,11 @@ const readBootInfo = async (
   i18n: ReturnType<typeof createI18n>,
   translate: (key: string) => string,
 ): Promise<BootInfo> => {
-  const settings: BootstrappedSettings = await bootstrapSettings(i18n, {
-    validateCurrency: true,
-  });
-  const launching = await detectLaunching(translate);
-  const read = await readSettings();
+  const [settings, launching, read] = await Promise.all([
+    bootstrapSettings(i18n, { validateCurrency: true }),
+    detectLaunching(translate),
+    readSettings(),
+  ]);
   let indexerNetwork = IndexerNetworkEnum.stable;
   if (
     read.indexerNetwork === IndexerNetworkEnum.stable ||
@@ -114,8 +112,6 @@ export function LifecycleProvider({
   const [lifecycleState, setLifecycleState] = useState<Lifecycle>(
     initial ?? make.booting(),
   );
-  const stateRef = useRef(lifecycleState);
-  stateRef.current = lifecycleState;
 
   const actions = useMemo<LifecycleActions>(() => {
     const boot = () => {
@@ -164,33 +160,27 @@ export function LifecycleProvider({
       retryBoot: boot,
       startOpening,
       sessionOpened: session => {
-        const current = stateRef.current;
-        if (current.phase !== 'opening') {
-          return;
-        }
-        setLifecycleState(make.active(current.boot, session));
+        setLifecycleState(cur =>
+          cur.phase === 'opening' ? make.active(cur.boot, session) : cur,
+        );
       },
       openingFailed: () => {
-        const current = stateRef.current;
-        if (current.phase !== 'opening') {
-          return;
-        }
-        setLifecycleState(make.setup(current.boot, true, false, true));
+        setLifecycleState(cur =>
+          cur.phase === 'opening'
+            ? make.setup(cur.boot, true, false, true)
+            : cur,
+        );
       },
       leaveSession,
       lockGate: () => {
-        const current = stateRef.current;
-        if (current.phase !== 'active') {
-          return;
-        }
-        setLifecycleState(make.locked(current.boot, current.session));
+        setLifecycleState(cur =>
+          cur.phase === 'active' ? make.locked(cur.boot, cur.session) : cur,
+        );
       },
       unlockGate: () => {
-        const current = stateRef.current;
-        if (current.phase !== 'locked') {
-          return;
-        }
-        setLifecycleState(make.active(current.boot, current.session));
+        setLifecycleState(cur =>
+          cur.phase === 'locked' ? make.active(cur.boot, cur.session) : cur,
+        );
       },
     };
   }, [translate, i18n]);

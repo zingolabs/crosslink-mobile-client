@@ -1,8 +1,14 @@
 import React, { Component } from 'react';
-import { AppState, AppStateStatus, Platform } from 'react-native';
+import {
+  AppState,
+  AppStateStatus,
+  NativeEventSubscription,
+  Platform,
+} from 'react-native';
 
 import NetInfo, {
   NetInfoState,
+  NetInfoSubscription,
 } from '@react-native-community/netinfo/src/index';
 
 import RPCModule from '../RPCModule';
@@ -33,7 +39,7 @@ import { RPCWalletKindType } from '../wallet/types/RPCWalletKindType';
 import Snackbars from '../../components/Components/Snackbars';
 import { RPCSeedType } from '../wallet/types/RPCSeedType';
 import Launching from '../lifecycle/Launching';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import {
   createUpdateRecoveryWalletInfo,
   hasRecoveryWalletInfo,
@@ -94,7 +100,8 @@ export default function Opening() {
 }
 
 class OpeningClass extends Component<OpeningProps, OpeningState> {
-  subscriptions: (() => void)[] = [];
+  private appStateSubscription: NativeEventSubscription | null = null;
+  private netInfoSubscription: NetInfoSubscription | null = null;
   screenName = ScreenEnum.Boot;
 
   constructor(props: OpeningProps) {
@@ -137,28 +144,21 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
     };
   }
 
-  componentDidMount = async () => {
-    this.subscribe();
-    await this.run(this.props.request);
-  };
-
-  componentWillUnmount = () => {
-    this.unsubscribe();
-  };
-
-  subscribe = () => {
-    const appState = AppState.addEventListener(
+  componentDidMount() {
+    this.appStateSubscription = AppState.addEventListener(
       EventListenerEnum.change,
       this.handleAppStateChange,
     );
-    const netInfo = NetInfo.addEventListener(this.handleNetInfoChange);
-    this.subscriptions = [() => appState?.remove?.(), netInfo];
-  };
+    this.netInfoSubscription = NetInfo.addEventListener(
+      this.handleNetInfoChange,
+    );
+    void this.run(this.props.request);
+  }
 
-  unsubscribe = () => {
-    this.subscriptions.forEach(off => typeof off === 'function' && off());
-    this.subscriptions = [];
-  };
+  componentWillUnmount() {
+    this.appStateSubscription?.remove();
+    this.netInfoSubscription?.();
+  }
 
   handleAppStateChange = async (nextAppState: AppStateStatus) => {
     this.setState({ appStateStatus: nextAppState });

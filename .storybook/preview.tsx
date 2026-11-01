@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -9,10 +9,7 @@ import type { Preview } from '@storybook/react-native-web-vite';
 
 import { ThemeProvider, navigationTheme, tokens } from '../app/theme';
 import { LoadedDomains, SetupDomains } from '../app/context/domains';
-import {
-  SessionDomainsProvider,
-  SetupDomainsProvider,
-} from '../app/context';
+import { SessionDomainsProvider, SetupDomainsProvider } from '../app/context';
 import { mockContextLoaded, mockContextLoading } from './mockContext';
 
 const Stack = createNativeStackNavigator();

@@ -1,4 +1,4 @@
-import React, { ReactNode, useContext, useRef } from 'react';
+import React, { ReactNode, useContext, useEffect, useRef } from 'react';
 
 import {
   defaultFeedback,
@@ -27,16 +27,28 @@ function useSlice<T extends object, K extends keyof T>(
   value: T,
   keys: K[],
 ): Pick<T, K> {
-  const ref = useRef<Pick<T, K> | null>(null);
-  const prev = ref.current;
-  if (prev && keys.every(k => Object.is(prev[k], value[k]))) {
-    return prev;
-  }
+  const cache = useRef<{ prev: T | null; slice: Pick<T, K> }>({
+    prev: null,
+    slice: {} as Pick<T, K>,
+  });
+  const prev = cache.current.prev;
+  const changed =
+    prev === null || !keys.every(k => Object.is(prev[k], value[k]));
+  const slice = changed ? pickSlice(value, keys) : cache.current.slice;
+  useEffect(() => {
+    cache.current = { prev: value, slice };
+  });
+  return slice;
+}
+
+function pickSlice<T extends object, K extends keyof T>(
+  value: T,
+  keys: K[],
+): Pick<T, K> {
   const next = {} as Pick<T, K>;
   keys.forEach(k => {
     next[k] = value[k];
   });
-  ref.current = next;
   return next;
 }
 
