@@ -5,12 +5,12 @@
   "connectingserver": "Sunucuya bağlanılıyor...",
   "wait": "Lütfen bekleyin...",
   "workingonit": "Bu özellik üzerinde çalışıyoruz.",
-  "updating" : {
+  "updating": {
     "firstlaunchingmessage-title": "Zingo Delegator optimize ediliyor",
     "firstlaunchingmessage-body": "Bu işlem, işlem geçmişine bağlı olarak biraz zaman alabilir. Lütfen işlem tamamlanana kadar uygulamayı açık tutun.",
     "firstlaunchingmessage-footer": "Teşekkürler."
   },
-  "installing" : {
+  "installing": {
     "firstlaunchingmessage-title": "Yeni bir cüzdan oluşturuluyor",
     "firstlaunchingmessage-body": "Lütfen işlem bitene kadar uygulamayı açık tutun.",
     "firstlaunchingmessage-footer": "Teşekkürler."
@@ -31,7 +31,6 @@
   "copy": "Kopyala",
   "share": "Paylaş",
   "confirm": "Onayla",
-  "support": "Email gönder",
   "view-error": "Hatayı Görüntüle/Bildir",
   "menudrawer-acc": "Menü çekmecesini aç",
   "menu-acc": "Menüyü aç",
@@ -41,9 +40,6 @@
   "restarting": "Sunucuya bağlanırken hata oluştu, uygulama birkaç saniye içinde yeniden başlayacak.",
   "change-privacy": "Yeni gizlilik politikası ",
   "warning-binance": "UYARI: Binance, kullanıcı fonlarını zamanında iade etmeden topluyor ve tutuyor. Bu cüzdandan Binance’e para yatırmayın.",
-  "email": "zingo@zingolabs.org",
-  "subject": "Zingo Delegator Destek...",
-  "body": "… ile ilgili yardıma ihtiyacım var",
   "connecting": "Bağlanıyor",
   "syncing": "Senkronize ediliyor",
   "synced": "Senkronize edildi",
@@ -159,8 +155,6 @@
     "valuetransfer-confirmed": "İşlem onaylandı",
     "payment-made": "Ödeme yapıldı",
     "valuetransfer-reverted": "İşlem hiçbir zaman bir doğrulayıcı tarafından onaylanmadı.",
-    "email-error-title": "E-posta istemcisi açılırken bir hata oluştu",
-    "email-error-body": "Raporu gönderebilmek için cihazınızın Ayarlar bölümüne gidin ve varsayılan bir e-posta uygulaması belirleyin.",
     "migration-title": "Cüzdan geçişi",
     "migration-body": "Cüzdanınızı yeni senkronizasyon sistemine taşıyoruz. Cihazınızı güç ve Wi-Fi'a bağlı tutun.\n\nBakiyeniz, taşıma işlemi ilerledikçe değişecektir. Endişelenmeyin, paranız güvende!"
   },

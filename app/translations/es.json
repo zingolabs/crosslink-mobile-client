@@ -5,12 +5,12 @@
   "connectingserver": "Conectando con el servidor...",
   "wait": "Por favor espere...",
   "workingonit": "Estamos trabajando en esta funcionalidad.",
-  "updating" : {
+  "updating": {
     "firstlaunchingmessage-title": "Optimizando Zingo Delegator",
     "firstlaunchingmessage-body": "Esto puede tardar un poco, dependiendo del historial de transacciones. Mantenga la aplicación abierta hasta que finalice el proceso.",
     "firstlaunchingmessage-footer": "Gracias."
   },
-  "installing" : {
+  "installing": {
     "firstlaunchingmessage-title": "Creando una nueva billetera",
     "firstlaunchingmessage-body": "Por favor, mantenga la aplicación abierta hasta que finalice el proceso.",
     "firstlaunchingmessage-footer": "Gracias."
@@ -31,7 +31,6 @@
   "copy": "Copiar",
   "share": "Compartir",
   "confirm": "Confirmar",
-  "support": "Enviar Email",
   "view-error": "Ver/Informar Error",
   "menudrawer-acc": "Abrir Menú Lateral",
   "menu-acc": "Abrir Menú",
@@ -41,9 +40,6 @@
   "restarting": "Error conectando con el servidor, la Aplicación se reiniciará en breves segundos.",
   "change-privacy": "Nueva Política de Privacidad: ",
   "warning-binance": "ADVERTENCIA: Binance recopila y retiene los fondos de los usuarios sin un recurso oportuno. NO deposite en Binance desde este Monedero.",
-  "email": "zingo@zingolabs.org",
-  "subject": "Soporte Zingo Delegator...",
-  "body": "Necesito ayuda con...",
   "connecting": "Conectando",
   "syncing": "Sincronizando",
   "synced": "Sincronizada",
@@ -159,8 +155,6 @@
     "valuetransfer-confirmed": "Transacción confirmada\n",
     "payment-made": "Pago realizado\n",
     "valuetransfer-reverted": "La transacción nunca fue confirmada por un validador.",
-    "email-error-title": "Error al abrir el cliente de correo electrónico",
-    "email-error-body": "Ingresa a los Ajustes de tu dispositivo y configura una aplicación de correo predeterminada para enviar el reporte.",
     "migration-title": "Migración de la billetera",
     "migration-body": "Estamos migrando tu billetera al nuevo sistema de sincronización. Mantén tu dispositivo conectado a la corriente y al wifi.\n\nTu saldo cambiará a medida que avance la migración. ¡No te preocupes, tus fondos están seguros!"
   },

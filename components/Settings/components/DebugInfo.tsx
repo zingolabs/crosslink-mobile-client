@@ -4,7 +4,6 @@ import { StyleSheet, ScrollView, Text, View } from 'react-native';
 import { LoadedAppStackParamList } from '../../../app/types';
 import {
   useAppLoadedActions,
-  useAppLoadedSettings,
   useAppLoadedWallet,
   useAppLoadedUi,
 } from '../../../app/context';
@@ -13,10 +12,7 @@ import { ToastProvider, useToast } from 'react-native-toastier';
 import { RouteEnum, ScreenEnum } from '../../../app/AppState';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { createAlert } from '../../../app/createAlert';
-import { sendEmail } from '../../../app/sendEmail';
 import { HeaderTitle } from '../../Header';
-import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
 import { mono, radiusCard, space, useTheme } from '../../../app/theme';
 
 type DebugInfoProps = NativeStackScreenProps<
@@ -26,13 +22,7 @@ type DebugInfoProps = NativeStackScreenProps<
 
 /** Last error, presented as a terminal: mono text on a dark panel. */
 const DebugInfo: React.FunctionComponent<DebugInfoProps> = ({ navigation }) => {
-  const {
-    removeFirstSnackbar,
-    setBackgroundError,
-    addLastSnackbar,
-    translate,
-  } = useAppLoadedActions();
-  const { zingolibVersion } = useAppLoadedSettings();
+  const { removeFirstSnackbar } = useAppLoadedActions();
   const { lastError } = useAppLoadedWallet();
   const { snackbars } = useAppLoadedUi();
   const { colors } = useTheme();
@@ -40,20 +30,6 @@ const DebugInfo: React.FunctionComponent<DebugInfoProps> = ({ navigation }) => {
   const screenName = ScreenEnum.DebugInfo;
 
   const insets = useSafeAreaInsets();
-
-  const reportError = (error: string) => {
-    createAlert(
-      setBackgroundError,
-      addLastSnackbar,
-      [screenName],
-      'Last Error',
-      error,
-      false,
-      translate,
-      sendEmail,
-      zingolibVersion,
-    );
-  };
 
   return (
     <ToastProvider>
@@ -95,18 +71,6 @@ const DebugInfo: React.FunctionComponent<DebugInfoProps> = ({ navigation }) => {
           )}
         </View>
       </ScrollView>
-      <View
-        style={[styles.footer, { paddingBottom: insets.bottom + space.xl }]}
-      >
-        {!!lastError && (
-          <LiquidPrimaryButton
-            title={'Report'}
-            onPress={() => {
-              reportError(lastError);
-            }}
-          />
-        )}
-      </View>
     </ToastProvider>
   );
 };
@@ -126,12 +90,6 @@ const styles = StyleSheet.create({
   line: {
     ...mono,
     lineHeight: 22,
-  },
-  footer: {
-    marginTop: 'auto',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: space.sm,
   },
 });
 

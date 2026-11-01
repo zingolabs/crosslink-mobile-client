@@ -42,6 +42,7 @@ import Clipboard from '../../assets/icons/clipboard.svg';
 import { formatSeconds } from '../../app/utils/Utils';
 import { scheduleReminder } from '../Staking/components/scheduleReminder';
 import { useTheme } from '../../app/theme';
+import { report } from '../../app/reporting';
 
 type ModalState = 'idle' | 'sending' | 'success';
 
@@ -196,6 +197,7 @@ const ScheduledActionDetail: React.FC<ScheduledActionDetailProps> = ({
 
       setModalState('success');
     } catch (error: any) {
+      report(error);
       console.warn('Unstaking tx failed:', error);
       setModalState('idle');
       if (JSON.stringify(error).toLowerCase().includes('window')) {

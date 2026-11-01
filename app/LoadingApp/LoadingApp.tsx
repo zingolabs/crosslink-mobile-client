@@ -83,6 +83,7 @@ import {
 } from '../legacyWallet';
 import notifee from '@notifee/react-native';
 import { useTheme, AppTheme } from '../theme';
+import { report, reportFailure } from '../reporting';
 import { LoadingAppEntryEnum } from '../AppState/enums/LoadingAppEntryEnum';
 import { BackdropHost } from '../Backdrop';
 
@@ -982,7 +983,6 @@ export class LoadingAppClass extends Component<
         title,
         result,
         false,
-        this.state.translate,
       );
       this.setState({
         actionButtonsDisabled: false,
@@ -993,6 +993,7 @@ export class LoadingAppClass extends Component<
       const workingServer = await this.checkServer(this.state.indexerServer);
       if (workingServer) {
         // the server is working -> this error is something not related with the server availability
+        reportFailure(title, result);
         createAlert(
           this.setBackgroundError,
           this.addLastSnackbar,
@@ -1000,7 +1001,6 @@ export class LoadingAppClass extends Component<
           title,
           result,
           false,
-          this.state.translate,
         );
         this.setState({
           actionButtonsDisabled: false,
@@ -1039,7 +1039,6 @@ export class LoadingAppClass extends Component<
                 title,
                 result,
                 false,
-                this.state.translate,
               );
               this.setState({
                 actionButtonsDisabled: false,
@@ -1055,7 +1054,6 @@ export class LoadingAppClass extends Component<
               title,
               this.state.translate('loadingapp.noservers') as string,
               false,
-              this.state.translate,
             );
             this.setState({
               actionButtonsDisabled: false,
@@ -1080,7 +1078,6 @@ export class LoadingAppClass extends Component<
               title,
               result,
               false,
-              this.state.translate,
             );
             this.setState({
               actionButtonsDisabled: false,
@@ -1181,6 +1178,10 @@ export class LoadingAppClass extends Component<
         seedJSON = await JSON.parse(seed);
         if (seedJSON.error) {
           this.setState({ actionButtonsDisabled: false });
+          reportFailure(
+            this.state.translate('loadingapp.creatingwallet-label') as string,
+            seedJSON.error,
+          );
           createAlert(
             this.setBackgroundError,
             this.addLastSnackbar,
@@ -1188,12 +1189,12 @@ export class LoadingAppClass extends Component<
             this.state.translate('loadingapp.creatingwallet-label') as string,
             seedJSON.error,
             false,
-            this.state.translate,
           );
           return;
         }
       } catch (e: unknown) {
         this.setState({ actionButtonsDisabled: false });
+        report(e);
         createAlert(
           this.setBackgroundError,
           this.addLastSnackbar,
@@ -1201,7 +1202,6 @@ export class LoadingAppClass extends Component<
           this.state.translate('loadingapp.creatingwallet-label') as string,
           e instanceof Error ? e.message : String(e),
           false,
-          this.state.translate,
         );
         return;
       }
@@ -1253,7 +1253,6 @@ export class LoadingAppClass extends Component<
         this.state.translate('loadingapp.emptyseedufvk-label') as string,
         this.state.translate('loadingapp.emptyseedufvk-error') as string,
         false,
-        this.state.translate,
       );
       return;
     }
@@ -1268,7 +1267,6 @@ export class LoadingAppClass extends Component<
         this.state.translate('loadingapp.invalidseedufvk-label') as string,
         this.state.translate('loadingapp.invalidseedufvk-error') as string,
         false,
-        this.state.translate,
       );
       return;
     }

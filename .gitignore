@@ -105,3 +105,9 @@ debug-storybook.log
 .scratch/
 fastlane/report.xml
 fastlane/README.md
+
+# crash triage CLI state
+.crash-triage/
+
+# build-time env (report URL and token)
+/.env

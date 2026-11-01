@@ -1,5 +1,6 @@
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 const { withStorybook } = require('@storybook/react-native/withStorybook');
+const { cacheVersion } = require('./scripts/build-env.cjs');
 
 /**
  * Metro configuration
@@ -31,6 +32,7 @@ const resolveRequest = (context, moduleName, platform) => {
 };
 
 const config = {
+  cacheVersion,
   transformer: {
     babelTransformerPath: require.resolve('react-native-svg-transformer'),
   },

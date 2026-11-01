@@ -109,6 +109,7 @@ import ScheduledActionDetail from '../../components/ScheduledActions/ScheduledAc
 import { FinalizerDetail } from '../../components/Staking/Finalizers/FinalizerDetail';
 import { scheduleReminder } from '../../components/Staking/components/scheduleReminder';
 import { useTheme, AppTheme } from '../theme';
+import { report, reportFailure } from '../reporting';
 
 const LoadedAppStack = createNativeStackNavigator<LoadedAppStackParamList>();
 
@@ -1012,6 +1013,12 @@ export class LoadedAppClass extends Component<
     const backgroundJson: BackgroundType =
       await BackgroundFileImpl.readBackground();
     if (!isEqual(this.state.background, backgroundJson)) {
+      if (
+        backgroundJson.error &&
+        backgroundJson.error !== this.state.background.error
+      ) {
+        reportFailure('Background Sync Error', backgroundJson.error);
+      }
       //console.log('fetch background sync info');
       this.setState({ background: backgroundJson });
     }
@@ -1234,7 +1241,6 @@ export class LoadedAppClass extends Component<
                   title,
                   message,
                   true,
-                  this.state.translate,
                 );
               }
               // here I know a new transaction is confirmed
@@ -1779,6 +1785,10 @@ export class LoadedAppClass extends Component<
     //console.log("jc change", resultStr);
     if (resultStr && resultStr.toLowerCase().startsWith(GlobalConst.error)) {
       //console.log(`Error change wallet. ${resultStr}`);
+      reportFailure(
+        this.state.translate('loadedapp.changingwallet-label') as string,
+        resultStr,
+      );
       createAlert(
         this.setBackgroundError,
         this.addLastSnackbar,
@@ -1786,7 +1796,6 @@ export class LoadedAppClass extends Component<
         this.state.translate('loadedapp.changingwallet-label') as string,
         resultStr,
         false,
-        this.state.translate,
       );
       return;
     }
@@ -1805,6 +1814,10 @@ export class LoadedAppClass extends Component<
     //console.log("jc restore", resultStr);
     if (resultStr && resultStr.toLowerCase().startsWith(GlobalConst.error)) {
       //console.log(`Error restore backup wallet. ${resultStr}`);
+      reportFailure(
+        this.state.translate('loadedapp.restoringwallet-label') as string,
+        resultStr,
+      );
       createAlert(
         this.setBackgroundError,
         this.addLastSnackbar,
@@ -1812,7 +1825,6 @@ export class LoadedAppClass extends Component<
         this.state.translate('loadedapp.restoringwallet-label') as string,
         resultStr,
         false,
-        this.state.translate,
       );
       return;
     }
@@ -1840,6 +1852,7 @@ export class LoadedAppClass extends Component<
   };
 
   setLastError = (error: string) => {
+    report(new Error(error));
     this.setState({ lastError: error });
   };
 
