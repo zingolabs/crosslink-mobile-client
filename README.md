@@ -62,14 +62,14 @@ Pushing a `release-X.Y.Z` tag builds both platforms. Android runs `android-relea
 
 Repository secrets the iOS job reads:
 
-| Secret | Content |
-|---|---|
-| `APP_STORE_CONNECT_API_KEY_ID` | key id of an App Store Connect API key with App Manager access |
-| `APP_STORE_CONNECT_API_ISSUER_ID` | issuer id of that key |
-| `APP_STORE_CONNECT_API_KEY_P8` | the `.p8` file, base64 |
-| `IOS_DIST_CERT_P12` | Apple Distribution certificate with private key, base64 `.p12` |
-| `IOS_DIST_CERT_PASSWORD` | password of that `.p12` |
-| `DELEGATOR_REPORT_URL`, `DELEGATOR_REPORT_TOKEN` | crash reporting, shared with Android |
+| Secret                                           | Content                                                        |
+| ------------------------------------------------ | -------------------------------------------------------------- |
+| `APP_STORE_CONNECT_API_KEY_ID`                   | key id of an App Store Connect API key with App Manager access |
+| `APP_STORE_CONNECT_API_ISSUER_ID`                | issuer id of that key                                          |
+| `APP_STORE_CONNECT_API_KEY_P8`                   | the `.p8` file, base64                                         |
+| `IOS_DIST_CERT_P12`                              | Apple Distribution certificate with private key, base64 `.p12` |
+| `IOS_DIST_CERT_PASSWORD`                         | password of that `.p12`                                        |
+| `DELEGATOR_REPORT_URL`, `DELEGATOR_REPORT_TOKEN` | crash reporting, shared with Android                           |
 
 ## Troubleshooting
 
