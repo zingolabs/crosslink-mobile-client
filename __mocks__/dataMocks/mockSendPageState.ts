@@ -1,10 +1,10 @@
-import { SendPageStateClass, ToAddrClass } from '../../app/AppState';
+import {
+  emptySendPageState,
+  SendPageState,
+} from '../../app/AppState';
 
-const mockSendPageState: SendPageStateClass = new SendPageStateClass(
-  new ToAddrClass(0),
-);
+const mockSendPageState: SendPageState = emptySendPageState();
 
-mockSendPageState.toaddr.id = 1234567890;
 mockSendPageState.toaddr.to = 'UA-12345678901234567890';
 mockSendPageState.toaddr.amount = '1.12345678';
 mockSendPageState.toaddr.amountCurrency = '50.22';

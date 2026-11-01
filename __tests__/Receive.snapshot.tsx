@@ -8,20 +8,20 @@ import React from 'react';
 import { render } from '@testing-library/react-native';
 import Receive from '../components/Receive';
 import {
-  ContextAppLoadedProvider,
-  defaultAppContextLoaded,
+  SessionDomainsProvider,
+  defaultLoadedDomains,
 } from '../app/context';
 import { mockAddresses } from '../__mocks__/dataMocks/mockAddresses';
 import { mockTranslate } from '../__mocks__/dataMocks/mockTranslate';
 import { mockInfo } from '../__mocks__/dataMocks/mockInfo';
 import { mockTotalBalance } from '../__mocks__/dataMocks/mockTotalBalance';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { LoadedAppStackParamList } from '../app/types';
+import { SessionStackParamList } from '../app/types';
 import { RouteEnum } from '../app/AppState';
 import mockNavigation from '../__mocks__/dataMocks/mockNavigation';
 
 function makeDrawerProps(): NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.Receive
 > {
   return {
@@ -37,7 +37,7 @@ function makeDrawerProps(): NativeStackScreenProps<
 describe('Component Receive - test', () => {
   //snapshot test
   test('Receive - snapshot', () => {
-    const state = defaultAppContextLoaded;
+    const state = defaultLoadedDomains;
     state.addresses = mockAddresses;
     state.translate = mockTranslate;
     state.info = mockInfo;
@@ -45,9 +45,9 @@ describe('Component Receive - test', () => {
     const onFunction = jest.fn();
     const props = makeDrawerProps();
     const receive = render(
-      <ContextAppLoadedProvider value={state}>
+      <SessionDomainsProvider value={state}>
         <Receive {...props} setSecurityOption={onFunction} />
-      </ContextAppLoadedProvider>,
+      </SessionDomainsProvider>,
     );
     expect(receive.toJSON()).toMatchSnapshot();
   });

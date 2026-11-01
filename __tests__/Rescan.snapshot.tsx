@@ -8,20 +8,20 @@ import React from 'react';
 import { render } from '@testing-library/react-native';
 import Rescan from '../components/Rescan';
 import {
-  defaultAppContextLoaded,
-  ContextAppLoadedProvider,
+  SessionDomainsProvider,
+  defaultLoadedDomains,
 } from '../app/context';
 import { mockTranslate } from '../__mocks__/dataMocks/mockTranslate';
 import { mockInfo } from '../__mocks__/dataMocks/mockInfo';
 import { mockTotalBalance } from '../__mocks__/dataMocks/mockTotalBalance';
 import { mockWallet } from '../__mocks__/dataMocks/mockWallet';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { LoadedAppStackParamList } from '../app/types';
+import { SessionStackParamList } from '../app/types';
 import { RouteEnum } from '../app/AppState';
 import mockNavigation from '../__mocks__/dataMocks/mockNavigation';
 
 function makeDrawerProps(): NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.Rescan
 > {
   return {
@@ -36,7 +36,7 @@ function makeDrawerProps(): NativeStackScreenProps<
 // test suite
 describe('Component Rescan - test', () => {
   //snapshot test
-  const state = defaultAppContextLoaded;
+  const state = defaultLoadedDomains;
   state.translate = mockTranslate;
   state.info = mockInfo;
   state.totalBalance = mockTotalBalance;
@@ -45,9 +45,9 @@ describe('Component Rescan - test', () => {
   const props = makeDrawerProps();
   test('Rescan - snapshot', () => {
     const rescan = render(
-      <ContextAppLoadedProvider value={state}>
+      <SessionDomainsProvider value={state}>
         <Rescan {...props} doRescan={onRescan} />
-      </ContextAppLoadedProvider>,
+      </SessionDomainsProvider>,
     );
     expect(rescan.toJSON()).toMatchSnapshot();
   });

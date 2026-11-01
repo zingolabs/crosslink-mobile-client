@@ -3,8 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import Confirm from './Confirm';
 import {
   RouteEnum,
-  SendPageStateClass,
-  ToAddrClass,
+  SendPageState,
+  emptyToAddr,
 } from '../../../app/AppState';
 import { screenProps } from '../../../.storybook/screenProps';
 import { mockAddresses } from '../../../__mocks__/dataMocks/mockAddresses';
@@ -14,12 +14,13 @@ import { mockAddresses } from '../../../__mocks__/dataMocks/mockAddresses';
  * Send.tsx:767 now fires a plain Alert *after* broadcast, so the user no
  * longer sees fee or privacy level before signing.
  */
-const toAddr = new ToAddrClass(0);
+
+const toAddr = emptyToAddr();
 toAddr.to = mockAddresses[0].address;
 toAddr.amount = '0.25';
 toAddr.memo = 'Thanks!';
 
-const sendPageState = new SendPageStateClass(toAddr);
+const sendPageState: SendPageState = { toaddr: toAddr };
 
 const parseAddressInfoJSON = {
   status: 'success',

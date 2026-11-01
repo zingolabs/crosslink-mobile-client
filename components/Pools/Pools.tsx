@@ -4,12 +4,12 @@ import { StyleSheet, View, ScrollView, ActivityIndicator } from 'react-native';
 import ZecAmount from '../Components/ZecAmount';
 import BoldText from '../Components/BoldText';
 import DetailLine from '../Components/DetailLine';
-import { LoadedAppStackParamList } from '../../app/types';
+import { SessionStackParamList } from '../../app/types';
 import {
-  useAppLoadedActions,
-  useAppLoadedSettings,
-  useAppLoadedWallet,
-  useAppLoadedUi,
+  useFeedback,
+  useSettings,
+  useStatus,
+  useWalletData,
 } from '../../app/context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import FadeText from '../Components/FadeText';
@@ -23,17 +23,16 @@ import { HeaderTitle } from '../Header';
 import { space, useTheme } from '../../app/theme';
 
 type PoolsProps = NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.Pools
 >;
 
 const Pools: React.FunctionComponent<PoolsProps> = ({ navigation }) => {
-  const { translate, removeFirstSnackbar } = useAppLoadedActions();
-  const { privacy, orchardPool, saplingPool, transparentPool } =
-    useAppLoadedSettings();
-  const { totalBalance, info, somePending, shieldingAmount } =
-    useAppLoadedWallet();
-  const { snackbars } = useAppLoadedUi();
+  const { translate, removeFirstSnackbar } = useFeedback();
+  const { privacy } = useSettings();
+  const { orchardPool, saplingPool, transparentPool } = useStatus();
+  const { totalBalance, info, somePending, shieldingAmount } = useWalletData();
+  const { snackbars } = useFeedback();
   const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.Pools;

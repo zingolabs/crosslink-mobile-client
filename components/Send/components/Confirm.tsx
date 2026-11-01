@@ -8,22 +8,22 @@ import RegText from '../../Components/RegText';
 import ZecAmount from '../../Components/ZecAmount';
 import CurrencyAmount from '../../Components/CurrencyAmount';
 import {
-  useAppLoadedActions,
-  useAppLoadedSettings,
-  useAppLoadedWallet,
-  useAppLoadedUi,
+  useFeedback,
+  useSettings,
+  useStatus,
+  useWalletData,
 } from '../../../app/context';
 import AddressItem from '../../Components/AddressItem';
 import simpleBiometrics from '../../../app/simpleBiometrics';
 
-import { LoadedAppStackParamList } from '../../../app/types';
+import { SessionStackParamList } from '../../../app/types';
 import Utils from '../../../app/utils';
 import {
   PrivacyLevelFromEnum,
   GlobalConst,
   ScreenEnum,
   RouteEnum,
-  SendPageStateClass,
+  SendPageState,
 } from '../../../app/AppState';
 import { RPCAddressKindEnum } from '../../../app/wallet/enums/RPCAddressKindEnum';
 import { RPCReceiversEnum } from '../../../app/wallet/enums/RPCReceiversEnum';
@@ -38,7 +38,7 @@ import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButt
 import { useTheme } from '../../../app/theme';
 
 type ConfirmProps = NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.Confirm
 >;
 
@@ -54,12 +54,11 @@ const Confirm: React.FunctionComponent<ConfirmProps> = ({
     !!route.params && route.params.calculateFeeWithPropose !== undefined
       ? route.params.calculateFeeWithPropose
       : async () => {};
-  const { translate, addLastSnackbar, removeFirstSnackbar } =
-    useAppLoadedActions();
-  const { currency, privacy, indexerServer, security } = useAppLoadedSettings();
-  const { info, zecPrice, defaultUnifiedAddress, totalBalance } =
-    useAppLoadedWallet();
-  const { snackbars } = useAppLoadedUi();
+  const { translate, addLastSnackbar, removeFirstSnackbar } = useFeedback();
+  const { currency, privacy, indexerServer, security } = useSettings();
+  const { info, defaultUnifiedAddress, totalBalance } = useWalletData();
+  const { zecPrice } = useStatus();
+  const { snackbars } = useFeedback();
   const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.Confirm;
@@ -90,10 +89,10 @@ const Confirm: React.FunctionComponent<ConfirmProps> = ({
       ? route.params.sendAllAmount
       : false,
   );
-  const [sendPageState, setSendPageState] = useState<SendPageStateClass>(
+  const [sendPageState, setSendPageState] = useState<SendPageState>(
     !!route.params && route.params.sendPageState !== undefined
       ? route.params.sendPageState
-      : ({} as SendPageStateClass),
+      : ({} as SendPageState),
   );
 
   const [memoTotal, setMemoTotal] = useState<string>(
@@ -124,7 +123,7 @@ const Confirm: React.FunctionComponent<ConfirmProps> = ({
     const _sendPageState =
       !!route.params && route.params.sendPageState !== undefined
         ? route.params.sendPageState
-        : ({} as SendPageStateClass);
+        : ({} as SendPageState);
     const _memoTotal = Utils.buildMemo(
       sendPageState.toaddr.memo,
       sendPageState.toaddr.includeUAMemo,
@@ -463,7 +462,7 @@ const Confirm: React.FunctionComponent<ConfirmProps> = ({
 
           {[sendPageState.toaddr].map(to => {
             return (
-              <View key={`${to.id}-${to.to}`} style={{ margin: 10 }}>
+              <View key={to.to} style={{ margin: 10 }}>
                 <FadeText>{translate('send.to') as string}</FadeText>
                 <AddressItem
                   address={to.to}

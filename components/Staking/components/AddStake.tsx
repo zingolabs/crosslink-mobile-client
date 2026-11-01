@@ -22,15 +22,17 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCheckCircle, faCircle } from '@fortawesome/free-solid-svg-icons';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { LoadedAppStackParamList } from '../../../app/types';
+import { SessionStackParamList } from '../../../app/types';
 import {
   RouteEnum,
   ScheduledActionType,
-  SendPageStateClass,
+  emptySendPageState,
   StakingActionKindEnum,
-  ToAddrClass,
 } from '../../../app/AppState';
-import { useAppLoadedSettings, useAppLoadedWallet } from '../../../app/context';
+import {
+  useSettings,
+  useWalletData,
+} from '../../../app/context';
 import Utils from '../../../app/utils';
 import FadeText from '../../Components/FadeText';
 import ZecAmount from '../../Components/ZecAmount';
@@ -45,7 +47,7 @@ const PRESET_AMOUNTS = [0.01, 0.1, 1, 10];
 type ModalState = 'idle' | 'sending' | 'success';
 
 type AddStakeScreenProps = NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.Stake
 >;
 
@@ -53,9 +55,8 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
   const navigation: any = useNavigation();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-  const { privacy } = useAppLoadedSettings();
-  const { totalBalance, info, globalStaked, stakingDay, scheduledActions } =
-    useAppLoadedWallet();
+  const { privacy } = useSettings();
+  const { totalBalance, info, globalStaked, stakingDay, scheduledActions } = useWalletData();
 
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [modalState, setModalState] = useState<ModalState>('idle');
@@ -146,7 +147,7 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
     }
 
     // Build a minimal SendPageState to reuse existing plumbing
-    const sendPageState = new SendPageStateClass(new ToAddrClass(0));
+    const sendPageState = emptySendPageState();
 
     sendPageState.toaddr.amount = Utils.parseNumberFloatToStringLocale(
       amount,

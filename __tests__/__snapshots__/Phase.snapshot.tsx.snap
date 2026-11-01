@@ -1,0 +1,163 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`Session - snapshot Session - active 1`] = `
+<View
+  style={
+    {
+      "flex": 1,
+    }
+  }
+>
+  <View
+    style={
+      [
+        {
+          "flex": 1,
+        },
+        undefined,
+      ]
+    }
+  >
+    <View />
+    <MockedNavigator
+      screenOptions={
+        {
+          "animation": "simple_push",
+          "headerShown": false,
+        }
+      }
+    >
+      <MockedScreen
+        name="MainTabs"
+      />
+      <MockedScreen
+        name="Send"
+      />
+      <MockedScreen
+        name="Receive"
+      />
+      <MockedScreen
+        name="Distribution"
+      />
+      <MockedScreen
+        name="SyncReport"
+      />
+      <MockedScreen
+        name="Finalizers"
+        options={
+          {
+            "presentation": "modal",
+          }
+        }
+      />
+      <MockedScreen
+        name="Faucet"
+      />
+      <MockedScreen
+        name="Computing"
+      />
+      <MockedScreen
+        name="ComputingOK"
+      />
+      <MockedScreen
+        name="ComputingError"
+      />
+      <MockedScreen
+        name="ValueTransferDetail"
+      />
+      <MockedScreen
+        name="FinalizerDetail"
+      />
+      <MockedScreen
+        name="ScannerAddress"
+      />
+      <MockedScreen
+        name="SettingsStack"
+      />
+      <MockedScreen
+        name="Stake"
+      />
+      <MockedScreen
+        name="Unstake"
+      />
+      <MockedScreen
+        name="Redelegate"
+      />
+      <MockedScreen
+        name="ScheduledActionDetail"
+      />
+    </MockedNavigator>
+  </View>
+</View>
+`;
+
+exports[`Setup - snapshot Setup - menu 1`] = `
+<View
+  style={
+    [
+      {
+        "flex": 1,
+      },
+      {
+        "backgroundColor": "#011401",
+      },
+    ]
+  }
+>
+  <View
+    pointerEvents="none"
+    style={
+      {
+        "bottom": 0,
+        "left": 0,
+        "position": "absolute",
+        "right": 0,
+        "top": 0,
+      }
+    }
+  />
+  <View
+    style={
+      [
+        {
+          "flex": 1,
+        },
+        undefined,
+      ]
+    }
+  >
+    <View />
+    <MockedNavigator
+      initialRouteName="StartMenu"
+      screenOptions={
+        {
+          "headerShown": false,
+        }
+      }
+    >
+      <MockedScreen
+        name="StartMenu"
+        options={
+          {
+            "contentStyle": {
+              "backgroundColor": "transparent",
+            },
+          }
+        }
+      />
+      <MockedScreen
+        name="Import"
+      />
+      <MockedScreen
+        name="ChooseIndexer"
+      />
+      <MockedScreen
+        name="ListedIndexers"
+      />
+      <MockedScreen
+        name="CustomIndexer"
+      />
+    </MockedNavigator>
+  </View>
+</View>
+`;

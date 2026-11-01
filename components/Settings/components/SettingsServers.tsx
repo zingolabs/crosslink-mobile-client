@@ -2,14 +2,12 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import {
-  LoadedAppStackParamList,
-  LoadingAppNavigationState,
+  SessionStackParamList,
 } from '../../../app/types';
 import {
-  useAppLoadedActions,
-  useAppLoadedSettings,
-  useAppLoadedWallet,
-  useAppLoadedUi,
+  useFeedback,
+  useSettings,
+  useWalletData,
 } from '../../../app/context';
 import Snackbars from '../../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
@@ -22,33 +20,29 @@ import { HeaderTitle } from '../../Header';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { radiusCard, space, text, useTheme } from '../../../app/theme';
-import { LoadingAppEntryEnum } from '../../../app/AppState';
 
 type SettingsServersProps = NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.SettingsServers
 > & {
-  navigateToLoadingApp: (state: LoadingAppNavigationState) => Promise<void>;
+  leaveSession: () => Promise<void>;
 };
 
 const SettingsServers: React.FunctionComponent<SettingsServersProps> = ({
-  navigateToLoadingApp,
+  leaveSession,
   navigation,
 }) => {
-  const { removeFirstSnackbar } = useAppLoadedActions();
-  const { indexerServer } = useAppLoadedSettings();
-  const { info } = useAppLoadedWallet();
-  const { snackbars } = useAppLoadedUi();
+  const { removeFirstSnackbar } = useFeedback();
+  const { indexerServer } = useSettings();
+  const { info } = useWalletData();
+  const { snackbars } = useFeedback();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { clear } = useToast();
   const screenName = ScreenEnum.SettingsServers;
 
   const changeServer = () => {
-    navigateToLoadingApp({
-      entry: LoadingAppEntryEnum.menu,
-      startingApp: false,
-    });
+    leaveSession();
   };
 
   const connected = !!info.latestBlock;

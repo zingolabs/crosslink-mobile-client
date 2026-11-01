@@ -8,11 +8,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import type { Preview } from '@storybook/react-native-web-vite';
 
 import { ThemeProvider, navigationTheme, tokens } from '../app/theme';
-import { AppContextLoaded, AppContextLoading } from '../app/AppState';
-import {
-  ContextAppLoadedProvider,
-  ContextAppLoadingProvider,
-} from '../app/context';
+import { LoadedDomains, SetupDomains } from '../app/context/domains';
+import { SessionDomainsProvider, SetupDomainsProvider } from '../app/context';
 import { mockContextLoaded, mockContextLoading } from './mockContext';
 
 const Stack = createNativeStackNavigator();
@@ -66,20 +63,20 @@ const preview: Preview = {
     ),
 
     (Story, ctx) => {
-      const value: AppContextLoaded = {
+      const value: LoadedDomains = {
         ...mockContextLoaded,
         ...(ctx.parameters.context ?? {}),
       };
-      const loadingValue: AppContextLoading = {
+      const loadingValue: SetupDomains = {
         ...mockContextLoading,
         ...(ctx.parameters.contextLoading ?? {}),
       };
       return (
-        <ContextAppLoadedProvider value={value}>
-          <ContextAppLoadingProvider value={loadingValue}>
+        <SessionDomainsProvider value={value}>
+          <SetupDomainsProvider value={loadingValue}>
             <Story />
-          </ContextAppLoadingProvider>
-        </ContextAppLoadedProvider>
+          </SetupDomainsProvider>
+        </SessionDomainsProvider>
       );
     },
 

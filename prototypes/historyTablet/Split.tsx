@@ -3,7 +3,10 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Droplet, Lock, QrCode, Send } from 'lucide-react-native';
 
-import { useAppLoadedWallet } from '../../app/context';
+import {
+  useStatus,
+  useWalletData,
+} from '../../app/context';
 import { useTheme } from '../../app/theme';
 import {
   MASK,
@@ -37,7 +40,8 @@ const Split: React.FC<VariantActions & { insetTop: number }> = ({
   onFaucet,
 }) => {
   const { colors } = useTheme();
-  const { totalBalance, zecPrice, info } = useAppLoadedWallet();
+  const { totalBalance, info } = useWalletData();
+  const { zecPrice } = useStatus();
   const transfers = useTransfers();
   const { hidden, toggle } = usePrivacy();
   const { selected, current, onSelect } = useSelection(transfers);

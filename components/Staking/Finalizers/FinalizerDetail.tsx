@@ -14,7 +14,7 @@ import {
 
 import { useNavigation } from '@react-navigation/native';
 
-import { LoadedAppStackParamList } from '../../../app/types';
+import { SessionStackParamList } from '../../../app/types';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../../Header';
 import { FinalizerCard } from './FinalizerCard';
@@ -23,7 +23,7 @@ import { RouteEnum, WalletBondsType } from '../../../app/AppState';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import { WalletBondsStatusEnum } from '../../../app/AppState/enums/WalletBondsStatusEnum';
-import { useAppLoadedWallet } from '../../../app/context';
+import { useWalletData } from '../../../app/context';
 import { FinalizerPosition } from './FinalizerPosition';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import StakingDayBubble from '../StakingDayBubble';
@@ -32,7 +32,7 @@ import { useTheme, text, space } from '../../../app/theme';
 type ModalState = 'idle' | 'sending' | 'success';
 
 type FinalizerDetailProps = NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.FinalizerDetail
 >;
 
@@ -59,7 +59,7 @@ export function FinalizerDetail({ route }: FinalizerDetailProps) {
 
   const modalVisible = modalState !== 'idle';
 
-  const { walletBonds, staked, globalStaked } = useAppLoadedWallet();
+  const { walletBonds, staked, globalStaked } = useWalletData();
 
   console.log('FINALIZER', finalizer);
 

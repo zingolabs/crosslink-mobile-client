@@ -8,8 +8,8 @@ import React from 'react';
 import { render } from '@testing-library/react-native';
 import { Header } from '../components/Header';
 import {
-  ContextAppLoadedProvider,
-  defaultAppContextLoaded,
+  SessionDomainsProvider,
+  defaultLoadedDomains,
 } from '../app/context';
 import { mockTranslate } from '../__mocks__/dataMocks/mockTranslate';
 import { mockInfo } from '../__mocks__/dataMocks/mockInfo';
@@ -20,11 +20,11 @@ import { ScreenEnum } from '../app/AppState';
 describe('Component Header - test', () => {
   //snapshot test
   test('Header Simple - snapshot', () => {
-    const state = defaultAppContextLoaded;
+    const state = defaultLoadedDomains;
     state.translate = mockTranslate;
     const close = jest.fn();
     const about = render(
-      <ContextAppLoadedProvider value={state}>
+      <SessionDomainsProvider value={state}>
         <Header
           title="title"
           screenName={ScreenEnum.About}
@@ -35,18 +35,18 @@ describe('Component Header - test', () => {
           noUfvkIcon={true}
           closeScreen={close}
         />
-      </ContextAppLoadedProvider>,
+      </SessionDomainsProvider>,
     );
     expect(about.toJSON()).toMatchSnapshot();
   });
   test('Header Complex - snapshot', () => {
-    const state = defaultAppContextLoaded;
+    const state = defaultLoadedDomains;
     state.translate = mockTranslate;
     state.info = mockInfo;
     state.totalBalance = mockTotalBalance;
     const onFunction = jest.fn();
     const header = render(
-      <ContextAppLoadedProvider value={state}>
+      <SessionDomainsProvider value={state}>
         <Header
           title="title"
           screenName={ScreenEnum.History}
@@ -55,7 +55,7 @@ describe('Component Header - test', () => {
           addLastSnackbar={onFunction}
           setShieldingAmount={onFunction}
         />
-      </ContextAppLoadedProvider>,
+      </SessionDomainsProvider>,
     );
     expect(header.toJSON()).toMatchSnapshot();
   });

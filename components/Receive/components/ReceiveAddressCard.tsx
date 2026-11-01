@@ -1,7 +1,7 @@
 import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
-import { useAppLoadedActions } from '../../../app/context';
+import { useFeedback } from '../../../app/context';
 import {
   AddressKindEnum,
   ScreenEnum,
@@ -29,7 +29,7 @@ const ReceiveAddressCard: React.FunctionComponent<ReceiveAddressCardProps> = ({
   screenName,
   onChangeTab,
 }) => {
-  const { translate, addLastSnackbar } = useAppLoadedActions();
+  const { translate, addLastSnackbar } = useFeedback();
 
   const isUnified = address?.addressKind === AddressKindEnum.u;
   const hasAddress =

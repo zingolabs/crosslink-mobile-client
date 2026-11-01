@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { LoadedAppStackParamList } from '../../app/types';
-import { useAppLoadedActions, useAppLoadedUi } from '../../app/context';
+import { SessionStackParamList } from '../../app/types';
+import { useFeedback } from '../../app/context';
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { RouteEnum, ScreenEnum } from '../../app/AppState';
@@ -9,13 +9,13 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HeaderTitle } from '../Header';
 
 type FaucetProps = NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.Faucet
 >;
 
 const Faucet: React.FunctionComponent<FaucetProps> = ({ navigation }) => {
-  const { removeFirstSnackbar } = useAppLoadedActions();
-  const { snackbars } = useAppLoadedUi();
+  const { removeFirstSnackbar } = useFeedback();
+  const { snackbars } = useFeedback();
   const { clear } = useToast();
   const screenName = ScreenEnum.About;
 

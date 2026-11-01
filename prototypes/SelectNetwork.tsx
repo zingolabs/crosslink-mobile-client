@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   CSSTransitionProperties,
   Easing,

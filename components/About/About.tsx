@@ -2,11 +2,10 @@ import React from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 
 import FadeText from '../Components/FadeText';
-import { LoadedAppStackParamList } from '../../app/types';
+import { SessionStackParamList } from '../../app/types';
 import {
-  useAppLoadedActions,
-  useAppLoadedSettings,
-  useAppLoadedUi,
+  useFeedback,
+  useStatus,
 } from '../../app/context';
 import DetailLine from '../Components/DetailLine';
 import Snackbars from '../Components/Snackbars';
@@ -18,14 +17,14 @@ import { HeaderTitle } from '../Header';
 import { space } from '../../app/theme';
 
 type AboutProps = NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.About
 >;
 
 const About: React.FunctionComponent<AboutProps> = ({ navigation }) => {
-  const { translate, removeFirstSnackbar } = useAppLoadedActions();
-  const { zingolibVersion } = useAppLoadedSettings();
-  const { snackbars } = useAppLoadedUi();
+  const { translate, removeFirstSnackbar } = useFeedback();
+  const { zingolibVersion } = useStatus();
+  const { snackbars } = useFeedback();
   const { clear } = useToast();
   const screenName = ScreenEnum.About;
 

@@ -6,7 +6,7 @@ import Animated, {
   useReducedMotion,
 } from 'react-native-reanimated';
 
-import { useAppLoadedActions } from '../../../app/context';
+import { useFeedback } from '../../../app/context';
 import { TriangleAlert } from '../../Components/Icons/TriangleAlert';
 import { ShieldIcon } from '../../Components/Icons/ShieldIcon';
 import RegText from '../../Components/RegText';
@@ -24,7 +24,7 @@ type TransparentAddressWarningProps = {
 const TransparentAddressWarning: React.FunctionComponent<
   TransparentAddressWarningProps
 > = ({ onChangeTab }) => {
-  const { translate } = useAppLoadedActions();
+  const { translate } = useFeedback();
   const { colors } = useTheme();
   const reducedMotion = useReducedMotion();
   const [pressed, setPressed] = React.useState<boolean>(false);

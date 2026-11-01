@@ -2,12 +2,13 @@ import React from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
 
 import DetailLine from '../Components/DetailLine';
-import { LoadedAppStackParamList } from '../../app/types';
+import { SessionStackParamList } from '../../app/types';
 import {
-  useAppLoadedActions,
-  useAppLoadedSettings,
-  useAppLoadedWallet,
-  useAppLoadedUi,
+  useFeedback,
+  useSession,
+  useSettings,
+  useStatus,
+  useWalletData,
 } from '../../app/context';
 import PriceFetcher from '../Components/PriceFetcher';
 import CurrencyAmount from '../Components/CurrencyAmount';
@@ -26,15 +27,17 @@ import { HeaderTitle } from '../Header';
 import { space, useTheme } from '../../app/theme';
 
 type InfoProps = NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.Info
 >;
 
 const Info: React.FunctionComponent<InfoProps> = ({ navigation }) => {
-  const { translate, setZecPrice, removeFirstSnackbar } = useAppLoadedActions();
-  const { currency, privacy } = useAppLoadedSettings();
-  const { info, zecPrice } = useAppLoadedWallet();
-  const { snackbars } = useAppLoadedUi();
+  const { translate, removeFirstSnackbar } = useFeedback();
+  const { setZecPrice } = useSession();
+  const { currency, privacy } = useSettings();
+  const { info } = useWalletData();
+  const { zecPrice } = useStatus();
+  const { snackbars } = useFeedback();
   const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.Info;

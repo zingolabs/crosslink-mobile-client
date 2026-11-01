@@ -31,9 +31,12 @@ import {
   StakingActionKindEnum,
   WalletBondsType,
 } from '../../../app/AppState';
-import { LoadedAppStackParamList } from '../../../app/types';
+import { SessionStackParamList } from '../../../app/types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useAppLoadedSettings, useAppLoadedWallet } from '../../../app/context';
+import {
+  useSettings,
+  useWalletData,
+} from '../../../app/context';
 import { HeaderTitle } from '../../Header';
 import { ChevronDown } from '../../Components/Icons/Chevron';
 import FadeText from '../../Components/FadeText';
@@ -47,7 +50,7 @@ import { useTheme, text, space } from '../../../app/theme';
 type ModalState = 'idle' | 'sending' | 'success';
 
 type RedelegateProps = NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.Redelegate
 >;
 
@@ -79,9 +82,8 @@ const Redelegate: React.FC<RedelegateProps> = ({ route }) => {
 
   const modalVisible = modalState !== 'idle';
 
-  const { privacy } = useAppLoadedSettings();
-  const { walletBonds, valueTransfers, staked, globalStaked, info } =
-    useAppLoadedWallet();
+  const { privacy } = useSettings();
+  const { walletBonds, valueTransfers, staked, globalStaked, info } = useWalletData();
 
   const movements = useMemo(() => {
     return walletBonds

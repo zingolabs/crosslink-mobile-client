@@ -16,12 +16,11 @@ import Clipboard from '@react-native-clipboard/clipboard';
 
 import RegText from '../Components/RegText';
 import ZecAmount from '../Components/ZecAmount';
-import { LoadedAppStackParamList } from '../../app/types';
+import { SessionStackParamList } from '../../app/types';
 import {
-  useAppLoadedActions,
-  useAppLoadedSettings,
-  useAppLoadedWallet,
-  useAppLoadedUi,
+  useFeedback,
+  useSettings,
+  useWalletData,
 } from '../../app/context';
 import Utils from '../../app/utils';
 import FadeText from '../Components/FadeText';
@@ -60,18 +59,17 @@ const getPercent = (percent: number) => {
 };
 
 type DistributionProps = NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.Distribution
 >;
 
 const Distribution: React.FunctionComponent<DistributionProps> = ({
   navigation,
 }) => {
-  const { translate, addLastSnackbar, removeFirstSnackbar } =
-    useAppLoadedActions();
-  const { privacy } = useAppLoadedSettings();
-  const { info, staked, globalStaked } = useAppLoadedWallet();
-  const { snackbars } = useAppLoadedUi();
+  const { translate, addLastSnackbar, removeFirstSnackbar } = useFeedback();
+  const { privacy } = useSettings();
+  const { info, staked, globalStaked } = useWalletData();
+  const { snackbars } = useFeedback();
   const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.Insight;

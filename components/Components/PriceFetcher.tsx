@@ -11,9 +11,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faRefresh } from '@fortawesome/free-solid-svg-icons';
 import FadeText from './FadeText';
 import {
-  useAppLoadedActions,
-  useAppLoadedSettings,
-  useAppLoadedWallet,
+  useFeedback,
+  useSettings,
+  useStatus,
 } from '../../app/context';
 import moment from 'moment';
 import WalletService from '../../app/wallet';
@@ -33,9 +33,9 @@ const PriceFetcher: React.FunctionComponent<PriceFetcherProps> = ({
   screenName,
   textBefore,
 }) => {
-  const { translate, addLastSnackbar } = useAppLoadedActions();
-  const { language, currency } = useAppLoadedSettings();
-  const { zecPrice } = useAppLoadedWallet();
+  const { translate, addLastSnackbar } = useFeedback();
+  const { language, currency } = useSettings();
+  const { zecPrice } = useStatus();
   const { colors } = useTheme();
 
   const [refreshMinutes, setRefreshMinutes] = useState<number>(0);

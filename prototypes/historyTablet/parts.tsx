@@ -22,7 +22,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import { Check, Copy, Eye, X } from 'lucide-react-native';
 
 import { ValueTransferType } from '../../app/AppState';
-import { useAppLoadedWallet } from '../../app/context';
+import { useWalletData } from '../../app/context';
 import { fontFamily, useTheme } from '../../app/theme';
 import {
   Flow,
@@ -150,7 +150,7 @@ export const BalanceFigure: React.FC<{
   color?: string;
 }> = ({ value, hidden, size = 40, weight = '600', rule = false, color }) => {
   const { colors } = useTheme();
-  const { info } = useAppLoadedWallet();
+  const { info } = useWalletData();
   const [peek, setPeek] = useState(false);
   const masked = hidden && !peek;
   const b = splitZec(value);
@@ -218,7 +218,7 @@ export const BalanceFigure: React.FC<{
 
 export const SyncLine: React.FC<{ size?: number }> = ({ size = 13 }) => {
   const { colors } = useTheme();
-  const { info } = useAppLoadedWallet();
+  const { info } = useWalletData();
   const sync = useSync();
   return (
     <View style={t.row}>
@@ -662,7 +662,7 @@ export const TxDetail: React.FC<{
   compact?: boolean;
 }> = ({ vt, hidden, compact = false }) => {
   const { colors } = useTheme();
-  const { info } = useAppLoadedWallet();
+  const { info } = useWalletData();
   const { copied, markCopied } = useCopy();
   const reduced = useReducedMotion();
   const fade = useRef(new Animated.Value(reduced ? 1 : 0)).current;

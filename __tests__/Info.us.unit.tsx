@@ -8,18 +8,18 @@ import React from 'react';
 import { render, screen } from '@testing-library/react-native';
 import Info from '../components/Info';
 import {
-  defaultAppContextLoaded,
-  ContextAppLoadedProvider,
+  SessionDomainsProvider,
+  defaultLoadedDomains,
 } from '../app/context';
 import { CurrencyEnum, RouteEnum } from '../app/AppState';
 import { mockInfo } from '../__mocks__/dataMocks/mockInfo';
 import { mockZecPrice } from '../__mocks__/dataMocks/mockZecPrice';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { LoadedAppStackParamList } from '../app/types';
+import { SessionStackParamList } from '../app/types';
 import mockNavigation from '../__mocks__/dataMocks/mockNavigation';
 
 function makeDrawerProps(): NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.Info
 > {
   return {
@@ -35,15 +35,15 @@ function makeDrawerProps(): NativeStackScreenProps<
 describe('Component Info - test', () => {
   //unit test
   test('Info - price with us (.) decimal point', () => {
-    const state = defaultAppContextLoaded;
+    const state = defaultLoadedDomains;
     state.info = mockInfo;
     state.zecPrice = mockZecPrice;
     state.currency = CurrencyEnum.USDCurrency;
     const props = makeDrawerProps();
     render(
-      <ContextAppLoadedProvider value={state}>
+      <SessionDomainsProvider value={state}>
         <Info {...props} />
-      </ContextAppLoadedProvider>,
+      </SessionDomainsProvider>,
     );
     screen.getByText('$ 33.33');
   });

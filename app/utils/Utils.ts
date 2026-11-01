@@ -12,9 +12,9 @@ import {
   GlobalConst,
   LanguageEnum,
   SendJsonToTypeType,
-  SendPageStateClass,
+  SendPageState,
   ServerType,
-  ToAddrClass,
+  ToAddr,
   TranslateType,
   ValueTransferKindEnum,
   ValueTransferType,
@@ -241,14 +241,14 @@ export default class Utils {
   }
 
   static async getSendManyJSON(
-    sendPageState: SendPageStateClass,
+    sendPageState: SendPageState,
     uAddress: string,
     server: ServerType,
     donation: boolean,
   ): Promise<SendJsonToTypeType[]> {
     let donationAddress: boolean = false;
     const json: Promise<SendJsonToTypeType[][]> = Promise.all(
-      [sendPageState.toaddr].map(async (to: ToAddrClass) => {
+      [sendPageState.toaddr].map(async (to: ToAddr) => {
         const memo = Utils.buildMemo(to.memo, to.includeUAMemo, uAddress);
         const amount = parseInt(
           (Utils.parseStringLocaleToNumberFloat(to.amount) * 10 ** 8).toFixed(

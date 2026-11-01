@@ -36,7 +36,10 @@ import {
 
 import { ValueTransferType } from '../../app/AppState';
 import { text, useTheme } from '../../app/theme';
-import { useAppLoadedSettings, useAppLoadedWallet } from '../../app/context';
+import {
+  useSettings,
+  useWalletData,
+} from '../../app/context';
 import { Feed, FeedItem, isPending, useFeed } from './feed';
 import ArtLoop from './ArtLoop';
 import { Incoming } from './data';
@@ -303,8 +306,8 @@ const IconAction: React.FC<{
 
 const Summary: React.FC = () => {
   const insets = useSafeAreaInsets();
-  const { privacy } = useAppLoadedSettings();
-  const { totalBalance, syncingStatus } = useAppLoadedWallet();
+  const { privacy } = useSettings();
+  const { totalBalance, syncingStatus } = useWalletData();
   const pct =
     syncingStatus?.percentage_total_outputs_scanned ||
     syncingStatus?.percentage_total_blocks_scanned ||

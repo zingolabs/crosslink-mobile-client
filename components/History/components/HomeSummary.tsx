@@ -6,9 +6,10 @@ import { Droplets, ScanQrCode, Send, ShieldOff } from 'lucide-react-native';
 
 import { GlobalConst, RouteEnum } from '../../../app/AppState';
 import {
-  useAppLoadedActions,
-  useAppLoadedSettings,
-  useAppLoadedWallet,
+  useSession,
+  useSettings,
+  useStatus,
+  useWalletData,
 } from '../../../app/context';
 import { useTheme, text, space } from '../../../app/theme';
 import { HeaderIconButton } from '../../Header';
@@ -23,10 +24,10 @@ export { SUMMARY_RADIUS } from '../../Components/SummaryPanel';
 const HomeSummary: React.FC = () => {
   const navigation: any = useNavigation();
   const { colors } = useTheme();
-  const { requestFaucetFunds } = useAppLoadedActions();
-  const { privacy } = useAppLoadedSettings();
-  const { totalBalance, info, syncingStatus, netInfo, defaultUnifiedAddress } =
-    useAppLoadedWallet();
+  const { requestFaucetFunds } = useSession();
+  const { privacy } = useSettings();
+  const { totalBalance, info, syncingStatus, defaultUnifiedAddress } = useWalletData();
+  const { netInfo } = useStatus();
 
   const pct =
     syncingStatus?.percentage_total_outputs_scanned ||

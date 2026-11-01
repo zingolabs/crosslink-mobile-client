@@ -23,13 +23,12 @@ import {
   TransparentAddressClass,
   UnifiedAddressClass,
 } from '../../app/AppState';
-import { LoadedAppStackParamList } from '../../app/types';
+import { SessionStackParamList } from '../../app/types';
 import FadeText from '../Components/FadeText';
 import AlSummaryLine from './components/AlSummaryLine';
 import {
-  useAppLoadedActions,
-  useAppLoadedWallet,
-  useAppLoadedUi,
+  useFeedback,
+  useWalletData,
 } from '../../app/context';
 import { Header } from '../Header';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -42,7 +41,7 @@ import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton'
 import { radiusPill, space, useTheme } from '../../app/theme';
 
 type AddressListProps = NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.AddressList
 >;
 
@@ -54,9 +53,9 @@ const AddressList: React.FunctionComponent<AddressListProps> = ({
     !!route.params && route.params.setIndex !== undefined
       ? route.params.setIndex
       : () => {};
-  const { translate, removeFirstSnackbar } = useAppLoadedActions();
-  const { addresses } = useAppLoadedWallet();
-  const { snackbars } = useAppLoadedUi();
+  const { translate, removeFirstSnackbar } = useFeedback();
+  const { addresses } = useWalletData();
+  const { snackbars } = useFeedback();
   const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.AddressList;

@@ -8,8 +8,8 @@ import React from 'react';
 import { render } from '@testing-library/react-native';
 import Send from '../components/Send';
 import {
-  defaultAppContextLoaded,
-  ContextAppLoadedProvider,
+  SessionDomainsProvider,
+  defaultLoadedDomains,
 } from '../app/context';
 import { CurrencyEnum, RouteEnum } from '../app/AppState';
 import { mockValueTransfers } from '../__mocks__/dataMocks/mockValueTransfers';
@@ -20,11 +20,11 @@ import { mockZecPrice } from '../__mocks__/dataMocks/mockZecPrice';
 import { mockTotalBalance } from '../__mocks__/dataMocks/mockTotalBalance';
 import mockSendPageState from '../__mocks__/dataMocks/mockSendPageState';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { LoadedAppStackParamList } from '../app/types';
+import { SessionStackParamList } from '../app/types';
 import mockNavigation from '../__mocks__/dataMocks/mockNavigation';
 
 function makeDrawerProps(): NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.Send
 > {
   return {
@@ -39,7 +39,7 @@ function makeDrawerProps(): NativeStackScreenProps<
 // test suite
 describe('Component Send - test', () => {
   //snapshot test
-  const state = defaultAppContextLoaded;
+  const state = defaultLoadedDomains;
   state.valueTransfers = mockValueTransfers;
   state.addresses = mockAddresses;
   state.translate = mockTranslate;
@@ -56,7 +56,7 @@ describe('Component Send - test', () => {
     state.privacy = false;
     const props = makeDrawerProps();
     const send = render(
-      <ContextAppLoadedProvider value={state}>
+      <SessionDomainsProvider value={state}>
         <Send
           {...props}
           sendTransaction={onFunction}
@@ -67,7 +67,7 @@ describe('Component Send - test', () => {
           setServerOption={onFunction}
           setSecurityOption={onFunction}
         />
-      </ContextAppLoadedProvider>,
+      </SessionDomainsProvider>,
     );
     expect(send.toJSON()).toMatchSnapshot();
   });
@@ -79,7 +79,7 @@ describe('Component Send - test', () => {
     state.privacy = true;
     const props = makeDrawerProps();
     const send = render(
-      <ContextAppLoadedProvider value={state}>
+      <SessionDomainsProvider value={state}>
         <Send
           {...props}
           sendTransaction={onFunction}
@@ -90,7 +90,7 @@ describe('Component Send - test', () => {
           setServerOption={onFunction}
           setSecurityOption={onFunction}
         />
-      </ContextAppLoadedProvider>,
+      </SessionDomainsProvider>,
     );
     expect(send.toJSON()).toMatchSnapshot();
   });

@@ -4,7 +4,11 @@ import { faChartPie, faGear } from '@fortawesome/free-solid-svg-icons';
 import { HandCoins, Layers } from 'lucide-react-native';
 
 import { RouteEnum } from '../../../app/AppState';
-import { useAppLoadedSettings, useAppLoadedWallet } from '../../../app/context';
+import {
+  useSettings,
+  useStatus,
+  useWalletData,
+} from '../../../app/context';
 import { useTheme } from '../../../app/theme';
 import { HeaderIconButton } from '../../Header';
 import SummaryPanel, { IconAction } from '../../Components/SummaryPanel';
@@ -14,8 +18,9 @@ import StakingDayStatusBar from './StakingDayStatusBar';
 const StakingSummary: React.FC = () => {
   const navigation: any = useNavigation();
   const { colors } = useTheme();
-  const { privacy } = useAppLoadedSettings();
-  const { totalBalance, info, syncingStatus, netInfo } = useAppLoadedWallet();
+  const { privacy } = useSettings();
+  const { totalBalance, info, syncingStatus } = useWalletData();
+  const { netInfo } = useStatus();
 
   const pct =
     syncingStatus?.percentage_total_outputs_scanned ||

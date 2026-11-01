@@ -6,12 +6,16 @@ import {
   View,
 } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
-import { useAppLoadedActions, useAppLoadedSettings } from '../../app/context';
+import {
+  useFeedback,
+  useSettings,
+  useStatus,
+  useUi,
+} from '../../app/context';
 import RegText from './RegText';
 import Utils from '../../app/utils';
 import {
-  SendPageStateClass,
-  ToAddrClass,
+  emptySendPageState,
   SnackbarDurationEnum,
   RouteEnum,
   SelectServerEnum,
@@ -43,9 +47,10 @@ const AddressItem: React.FunctionComponent<AddressItemProps> = ({
   ufvk,
 }) => {
   const navigation: any = useNavigation();
-  const { translate, addLastSnackbar, setSendPageState } =
-    useAppLoadedActions();
-  const { privacy, readOnly, selectIndexerServer } = useAppLoadedSettings();
+  const { translate, addLastSnackbar } = useFeedback();
+  const { setSendPageState } = useUi();
+  const { privacy, selectIndexerServer } = useSettings();
+  const { readOnly } = useStatus();
   const { colors } = useTheme();
 
   const [expandAddress, setExpandAddress] = useState<boolean>(false);
@@ -129,9 +134,7 @@ const AddressItem: React.FunctionComponent<AddressItemProps> = ({
                 style={styles.sendButton}
                 onPress={() => {
                   // enviar
-                  const sendPageState = new SendPageStateClass(
-                    new ToAddrClass(0),
-                  );
+                  const sendPageState = emptySendPageState();
                   sendPageState.toaddr.to = address;
                   setSendPageState(sendPageState);
                   navigation.navigate(RouteEnum.Send);

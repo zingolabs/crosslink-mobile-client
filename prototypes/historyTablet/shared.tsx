@@ -22,9 +22,10 @@ import {
 } from '../../app/AppState';
 import { RPCValueTransferStatusEnum } from '../../app/wallet/enums/RPCValueTransferStatusEnum';
 import {
-  useAppLoadedActions,
-  useAppLoadedSettings,
-  useAppLoadedWallet,
+  useFeedback,
+  useSettings,
+  useStatus,
+  useWalletData,
 } from '../../app/context';
 import { recipientNames } from './data';
 
@@ -266,7 +267,7 @@ export const relativeBucket = (vt: ValueTransferType) => {
 };
 
 export const useTransfers = () => {
-  const { valueTransfers } = useAppLoadedWallet();
+  const { valueTransfers } = useWalletData();
   return useMemo(
     () =>
       (valueTransfers ?? [])
@@ -277,7 +278,8 @@ export const useTransfers = () => {
 };
 
 export const useSync = () => {
-  const { syncingStatus, netInfo } = useAppLoadedWallet();
+  const { syncingStatus } = useWalletData();
+  const { netInfo } = useStatus();
   const pct =
     syncingStatus?.percentage_total_outputs_scanned ||
     syncingStatus?.percentage_total_blocks_scanned ||
@@ -300,8 +302,8 @@ export const useSync = () => {
 };
 
 export const usePrivacy = () => {
-  const { setPrivacyOption } = useAppLoadedActions();
-  const { privacy } = useAppLoadedSettings();
+  const { setPrivacyOption } = useFeedback();
+  const { privacy } = useSettings();
   const [hidden, setHidden] = useState<boolean>(!!privacy);
   useEffect(() => setHidden(!!privacy), [privacy]);
   const toggle = () => {

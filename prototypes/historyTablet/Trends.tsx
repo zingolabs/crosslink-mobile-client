@@ -3,7 +3,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Lock, QrCode, Send } from 'lucide-react-native';
 
-import { useAppLoadedWallet } from '../../app/context';
+import { useWalletData } from '../../app/context';
 import { useTheme } from '../../app/theme';
 import {
   MASK,
@@ -37,7 +37,7 @@ const Trends: React.FC<VariantActions & { insetTop: number }> = ({
   onReceive,
 }) => {
   const { colors } = useTheme();
-  const { totalBalance, info } = useAppLoadedWallet();
+  const { totalBalance, info } = useWalletData();
   const transfers = useTransfers();
   const { hidden, toggle } = usePrivacy();
   const { selected, current, onSelect } = useSelection(transfers);

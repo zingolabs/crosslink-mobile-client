@@ -30,12 +30,11 @@ import {
 } from '../../../app/AppState';
 import Utils from '../../../app/utils';
 import ZecAmount from '../../Components/ZecAmount';
-import { LoadedAppStackParamList } from '../../../app/types';
+import { SessionStackParamList } from '../../../app/types';
 import {
-  useAppLoadedActions,
-  useAppLoadedSettings,
-  useAppLoadedWallet,
-  useAppLoadedUi,
+  useFeedback,
+  useSettings,
+  useWalletData,
 } from '../../../app/context';
 import { KindIcon, isIncoming } from './TxRow';
 import { Copy as CopyIcon } from 'lucide-react-native';
@@ -57,7 +56,7 @@ import {
 } from '../../../app/theme';
 
 type ValueTransferDetailProps = NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.ValueTransferDetail
 >;
 
@@ -130,11 +129,10 @@ const ValueTransferDetail: React.FunctionComponent<
   ValueTransferDetailProps
 > = ({ route }) => {
   const navigation: any = useNavigation();
-  const { translate, addLastSnackbar, removeFirstSnackbar } =
-    useAppLoadedActions();
-  const { language, privacy } = useAppLoadedSettings();
-  const { info } = useAppLoadedWallet();
-  const { snackbars } = useAppLoadedUi();
+  const { translate, addLastSnackbar, removeFirstSnackbar } = useFeedback();
+  const { language, privacy } = useSettings();
+  const { info } = useWalletData();
+  const { snackbars } = useFeedback();
   const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.ValueTransferDetail;

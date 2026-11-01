@@ -12,7 +12,7 @@ import Animated, {
   useReducedMotion,
 } from 'react-native-reanimated';
 
-import { useAppLoadedActions } from '../../../app/context';
+import { useFeedback } from '../../../app/context';
 import { TriangleAlert } from '../../Components/Icons/TriangleAlert';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
@@ -33,7 +33,7 @@ const TransparentWarning = ({
   setHeightLayout,
 }: TransparentWarningProps) => {
   const { colors } = useTheme();
-  const { translate } = useAppLoadedActions();
+  const { translate } = useFeedback();
   const reducedMotion = useReducedMotion();
   const [pressed, setPressed] = useState(false);
 

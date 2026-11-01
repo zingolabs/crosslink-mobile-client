@@ -21,14 +21,17 @@ import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton'
 import {
   RouteEnum,
   ScheduledActionType,
-  SendPageStateClass,
+  SendPageState,
+  emptySendPageState,
   StakingActionKindEnum,
   StakingActionType,
-  ToAddrClass,
 } from '../../app/AppState';
-import { LoadedAppStackParamList } from '../../app/types';
+import { SessionStackParamList } from '../../app/types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useAppLoadedActions, useAppLoadedWallet } from '../../app/context';
+import {
+  useSession,
+  useWalletData,
+} from '../../app/context';
 import { HeaderTitle } from '../Header';
 import RegText from '../Components/RegText';
 import ZecAmount from '../Components/ZecAmount';
@@ -52,11 +55,11 @@ const dimensions = {
 };
 
 type ScheduledActionDetailProps = NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.ScheduledActionDetail
 > & {
   stakeTransaction: (
-    sendPageState: SendPageStateClass,
+    sendPageState: SendPageState,
     stakingAction: StakingActionType,
   ) => Promise<string>;
   beginUnstakeTransaction: (txid: string) => Promise<string>;
@@ -88,15 +91,8 @@ const ScheduledActionDetail: React.FC<ScheduledActionDetailProps> = ({
 
   const modalVisible = modalState !== 'idle';
 
-  const { setScheduledActions } = useAppLoadedActions();
-  const {
-    valueTransfers,
-    stakingDay,
-    info,
-    walletBonds,
-    timeToStakingDaySeconds: timeToStakingDay,
-    scheduledActions,
-  } = useAppLoadedWallet();
+  const { setScheduledActions } = useSession();
+  const { valueTransfers, stakingDay, info, walletBonds, timeToStakingDaySeconds: timeToStakingDay, scheduledActions } = useWalletData();
 
   useEffect(() => {
     const s1 = Keyboard.addListener('keyboardDidShow', () => setKbOpen(true));
@@ -151,7 +147,7 @@ const ScheduledActionDetail: React.FC<ScheduledActionDetailProps> = ({
     console.log('selectedKind', selectedKind);
 
     // Build a minimal SendPageState to reuse existing plumbing
-    const sendPageState = new SendPageStateClass(new ToAddrClass(0));
+    const sendPageState = emptySendPageState();
 
     sendPageState.toaddr.amount = Utils.parseNumberFloatToStringLocale(
       item.amount,

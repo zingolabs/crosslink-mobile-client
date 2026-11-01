@@ -7,20 +7,20 @@ import React from 'react';
 
 import { render } from '@testing-library/react-native';
 import {
-  ContextAppLoadedProvider,
-  defaultAppContextLoaded,
+  SessionDomainsProvider,
+  defaultLoadedDomains,
 } from '../app/context';
 import { AddressList } from '../components/AddressList';
 import { mockTranslate } from '../__mocks__/dataMocks/mockTranslate';
 import { mockAddresses } from '../__mocks__/dataMocks/mockAddresses';
 import { AddressKindEnum, RouteEnum } from '../app/AppState';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { LoadedAppStackParamList } from '../app/types';
+import { SessionStackParamList } from '../app/types';
 import mockNavigation from '../__mocks__/dataMocks/mockNavigation';
 
 function makeDrawerProps(
   ak: AddressKindEnum,
-): NativeStackScreenProps<LoadedAppStackParamList, RouteEnum.AddressList> {
+): NativeStackScreenProps<SessionStackParamList, RouteEnum.AddressList> {
   return {
     navigation: mockNavigation,
     route: {
@@ -37,27 +37,27 @@ function makeDrawerProps(
 describe('Component Unified Address List - test', () => {
   //snapshot test
   test('Address Unified List - snapshot', () => {
-    const state = defaultAppContextLoaded;
+    const state = defaultLoadedDomains;
     state.addresses = mockAddresses;
     state.translate = mockTranslate;
     const props = makeDrawerProps(AddressKindEnum.u);
     const al: any = render(
-      <ContextAppLoadedProvider value={state}>
+      <SessionDomainsProvider value={state}>
         <AddressList {...props} />
-      </ContextAppLoadedProvider>,
+      </SessionDomainsProvider>,
     );
     expect(al.toJSON()).toMatchSnapshot();
   });
 
   test('Address Transparent List - snapshot', () => {
-    const state = defaultAppContextLoaded;
+    const state = defaultLoadedDomains;
     state.addresses = mockAddresses;
     state.translate = mockTranslate;
     const props = makeDrawerProps(AddressKindEnum.t);
     const al: any = render(
-      <ContextAppLoadedProvider value={state}>
+      <SessionDomainsProvider value={state}>
         <AddressList {...props} />
-      </ContextAppLoadedProvider>,
+      </SessionDomainsProvider>,
     );
     expect(al.toJSON()).toMatchSnapshot();
   });

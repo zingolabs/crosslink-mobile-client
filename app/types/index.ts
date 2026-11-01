@@ -1,8 +1,6 @@
 export type {
   MainTabParamList,
-  AppStackParamList,
-  LoadedAppStackParamList,
-  LoadingAppNavigationState,
-  LoadingAppStackParamList,
-  LoadedAppNavigationState,
+  SetupStackParamList,
+  SessionStackParamList,
+  SettingsStackParamList,
 } from './NavigationTypes';
