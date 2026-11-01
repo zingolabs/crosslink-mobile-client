@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  useSafeAreaInsets } from 'react-native-safe-area-context';
 import { faNetworkWired } from '@fortawesome/free-solid-svg-icons';
 
 import { HeaderIconButton } from '../components/Header';

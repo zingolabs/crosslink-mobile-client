@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { NativeModules, Platform } from 'react-native';
 
-import { useAppLoadedWallet } from './context';
+import { useWalletData } from './context';
 
 export type StakingDayActivityPayload = {
   stakingDay: boolean;
@@ -54,8 +54,7 @@ const stopActivity = (): Promise<boolean> =>
   nativeModule ? nativeModule.stopActivity() : Promise.resolve(false);
 
 const useStakingDayActivity = (): void => {
-  const { stakingDay, timeToStakingDaySeconds, timeLeftStakingDaySeconds } =
-    useAppLoadedWallet();
+  const { stakingDay, timeToStakingDaySeconds, timeLeftStakingDaySeconds } = useWalletData();
 
   const runningRef = useRef(false);
   const syncedStateRef = useRef('');

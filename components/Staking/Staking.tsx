@@ -36,10 +36,9 @@ import {
 import StakingSummary from './components/StakingSummary';
 import EmptyState from '../Components/EmptyState';
 import {
-  useAppLoadedActions,
-  useAppLoadedSettings,
-  useAppLoadedWallet,
-  useAppLoadedUi,
+  useFeedback,
+  useSettings,
+  useWalletData,
 } from '../../app/context';
 import Stake from '../../assets/icons/stake-white.svg';
 import Unstake from '../../assets/icons/unstake-white.svg';
@@ -92,20 +91,10 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
       : 'active';
 
   const navigation: any = useNavigation();
-  const { removeFirstSnackbar } = useAppLoadedActions();
-  const { privacy } = useAppLoadedSettings();
-  const {
-    staked,
-    info,
-    stakingDay,
-    timeToStakingDaySeconds: timeToStakingDay,
-    timeLeftStakingDaySeconds: timeLeftStakingDay,
-    scheduledActions,
-    walletBonds,
-    blocksToStakingDay,
-    blocksTotalStakingDay,
-  } = useAppLoadedWallet();
-  const { snackbars } = useAppLoadedUi();
+  const { removeFirstSnackbar } = useFeedback();
+  const { privacy } = useSettings();
+  const { staked, info, stakingDay, timeToStakingDaySeconds: timeToStakingDay, timeLeftStakingDaySeconds: timeLeftStakingDay, scheduledActions, walletBonds, blocksToStakingDay, blocksTotalStakingDay } = useWalletData();
+  const { snackbars } = useFeedback();
 
   const screenName = ScreenEnum.StakingHome;
 

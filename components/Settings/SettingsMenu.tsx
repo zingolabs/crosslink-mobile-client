@@ -6,10 +6,9 @@ import Animated, {
   useReducedMotion,
 } from 'react-native-reanimated';
 
-import { LoadingAppNavigationState } from '../../app/types';
-import { useAppLoadedActions } from '../../app/context';
+import { useFeedback } from '../../app/context';
 import { ToastProvider, useToast } from 'react-native-toastier';
-import { LoadingAppEntryEnum, RouteEnum } from '../../app/AppState';
+import { RouteEnum } from '../../app/AppState';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import {
   faChevronRight,
@@ -41,14 +40,14 @@ type SettingsMenuProps = NativeStackScreenProps<
   SettingsStackParamList,
   RouteEnum.SettingsMenu
 > & {
-  onClickOKChangeWallet: (state: LoadingAppNavigationState) => Promise<void>;
+  onClickOKChangeWallet: () => Promise<void>;
 };
 
 const SettingsMenu: React.FunctionComponent<SettingsMenuProps> = ({
   onClickOKChangeWallet,
   navigation,
 }) => {
-  const { translate } = useAppLoadedActions();
+  const { translate } = useFeedback();
   const { colors } = useTheme();
   const { clear } = useToast();
   const reduced = useReducedMotion();
@@ -71,10 +70,7 @@ const SettingsMenu: React.FunctionComponent<SettingsMenuProps> = ({
         {
           text: translate('confirm') as string,
           onPress: () =>
-            onClickOKChangeWallet({
-              entry: LoadingAppEntryEnum.menu,
-              startingApp: false,
-            }),
+            onClickOKChangeWallet(),
         },
         { text: translate('cancel') as string, style: 'cancel' },
       ],

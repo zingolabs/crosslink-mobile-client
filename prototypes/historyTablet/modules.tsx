@@ -12,7 +12,11 @@ import {
 
 import { ValueTransferType } from '../../app/AppState';
 import { WalletBondsStatusEnum } from '../../app/AppState/enums/WalletBondsStatusEnum';
-import { useAppLoadedSettings, useAppLoadedWallet } from '../../app/context';
+import {
+  useSettings,
+  useStatus,
+  useWalletData,
+} from '../../app/context';
 import { useTheme } from '../../app/theme';
 import { Bars, BarDatum, Gauge, Sparkline, StackBar } from './charts';
 import {
@@ -43,12 +47,12 @@ export const POOL = {
 };
 
 const useCurrency = () => {
-  const { info } = useAppLoadedWallet();
+  const { info } = useWalletData();
   return info.currencyName || 'ZEC';
 };
 
 export const usePools = () => {
-  const { totalBalance } = useAppLoadedWallet();
+  const { totalBalance } = useWalletData();
   const orchard = totalBalance?.totalOrchardBalance ?? 0;
   const sapling = totalBalance?.totalSaplingBalance ?? 0;
   const transparent = totalBalance?.totalTransparentBalance ?? 0;
@@ -80,7 +84,7 @@ export const SpendableHeader: React.FC<{
   size?: number;
 }> = ({ hidden, size = 40 }) => {
   const { colors } = useTheme();
-  const { zecPrice } = useAppLoadedWallet();
+  const { zecPrice } = useStatus();
   const cur = useCurrency();
   const p = usePools();
   return (
@@ -256,8 +260,8 @@ export const ShieldPrompt: React.FC<{
 
 export const NetworkModule: React.FC = () => {
   const { colors } = useTheme();
-  const { indexerServer } = useAppLoadedSettings();
-  const { info } = useAppLoadedWallet();
+  const { indexerServer } = useSettings();
+  const { info } = useWalletData();
   const sync = useSync();
   return (
     <View style={{ gap: 8 }}>
@@ -290,7 +294,7 @@ export const RANGES: { key: Range; label: string }[] = [
 const RANGE_DAYS: Record<Range, number> = { '1M': 30, '3M': 90, All: 120 };
 
 export const usePrice = (days: number) => {
-  const { zecPrice } = useAppLoadedWallet();
+  const { zecPrice } = useStatus();
   const series = priceHistory.slice(-(days + 1));
   const now = zecPrice?.zecPrice ?? series[series.length - 1];
   const day = priceHistory[priceHistory.length - 2];
@@ -592,7 +596,7 @@ export const FlowBars: React.FC<{
 };
 
 export const useStaking = () => {
-  const { walletBonds, globalStaked, totalBalance } = useAppLoadedWallet();
+  const { walletBonds, globalStaked, totalBalance } = useWalletData();
   const bonds = walletBonds ?? [];
   const active = bonds.filter(b => b.status === WalletBondsStatusEnum.Active);
   const unbonding = bonds.filter(

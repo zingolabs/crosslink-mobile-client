@@ -7,7 +7,7 @@ export const mockSnackbars: SnackbarType[] = [
   },
   {
     message: 'snackbar 2',
-    screenName: [ScreenEnum.LoadedApp],
+    screenName: [ScreenEnum.Session],
   },
   {
     message: 'snackbar 3',

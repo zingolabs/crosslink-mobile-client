@@ -31,9 +31,10 @@ import {
   ValueTransferType,
 } from '../../app/AppState';
 import {
-  useAppLoadedActions,
-  useAppLoadedSettings,
-  useAppLoadedWallet,
+  useFeedback,
+  useSession,
+  useSettings,
+  useWalletData,
 } from '../../app/context';
 import Utils from '../../app/utils';
 import { RPCValueTransferStatusEnum } from '../../app/wallet/enums/RPCValueTransferStatusEnum';
@@ -109,9 +110,10 @@ const History: React.FunctionComponent<HistoryProps> = ({
   scrollToTop,
 }) => {
   const navigation: any = useNavigation();
-  const { translate, doRefresh } = useAppLoadedActions();
-  const { language } = useAppLoadedSettings();
-  const { valueTransfers } = useAppLoadedWallet();
+  const { translate } = useFeedback();
+  const { doRefresh } = useSession();
+  const { language } = useSettings();
+  const { valueTransfers } = useWalletData();
   const { colors } = useTheme();
   const screenName = ScreenEnum.History;
 

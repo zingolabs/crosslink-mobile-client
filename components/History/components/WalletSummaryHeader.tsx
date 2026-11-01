@@ -4,9 +4,10 @@ import { useNavigation } from '@react-navigation/native';
 import { isEqual } from 'lodash';
 
 import {
-  useAppLoadedActions,
-  useAppLoadedSettings,
-  useAppLoadedWallet,
+  useFeedback,
+  useSettings,
+  useStatus,
+  useWalletData,
 } from '../../../app/context';
 import { RouteEnum, SelectServerEnum } from '../../../app/AppState';
 import { RPCSyncStatusType } from '../../../app/wallet/types/RPCSyncStatusType';
@@ -24,9 +25,10 @@ const WalletSummaryHeader: React.FC<WalletSummaryHeaderProps> = ({
   const navigation: any = useNavigation();
   const { colors } = useTheme();
 
-  const { translate } = useAppLoadedActions();
-  const { selectIndexerServer, privacy } = useAppLoadedSettings();
-  const { totalBalance, info, syncingStatus, netInfo } = useAppLoadedWallet();
+  const { translate } = useFeedback();
+  const { selectIndexerServer, privacy } = useSettings();
+  const { totalBalance, info, syncingStatus } = useWalletData();
+  const { netInfo } = useStatus();
 
   const [percentageOutputsScanned, setPercentageOutputsScanned] =
     useState<number>(0);

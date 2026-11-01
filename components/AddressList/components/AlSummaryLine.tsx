@@ -17,7 +17,7 @@ import {
   ScreenEnum,
 } from '../../../app/AppState';
 import Utils from '../../../app/utils';
-import { useAppLoadedActions } from '../../../app/context';
+import { useFeedback } from '../../../app/context';
 import { space, text, useTheme } from '../../../app/theme';
 
 type AlSummaryLineProps = {
@@ -34,7 +34,7 @@ const AlSummaryLine: React.FunctionComponent<AlSummaryLineProps> = ({
   closeScreen,
   screenName,
 }) => {
-  const { translate, addLastSnackbar } = useAppLoadedActions();
+  const { translate, addLastSnackbar } = useFeedback();
   const { colors } = useTheme();
 
   const displayAddress: string = item.address

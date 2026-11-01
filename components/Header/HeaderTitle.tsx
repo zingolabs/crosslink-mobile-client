@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  useSafeAreaInsets } from 'react-native-safe-area-context';
 import { faChevronLeft, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { text, useTheme } from '../../app/theme';
 import HeaderIconButton from './HeaderIconButton';

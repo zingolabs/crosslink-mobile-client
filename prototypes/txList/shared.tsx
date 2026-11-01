@@ -30,7 +30,7 @@ import {
   ValueTransferType,
 } from '../../app/AppState';
 import { useTheme } from '../../app/theme';
-import { useAppLoadedSettings } from '../../app/context';
+import { useSettings } from '../../app/context';
 import JellyLoader from '../../components/Components/Icons/JellyLoader';
 import { FeedItem, isPending } from './feed';
 
@@ -300,7 +300,7 @@ export const Amount: React.FC<{
   vt: ValueTransferType;
   color: string;
 }> = ({ vt, color }) => {
-  const { privacy } = useAppLoadedSettings();
+  const { privacy } = useSettings();
   const style: TextStyle = {
     fontSize: 17,
     lineHeight: 22,

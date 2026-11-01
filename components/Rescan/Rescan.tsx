@@ -2,12 +2,11 @@ import React from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 
 import RegText from '../Components/RegText';
-import { LoadedAppStackParamList } from '../../app/types';
+import { SessionStackParamList } from '../../app/types';
 import {
-  useAppLoadedActions,
-  useAppLoadedSettings,
-  useAppLoadedWallet,
-  useAppLoadedUi,
+  useFeedback,
+  useSettings,
+  useStatus,
 } from '../../app/context';
 import {
   RouteEnum,
@@ -24,7 +23,7 @@ import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton'
 import { space } from '../../app/theme';
 
 type RescanProps = NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.Rescan
 > & {
   doRescan: () => Promise<void>;
@@ -34,11 +33,10 @@ const Rescan: React.FunctionComponent<RescanProps> = ({
   navigation,
   doRescan,
 }) => {
-  const { translate, addLastSnackbar, removeFirstSnackbar } =
-    useAppLoadedActions();
-  const { wallet, selectIndexerServer } = useAppLoadedSettings();
-  const { netInfo } = useAppLoadedWallet();
-  const { snackbars } = useAppLoadedUi();
+  const { translate, addLastSnackbar, removeFirstSnackbar } = useFeedback();
+  const { selectIndexerServer } = useSettings();
+  const { wallet, netInfo } = useStatus();
+  const { snackbars } = useFeedback();
   const { clear } = useToast();
   const screenName = ScreenEnum.Rescan;
 
@@ -67,7 +65,7 @@ const Rescan: React.FunctionComponent<RescanProps> = ({
       addLastSnackbar({
         message: translate('loadedapp.syncing') as string,
         duration: SnackbarDurationEnum.longer,
-        screenName: [screenName, ScreenEnum.LoadedApp],
+        screenName: [screenName, ScreenEnum.Session],
       });
     }, 3 * 1000);
   };

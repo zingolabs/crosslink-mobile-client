@@ -4,7 +4,8 @@ import { StyleSheet, ScrollView, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import { ToastProvider, useToast } from 'react-native-toastier';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  useSafeAreaInsets } from 'react-native-safe-area-context';
 import FadeText from '../../Components/FadeText';
 import { HeaderTitle } from '../../Header';
 import { radiusCard, space, useTheme } from '../../../app/theme';

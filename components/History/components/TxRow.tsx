@@ -27,8 +27,8 @@ import {
   ValueTransferType,
 } from '../../../app/AppState';
 import {
-  useAppLoadedActions,
-  useAppLoadedSettings,
+  useFeedback,
+  useSettings,
 } from '../../../app/context';
 import { text, curve, duration, useTheme } from '../../../app/theme';
 import Utils from '../../../app/utils';
@@ -102,8 +102,8 @@ type TxRowProps = {
 const TxRow: React.FC<TxRowProps> = ({ vt, fresh, last, onPress, testID }) => {
   const { colors } = useTheme();
   const reduced = useReducedMotion();
-  const { translate } = useAppLoadedActions();
-  const { privacy } = useAppLoadedSettings();
+  const { translate } = useFeedback();
+  const { privacy } = useSettings();
   const [pressed, setPressed] = useState(false);
 
   const pending = isPendingTx(vt);

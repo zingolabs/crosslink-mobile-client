@@ -8,20 +8,20 @@ import React from 'react';
 import { render, RenderResult } from '@testing-library/react-native';
 import Info from '../components/Info';
 import {
-  defaultAppContextLoaded,
-  ContextAppLoadedProvider,
+  SessionDomainsProvider,
+  defaultLoadedDomains,
 } from '../app/context';
 import { mockInfo } from '../__mocks__/dataMocks/mockInfo';
 import { mockTranslate } from '../__mocks__/dataMocks/mockTranslate';
 import { mockTotalBalance } from '../__mocks__/dataMocks/mockTotalBalance';
 import { mockZecPrice } from '../__mocks__/dataMocks/mockZecPrice';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { LoadedAppStackParamList } from '../app/types';
+import { SessionStackParamList } from '../app/types';
 import { RouteEnum } from '../app/AppState';
 import mockNavigation from '../__mocks__/dataMocks/mockNavigation';
 
 function makeDrawerProps(): NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.Info
 > {
   return {
@@ -37,16 +37,16 @@ function makeDrawerProps(): NativeStackScreenProps<
 describe('Component Info - test', () => {
   //snapshot test
   test('Info - snapshot', () => {
-    const state = defaultAppContextLoaded;
+    const state = defaultLoadedDomains;
     state.info = mockInfo;
     state.zecPrice = mockZecPrice;
     state.translate = mockTranslate;
     state.totalBalance = mockTotalBalance;
     const props = makeDrawerProps();
     const info: RenderResult = render(
-      <ContextAppLoadedProvider value={state}>
+      <SessionDomainsProvider value={state}>
         <Info {...props} />
-      </ContextAppLoadedProvider>,
+      </SessionDomainsProvider>,
     );
     expect(info.toJSON()).toMatchSnapshot();
   });

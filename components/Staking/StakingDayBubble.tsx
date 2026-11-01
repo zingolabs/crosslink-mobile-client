@@ -10,7 +10,7 @@ import {
 
 import ClockActiveWithCheck from '../../assets/icons/clock-active-with-check.svg';
 import TriangleYellow from '../../assets/icons/triangle-yellow.svg';
-import { useAppLoadedWallet } from '../../app/context';
+import { useWalletData } from '../../app/context';
 import RegText from '../Components/RegText';
 import { formatSeconds } from '../../app/utils/Utils';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
@@ -25,11 +25,7 @@ const CENTER_LEFT = (SCREEN_WIDTH - EXPANDED_WIDTH) / 2;
 
 const StakingDayBubble: React.FC = () => {
   const { colors } = useTheme();
-  const {
-    stakingDay,
-    timeToStakingDaySeconds: timeToStakingDay,
-    timeLeftStakingDaySeconds: timeLeftStakingDay,
-  } = useAppLoadedWallet();
+  const { stakingDay, timeToStakingDaySeconds: timeToStakingDay, timeLeftStakingDaySeconds: timeLeftStakingDay } = useWalletData();
 
   const [expanded, setExpanded] = useState(false);
   const [anchorX, setAnchorX] = useState(0);

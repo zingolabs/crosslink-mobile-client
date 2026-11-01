@@ -5,7 +5,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 
 import FadeText from './FadeText';
 import RegText from './RegText';
-import { useAppLoadedActions } from '../../app/context';
+import { useFeedback } from '../../app/context';
 import { ScreenEnum, SnackbarDurationEnum } from '../../app/AppState';
 import { useTheme } from '../../app/theme';
 
@@ -25,7 +25,7 @@ const DetailLine: React.FunctionComponent<DetailLineProps> = ({
   screenName,
 }) => {
   const { colors } = useTheme();
-  const { addLastSnackbar, translate } = useAppLoadedActions();
+  const { addLastSnackbar, translate } = useFeedback();
 
   return (
     <View style={{ display: 'flex', marginTop: 20 }}>

@@ -7,8 +7,8 @@ import {
   SnackbarDurationEnum,
 } from '../../../app/AppState';
 import {
-  useAppLoadedActions,
-  useAppLoadedSettings,
+  useFeedback,
+  useSettings,
 } from '../../../app/context';
 import { useToast } from 'react-native-toastier';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -34,8 +34,8 @@ const VerifyAddress: React.FunctionComponent<VerifyAddressProps> = ({
   screenName,
   setHeightLayout,
 }) => {
-  const { translate, addLastSnackbar } = useAppLoadedActions();
-  const { indexerServer } = useAppLoadedSettings();
+  const { translate, addLastSnackbar } = useFeedback();
+  const { indexerServer } = useSettings();
   const { colors } = useTheme();
   const { clear } = useToast();
 

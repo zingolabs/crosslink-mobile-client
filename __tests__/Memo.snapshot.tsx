@@ -8,17 +8,17 @@ import React from 'react';
 import { render } from '@testing-library/react-native';
 import Memo from '../components/Memo';
 import {
-  defaultAppContextLoaded,
-  ContextAppLoadedProvider,
+  SessionDomainsProvider,
+  defaultLoadedDomains,
 } from '../app/context';
 import { mockTranslate } from '../__mocks__/dataMocks/mockTranslate';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { LoadedAppStackParamList } from '../app/types';
+import { SessionStackParamList } from '../app/types';
 import { RouteEnum } from '../app/AppState';
 import mockNavigation from '../__mocks__/dataMocks/mockNavigation';
 
 function makeDrawerProps(): NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.Memo
 > {
   return {
@@ -38,13 +38,13 @@ function makeDrawerProps(): NativeStackScreenProps<
 describe('Component Memo - test', () => {
   //snapshot test
   test('Memo - snapshot', () => {
-    const state = defaultAppContextLoaded;
+    const state = defaultLoadedDomains;
     state.translate = mockTranslate;
     const props = makeDrawerProps();
     const memo = render(
-      <ContextAppLoadedProvider value={state}>
+      <SessionDomainsProvider value={state}>
         <Memo {...props} />
-      </ContextAppLoadedProvider>,
+      </SessionDomainsProvider>,
     );
     expect(memo.toJSON()).toMatchSnapshot();
   });

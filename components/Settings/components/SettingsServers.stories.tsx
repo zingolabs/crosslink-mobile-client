@@ -9,7 +9,7 @@ const meta = {
   component: SettingsServers,
   args: {
     ...screenProps(RouteEnum.SettingsServers),
-    navigateToLoadingApp: async () => {},
+    leaveSession: async () => {},
   },
 } satisfies Meta<typeof SettingsServers>;
 

@@ -1,10 +1,10 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { useEffect, useRef, useState } from 'react';
 
-import { useAppLoadedActions, useAppLoadedUi } from '../../../app/context';
+import { useFeedback } from '../../../app/context';
 import Scanner from '../../Scanner';
 import { GlobalConst, RouteEnum, ScreenEnum } from '../../../app/AppState';
-import { LoadedAppStackParamList } from '../../../app/types';
+import { SessionStackParamList } from '../../../app/types';
 
 import { View } from 'react-native';
 import Snackbars from '../../Components/Snackbars';
@@ -14,7 +14,7 @@ import { HeaderTitle } from '../../Header';
 import { useTheme } from '../../../app/theme';
 
 type ScannerAddressProps = NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.ScannerAddress
 >;
 
@@ -26,8 +26,8 @@ const ScannerAddress: React.FunctionComponent<ScannerAddressProps> = ({
     !!route.params && route.params.setAddress !== undefined
       ? route.params.setAddress
       : () => {};
-  const { removeFirstSnackbar } = useAppLoadedActions();
-  const { snackbars } = useAppLoadedUi();
+  const { removeFirstSnackbar } = useFeedback();
+  const { snackbars } = useFeedback();
   const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.ScannerAddress;

@@ -1,8 +1,8 @@
 // TODO: SPLIT INTO SUB-ROUTES
 export enum RouteEnum {
   // Stack
-  LoadingApp = 'LoadingApp',
-  LoadedApp = 'LoadedApp',
+  Boot = 'boot',
+  Session = 'session',
 
   Servers = 'Servers',
   StartMenu = 'StartMenu',

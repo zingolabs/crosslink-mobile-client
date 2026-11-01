@@ -1,17 +1,19 @@
 import { I18n } from 'i18n-js';
 
 import {
-  AppContextLoaded,
-  AppContextLoading,
   CurrencyEnum,
   LanguageEnum,
   SelectServerEnum,
-  SendPageStateClass,
-  ToAddrClass,
+  SendPageState,
+  emptySendPageState,
+  ToAddr,
   TranslateType,
 } from '../app/AppState';
-import { defaultAppContextLoaded } from '../app/context/contextAppLoaded';
-import { defaultAppContextLoading } from '../app/context/contextAppLoading';
+import { LoadedDomains, SetupDomains } from '../app/context/domains';
+import {
+  defaultLoadedDomains,
+  defaultSetupDomains,
+} from '../app/context';
 
 import { mockInfo } from '../__mocks__/dataMocks/mockInfo';
 import { mockBackground } from '../__mocks__/dataMocks/mockBackground';
@@ -40,8 +42,8 @@ const translate = (key: string) => i18n.t(key) as TranslateType;
  * Stories override single fields rather than rebuilding the object:
  *   parameters: { context: { totalBalance: null } }
  */
-export const mockContextLoaded: AppContextLoaded = {
-  ...defaultAppContextLoaded,
+export const mockContextLoaded: LoadedDomains = {
+  ...defaultLoadedDomains,
 
   translate,
   netInfo: mockNetInfo,
@@ -64,7 +66,7 @@ export const mockContextLoaded: AppContextLoaded = {
   defaultUnifiedAddress: mockAddresses[0]?.address ?? '',
   zenniesDonationAddress: mockAddresses[0]?.address ?? '',
   zingolibVersion: 'storybook',
-  sendPageState: new SendPageStateClass(new ToAddrClass(0)),
+  sendPageState: emptySendPageState(),
 
   staked: [],
   globalStaked: [],
@@ -88,8 +90,8 @@ export const mockContextLoaded: AppContextLoaded = {
  * The onboarding-time context. Much smaller than the loaded one: no wallet
  * data yet, only settings and connectivity.
  */
-export const mockContextLoading: AppContextLoading = {
-  ...defaultAppContextLoading,
+export const mockContextLoading: SetupDomains = {
+  ...defaultSetupDomains,
 
   translate,
   netInfo: mockNetInfo,

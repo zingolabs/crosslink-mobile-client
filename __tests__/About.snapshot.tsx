@@ -8,19 +8,19 @@ import React from 'react';
 import { render } from '@testing-library/react-native';
 import About from '../components/About';
 import {
-  ContextAppLoadedProvider,
-  defaultAppContextLoaded,
+  SessionDomainsProvider,
+  defaultLoadedDomains,
 } from '../app/context';
 import { mockInfo } from '../__mocks__/dataMocks/mockInfo';
 import { mockTotalBalance } from '../__mocks__/dataMocks/mockTotalBalance';
 import { mockTranslate } from '../__mocks__/dataMocks/mockTranslate';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { LoadedAppStackParamList } from '../app/types';
+import { SessionStackParamList } from '../app/types';
 import { RouteEnum } from '../app/AppState';
 import mockNavigation from '../__mocks__/dataMocks/mockNavigation';
 
 function makeDrawerProps(): NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.About
 > {
   return {
@@ -36,15 +36,15 @@ function makeDrawerProps(): NativeStackScreenProps<
 describe('Component About - test', () => {
   //snapshot test
   test('About - snapshot', () => {
-    const state = defaultAppContextLoaded;
+    const state = defaultLoadedDomains;
     state.translate = mockTranslate;
     state.info = mockInfo;
     state.totalBalance = mockTotalBalance;
     const props = makeDrawerProps();
     const about = render(
-      <ContextAppLoadedProvider value={state}>
+      <SessionDomainsProvider value={state}>
         <About {...props} />
-      </ContextAppLoadedProvider>,
+      </SessionDomainsProvider>,
     );
     expect(about.toJSON()).toMatchSnapshot();
   });

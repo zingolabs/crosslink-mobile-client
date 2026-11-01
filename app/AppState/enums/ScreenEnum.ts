@@ -1,14 +1,14 @@
 export enum ScreenEnum {
   // App
   //
-  LoadingApp = 'LoadingApp',
+  Boot = 'boot',
   Servers = 'Servers',
   // Launching
   StartMenu = 'StartMenu',
   Import = 'Import',
   ScannerUfvk = 'ScannerUfvk',
   //
-  LoadedApp = 'LoadedApp',
+  Session = 'session',
   ComputingTxContext = 'ComputingTxContext',
   History = 'History',
   ValueTransferDetail = 'ValueTransferDetail',

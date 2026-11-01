@@ -1,10 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { LoadedAppStackParamList } from '../../app/types';
+import { SessionStackParamList } from '../../app/types';
 import {
-  useAppLoadedActions,
-  useAppLoadedWallet,
-  useAppLoadedUi,
+  useFeedback,
+  useWalletData,
 } from '../../app/context';
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
@@ -58,7 +57,7 @@ import {
 } from '../../app/theme';
 
 type FinalizersProps = NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.Finalizers
 >;
 
@@ -82,9 +81,9 @@ const Finalizers: React.FunctionComponent<FinalizersProps> = ({
       : '';
 
   const { colors } = useTheme();
-  const { removeFirstSnackbar } = useAppLoadedActions();
-  const { staked, globalStaked, info, walletBonds } = useAppLoadedWallet();
-  const { snackbars } = useAppLoadedUi();
+  const { removeFirstSnackbar } = useFeedback();
+  const { staked, globalStaked, info, walletBonds } = useWalletData();
+  const { snackbars } = useFeedback();
   const { clear } = useToast();
   const screenName = ScreenEnum.About;
 

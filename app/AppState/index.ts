@@ -11,9 +11,8 @@
 
 export { default as UnifiedAddressClass } from './classes/UnifiedAddressClass';
 export { default as TransparentAddressClass } from './classes/TransparentAddressClass';
-export { default as SendPageStateClass } from './classes/SendPageStateClass';
-export { default as SettingsFileClass } from './classes/SettingsFileClass';
-export { default as ToAddrClass } from './classes/ToAddrClass';
+export { emptySendPageState, emptyToAddr } from './types/SendPageState';
+export type { SendPageState, ToAddr } from './types/SendPageState';
 export { default as TotalBalanceClass } from './classes/TotalBalanceClass';
 
 export { LanguageEnum } from './enums/LanguageEnum';
@@ -53,8 +52,7 @@ export { GlobalConst } from './const/GlobalConst';
 
 export type { default as AppStateLoaded } from './AppStateLoaded';
 export type { default as AppStateLoading } from './AppStateLoading';
-export type { default as AppContextLoading } from './AppContextLoading';
-export type { default as AppContextLoaded } from './AppContextLoaded';
+export type { WalletKind } from './lifecycle';
 
 export type { default as WalletType } from './types/WalletType';
 export type { default as SendJsonToTypeType } from './types/SendJsonToTypeType';

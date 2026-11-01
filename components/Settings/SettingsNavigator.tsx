@@ -6,7 +6,6 @@ import { SettingsMenu } from '.';
 import SettingsServers from './components/SettingsServers';
 import DebugInfo from './components/DebugInfo';
 import Seed from '../Seed';
-import { LoadingAppNavigationState } from '../../app/types';
 import { Notes } from './components/Notes';
 
 export type SettingsStackParamList = {
@@ -20,13 +19,13 @@ export type SettingsStackParamList = {
 const SettingsStack = createNativeStackNavigator<SettingsStackParamList>();
 
 type SettingsNavigatorProps = {
-  onClickOKChangeWallet: (state: LoadingAppNavigationState) => Promise<void>;
-  navigateToLoadingApp: (state: LoadingAppNavigationState) => Promise<void>;
+  onClickOKChangeWallet: () => Promise<void>;
+  leaveSession: () => Promise<void>;
 };
 
 export default function SettingsNavigator({
   onClickOKChangeWallet,
-  navigateToLoadingApp,
+  leaveSession,
 }: SettingsNavigatorProps) {
   return (
     <SettingsStack.Navigator
@@ -53,7 +52,7 @@ export default function SettingsNavigator({
         {props => (
           <SettingsServers
             {...props}
-            navigateToLoadingApp={navigateToLoadingApp}
+            leaveSession={leaveSession}
           />
         )}
       </SettingsStack.Screen>

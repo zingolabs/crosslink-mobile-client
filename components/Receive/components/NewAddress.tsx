@@ -17,7 +17,7 @@ import {
   SnackbarDurationEnum,
 } from '../../../app/AppState';
 import RegText from '../../Components/RegText';
-import { useAppLoadedActions } from '../../../app/context';
+import { useFeedback } from '../../../app/context';
 import { useToast } from 'react-native-toastier';
 import { AddressUnifiedTypeEnum } from '../../../app/AppState';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -41,7 +41,7 @@ const NewAddress: React.FunctionComponent<NewAddressProps> = ({
   screenName,
   setHeightLayout,
 }) => {
-  const { translate, addLastSnackbar } = useAppLoadedActions();
+  const { translate, addLastSnackbar } = useFeedback();
   const { colors } = useTheme();
   const { clear } = useToast();
 

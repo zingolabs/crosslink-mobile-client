@@ -1,11 +1,10 @@
 import React from 'react';
 import { StyleSheet, ScrollView, Text, View } from 'react-native';
 
-import { LoadedAppStackParamList } from '../../../app/types';
+import { SessionStackParamList } from '../../../app/types';
 import {
-  useAppLoadedActions,
-  useAppLoadedWallet,
-  useAppLoadedUi,
+  useFeedback,
+  useSession,
 } from '../../../app/context';
 import Snackbars from '../../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
@@ -16,15 +15,15 @@ import { HeaderTitle } from '../../Header';
 import { mono, radiusCard, space, useTheme } from '../../../app/theme';
 
 type DebugInfoProps = NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.DebugInfo
 >;
 
 /** Last error, presented as a terminal: mono text on a dark panel. */
 const DebugInfo: React.FunctionComponent<DebugInfoProps> = ({ navigation }) => {
-  const { removeFirstSnackbar } = useAppLoadedActions();
-  const { lastError } = useAppLoadedWallet();
-  const { snackbars } = useAppLoadedUi();
+  const { removeFirstSnackbar } = useFeedback();
+  const { lastError } = useSession();
+  const { snackbars } = useFeedback();
   const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.DebugInfo;

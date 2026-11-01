@@ -23,9 +23,9 @@ import {
 } from '../../../app/AppState';
 
 import {
-  useAppLoadedActions,
-  useAppLoadedSettings,
-  useAppLoadedWallet,
+  useFeedback,
+  useSettings,
+  useWalletData,
 } from '../../../app/context';
 import { RPCValueTransferStatusEnum } from '../../../app/wallet/enums/RPCValueTransferStatusEnum';
 import Utils from '../../../app/utils';
@@ -63,9 +63,9 @@ const ValueTransferLine: React.FunctionComponent<ValueTransferLineProps> = ({
   setValueTransferDetailModalShow,
   closeAllSwipeables,
 }) => {
-  const { translate } = useAppLoadedActions();
-  const { language, privacy } = useAppLoadedSettings();
-  const { info } = useAppLoadedWallet();
+  const { translate } = useFeedback();
+  const { language, privacy } = useSettings();
+  const { info } = useWalletData();
   const { colors } = useTheme();
   const reduced = useReducedMotion();
   const [pressed, setPressed] = useState(false);

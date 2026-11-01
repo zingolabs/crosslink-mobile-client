@@ -22,11 +22,10 @@ import {
 import { useNavigation } from '@react-navigation/native';
 
 import ReceiveAddressCard from './components/ReceiveAddressCard';
-import { LoadedAppStackParamList } from '../../app/types';
+import { SessionStackParamList } from '../../app/types';
 import {
-  useAppLoadedActions,
-  useAppLoadedWallet,
-  useAppLoadedUi,
+  useFeedback,
+  useWalletData,
 } from '../../app/context';
 
 import {
@@ -54,7 +53,7 @@ import { HeaderTitle } from '../Header';
 import { space, useTheme } from '../../app/theme';
 
 type ReceiveProps = NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.Receive
 > & {
   setSecurityOption: (s: SecurityType) => Promise<void>;
@@ -70,9 +69,9 @@ const Receive: React.FunctionComponent<ReceiveProps> = (
   },
 ) => {
   const navigation: any = useNavigation();
-  const { translate, removeFirstSnackbar } = useAppLoadedActions();
-  const { addresses, defaultUnifiedAddress } = useAppLoadedWallet();
-  const { snackbars } = useAppLoadedUi();
+  const { translate, removeFirstSnackbar } = useFeedback();
+  const { addresses, defaultUnifiedAddress } = useWalletData();
+  const { snackbars } = useFeedback();
   const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.Receive;

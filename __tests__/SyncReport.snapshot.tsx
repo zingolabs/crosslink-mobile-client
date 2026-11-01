@@ -8,8 +8,8 @@ import React from 'react';
 import { render } from '@testing-library/react-native';
 import SyncReport from '../components/SyncReport';
 import {
-  defaultAppContextLoaded,
-  ContextAppLoadedProvider,
+  SessionDomainsProvider,
+  defaultLoadedDomains,
 } from '../app/context';
 import { mockWallet } from '../__mocks__/dataMocks/mockWallet';
 import { mockTranslate } from '../__mocks__/dataMocks/mockTranslate';
@@ -18,12 +18,12 @@ import { mockTotalBalance } from '../__mocks__/dataMocks/mockTotalBalance';
 import mockSyncingStatus from '../__mocks__/dataMocks/mockSyncingStatus';
 import { mockNetInfo } from '../__mocks__/dataMocks/mockNetInfo';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { LoadedAppStackParamList } from '../app/types';
+import { SessionStackParamList } from '../app/types';
 import { RouteEnum } from '../app/AppState';
 import mockNavigation from '../__mocks__/dataMocks/mockNavigation';
 
 function makeDrawerProps(): NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.SyncReport
 > {
   return {
@@ -38,7 +38,7 @@ function makeDrawerProps(): NativeStackScreenProps<
 // test suite
 describe('Component SyncReport - test', () => {
   //snapshot test
-  const state = defaultAppContextLoaded;
+  const state = defaultLoadedDomains;
   state.translate = mockTranslate;
   state.info = mockInfo;
   state.totalBalance = mockTotalBalance;
@@ -48,9 +48,9 @@ describe('Component SyncReport - test', () => {
   const props = makeDrawerProps();
   test('SyncReport - snapshot', () => {
     const sync = render(
-      <ContextAppLoadedProvider value={state}>
+      <SessionDomainsProvider value={state}>
         <SyncReport {...props} />
-      </ContextAppLoadedProvider>,
+      </SessionDomainsProvider>,
     );
     expect(sync.toJSON()).toMatchSnapshot();
   });

@@ -7,7 +7,10 @@ import FadeText from '../../Components/FadeText';
 import PaperPlane from '../../../assets/icons/paper-plane.svg';
 import QrCode from '../../../assets/icons/qr.svg';
 import FaucetIcon from '../../../assets/icons/faucet.svg';
-import { useAppLoadedActions, useAppLoadedWallet } from '../../../app/context';
+import {
+  useSession,
+  useWalletData,
+} from '../../../app/context';
 import { space, useTheme } from '../../../app/theme';
 
 const ActionButton = ({
@@ -37,8 +40,8 @@ const QuickActionsRow: React.FC = () => {
   const navigation: any = useNavigation();
   const { colors } = useTheme();
 
-  const { requestFaucetFunds } = useAppLoadedActions();
-  const { defaultUnifiedAddress } = useAppLoadedWallet();
+  const { requestFaucetFunds } = useSession();
+  const { defaultUnifiedAddress } = useWalletData();
 
   return (
     <View style={styles.row}>

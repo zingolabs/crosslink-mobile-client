@@ -1,17 +1,17 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import type { Preview } from '@storybook/react-native-web-vite';
 
 import { ThemeProvider, navigationTheme, tokens } from '../app/theme';
-import { AppContextLoaded, AppContextLoading } from '../app/AppState';
+import { LoadedDomains, SetupDomains } from '../app/context/domains';
 import {
-  ContextAppLoadedProvider,
-  ContextAppLoadingProvider,
+  SessionDomainsProvider,
+  SetupDomainsProvider,
 } from '../app/context';
 import { mockContextLoaded, mockContextLoading } from './mockContext';
 
@@ -66,20 +66,20 @@ const preview: Preview = {
     ),
 
     (Story, ctx) => {
-      const value: AppContextLoaded = {
+      const value: LoadedDomains = {
         ...mockContextLoaded,
         ...(ctx.parameters.context ?? {}),
       };
-      const loadingValue: AppContextLoading = {
+      const loadingValue: SetupDomains = {
         ...mockContextLoading,
         ...(ctx.parameters.contextLoading ?? {}),
       };
       return (
-        <ContextAppLoadedProvider value={value}>
-          <ContextAppLoadingProvider value={loadingValue}>
+        <SessionDomainsProvider value={value}>
+          <SetupDomainsProvider value={loadingValue}>
             <Story />
-          </ContextAppLoadingProvider>
-        </ContextAppLoadedProvider>
+          </SetupDomainsProvider>
+        </SessionDomainsProvider>
       );
     },
 

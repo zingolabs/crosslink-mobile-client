@@ -403,7 +403,7 @@ exports[`Component Import - test Import - snapshot 1`] = `
           Birthday
         </Text>
         <TextInput
-          accessibilityLabel=""
+          accessibilityLabel="text translated"
           editable={true}
           keyboardType="number-pad"
           onChangeText={[Function]}
@@ -531,7 +531,9 @@ exports[`Component Import - test Import - snapshot 1`] = `
                   },
                 ]
               }
-            />
+            >
+              text translated
+            </Text>
             <Text
               accessible={false}
               importantForAccessibility="no-hide-descendants"
@@ -577,7 +579,9 @@ exports[`Component Import - test Import - snapshot 1`] = `
                   },
                 ]
               }
-            />
+            >
+              text translated
+            </Text>
           </View>
         </div>
       </View>

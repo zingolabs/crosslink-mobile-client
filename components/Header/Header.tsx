@@ -18,9 +18,10 @@ import {
   ScreenEnum,
 } from '../../app/AppState';
 import {
-  useAppLoadedActions,
-  useAppLoadedSettings,
-  useAppLoadedWallet,
+  useFeedback,
+  useSettings,
+  useStatus,
+  useWalletData,
 } from '../../app/context';
 import ZecAmount from '../Components/ZecAmount';
 import FadeText from '../Components/FadeText';
@@ -71,18 +72,10 @@ const Header: React.FunctionComponent<HeaderProps> = ({
   screenName,
 }) => {
   const navigation: any = useNavigation();
-  const { translate: translateContext } = useAppLoadedActions();
-  const {
-    security,
-    selectIndexerServer,
-    privacy: privacyContext,
-  } = useAppLoadedSettings();
-  const {
-    totalBalance,
-    info,
-    syncingStatus,
-    netInfo: netInfoContext,
-  } = useAppLoadedWallet();
+  const { translate: translateContext } = useFeedback();
+  const { security, selectIndexerServer, privacy: privacyContext } = useSettings();
+  const { totalBalance, info, syncingStatus } = useWalletData();
+  const { netInfo: netInfoContext } = useStatus();
 
   const translate = translateProp ?? translateContext;
   const netInfo = netInfoProp ?? netInfoContext;

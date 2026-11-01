@@ -7,13 +7,13 @@ import {
   ActivityIndicator,
 } from 'react-native';
 
-import { LoadedAppStackParamList } from '../../app/types';
+import { SessionStackParamList } from '../../app/types';
 import DetailLine from '../Components/DetailLine';
 import {
-  useAppLoadedActions,
-  useAppLoadedSettings,
-  useAppLoadedWallet,
-  useAppLoadedUi,
+  useFeedback,
+  useSettings,
+  useStatus,
+  useWalletData,
 } from '../../app/context';
 import moment from 'moment';
 
@@ -36,7 +36,7 @@ import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton'
 import { space, useTheme } from '../../app/theme';
 
 type SyncReportProps = NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.SyncReport
 >;
 
@@ -68,15 +68,12 @@ const rangeColor = (
 const SyncReport: React.FunctionComponent<SyncReportProps> = ({
   navigation,
 }) => {
-  const {
-    translate,
-    removeFirstSnackbar,
-    setBackgroundError,
-    addLastSnackbar,
-  } = useAppLoadedActions();
-  const { wallet, language } = useAppLoadedSettings();
-  const { syncingStatus, background, netInfo, info } = useAppLoadedWallet();
-  const { snackbars } = useAppLoadedUi();
+  const { translate, removeFirstSnackbar, setBackgroundError, addLastSnackbar } = useFeedback();
+  const { language } = useSettings();
+  const { wallet } = useStatus();
+  const { syncingStatus, info } = useWalletData();
+  const { background, netInfo } = useStatus();
+  const { snackbars } = useFeedback();
   const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.SyncReport;

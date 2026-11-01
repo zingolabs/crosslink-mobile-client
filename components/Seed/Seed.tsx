@@ -13,11 +13,12 @@ import Clipboard from '@react-native-clipboard/clipboard';
 
 import RegText from '../Components/RegText';
 import FadeText from '../Components/FadeText';
-import { LoadedAppStackParamList } from '../../app/types';
+import { SessionStackParamList } from '../../app/types';
 import {
-  useAppLoadedActions,
-  useAppLoadedSettings,
-  useAppLoadedUi,
+  useFeedback,
+  useSession,
+  useSettings,
+  useStatus,
 } from '../../app/context';
 import {
   SnackbarDurationEnum,
@@ -41,7 +42,7 @@ import type { CSSTransitionProperties } from 'react-native-reanimated';
 import { curve, duration as motionDuration, useTheme } from '../../app/theme';
 
 type SeedProps = NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.Seed
 >;
 
@@ -49,10 +50,11 @@ const EASE_OUT = cubicBezier(curve[0], curve[1], curve[2], curve[3]);
 
 const Seed: React.FunctionComponent<SeedProps> = ({}) => {
   const navigation: any = useNavigation();
-  const { translate, addLastSnackbar, removeFirstSnackbar, getUfvk } =
-    useAppLoadedActions();
-  const { wallet, privacy } = useAppLoadedSettings();
-  const { snackbars } = useAppLoadedUi();
+  const { translate, addLastSnackbar, removeFirstSnackbar } = useFeedback();
+  const { getUfvk } = useSession();
+  const { privacy } = useSettings();
+  const { wallet } = useStatus();
+  const { snackbars } = useFeedback();
   const { colors } = useTheme();
   // when this screen is open from LoadingApp (new wallet)
   // is using the standard modal from react-native

@@ -13,7 +13,8 @@ import Animated, {
   cubicBezier,
   useReducedMotion,
 } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WifiOff } from 'lucide-react-native';
 
 import {

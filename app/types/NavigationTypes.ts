@@ -3,34 +3,18 @@ import type { IndexerReport } from '../indexers';
 import {
   AddressKindEnum,
   IndexerNetworkEnum,
-  LaunchingModeEnum,
-  LoadingAppEntryEnum,
   RouteEnum,
   ScheduledActionType,
   SeedActionEnum,
   SelectServerEnum,
-  SendPageStateClass,
+  SendPageState,
   ServerType,
   UfvkActionEnum,
   ValueTransferType,
 } from '../AppState';
 import { RPCParseAddressType } from '../wallet/types/RPCParseAddressType';
 
-export type LoadedAppRouteParams =
-  | LoadedAppNavigationState
-  | (LoadedAppNavigationState & NavigatorScreenParams<LoadedAppStackParamList>);
-
-/**
- * Root navigation parameter list for the main stack navigator
- * This defines the structure of parameters passed between main app screens
- */
-export type AppStackParamList = {
-  // Stack
-  [RouteEnum.LoadingApp]: LoadingAppNavigationState | undefined;
-  [RouteEnum.LoadedApp]: LoadedAppRouteParams | undefined;
-};
-
-export type LoadingAppStackParamList = {
+export type SetupStackParamList = {
   [RouteEnum.StartMenu]: undefined;
   [RouteEnum.ChooseIndexer]: undefined;
   [RouteEnum.ListedIndexers]:
@@ -40,35 +24,12 @@ export type LoadingAppStackParamList = {
   [RouteEnum.Import]: undefined;
 };
 
-/**
- * Navigation state used for internal app navigation within LoadedApp
- * Used for methods like navigateToLoadingApp and onClickOKChangeWallet
- */
-export type LoadingAppNavigationState = {
-  entry?: LoadingAppEntryEnum;
-  startingApp?: boolean;
-  biometricsFailed?: boolean;
-  walletSeed?: string;
-  walletBirthday?: number;
-};
-/**
- * Navigation state used for internal app navigation within LoadedApp
- * Used for methods like navigateToLoadedApp
- */
-export type LoadedAppNavigationState = {
-  readOnly?: boolean;
-  orchardPool?: boolean;
-  saplingPool?: boolean;
-  transparentPool?: boolean;
-  firstLaunchingMessage?: LaunchingModeEnum;
-};
-
 export type MainTabParamList = {
   [RouteEnum.History]: undefined;
   [RouteEnum.StakingHome]: StakingHomeNavigationState | undefined;
 };
 
-export type LoadedAppStackParamList = {
+export type SessionStackParamList = {
   [RouteEnum.MainTabs]: NavigatorScreenParams<MainTabParamList> | undefined;
 
   [RouteEnum.Send]: undefined;
@@ -187,7 +148,7 @@ export type ConfirmNavigationState = {
   calculatedFee: number;
   parseAddressInfoJSON: RPCParseAddressType;
   donationAmount: number;
-  confirmSend: (s: SendPageStateClass) => Promise<void>;
+  confirmSend: (s: SendPageState) => Promise<void>;
   sendAllAmount: boolean;
   calculateFeeWithPropose: (
     amount: string,
@@ -195,14 +156,14 @@ export type ConfirmNavigationState = {
     memo: string,
     includeUAMemo: boolean,
   ) => Promise<void>;
-  sendPageState: SendPageStateClass;
+  sendPageState: SendPageState;
 };
 
 export type MessagesAddressNavigationState = {
   setScrollToBottom: (value: boolean) => void;
   scrollToBottom: boolean;
   address: string;
-  sendTransaction: (s: SendPageStateClass) => Promise<String>;
+  sendTransaction: (s: SendPageState) => Promise<String>;
   setServerOption: (
     value: ServerType,
     selectServer: SelectServerEnum,
@@ -225,7 +186,7 @@ export type SeedNavigationState = {
 };
 
 export type ComputingNavigationState = {
-  sendPageStatePar: SendPageStateClass;
+  sendPageStatePar: SendPageState;
 };
 
 export type ComputingOKNavigationState = {

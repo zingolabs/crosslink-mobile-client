@@ -13,11 +13,10 @@ import {
   NativeSyntheticEvent,
 } from 'react-native';
 
-import { LoadedAppStackParamList } from '../../app/types';
+import { SessionStackParamList } from '../../app/types';
 import {
-  useAppLoadedActions,
-  useAppLoadedWallet,
-  useAppLoadedUi,
+  useFeedback,
+  useWalletData,
 } from '../../app/context';
 import { Header } from '../Header';
 import { GlobalConst, RouteEnum, ScreenEnum } from '../../app/AppState';
@@ -31,7 +30,7 @@ import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton'
 import { space, text, useTheme } from '../../app/theme';
 
 type MemoProps = NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.Memo
 >;
 
@@ -40,9 +39,9 @@ const Memo: React.FunctionComponent<MemoProps> = ({ navigation, route }) => {
     !!route.params && route.params.setMessage !== undefined
       ? route.params.setMessage
       : () => {};
-  const { translate, removeFirstSnackbar } = useAppLoadedActions();
-  const { defaultUnifiedAddress } = useAppLoadedWallet();
-  const { snackbars } = useAppLoadedUi();
+  const { translate, removeFirstSnackbar } = useFeedback();
+  const { defaultUnifiedAddress } = useWalletData();
+  const { snackbars } = useFeedback();
   const { colors } = useTheme();
   const { clear } = useToast();
   const screenName = ScreenEnum.Memo;

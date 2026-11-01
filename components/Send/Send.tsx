@@ -28,8 +28,8 @@ import ErrorText from '../Components/ErrorText';
 import RegText from '../Components/RegText';
 import ZecAmount from '../Components/ZecAmount';
 import {
-  SendPageStateClass,
-  ToAddrClass,
+  emptySendPageState,
+  SendPageState,
   ChainNameEnum,
   GlobalConst,
   ServerType,
@@ -41,12 +41,14 @@ import {
 import { parseZcashURI } from '../../app/uris';
 import RPCModule from '../../app/RPCModule';
 import Utils from '../../app/utils';
-import { LoadedAppStackParamList } from '../../app/types';
+import { SessionStackParamList } from '../../app/types';
 import {
-  useAppLoadedActions,
-  useAppLoadedSettings,
-  useAppLoadedWallet,
-  useAppLoadedUi,
+  useFeedback,
+  useSession,
+  useSettings,
+  useStatus,
+  useUi,
+  useWalletData,
 } from '../../app/context';
 import { createAlert } from '../../app/createAlert';
 import { RPCSendProposeType } from '../../app/wallet/types/RPCSendProposeType';
@@ -63,13 +65,13 @@ import { useTheme } from '../../app/theme';
 import { report } from '../../app/reporting';
 
 type SendProps = NativeStackScreenProps<
-  LoadedAppStackParamList,
+  SessionStackParamList,
   RouteEnum.Send
 > & {
   setShieldingAmount: (value: number) => void;
   setScrollToTop: (value: boolean) => void;
   setScrollToBottom: (value: boolean) => void;
-  sendTransaction: (s: SendPageStateClass) => Promise<String>;
+  sendTransaction: (s: SendPageState) => Promise<String>;
   setServerOption: (
     value: ServerType,
     selectServer: SelectServerEnum,
@@ -94,30 +96,13 @@ const Send: React.FunctionComponent<SendProps> = ({
   setScrollToBottom,
 }) => {
   const navigation: any = useNavigation();
-  const {
-    translate,
-    setBackgroundError,
-    addLastSnackbar,
-    removeFirstSnackbar,
-  } = useAppLoadedActions();
-  const {
-    privacy,
-    indexerServer,
-    donation,
-    selectIndexerServer,
-    zenniesDonationAddress,
-  } = useAppLoadedSettings();
-  const {
-    info,
-    totalBalance,
-    zecPrice,
-    netInfo,
-    somePending,
-    addresses,
-    defaultUnifiedAddress,
-    shieldingAmount,
-  } = useAppLoadedWallet();
-  const { sendPageState, snackbars } = useAppLoadedUi();
+  const { translate, setBackgroundError, addLastSnackbar, removeFirstSnackbar } = useFeedback();
+  const { privacy, indexerServer, donation, selectIndexerServer } = useSettings();
+  const { zenniesDonationAddress } = useSession();
+  const { info, totalBalance, somePending, addresses, defaultUnifiedAddress, shieldingAmount } = useWalletData();
+  const { zecPrice, netInfo } = useStatus();
+  const { sendPageState } = useUi();
+  const { snackbars } = useFeedback();
 
   const { colors } = useTheme();
   const { clear } = useToast();
@@ -257,9 +242,7 @@ const Send: React.FunctionComponent<SendProps> = ({
         return;
       }
 
-      const sendPageStateCalculateFee = new SendPageStateClass(
-        new ToAddrClass(0),
-      );
+      const sendPageStateCalculateFee = emptySendPageState();
       sendPageStateCalculateFee.toaddr.to = addressPar;
       sendPageStateCalculateFee.toaddr.memo = memoPar;
       sendPageStateCalculateFee.toaddr.includeUAMemo = includeUAMemoPar;
@@ -727,7 +710,7 @@ const Send: React.FunctionComponent<SendProps> = ({
         memo: memoText,
         includeUAMemo: includeUAMemoBoolean,
       },
-    }) as SendPageStateClass;
+    }) as SendPageState;
 
   const interceptCustomError = (error: string) => {
     if (
@@ -741,7 +724,7 @@ const Send: React.FunctionComponent<SendProps> = ({
     }
   };
 
-  const confirmSend = async (sendPageStatePar: SendPageStateClass) => {
+  const confirmSend = async (sendPageStatePar: SendPageState) => {
     if (
       !netInfo.isConnected ||
       selectIndexerServer === SelectServerEnum.offline

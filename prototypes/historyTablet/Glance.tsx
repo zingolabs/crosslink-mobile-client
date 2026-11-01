@@ -5,7 +5,7 @@ import moment from 'moment';
 import { Eye, EyeOff, QrCode, Send } from 'lucide-react-native';
 
 import { ValueTransferType } from '../../app/AppState';
-import { useAppLoadedWallet } from '../../app/context';
+import { useWalletData } from '../../app/context';
 import { useTheme } from '../../app/theme';
 import { Sparkline } from './charts';
 import {
@@ -82,7 +82,7 @@ const Glance: React.FC<VariantActions & { insetTop: number }> = ({
   onShield,
 }) => {
   const { colors } = useTheme();
-  const { info } = useAppLoadedWallet();
+  const { info } = useWalletData();
   const transfers = useTransfers();
   const { hidden, toggle } = usePrivacy();
   const [selected, setSelected] = useState<string | null>(null);
