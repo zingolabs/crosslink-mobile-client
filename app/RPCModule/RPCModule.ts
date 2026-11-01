@@ -1,3 +1,9 @@
 import { NativeModules } from 'react-native';
 
-export default NativeModules.RPCModule;
+import { FAKE_RPC } from '../config';
+
+import fakeRpc from './fakeRpc';
+
+const RPCModule = FAKE_RPC ? fakeRpc : NativeModules.RPCModule;
+
+export default RPCModule;
