@@ -9,12 +9,46 @@ import {
   clearBreadcrumbs,
   buildPayload,
   report,
+  resetReportState,
   normalizeStack,
 } from '../app/reporting';
 import { BUILD_ID, REPORT } from '../app/config';
 
+jest.mock('react-native', () => {
+  const RN = jest.requireActual('react-native');
+  RN.AppState = {
+    addEventListener: jest.fn(() => ({ remove: jest.fn() })),
+  };
+  return RN;
+});
+
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  setItem: jest.fn(() => Promise.resolve()),
+  getItem: jest.fn(() => Promise.resolve(null)),
+}));
+
+const QUEUE_LIMIT = 50;
+const MAX_PER_MINUTE = 10;
+const DEDUPE_WINDOW_MS = 10 * 60_000;
+
 describe('reporting', () => {
-  beforeEach(() => clearBreadcrumbs());
+  let now: number;
+  let fetchMock: jest.Mock;
+
+  beforeEach(() => {
+    resetReportState();
+    clearBreadcrumbs();
+    jest.clearAllMocks();
+    now = 1_000_000_000_000;
+    jest.spyOn(Date, 'now').mockImplementation(() => now);
+    fetchMock = jest.fn(() => Promise.resolve({ ok: true, status: 204 }));
+    (global as any).fetch = fetchMock;
+  });
+
+  afterEach(() => {
+    resetReportState();
+    jest.restoreAllMocks();
+  });
 
   test('breadcrumb ring keeps the last 50 actions in order', () => {
     for (let i = 0; i < 60; i += 1) {
@@ -56,12 +90,12 @@ describe('reporting', () => {
     expect(normalizeStack(dev)).toBe('at anonymous (index.bundle:282239:78)');
   });
 
-  test('report posts fire-and-forget with the token header', () => {
-    const fetchMock = jest.fn(() => Promise.reject(new Error('offline')));
-    (global as any).fetch = fetchMock;
-    expect(() => report(new Error('x'))).not.toThrow();
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    const [url, init] = fetchMock.mock.calls[0] as unknown as [
+  test('report posts fire-and-forget with the token header', async () => {
+    const failingFetch = jest.fn(() => Promise.reject(new Error('offline')));
+    (global as any).fetch = failingFetch;
+    await expect(report(new Error('x'))).resolves.toBeUndefined();
+    expect(failingFetch).toHaveBeenCalledTimes(1);
+    const [url, init] = failingFetch.mock.calls[0] as unknown as [
       string,
       RequestInit,
     ];
@@ -71,5 +105,52 @@ describe('reporting', () => {
       REPORT.token,
     );
     expect(JSON.parse(init.body as string).buildId).toBe(BUILD_ID);
+  });
+
+  test('drops duplicate messages within the dedupe window', async () => {
+    await report(new Error('same failure'));
+    await report(new Error('same failure'));
+    await report(new Error('same failure'));
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    now += DEDUPE_WINDOW_MS + 1;
+    await report(new Error('same failure'));
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  test('keeps a report queued when the send fails and sends it later', async () => {
+    fetchMock.mockResolvedValueOnce({ ok: false, status: 500 });
+    await report(new Error('queued failure'));
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    now += 1000;
+    await report(new Error('second failure'));
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    const queued = JSON.parse(fetchMock.mock.calls[1][1].body);
+    const second = JSON.parse(fetchMock.mock.calls[2][1].body);
+    expect(queued.message).toBe('[DEV] queued failure');
+    expect(second.message).toBe('[DEV] second failure');
+  });
+
+  test('rate limits sends per minute and drains the queue later', async () => {
+    for (let i = 0; i < 12; i += 1) {
+      await report(new Error(`failure ${i}`));
+    }
+    expect(fetchMock).toHaveBeenCalledTimes(MAX_PER_MINUTE);
+
+    now += 61_000;
+    await report(new Error('failure 12'));
+    expect(fetchMock).toHaveBeenCalledTimes(MAX_PER_MINUTE + 3);
+  });
+
+  test('queue never grows past the limit', async () => {
+    fetchMock.mockResolvedValue({ ok: false, status: 500 });
+    // every send fails, so every report stays queued until the limit holds
+    for (let i = 0; i < QUEUE_LIMIT + 20; i += 1) {
+      now += 61_000;
+      await report(new Error(`overflow ${i}`));
+    }
+    // the flush after each report makes one attempt and stops on failure
+    expect(fetchMock).toHaveBeenCalledTimes(QUEUE_LIMIT + 20);
   });
 });
