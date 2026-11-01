@@ -1,0 +1,129 @@
+name: iOS Release
+
+on:
+  push:
+    tags: ['release-*']
+  workflow_dispatch:
+
+env:
+  REPO-OWNER: ${{ github.repository_owner }}
+
+jobs:
+  create-cache-key:
+    uses: ./.github/workflows/create-cache-key.yaml
+
+  ios-release:
+    name: Archive, sign and upload to TestFlight
+    needs: create-cache-key
+    runs-on: macos-15
+    env:
+      CACHE-KEY: ${{ needs.create-cache-key.outputs.cache-key }}
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Restore native rust (device + simulator)
+        id: native-rust
+        uses: actions/cache@v4
+        with:
+          path: |
+            ios/Zingolib.xcframework
+            ios/zingo.swift
+          key: native-ios-uniffi-release-${{ env.CACHE-KEY }}
+
+      - name: Rust toolchain
+        if: steps.native-rust.outputs.cache-hit != 'true'
+        run: |
+          rustup default stable
+          rustup target add aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios
+          cargo install --force --locked bindgen-cli
+          brew install protobuf
+
+      - name: Build Zingolib xcframework (device + simulator)
+        if: steps.native-rust.outputs.cache-hit != 'true'
+        run: node rust/ios/build_ios.mjs
+
+      - name: Yarn install
+        run: yarn
+
+      - name: Ruby and bundler
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: ios/Pods
+          key: pods-${{ runner.os }}-${{ hashFiles('ios/Podfile', 'yarn.lock') }}
+
+      - name: Pod install
+        working-directory: ios
+        run: bundle exec pod install
+
+      - name: Hermes dSYM for the archive
+        run: |
+          set -euo pipefail
+          RN=$(node -p "require('react-native/package.json').version")
+          if ! grep -q "hermes-dsyms/RN-${RN}/" ios/ZingoDelegator.xcodeproj/project.pbxproj; then
+            echo "The Hermes dSYM script phase in project.pbxproj does not reference RN-${RN}. Update its path." >&2
+            exit 1
+          fi
+          DEST="ios/vendor/hermes-dsyms/RN-${RN}/ios-arm64/release/react-native-artifacts-${RN}-hermes-framework-dSYM-release"
+          mkdir -p "${DEST}"
+          curl -sSL --fail -o "${RUNNER_TEMP}/hermes-dsym.tgz" \
+            "https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/${RN}/react-native-artifacts-${RN}-hermes-framework-dSYM-release.tar.gz"
+          tar -xzf "${RUNNER_TEMP}/hermes-dsym.tgz" -C "${DEST}"
+          test -d "${DEST}/iphoneos/hermes.framework.dSYM"
+
+      - name: Version from tag
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/release-* ]]; then
+            echo "MARKETING_VERSION=${GITHUB_REF_NAME#release-}" >> "$GITHUB_ENV"
+          else
+            echo "MARKETING_VERSION=$(node -p "require('./package.json').version")" >> "$GITHUB_ENV"
+          fi
+          echo "BUILD_NUMBER=${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
+
+      - name: Apple credentials
+        env:
+          API_KEY_P8_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+          DIST_CERT_P12_BASE64: ${{ secrets.IOS_DIST_CERT_P12 }}
+        run: |
+          set -euo pipefail
+          echo "${API_KEY_P8_BASE64}" | base64 --decode > "${RUNNER_TEMP}/AuthKey.p8"
+          echo "${DIST_CERT_P12_BASE64}" | base64 --decode > "${RUNNER_TEMP}/dist.p12"
+          echo "APP_STORE_CONNECT_API_KEY_PATH=${RUNNER_TEMP}/AuthKey.p8" >> "$GITHUB_ENV"
+          echo "IOS_DIST_CERT_PATH=${RUNNER_TEMP}/dist.p12" >> "$GITHUB_ENV"
+
+      - name: Archive, sign and upload
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          IOS_DIST_CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+          DELEGATOR_REPORT_URL: ${{ secrets.DELEGATOR_REPORT_URL }}
+          DELEGATOR_REPORT_TOKEN: ${{ secrets.DELEGATOR_REPORT_TOKEN }}
+        run: bundle exec fastlane ios release
+
+      - name: Collect artifacts
+        run: |
+          mv build/ZingoDelegator.ipa "ZingoDelegator-${{ github.ref_name }}.ipa"
+          mv build/ZingoDelegator.app.dSYM.zip "ZingoDelegator-${{ github.ref_name }}-dSYM.zip"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZingoDelegator-${{ github.ref_name }}-ios
+          path: |
+            ZingoDelegator-${{ github.ref_name }}.ipa
+            ZingoDelegator-${{ github.ref_name }}-dSYM.zip
+
+      - name: Attach to release
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ZingoDelegator-${{ github.ref_name }}.ipa
+            ZingoDelegator-${{ github.ref_name }}-dSYM.zip

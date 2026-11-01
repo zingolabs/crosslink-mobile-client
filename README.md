@@ -56,6 +56,21 @@ yarn crash-triage triage <fingerprint> --actor <name> [--pr <url>] [--note <text
 
 Release bundles read the Worker URL and report token from `.env` (see `.env.example`) at build time. Dev bundles post to the local Worker on port 3000. `DELEGATOR_REPORT_TARGET=prod` makes a dev bundle post to production; every dev-bundle report carries a `[DEV] ` message prefix and a ` DEV` version suffix so it stands out in the feed. `DELEGATOR_CRASH_TEST=1` in `.env` enables the `delegator://crash-test` deep link for a verification build and must stay off for shipping builds.
 
+## Release
+
+Pushing a `release-X.Y.Z` tag builds both platforms. Android runs `android-release-apk.yaml`. iOS runs `ios-release.yaml`: it builds the Rust framework for device and simulator, fetches the Hermes dSYM the archive script expects, archives with automatic signing through an App Store Connect API key, uploads to TestFlight, and attaches the IPA and dSYMs to the GitHub release. The marketing version comes from the tag and the build number from the run number.
+
+Repository secrets the iOS job reads:
+
+| Secret | Content |
+|---|---|
+| `APP_STORE_CONNECT_API_KEY_ID` | key id of an App Store Connect API key with App Manager access |
+| `APP_STORE_CONNECT_API_ISSUER_ID` | issuer id of that key |
+| `APP_STORE_CONNECT_API_KEY_P8` | the `.p8` file, base64 |
+| `IOS_DIST_CERT_P12` | Apple Distribution certificate with private key, base64 `.p12` |
+| `IOS_DIST_CERT_PASSWORD` | password of that `.p12` |
+| `DELEGATOR_REPORT_URL`, `DELEGATOR_REPORT_TOKEN` | crash reporting, shared with Android |
+
 ## Troubleshooting
 
 See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md).
