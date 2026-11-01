@@ -12,7 +12,7 @@ import {
   UfvkActionEnum,
   ValueTransferType,
 } from '../AppState';
-import { RPCParseAddressType } from '../wallet/types/RPCParseAddressType';
+import { ParseAddressType } from '../wallet/types/ParseAddressType';
 
 export type SetupStackParamList = {
   [RouteEnum.StartMenu]: undefined;
@@ -146,7 +146,7 @@ export type ScheduledActionDetailNavigationState = {
 
 export type ConfirmNavigationState = {
   calculatedFee: number;
-  parseAddressInfoJSON: RPCParseAddressType;
+  parseAddressInfoJSON: ParseAddressType;
   donationAmount: number;
   confirmSend: (s: SendPageState) => Promise<void>;
   sendAllAmount: boolean;

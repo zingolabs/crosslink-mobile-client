@@ -23,10 +23,10 @@ import {
 import randomColor from 'randomcolor';
 import RPCModule from '../RPCModule';
 import { Buffer } from 'buffer';
-import { RPCParseAddressType } from '../wallet/types/RPCParseAddressType';
-import { RPCParseAddressStatusEnum } from '../wallet/enums/RPCParseAddressStatusEnum';
-import { RPCAddressKindEnum } from '../wallet/enums/RPCAddressKindEnum';
-import { RPCReceiversEnum } from '../wallet/enums/RPCReceiversEnum';
+import { ParseAddressType } from '../wallet/types/ParseAddressType';
+import { ParseAddressStatusEnum } from '../wallet/enums/ParseAddressStatusEnum';
+import { WalletAddressKindEnum } from '../wallet/enums/WalletAddressKindEnum';
+import { ReceiversEnum } from '../wallet/enums/ReceiversEnum';
 
 export default class Utils {
   static trimToSmall(addr?: string, numChars?: number): string {
@@ -349,7 +349,7 @@ export default class Utils {
     } else {
       return { isValid, onlyOrchardUA };
     }
-    let resultJSON = {} as RPCParseAddressType;
+    let resultJSON = {} as ParseAddressType;
     try {
       resultJSON = await JSON.parse(result);
     } catch (e) {
@@ -357,20 +357,20 @@ export default class Utils {
     }
 
     isValid =
-      resultJSON.status === RPCParseAddressStatusEnum.successAddressParse &&
+      resultJSON.status === ParseAddressStatusEnum.successAddressParse &&
       resultJSON.chain_name === serverChainName;
     if (isValid) {
       isFullUA =
-        resultJSON.address_kind === RPCAddressKindEnum.unifiedAddressKind &&
+        resultJSON.address_kind === WalletAddressKindEnum.unifiedAddressKind &&
         !!resultJSON.receivers_available &&
         resultJSON.receivers_available.includes(
-          RPCReceiversEnum.orchardRPCReceiver,
+          ReceiversEnum.orchard,
         ) &&
         resultJSON.receivers_available.includes(
-          RPCReceiversEnum.saplingRPCReceiver,
+          ReceiversEnum.sapling,
         ) &&
         resultJSON.receivers_available.includes(
-          RPCReceiversEnum.transparentRPCReceiver,
+          ReceiversEnum.transparent,
         );
       if (isFullUA) {
         // the only use case for this is: if the UA is full (3 receivers)
@@ -398,7 +398,7 @@ export default class Utils {
     } else {
       return false;
     }
-    let resultJSON = {} as RPCParseAddressType;
+    let resultJSON = {} as ParseAddressType;
     try {
       resultJSON = await JSON.parse(result);
     } catch (e) {
@@ -408,9 +408,9 @@ export default class Utils {
     //console.log('parse-memo', address, resultJSON);
 
     return (
-      resultJSON.status === RPCParseAddressStatusEnum.successAddressParse &&
-      resultJSON.address_kind !== RPCAddressKindEnum.transparentAddressKind &&
-      resultJSON.address_kind !== RPCAddressKindEnum.texAddressKind &&
+      resultJSON.status === ParseAddressStatusEnum.successAddressParse &&
+      resultJSON.address_kind !== WalletAddressKindEnum.transparentAddressKind &&
+      resultJSON.address_kind !== WalletAddressKindEnum.texAddressKind &&
       resultJSON.chain_name === serverChainName
     );
   }

@@ -18,7 +18,7 @@ import { parseZcashURI } from '../../../app/uris';
 import TextInputAddress from '../../Components/TextInputAddress';
 import FadeText from '../../Components/FadeText';
 import RegText from '../../Components/RegText';
-import { RPCCheckAddressType } from '../../../app/wallet/types/RPCCheckAddressType';
+import { CheckAddressType } from '../../../app/wallet/types/CheckAddressType';
 import { VerifyCheckIcon } from '../../Components/Icons/VerifyCheckIcon';
 import { VerifyXIcon } from '../../Components/Icons/VerifyXIcon';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
@@ -61,7 +61,7 @@ const VerifyAddress: React.FunctionComponent<VerifyAddressProps> = ({
         console.log('Internal Error new address ');
       }
 
-      const verifyAddressJSON: RPCCheckAddressType =
+      const verifyAddressJSON: CheckAddressType =
         await JSON.parse(verifyAddressStr);
       setVerifyOK(verifyAddressJSON.is_wallet_address);
 

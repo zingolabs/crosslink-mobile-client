@@ -35,7 +35,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faAngleUp } from '@fortawesome/free-solid-svg-icons';
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
-import { RPCAddressScopeEnum } from '../../app/wallet/enums/RPCAddressScopeEnum';
+import { AddressScopeEnum } from '../../app/wallet/enums/AddressScopeEnum';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
 import { radiusPill, space, useTheme } from '../../app/theme';
@@ -102,7 +102,7 @@ const AddressList: React.FunctionComponent<AddressListProps> = ({
       return addresses.filter(
         (a: UnifiedAddressClass | TransparentAddressClass) =>
           a.addressKind === addressKind &&
-          a.scope === RPCAddressScopeEnum.external,
+          a.scope === AddressScopeEnum.external,
       );
     }
   }, [addressKind, addresses]);

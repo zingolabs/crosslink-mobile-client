@@ -51,8 +51,8 @@ import {
   useWalletData,
 } from '../../app/context';
 import { createAlert } from '../../app/createAlert';
-import { RPCSendProposeType } from '../../app/wallet/types/RPCSendProposeType';
-import { RPCSpendablebalanceType } from '../../app/wallet/types/RPCSpendablebalanceType';
+import { SendProposeType } from '../../app/wallet/types/SendProposeType';
+import { SpendablebalanceType } from '../../app/wallet/types/SpendablebalanceType';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import Snackbars from '../Components/Snackbars';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -271,7 +271,7 @@ const Send: React.FunctionComponent<SendProps> = ({
       }
 
       try {
-        const runProposeJson: RPCSendProposeType = JSON.parse(runProposeStr);
+        const runProposeJson: SendProposeType = JSON.parse(runProposeStr);
 
         if (runProposeJson.error) {
           setProposeSendLastError(runProposeJson.error);
@@ -369,7 +369,7 @@ const Send: React.FunctionComponent<SendProps> = ({
       }
 
       try {
-        const runSpendableBalanceJson: RPCSpendablebalanceType = JSON.parse(
+        const runSpendableBalanceJson: SpendablebalanceType = JSON.parse(
           runSpendableBalanceStr,
         );
 

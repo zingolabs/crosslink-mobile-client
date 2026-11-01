@@ -4,7 +4,7 @@ import History from './History';
 import { RouteEnum } from '../../app/AppState';
 import { screenProps } from '../../.storybook/screenProps';
 import { mockValueTransfers } from '../../__mocks__/dataMocks/mockValueTransfers';
-import { RPCValueTransferStatusEnum } from '../../app/wallet/enums/RPCValueTransferStatusEnum';
+import { ValueTransferStatusEnum } from '../../app/wallet/enums/ValueTransferStatusEnum';
 
 /** The Home tab. */
 const meta = {
@@ -43,7 +43,7 @@ export const SomePending: Story = {
           ...mockValueTransfers[0],
           txid: 'pending-txid',
           confirmations: 0,
-          status: RPCValueTransferStatusEnum.mempool,
+          status: ValueTransferStatusEnum.mempool,
           time: Math.floor(Date.now() / 1000),
         },
         ...mockValueTransfers,

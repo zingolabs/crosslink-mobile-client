@@ -20,7 +20,7 @@ import {
   ValueTransferKindEnum as K,
   ValueTransferType,
 } from '../../app/AppState';
-import { RPCValueTransferStatusEnum } from '../../app/wallet/enums/RPCValueTransferStatusEnum';
+import { ValueTransferStatusEnum } from '../../app/wallet/enums/ValueTransferStatusEnum';
 import {
   useFeedback,
   useSettings,
@@ -94,13 +94,13 @@ export const kindLabel = (vt: ValueTransferType) => {
 
 export const statusLabel = (vt: ValueTransferType) => {
   switch (vt.status) {
-    case RPCValueTransferStatusEnum.calculated:
+    case ValueTransferStatusEnum.calculated:
       return 'Preparing';
-    case RPCValueTransferStatusEnum.transmitted:
+    case ValueTransferStatusEnum.transmitted:
       return 'Broadcast';
-    case RPCValueTransferStatusEnum.mempool:
+    case ValueTransferStatusEnum.mempool:
       return 'In mempool';
-    case RPCValueTransferStatusEnum.failed:
+    case ValueTransferStatusEnum.failed:
       return 'Failed';
     default:
       return 'Confirmed';
@@ -271,7 +271,7 @@ export const useTransfers = () => {
   return useMemo(
     () =>
       (valueTransfers ?? [])
-        .filter(vt => vt.status !== RPCValueTransferStatusEnum.failed)
+        .filter(vt => vt.status !== ValueTransferStatusEnum.failed)
         .sort((a, b) => b.time - a.time),
     [valueTransfers],
   );

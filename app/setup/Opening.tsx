@@ -35,9 +35,9 @@ import WalletService from '../wallet';
 import { SetupDomains, SetupDomainsProvider } from '../context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAlert } from '../createAlert';
-import { RPCWalletKindType } from '../wallet/types/RPCWalletKindType';
+import { WalletKindType } from '../wallet/types/WalletKindType';
 import Snackbars from '../../components/Components/Snackbars';
-import { RPCSeedType } from '../wallet/types/RPCSeedType';
+import { SeedType } from '../wallet/types/SeedType';
 import Launching from '../lifecycle/Launching';
 import isEqual from 'lodash/isEqual';
 import {
@@ -45,9 +45,9 @@ import {
   hasRecoveryWalletInfo,
   removeRecoveryWalletInfo,
 } from '../recoveryWalletInfov10';
-import { RPCWalletKindEnum } from '../wallet/enums/RPCWalletKindEnum';
+import { WalletKindEnum } from '../wallet/enums/WalletKindEnum';
 import { ToastProvider } from 'react-native-toastier';
-import { RPCUfvkType } from '../wallet/types/RPCUfvkType';
+import { UfvkType } from '../wallet/types/UfvkType';
 import ScheduledActionsFileImpl from '../../components/ScheduledActions/ScheduledActionsFileImpl';
 import { discoverIndexers, probeIndexer, selectBestIndexer } from '../indexers';
 import {
@@ -309,7 +309,7 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
       await this.walletErrorHandle(result, title, true);
       return;
     }
-    let resultJson: RPCSeedType & RPCUfvkType;
+    let resultJson: SeedType & UfvkType;
     try {
       resultJson = await JSON.parse(result);
     } catch (e: unknown) {
@@ -365,7 +365,7 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
     );
 
     if (seed && !seed.toLowerCase().startsWith(GlobalConst.error)) {
-      let seedJSON = {} as RPCSeedType;
+      let seedJSON = {} as SeedType;
       try {
         seedJSON = await JSON.parse(seed);
         if (seedJSON.error) {
@@ -477,7 +477,7 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
       );
       return;
     }
-    let resultJson: RPCSeedType & RPCUfvkType;
+    let resultJson: SeedType & UfvkType;
     try {
       resultJson = await JSON.parse(result);
     } catch (e: unknown) {
@@ -527,11 +527,11 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
     };
     const walletKindStr: string = await RPCModule.walletKindInfo();
     try {
-      const walletKindJSON: RPCWalletKindType = await JSON.parse(walletKindStr);
+      const walletKindJSON: WalletKindType = await JSON.parse(walletKindStr);
       kind.readOnly =
         walletKindJSON.kind ===
-          RPCWalletKindEnum.LoadedFromUnifiedFullViewingKey ||
-        walletKindJSON.kind === RPCWalletKindEnum.NoKeysFound;
+          WalletKindEnum.LoadedFromUnifiedFullViewingKey ||
+        walletKindJSON.kind === WalletKindEnum.NoKeysFound;
       kind.orchardPool = walletKindJSON.orchard;
       kind.saplingPool = walletKindJSON.sapling;
       kind.transparentPool = walletKindJSON.transparent;

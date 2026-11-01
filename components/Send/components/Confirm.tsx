@@ -25,13 +25,13 @@ import {
   RouteEnum,
   SendPageState,
 } from '../../../app/AppState';
-import { RPCAddressKindEnum } from '../../../app/wallet/enums/RPCAddressKindEnum';
-import { RPCReceiversEnum } from '../../../app/wallet/enums/RPCReceiversEnum';
-import { RPCParseAddressStatusEnum } from '../../../app/wallet/enums/RPCParseAddressStatusEnum';
+import { WalletAddressKindEnum } from '../../../app/wallet/enums/WalletAddressKindEnum';
+import { ReceiversEnum } from '../../../app/wallet/enums/ReceiversEnum';
+import { ParseAddressStatusEnum } from '../../../app/wallet/enums/ParseAddressStatusEnum';
 import Snackbars from '../../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RPCParseAddressType } from '../../../app/wallet/types/RPCParseAddressType';
+import { ParseAddressType } from '../../../app/wallet/types/ParseAddressType';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../../Header';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
@@ -74,10 +74,10 @@ const Confirm: React.FunctionComponent<ConfirmProps> = ({
       : 0,
   );
   const [parseAddressInfoJSON, setParseAddressInfoJSON] =
-    useState<RPCParseAddressType>(
+    useState<ParseAddressType>(
       !!route.params && route.params.parseAddressInfoJSON !== undefined
         ? route.params.parseAddressInfoJSON
-        : ({} as RPCParseAddressType),
+        : ({} as ParseAddressType),
     );
   const [donationAmount, setDonationAmount] = useState<number>(
     !!route.params && route.params.donationAmount !== undefined
@@ -111,7 +111,7 @@ const Confirm: React.FunctionComponent<ConfirmProps> = ({
     const _parseAddressInfoJSON =
       !!route.params && route.params.parseAddressInfoJSON !== undefined
         ? route.params.parseAddressInfoJSON
-        : ({} as RPCParseAddressType);
+        : ({} as ParseAddressType);
     const _donationAmount =
       !!route.params && route.params.donationAmount !== undefined
         ? route.params.donationAmount
@@ -196,11 +196,11 @@ const Confirm: React.FunctionComponent<ConfirmProps> = ({
       return '-';
     }
 
-    //console.log('parse-address', sendPageState.toaddr.to, resultJSON.status === RPCParseStatusEnum.successParse);
+    //console.log('parse-address', sendPageState.toaddr.to, resultJSON.status === ParseAddressStatusEnum.successParse);
 
     if (
       parseAddressInfoJSON.status !==
-        RPCParseAddressStatusEnum.successAddressParse ||
+        ParseAddressStatusEnum.successAddressParse ||
       parseAddressInfoJSON.chain_name !== indexerServer.chainName
     ) {
       return '-';
@@ -212,9 +212,9 @@ const Confirm: React.FunctionComponent<ConfirmProps> = ({
     if (
       from === PrivacyLevelFromEnum.orchardPrivacyLevel &&
       parseAddressInfoJSON.address_kind ===
-        RPCAddressKindEnum.unifiedAddressKind &&
+        WalletAddressKindEnum.unifiedAddressKind &&
       parseAddressInfoJSON.receivers_available?.includes(
-        RPCReceiversEnum.orchardRPCReceiver,
+        ReceiversEnum.orchard,
       )
     ) {
       return translate('send.private') as string;
@@ -224,14 +224,14 @@ const Confirm: React.FunctionComponent<ConfirmProps> = ({
     if (
       from === PrivacyLevelFromEnum.saplingPrivacyLevel &&
       (parseAddressInfoJSON.address_kind ===
-        RPCAddressKindEnum.saplingAddressKind ||
+        WalletAddressKindEnum.saplingAddressKind ||
         (parseAddressInfoJSON.address_kind ===
-          RPCAddressKindEnum.unifiedAddressKind &&
+          WalletAddressKindEnum.unifiedAddressKind &&
           parseAddressInfoJSON.receivers_available?.includes(
-            RPCReceiversEnum.saplingRPCReceiver,
+            ReceiversEnum.sapling,
           ) &&
           !parseAddressInfoJSON.receivers_available?.includes(
-            RPCReceiversEnum.orchardRPCReceiver,
+            ReceiversEnum.orchard,
           )))
     ) {
       return translate('send.private') as string;
@@ -241,11 +241,11 @@ const Confirm: React.FunctionComponent<ConfirmProps> = ({
     if (
       from === PrivacyLevelFromEnum.orchardPrivacyLevel &&
       (parseAddressInfoJSON.address_kind ===
-        RPCAddressKindEnum.saplingAddressKind ||
+        WalletAddressKindEnum.saplingAddressKind ||
         (parseAddressInfoJSON.address_kind ===
-          RPCAddressKindEnum.unifiedAddressKind &&
+          WalletAddressKindEnum.unifiedAddressKind &&
           parseAddressInfoJSON.receivers_available?.includes(
-            RPCReceiversEnum.saplingRPCReceiver,
+            ReceiversEnum.sapling,
           )))
     ) {
       return translate('send.amountrevealed') as string;
@@ -255,9 +255,9 @@ const Confirm: React.FunctionComponent<ConfirmProps> = ({
     if (
       from === PrivacyLevelFromEnum.saplingPrivacyLevel &&
       parseAddressInfoJSON.address_kind ===
-        RPCAddressKindEnum.unifiedAddressKind &&
+        WalletAddressKindEnum.unifiedAddressKind &&
       parseAddressInfoJSON.receivers_available?.includes(
-        RPCReceiversEnum.orchardRPCReceiver,
+        ReceiversEnum.orchard,
       )
     ) {
       return translate('send.amountrevealed') as string;
@@ -268,14 +268,14 @@ const Confirm: React.FunctionComponent<ConfirmProps> = ({
     if (
       from === PrivacyLevelFromEnum.orchardAndSaplingPrivacyLevel &&
       (parseAddressInfoJSON.address_kind ===
-        RPCAddressKindEnum.saplingAddressKind ||
+        WalletAddressKindEnum.saplingAddressKind ||
         (parseAddressInfoJSON.address_kind ===
-          RPCAddressKindEnum.unifiedAddressKind &&
+          WalletAddressKindEnum.unifiedAddressKind &&
           (parseAddressInfoJSON.receivers_available?.includes(
-            RPCReceiversEnum.orchardRPCReceiver,
+            ReceiversEnum.orchard,
           ) ||
             parseAddressInfoJSON.receivers_available?.includes(
-              RPCReceiversEnum.saplingRPCReceiver,
+              ReceiversEnum.sapling,
             ))))
     ) {
       return translate('send.amountrevealed') as string;
@@ -287,8 +287,8 @@ const Confirm: React.FunctionComponent<ConfirmProps> = ({
         from === PrivacyLevelFromEnum.saplingPrivacyLevel ||
         from === PrivacyLevelFromEnum.orchardAndSaplingPrivacyLevel) &&
       (parseAddressInfoJSON.address_kind ===
-        RPCAddressKindEnum.transparentAddressKind ||
-        parseAddressInfoJSON.address_kind === RPCAddressKindEnum.texAddressKind)
+        WalletAddressKindEnum.transparentAddressKind ||
+        parseAddressInfoJSON.address_kind === WalletAddressKindEnum.texAddressKind)
     ) {
       return translate('send.deshielded') as string;
     }
