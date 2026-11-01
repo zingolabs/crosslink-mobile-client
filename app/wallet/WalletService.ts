@@ -503,26 +503,32 @@ export default class WalletService {
   // - Internet from Not Connected to Connected.
   // - Server change.
   async configure(): Promise<void> {
-    // takes a while to start
-    await this.fetchTandZandOValueTransfers();
-    await this.fetchAddresses();
-    await this.fetchTotalBalance();
-    await this.fetchStaked();
-    await this.fetchInfoAndServerHeight();
-
-    // I need to fetch this quickly.
-    await this.fetchZingolibVersion();
-
-    await this.fetchTandZandOMessages();
-    await this.fetchWalletHeight();
-    await this.fetchWalletBirthdaySeedUfvk();
-
-    // every 5 seconds the App update part of the data
+    // start the periodic updates immediately; the initial fetches below
+    // fill the data in as they complete. Starting the timer only after
+    // the fetches left the app without updates for the whole duration
+    // of the chain when the server was slow to answer.
     if (!this.updateTimerID) {
       this.updateTimerID = setInterval(() => this.runTaskPromises(), 5 * 1000); // 5 secs
       //console.log('create update timer', this.updateVTTimerID);
       this.timers.push(this.updateTimerID);
     }
+
+    // these fetches are independent: each has its own lock and its own
+    // error handling, so they run concurrently. Serialized, a dead
+    // server made the whole chain take the sum of nine timeouts.
+    await Promise.allSettled([
+      // takes a while to start
+      this.fetchTandZandOValueTransfers(),
+      this.fetchAddresses(),
+      this.fetchTotalBalance(),
+      this.fetchStaked(),
+      this.fetchInfoAndServerHeight(),
+      // I need to fetch this quickly.
+      this.fetchZingolibVersion(),
+      this.fetchTandZandOMessages(),
+      this.fetchWalletHeight(),
+      this.fetchWalletBirthdaySeedUfvk(),
+    ]);
 
     await this.sanitizeTimers();
   }
