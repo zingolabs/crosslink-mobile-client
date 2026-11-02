@@ -21,8 +21,8 @@ import { LanguageEnum } from '../AppState/enums/LanguageEnum';
 import { CurrencyEnum } from '../AppState/enums/CurrencyEnum';
 import { SelectServerEnum } from '../AppState/enums/SelectServerEnum';
 import { ScreenEnum } from '../AppState/enums/ScreenEnum';
-import { RPCPerformanceLevelEnum } from '../wallet/enums/RPCPerformanceLevelEnum';
-import { RPCSyncStatusType } from '../wallet/types/RPCSyncStatusType';
+import { PerformanceLevelEnum } from '../wallet/enums/PerformanceLevelEnum';
+import { SyncStatusType } from '../wallet/types/SyncStatusType';
 
 export interface SettingsValue {
   indexerServer: ServerType;
@@ -35,7 +35,7 @@ export interface SettingsValue {
   security: SecurityType;
   rescanMenu: boolean;
   recoveryWalletInfoOnDevice: boolean;
-  performanceLevel: RPCPerformanceLevelEnum;
+  performanceLevel: PerformanceLevelEnum;
 }
 
 export const defaultSettings: SettingsValue = {
@@ -49,7 +49,7 @@ export const defaultSettings: SettingsValue = {
   security: {} as SecurityType,
   rescanMenu: false,
   recoveryWalletInfoOnDevice: false,
-  performanceLevel: RPCPerformanceLevelEnum.Medium,
+  performanceLevel: PerformanceLevelEnum.Medium,
 };
 
 export interface StatusValue {
@@ -115,7 +115,7 @@ export interface WalletDataValue {
   messages: ValueTransferType[] | null;
   messagesTotal: number | null;
   info: InfoType;
-  syncingStatus: RPCSyncStatusType;
+  syncingStatus: SyncStatusType;
   defaultUnifiedAddress: string;
   somePending: boolean;
   shieldingAmount: number;
@@ -139,7 +139,7 @@ export const defaultWalletData: WalletDataValue = {
   messages: null,
   messagesTotal: null,
   info: {} as InfoType,
-  syncingStatus: {} as RPCSyncStatusType,
+  syncingStatus: {} as SyncStatusType,
   defaultUnifiedAddress: '',
   somePending: false,
   shieldingAmount: 0,

@@ -1,17 +1,17 @@
-import { RPCAddressScopeEnum } from '../../wallet/enums/RPCAddressScopeEnum';
+import { AddressScopeEnum } from '../../wallet/enums/AddressScopeEnum';
 import { AddressKindEnum } from '../enums/AddressKindEnum';
 
 export default class TransparentAddressClass {
   index: number;
   address: string;
   addressKind: AddressKindEnum.t;
-  scope: RPCAddressScopeEnum;
+  scope: AddressScopeEnum;
 
   constructor(
     index: number,
     address: string,
     addressKind: AddressKindEnum.t,
-    scope: RPCAddressScopeEnum,
+    scope: AddressScopeEnum,
   ) {
     this.index = index;
     this.address = address;

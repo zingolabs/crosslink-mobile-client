@@ -10,7 +10,7 @@ import {
   SelectServerEnum,
   ServerType,
 } from './AppState';
-import { RPCPerformanceLevelEnum } from './wallet/enums/RPCPerformanceLevelEnum';
+import { PerformanceLevelEnum } from './wallet/enums/PerformanceLevelEnum';
 
 export const translations = {
   en: require('./translations/en.json'),
@@ -31,7 +31,7 @@ export type BootstrappedSettings = {
   security: SecurityType;
   rescanMenu: boolean;
   recoveryWalletInfoOnDevice: boolean;
-  performanceLevel: RPCPerformanceLevelEnum;
+  performanceLevel: PerformanceLevelEnum;
 };
 
 export const fallbackSettings: BootstrappedSettings = {
@@ -57,7 +57,7 @@ export const fallbackSettings: BootstrappedSettings = {
   },
   rescanMenu: true,
   recoveryWalletInfoOnDevice: false,
-  performanceLevel: RPCPerformanceLevelEnum.Medium,
+  performanceLevel: PerformanceLevelEnum.Medium,
 };
 
 export const createI18n = (): I18n => {
@@ -85,11 +85,11 @@ const isSelectServer = (value: unknown): value is SelectServerEnum =>
   value === SelectServerEnum.list ||
   value === SelectServerEnum.offline;
 
-const isPerformanceLevel = (value: unknown): value is RPCPerformanceLevelEnum =>
-  value === RPCPerformanceLevelEnum.High ||
-  value === RPCPerformanceLevelEnum.Low ||
-  value === RPCPerformanceLevelEnum.Maximum ||
-  value === RPCPerformanceLevelEnum.Medium;
+const isPerformanceLevel = (value: unknown): value is PerformanceLevelEnum =>
+  value === PerformanceLevelEnum.High ||
+  value === PerformanceLevelEnum.Low ||
+  value === PerformanceLevelEnum.Maximum ||
+  value === PerformanceLevelEnum.Medium;
 
 const isBoolean = (value: unknown): value is boolean =>
   value === true || value === false;

@@ -38,7 +38,7 @@ import {
 } from '../../../app/context';
 import { KindIcon, isIncoming } from './TxRow';
 import { Copy as CopyIcon } from 'lucide-react-native';
-import { RPCValueTransferStatusEnum } from '../../../app/wallet/enums/RPCValueTransferStatusEnum';
+import { ValueTransferStatusEnum } from '../../../app/wallet/enums/ValueTransferStatusEnum';
 import Snackbars from '../../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -215,7 +215,7 @@ const ValueTransferDetail: React.FunctionComponent<
         : valueTransfer.amount * -1;
 
   const pendingText =
-    valueTransfer.status === RPCValueTransferStatusEnum.confirmed
+    valueTransfer.status === ValueTransferStatusEnum.confirmed
       ? (translate(`history.${valueTransfer.status}`) as string) +
         ' - ' +
         (translate('history.waiting') as string) +

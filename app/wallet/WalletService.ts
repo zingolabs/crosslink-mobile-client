@@ -17,31 +17,32 @@ import {
   StakingActionType,
   WalletBondsType,
   StakingActionKindEnum,
+  IndexerNetworkEnum,
 } from '../AppState';
 import RPCModule from '../RPCModule';
-import { RPCUnifiedAddressType } from './types/RPCUnifiedAddressType';
-import { RPCBalancesType } from './types/RPCBalancesType';
-import { RPCInfoType } from './types/RPCInfoType';
-import { RPCWalletHeight } from './types/RPCWalletHeightType';
-import { RPCSeedType } from './types/RPCSeedType';
-import { RPCSyncStatusType } from './types/RPCSyncStatusType';
-import { RPCSendType } from './types/RPCSendType';
-import { RPCValueTransfersType } from './types/RPCValueTransfersType';
-import { RPCValueTransferKindEnum } from './enums/RPCValueTransferKindEnum';
-import { RPCValueTransferType } from './types/RPCValueTransferType';
-import { RPCValueTransferStatusEnum } from './enums/RPCValueTransferStatusEnum';
-import { RPCSendProposeType } from './types/RPCSendProposeType';
-import { RPCSyncPollType } from './types/RPCSyncPollType';
-import { RPCZecPriceType } from './types/RPCZecPriceType';
-import { RPCTransparentAddressType } from './types/RPCTransparentAddressType';
-import { RPCSpendablebalanceType } from './types/RPCSpendablebalanceType';
-//import { RPCWalletSaveRequiredType } from './types/RPCWalletSaveRequiredType';
-import { RPCConfigWalletPerformanceType } from './types/RPCConfigWalletPerformanceType';
-import { RPCPerformanceLevelEnum } from './enums/RPCPerformanceLevelEnum';
-import { RPCWalletVersionType } from './types/RPCWalletVersionType';
+import { UnifiedAddressType } from './types/UnifiedAddressType';
+import { BalancesType } from './types/BalancesType';
+import { WalletInfoType } from './types/WalletInfoType';
+import { WalletHeight } from './types/WalletHeightType';
+import { SeedType } from './types/SeedType';
+import { SyncStatusType } from './types/SyncStatusType';
+import { SendType } from './types/SendType';
+import { ValueTransfersType } from './types/ValueTransfersType';
+import { WalletValueTransferKindEnum } from './enums/WalletValueTransferKindEnum';
+import { WalletValueTransferType } from './types/WalletValueTransferType';
+import { ValueTransferStatusEnum } from './enums/ValueTransferStatusEnum';
+import { SendProposeType } from './types/SendProposeType';
+import { SyncPollType } from './types/SyncPollType';
+import { WalletZecPriceType } from './types/WalletZecPriceType';
+import { TransparentAddressType } from './types/TransparentAddressType';
+import { SpendablebalanceType } from './types/SpendablebalanceType';
+//import { WalletSaveRequiredType } from './types/WalletSaveRequiredType';
+import { ConfigWalletPerformanceType } from './types/ConfigWalletPerformanceType';
+import { PerformanceLevelEnum } from './enums/PerformanceLevelEnum';
+import { WalletVersionType } from './types/WalletVersionType';
 import { StakeJsonToTypeType } from '../AppState/types/ValueTransferType';
-import RPCWalletBondsType from './types/RPCWalletBondsType';
-import { RPCStakedType } from './types/RPCStakedType';
+import WalletBondsInfoType from './types/WalletBondsInfoType';
+import { StakedType } from './types/StakedType';
 import { reverseHex32Bytes } from '../utils/hex';
 import { WalletBondsStatusEnum } from '../AppState/enums/WalletBondsStatusEnum';
 
@@ -56,7 +57,7 @@ export default class WalletService {
   fnSetAllAddresses: (
     allAddresses: (UnifiedAddressClass | TransparentAddressClass)[],
   ) => void;
-  fnSetSyncingStatus: (syncingStatus: RPCSyncStatusType) => void;
+  fnSetSyncingStatus: (syncingStatus: SyncStatusType) => void;
   translate: (key: string) => TranslateType;
   keepAwake: (keep: boolean) => void;
   fnSetZingolib: (zingolib: string) => void;
@@ -92,9 +93,9 @@ export default class WalletService {
 
   readOnly: boolean;
   indexerServer: ServerType;
-  performanceLevel: RPCPerformanceLevelEnum;
+  performanceLevel: PerformanceLevelEnum;
 
-  walletConfigPerformanceLevel: RPCPerformanceLevelEnum | undefined;
+  walletConfigPerformanceLevel: PerformanceLevelEnum | undefined;
 
   constructor(
     fnSetTotalBalance: (totalBalance: TotalBalanceClass) => void,
@@ -110,7 +111,7 @@ export default class WalletService {
       addresses: (UnifiedAddressClass | TransparentAddressClass)[],
     ) => void,
     fnSetInfo: (info: InfoType) => void,
-    fnSetSyncingStatus: (syncingStatus: RPCSyncStatusType) => void,
+    fnSetSyncingStatus: (syncingStatus: SyncStatusType) => void,
     translate: (key: string) => TranslateType,
     keepAwake: (keep: boolean) => void,
     fnSetZingolib: (zingolib: string) => void,
@@ -119,7 +120,7 @@ export default class WalletService {
     fnRecoverWallet: (seed: string, birthday: number) => Promise<void>,
     readOnly: boolean,
     indexerServer: ServerType,
-    performanceLevel: RPCPerformanceLevelEnum,
+    performanceLevel: PerformanceLevelEnum,
   ) {
     this.fnSetTotalBalance = fnSetTotalBalance;
     this.fnSetStaked = fnSetStaked;
@@ -199,7 +200,7 @@ export default class WalletService {
           console.log(`Error fetching price ${resultStr}`);
           return { price: -1, error: resultStr };
         } else {
-          const resultJSON: RPCZecPriceType = await JSON.parse(resultStr);
+          const resultJSON: WalletZecPriceType = await JSON.parse(resultStr);
           if (resultJSON.error) {
             console.log(`Error fetching price ${resultJSON.error}`);
             return { price: -1, error: resultJSON.error };
@@ -305,7 +306,7 @@ export default class WalletService {
           console.log('Internal Error seed');
           return {} as WalletType;
         }
-        const RPCseed: RPCSeedType = await JSON.parse(seedStr);
+        const RPCseed: SeedType = await JSON.parse(seedStr);
 
         const wallet: WalletType = {} as WalletType;
         if (RPCseed.seed_phrase) {
@@ -321,6 +322,171 @@ export default class WalletService {
         return {} as WalletType;
       }
     }
+  }
+
+  static async walletExists(): Promise<string> {
+    return RPCModule.walletExists();
+  }
+
+  static async doSave(): Promise<string> {
+    return RPCModule.doSave();
+  }
+
+  static async setCryptoDefaultProvider(): Promise<string> {
+    return RPCModule.setCryptoDefaultProvider();
+  }
+
+  static async getVersionInfo(): Promise<string> {
+    return RPCModule.getVersionInfo();
+  }
+
+  static async walletKindInfo(): Promise<string> {
+    return RPCModule.walletKindInfo();
+  }
+
+  static async createTorClientProcess(): Promise<string> {
+    return RPCModule.createTorClientProcess();
+  }
+
+  static async removeTorClientProcess(): Promise<string> {
+    return RPCModule.removeTorClientProcess();
+  }
+
+  static async changeServerProcess(serverUri: string): Promise<string> {
+    return RPCModule.changeServerProcess(serverUri);
+  }
+
+  static async setConfigWalletToProdProcess(
+    performanceLevel: PerformanceLevelEnum,
+    minConfirmations: string,
+  ): Promise<string> {
+    return RPCModule.setConfigWalletToProdProcess(
+      performanceLevel,
+      minConfirmations,
+    );
+  }
+
+  static async loadExistingWallet(
+    serverUri: string,
+    chainName: string,
+    performanceLevel: PerformanceLevelEnum,
+    minConfirmations: string,
+  ): Promise<string> {
+    return RPCModule.loadExistingWallet(
+      serverUri,
+      chainName,
+      performanceLevel,
+      minConfirmations,
+    );
+  }
+
+  static async createNewWallet(
+    serverUri: string,
+    chainName: string,
+    performanceLevel: PerformanceLevelEnum,
+    minConfirmations: string,
+  ): Promise<string> {
+    return RPCModule.createNewWallet(
+      serverUri,
+      chainName,
+      performanceLevel,
+      minConfirmations,
+    );
+  }
+
+  static async restoreWalletFromSeed(
+    seed: string,
+    birthday: string,
+    serverUri: string,
+    chainName: string,
+    performanceLevel: PerformanceLevelEnum,
+    minConfirmations: string,
+  ): Promise<string> {
+    return RPCModule.restoreWalletFromSeed(
+      seed,
+      birthday,
+      serverUri,
+      chainName,
+      performanceLevel,
+      minConfirmations,
+    );
+  }
+
+  static async parseAddressInfo(address: string): Promise<string> {
+    return RPCModule.parseAddressInfo(address);
+  }
+
+  static async getDonationAddress(): Promise<string> {
+    return RPCModule.getDonationAddress();
+  }
+
+  static async getZenniesDonationAddress(): Promise<string> {
+    return RPCModule.getZenniesDonationAddress();
+  }
+
+  static async discoverIndexers(network: IndexerNetworkEnum): Promise<string> {
+    return RPCModule.discoverIndexers(network);
+  }
+
+  static async probeIndexer(
+    uri: string,
+    network: IndexerNetworkEnum,
+  ): Promise<string> {
+    return RPCModule.probeIndexer(uri, network);
+  }
+
+  static async selectBestIndexer(
+    network: IndexerNetworkEnum,
+  ): Promise<string> {
+    return RPCModule.selectBestIndexer(network);
+  }
+
+  static async inspectWallet(
+    data: string,
+    serverUri: string,
+    platform: string,
+  ): Promise<string> {
+    return RPCModule.inspectWallet(data, serverUri, platform);
+  }
+
+  static async getTotalValueToAddressInfo(): Promise<string> {
+    return RPCModule.getTotalValueToAddressInfo();
+  }
+
+  static async getTotalSpendsToAddressInfo(): Promise<string> {
+    return RPCModule.getTotalSpendsToAddressInfo();
+  }
+
+  static async getTotalMemobytesToAddressInfo(): Promise<string> {
+    return RPCModule.getTotalMemobytesToAddressInfo();
+  }
+
+  static async createNewUnifiedAddressProcess(
+    receivers: string,
+  ): Promise<string> {
+    return RPCModule.createNewUnifiedAddressProcess(receivers);
+  }
+
+  static async createNewTransparentAddressProcess(): Promise<string> {
+    return RPCModule.createNewTransparentAddressProcess();
+  }
+
+  static async checkMyAddressInfo(address: string): Promise<string> {
+    return RPCModule.checkMyAddressInfo(address);
+  }
+
+  static async sendProcess(proposeJSON: string): Promise<string> {
+    return RPCModule.sendProcess(proposeJSON);
+  }
+
+  static async getSpendableBalanceWithAddressInfo(
+    address: string,
+    zenniesForZingo: string,
+  ): Promise<string> {
+    return RPCModule.getSpendableBalanceWithAddressInfo(
+      address,
+      zenniesForZingo,
+    );
   }
 
   async runTaskPromises(): Promise<void> {
@@ -604,7 +770,7 @@ export default class WalletService {
       //  confirmedSaplingBalance: 0,
       //  totalSpendableBalance: 0,
       //} as TotalBalanceClass);
-      //this.fnSetSyncingStatus({} as RPCSyncStatusType);
+      //this.fnSetSyncingStatus({} as SyncStatusType);
 
       // the rescan in zingolib do two tasks:
       // 1. stop the sync.
@@ -671,7 +837,7 @@ export default class WalletService {
       this.fetchSyncStatusLock = false;
       return;
     }
-    let ss = {} as RPCSyncStatusType;
+    let ss = {} as SyncStatusType;
     try {
       ss = await JSON.parse(returnStatus);
     } catch (error) {
@@ -694,7 +860,7 @@ export default class WalletService {
     //console.log('interval sync/rescan, secs', this.secondsBatch, 'timer', this.syncStatusTimerID);
 
     // store SyncStatus object for a new screen
-    this.fnSetSyncingStatus(ss as RPCSyncStatusType);
+    this.fnSetSyncingStatus(ss as SyncStatusType);
 
     // Close the poll timer if the sync finished(checked via promise above)
     const percentage: number =
@@ -815,7 +981,7 @@ export default class WalletService {
       return;
     }
 
-    let sp = {} as RPCSyncPollType;
+    let sp = {} as SyncPollType;
     try {
       sp = await JSON.parse(returnPoll);
     } catch (error) {
@@ -875,7 +1041,7 @@ export default class WalletService {
         return;
       }
 
-      const infoJSON: RPCInfoType = await JSON.parse(infoStr);
+      const infoJSON: WalletInfoType = await JSON.parse(infoStr);
 
       const info: InfoType = {
         chainName: infoJSON.chain_name,
@@ -956,8 +1122,8 @@ export default class WalletService {
         );
       }
       //console.log(spendableStr);
-      let spendableJSON: RPCSpendablebalanceType =
-        {} as RPCSpendablebalanceType;
+      let spendableJSON: SpendablebalanceType =
+        {} as SpendablebalanceType;
       if (spendableStr) {
         if (spendableStr.toLowerCase().startsWith(GlobalConst.error)) {
           console.log(`Error spendable balance ${spendableStr}`);
@@ -989,7 +1155,7 @@ export default class WalletService {
         this.fetchTotalBalanceLock = false;
         return;
       }
-      const balanceJSON: RPCBalancesType = await JSON.parse(balanceStr);
+      const balanceJSON: BalancesType = await JSON.parse(balanceStr);
 
       //console.log('balance:', balanceJSON);
 
@@ -1043,7 +1209,7 @@ export default class WalletService {
       }
 
       const rosterInfo = JSON.parse(rosterInfoStr) as {
-        roster_members: Array<RPCStakedType>;
+        roster_members: Array<StakedType>;
       };
 
       const start3 = Date.now();
@@ -1070,7 +1236,7 @@ export default class WalletService {
         return;
       }
       const walletBondsJSON = JSON.parse(walletBondsStr) as {
-        bonds: Array<RPCWalletBondsType>;
+        bonds: Array<WalletBondsInfoType>;
       };
 
       const globalStakedList: StakeType[] = (
@@ -1173,7 +1339,7 @@ export default class WalletService {
         this.fetchAddressesLock = false;
         return;
       }
-      const unifiedAddressesJSON: RPCUnifiedAddressType[] =
+      const unifiedAddressesJSON: UnifiedAddressType[] =
         (await JSON.parse(unifiedAddressesStr)) || [];
 
       // TRANSPARENT
@@ -1200,13 +1366,13 @@ export default class WalletService {
         this.fetchAddressesLock = false;
         return;
       }
-      const transparentAddressesJSON: RPCTransparentAddressType[] =
+      const transparentAddressesJSON: TransparentAddressType[] =
         (await JSON.parse(transparentAddressStr)) || [];
 
       let allAddresses: (UnifiedAddressClass | TransparentAddressClass)[] = [];
 
       unifiedAddressesJSON &&
-        unifiedAddressesJSON.forEach((u: RPCUnifiedAddressType) => {
+        unifiedAddressesJSON.forEach((u: UnifiedAddressType) => {
           const ua: UnifiedAddressClass = new UnifiedAddressClass(
             u.address_index,
             u.encoded_address,
@@ -1219,7 +1385,7 @@ export default class WalletService {
         });
 
       transparentAddressesJSON &&
-        transparentAddressesJSON.forEach((u: RPCTransparentAddressType) => {
+        transparentAddressesJSON.forEach((u: TransparentAddressType) => {
           const t: TransparentAddressClass = new TransparentAddressClass(
             u.address_index,
             u.encoded_address,
@@ -1271,7 +1437,7 @@ export default class WalletService {
         this.fetchWalletHeightLock = false;
         return;
       }
-      const heightJSON: RPCWalletHeight = await JSON.parse(heightStr);
+      const heightJSON: WalletHeight = await JSON.parse(heightStr);
 
       this.lastWalletBlockHeight = heightJSON.height;
       this.fetchWalletHeightLock = false;
@@ -1315,7 +1481,7 @@ export default class WalletService {
         this.getWalletSaveRequiredLock = false;
         return false;
       }
-      const walletSaveRequiredJSON: RPCWalletSaveRequiredType =
+      const walletSaveRequiredJSON: WalletSaveRequiredType =
         await JSON.parse(walletSaveRequiredStr);
 
       this.getWalletSaveRequiredLock = false;
@@ -1329,7 +1495,7 @@ export default class WalletService {
   }
 */
   async getConfigWalletPerformance(): Promise<
-    RPCPerformanceLevelEnum | undefined
+    PerformanceLevelEnum | undefined
   > {
     try {
       const start = Date.now();
@@ -1357,7 +1523,7 @@ export default class WalletService {
         console.log('Internal Error wallet config performance');
         return;
       }
-      const configWalletPerformanceJSON: RPCConfigWalletPerformanceType =
+      const configWalletPerformanceJSON: ConfigWalletPerformanceType =
         await JSON.parse(configWalletPerformanceStr);
 
       return configWalletPerformanceJSON.performance_level;
@@ -1388,7 +1554,7 @@ export default class WalletService {
         console.log('Internal Error wallet version');
         return;
       }
-      const walletVersionJSON: RPCWalletVersionType =
+      const walletVersionJSON: WalletVersionType =
         await JSON.parse(walletVersionStr);
 
       return walletVersionJSON.read_version;
@@ -1480,7 +1646,7 @@ export default class WalletService {
         this.fetchTandZandOValueTransfersLock = false;
         return;
       }
-      const valueTransfersJSON: RPCValueTransfersType =
+      const valueTransfersJSON: ValueTransfersType =
         await JSON.parse(valueTransfersStr);
 
       //console.log(valueTransfersJSON.wallet_events);
@@ -1492,34 +1658,34 @@ export default class WalletService {
       valueTransfersJSON &&
         valueTransfersJSON.wallet_events &&
         valueTransfersJSON.wallet_events.forEach(
-          (vt: RPCValueTransferType) => {
+          (vt: WalletValueTransferType) => {
             const currentValueTransferList: ValueTransferType =
               {} as ValueTransferType;
 
             currentValueTransferList.txid = vt.txid;
             currentValueTransferList.time = vt.datetime;
             currentValueTransferList.kind =
-              vt.kind === RPCValueTransferKindEnum.memoToSelf
+              vt.kind === WalletValueTransferKindEnum.memoToSelf
                 ? ValueTransferKindEnum.MemoToSelf
-                : vt.kind === RPCValueTransferKindEnum.sendToSelf
+                : vt.kind === WalletValueTransferKindEnum.sendToSelf
                   ? ValueTransferKindEnum.SendToSelf
-                  : vt.kind === RPCValueTransferKindEnum.received
+                  : vt.kind === WalletValueTransferKindEnum.received
                     ? ValueTransferKindEnum.Received
-                    : vt.kind === RPCValueTransferKindEnum.sent
+                    : vt.kind === WalletValueTransferKindEnum.sent
                       ? ValueTransferKindEnum.Sent
-                      : vt.kind === RPCValueTransferKindEnum.shield
+                      : vt.kind === WalletValueTransferKindEnum.shield
                         ? ValueTransferKindEnum.Shield
-                        : vt.kind === RPCValueTransferKindEnum.rejection
+                        : vt.kind === WalletValueTransferKindEnum.rejection
                           ? ValueTransferKindEnum.Rejection
-                          : vt.kind === RPCValueTransferKindEnum.createBond
+                          : vt.kind === WalletValueTransferKindEnum.createBond
                             ? ValueTransferKindEnum.CreateBond
-                            : vt.kind === RPCValueTransferKindEnum.beginUnbond
+                            : vt.kind === WalletValueTransferKindEnum.beginUnbond
                               ? ValueTransferKindEnum.BeginUnbond
                               : vt.kind ===
-                                  RPCValueTransferKindEnum.withdrawBond
+                                  WalletValueTransferKindEnum.withdrawBond
                                 ? ValueTransferKindEnum.WithdrawBond
                                 : vt.kind ===
-                                    RPCValueTransferKindEnum.retargetDelegationBond
+                                    WalletValueTransferKindEnum.retargetDelegationBond
                                   ? ValueTransferKindEnum.RetargetDelegationBond
                                   : ValueTransferKindEnum.Unknown; // error
             currentValueTransferList.fee =
@@ -1528,13 +1694,13 @@ export default class WalletService {
               ? 0
               : vt.zec_price;
             if (
-              vt.status === RPCValueTransferStatusEnum.calculated ||
-              vt.status === RPCValueTransferStatusEnum.transmitted ||
-              vt.status === RPCValueTransferStatusEnum.mempool ||
-              vt.status === RPCValueTransferStatusEnum.failed
+              vt.status === ValueTransferStatusEnum.calculated ||
+              vt.status === ValueTransferStatusEnum.transmitted ||
+              vt.status === ValueTransferStatusEnum.mempool ||
+              vt.status === ValueTransferStatusEnum.failed
             ) {
               currentValueTransferList.confirmations = 0;
-            } else if (vt.status === RPCValueTransferStatusEnum.confirmed) {
+            } else if (vt.status === ValueTransferStatusEnum.confirmed) {
               currentValueTransferList.confirmations =
                 this.lastServerBlockHeight &&
                 this.lastServerBlockHeight >= this.lastWalletBlockHeight
@@ -1578,11 +1744,11 @@ export default class WalletService {
               console.log('valuetransfer zingo', currentValueTransferList);
               console.log('--------------------------------------------------');
             }
-            //if (vt.status === RPCValueTransferStatusEnum.calculated) {
+            //if (vt.status === ValueTransferStatusEnum.calculated) {
             //  console.log('CALCULATED ))))))))))))))))))))))))))))))))))');
             //  console.log(vt);
             //}
-            //if (vt.status === RPCValueTransferStatusEnum.transmitted) {
+            //if (vt.status === ValueTransferStatusEnum.transmitted) {
             //  console.log('TRANSMITTED ))))))))))))))))))))))))))))))))))');
             //  console.log(vt);
             //}
@@ -1641,7 +1807,7 @@ export default class WalletService {
         this.fetchTandZandOMessagesLock = false;
         return;
       }
-      const messagesJSON: RPCValueTransfersType = await JSON.parse(messagesStr);
+      const messagesJSON: ValueTransfersType = await JSON.parse(messagesStr);
 
       //console.log(valueTransfersJSON);
 
@@ -1651,45 +1817,45 @@ export default class WalletService {
       // value transfers.
       messagesJSON &&
         messagesJSON.wallet_events &&
-        messagesJSON.wallet_events.forEach((m: RPCValueTransferType) => {
+        messagesJSON.wallet_events.forEach((m: WalletValueTransferType) => {
           const currentMessageList: ValueTransferType = {} as ValueTransferType;
 
           currentMessageList.txid = m.txid;
           currentMessageList.time = m.datetime;
           currentMessageList.kind =
-            m.kind === RPCValueTransferKindEnum.memoToSelf
+            m.kind === WalletValueTransferKindEnum.memoToSelf
               ? ValueTransferKindEnum.MemoToSelf
-              : m.kind === RPCValueTransferKindEnum.sendToSelf
+              : m.kind === WalletValueTransferKindEnum.sendToSelf
                 ? ValueTransferKindEnum.SendToSelf
-                : m.kind === RPCValueTransferKindEnum.received
+                : m.kind === WalletValueTransferKindEnum.received
                   ? ValueTransferKindEnum.Received
-                  : m.kind === RPCValueTransferKindEnum.sent
+                  : m.kind === WalletValueTransferKindEnum.sent
                     ? ValueTransferKindEnum.Sent
-                    : m.kind === RPCValueTransferKindEnum.shield
+                    : m.kind === WalletValueTransferKindEnum.shield
                       ? ValueTransferKindEnum.Shield
-                      : m.kind === RPCValueTransferKindEnum.rejection
+                      : m.kind === WalletValueTransferKindEnum.rejection
                         ? ValueTransferKindEnum.Rejection
-                        : m.kind === RPCValueTransferKindEnum.createBond
+                        : m.kind === WalletValueTransferKindEnum.createBond
                           ? ValueTransferKindEnum.CreateBond
-                          : m.kind === RPCValueTransferKindEnum.beginUnbond
+                          : m.kind === WalletValueTransferKindEnum.beginUnbond
                             ? ValueTransferKindEnum.BeginUnbond
-                            : m.kind === RPCValueTransferKindEnum.withdrawBond
+                            : m.kind === WalletValueTransferKindEnum.withdrawBond
                               ? ValueTransferKindEnum.WithdrawBond
                               : m.kind ===
-                                  RPCValueTransferKindEnum.retargetDelegationBond
+                                  WalletValueTransferKindEnum.retargetDelegationBond
                                 ? ValueTransferKindEnum.RetargetDelegationBond
                                 : ValueTransferKindEnum.Unknown; // error
           currentMessageList.fee =
             (!m.transaction_fee ? 0 : m.transaction_fee) / 10 ** 8;
           currentMessageList.zecPrice = !m.zec_price ? 0 : m.zec_price;
           if (
-            m.status === RPCValueTransferStatusEnum.calculated ||
-            m.status === RPCValueTransferStatusEnum.transmitted ||
-            m.status === RPCValueTransferStatusEnum.mempool ||
-            m.status === RPCValueTransferStatusEnum.failed
+            m.status === ValueTransferStatusEnum.calculated ||
+            m.status === ValueTransferStatusEnum.transmitted ||
+            m.status === ValueTransferStatusEnum.mempool ||
+            m.status === ValueTransferStatusEnum.failed
           ) {
             currentMessageList.confirmations = 0;
-          } else if (m.status === RPCValueTransferStatusEnum.confirmed) {
+          } else if (m.status === ValueTransferStatusEnum.confirmed) {
             currentMessageList.confirmations =
               this.lastServerBlockHeight &&
               this.lastServerBlockHeight >= this.lastWalletBlockHeight
@@ -1718,11 +1884,11 @@ export default class WalletService {
             console.log('valuetransfer messages zingo', currentMessageList);
             console.log('--------------------------------------------------');
           }
-          //if (m.status === RPCValueTransferStatusEnum.calculated) {
+          //if (m.status === ValueTransferStatusEnum.calculated) {
           //  console.log('CALCULATED ))))))))))))))))))))))))))))))))))');
           //  console.log(m);
           //}
-          //if (m.status === RPCValueTransferStatusEnum.transmitted) {
+          //if (m.status === ValueTransferStatusEnum.transmitted) {
           //  console.log('TRANSMITTED ))))))))))))))))))))))))))))))))))');
           //  console.log(m);
           //}
@@ -1774,7 +1940,7 @@ export default class WalletService {
           sendError = 'Error: Internal RPC Error: propose';
         }
         if (!sendError) {
-          const proposeJSON: RPCSendProposeType = await JSON.parse(proposeStr);
+          const proposeJSON: SendProposeType = await JSON.parse(proposeStr);
           if (proposeJSON.error) {
             console.log(`Error propose ${proposeJSON.error}`);
             sendError = proposeJSON.error;
@@ -1792,7 +1958,7 @@ export default class WalletService {
               sendError = 'Error: Internal RPC Error: confirm';
             }
             if (!sendError) {
-              const sendJSON: RPCSendType = await JSON.parse(sendStr);
+              const sendJSON: SendType = await JSON.parse(sendStr);
               if (sendJSON.error) {
                 console.log(`Error confirm ${sendJSON.error}`);
                 sendError = sendJSON.error;
@@ -1861,7 +2027,7 @@ export default class WalletService {
         }
 
         if (!sendError) {
-          const proposeJSON: RPCSendProposeType = JSON.parse(proposeStr);
+          const proposeJSON: SendProposeType = JSON.parse(proposeStr);
           if (proposeJSON.error) {
             console.log(`Error staking propose ${proposeJSON.error}`);
             sendError = proposeJSON.error;
@@ -1882,7 +2048,7 @@ export default class WalletService {
           }
 
           if (!sendError) {
-            const sendJSON: RPCSendType = JSON.parse(sendStr);
+            const sendJSON: SendType = JSON.parse(sendStr);
             if (sendJSON.error) {
               sendError = sendJSON.error;
             } else if (sendJSON.txids && sendJSON.txids.length > 0) {
@@ -1929,7 +2095,7 @@ export default class WalletService {
           } else if (proposeStr.toLowerCase().startsWith(GlobalConst.error)) {
             sendError = proposeStr;
           } else {
-            const proposeJSON: RPCSendProposeType = JSON.parse(proposeStr);
+            const proposeJSON: SendProposeType = JSON.parse(proposeStr);
             if (proposeJSON.error) sendError = proposeJSON.error;
           }
         }
@@ -1943,7 +2109,7 @@ export default class WalletService {
           } else if (sendStr.toLowerCase().startsWith(GlobalConst.error)) {
             sendError = sendStr;
           } else {
-            const sendJSON: RPCSendType = JSON.parse(sendStr);
+            const sendJSON: SendType = JSON.parse(sendStr);
             if (sendJSON.error) {
               sendError = sendJSON.error;
             } else if (sendJSON.txids?.length) {
@@ -2060,7 +2226,7 @@ export default class WalletService {
           } else if (proposeStr.toLowerCase().startsWith(GlobalConst.error)) {
             sendError = proposeStr;
           } else {
-            const proposeJSON: RPCSendProposeType = JSON.parse(proposeStr);
+            const proposeJSON: SendProposeType = JSON.parse(proposeStr);
             if (proposeJSON.error) sendError = proposeJSON.error;
           }
         }
@@ -2074,7 +2240,7 @@ export default class WalletService {
           } else if (sendStr.toLowerCase().startsWith(GlobalConst.error)) {
             sendError = sendStr;
           } else {
-            const sendJSON: RPCSendType = JSON.parse(sendStr);
+            const sendJSON: SendType = JSON.parse(sendStr);
             if (sendJSON.error) {
               sendError = sendJSON.error;
             } else if (sendJSON.txids?.length) {
