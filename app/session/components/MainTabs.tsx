@@ -5,6 +5,7 @@ import StakingScreen from '../../../components/Staking/Staking';
 import History from '../../../components/History';
 import { Platform } from 'react-native';
 import { useTheme } from '../../theme';
+import { ScreenErrorBoundary } from '../../ErrorBoundary';
 
 const Tab = createNativeBottomTabNavigator<MainTabParamList>();
 
@@ -45,19 +46,20 @@ export const MainTabs: React.FunctionComponent<MainTabsProps> = ({
         }}
       >
         {props => (
-          <History
-            {...props}
-            setShieldingAmount={setShieldingAmount}
-            setScrollToTop={setScrollToTop}
-            scrollToTop={scrollToTop}
-            setScrollToBottom={setScrollToBottom}
-          />
+          <ScreenErrorBoundary>
+            <History
+              {...props}
+              setShieldingAmount={setShieldingAmount}
+              setScrollToTop={setScrollToTop}
+              scrollToTop={scrollToTop}
+              setScrollToBottom={setScrollToBottom}
+            />
+          </ScreenErrorBoundary>
         )}
       </Tab.Screen>
 
       <Tab.Screen
         name={RouteEnum.StakingHome}
-        component={StakingScreen}
         options={{
           title: 'Staking',
           tabBarIcon: () =>
@@ -67,7 +69,13 @@ export const MainTabs: React.FunctionComponent<MainTabsProps> = ({
             }),
           tabBarActiveTintColor: colors.fgAccent,
         }}
-      />
+      >
+        {props => (
+          <ScreenErrorBoundary>
+            <StakingScreen {...props} />
+          </ScreenErrorBoundary>
+        )}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 };

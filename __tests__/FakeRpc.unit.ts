@@ -7,9 +7,9 @@ import 'react-native';
 import { AddressKindEnum, GlobalConst } from '../app/AppState';
 import RPCModule from '../app/RPCModule';
 import fakeRpc from '../app/RPCModule/fakeRpc';
-import { RPCParseAddressStatusEnum } from '../app/wallet/enums/RPCParseAddressStatusEnum';
-import { RPCValueTransferKindEnum } from '../app/wallet/enums/RPCValueTransferKindEnum';
-import { RPCWalletKindEnum } from '../app/wallet/enums/RPCWalletKindEnum';
+import { ParseAddressStatusEnum } from '../app/wallet/enums/ParseAddressStatusEnum';
+import { WalletValueTransferKindEnum } from '../app/wallet/enums/WalletValueTransferKindEnum';
+import { WalletKindEnum } from '../app/wallet/enums/WalletKindEnum';
 import { mockAddresses } from '../__mocks__/dataMocks/mockAddresses';
 import { mockInfo } from '../__mocks__/dataMocks/mockInfo';
 import { mockIndexerServer } from '../__mocks__/dataMocks/mockServers';
@@ -51,7 +51,7 @@ describe('FakeRpc - wallet lifecycle', () => {
     ).resolves.toMatch(/^error/i);
     expect(await fakeRpc.walletExists()).toBe(GlobalConst.true);
     const kind = JSON.parse(await fakeRpc.walletKindInfo());
-    expect(kind.kind).toBe(RPCWalletKindEnum.LoadedFromSeedPhrase);
+    expect(kind.kind).toBe(WalletKindEnum.LoadedFromSeedPhrase);
     expect(kind.orchard).toBe(true);
     expect(kind.sapling).toBe(true);
     expect(kind.transparent).toBe(true);
@@ -91,7 +91,7 @@ describe('FakeRpc - value transfers', () => {
     expect(list.wallet_events).toHaveLength(mockValueTransfers.length);
     expect(list.total).toBe(mockValueTransfers.length);
     const sent = list.wallet_events.find(
-      (e: { kind: string }) => e.kind === RPCValueTransferKindEnum.sent,
+      (e: { kind: string }) => e.kind === WalletValueTransferKindEnum.sent,
     );
     expect(sent.value).toBe(zats(mockValueTransfers[0].amount ?? 0));
     expect(sent.transaction_fee).toBe(zats(mockValueTransfers[0].fee ?? 0));
@@ -118,7 +118,7 @@ describe('FakeRpc - value transfers', () => {
     const list = JSON.parse(await fakeRpc.getValueTransfersList());
     expect(list.wallet_events).toHaveLength(mockValueTransfers.length + 1);
     const last = list.wallet_events[mockValueTransfers.length];
-    expect(last.kind).toBe(RPCValueTransferKindEnum.sent);
+    expect(last.kind).toBe(WalletValueTransferKindEnum.sent);
     expect(last.value).toBe(ZATS);
     await expect(fakeRpc.confirmProcess()).resolves.toMatch(/^error/i);
   });
@@ -137,7 +137,7 @@ describe('FakeRpc - value transfers', () => {
     expect(bond.txids).toHaveLength(1);
     const list = JSON.parse(await fakeRpc.getValueTransfersList());
     const last = list.wallet_events[list.wallet_events.length - 1];
-    expect(last.kind).toBe(RPCValueTransferKindEnum.createBond);
+    expect(last.kind).toBe(WalletValueTransferKindEnum.createBond);
 
     const withdraw = JSON.parse(
       await fakeRpc.withdrawStakeProcess(bond.txids[0]),
@@ -227,7 +227,7 @@ describe('FakeRpc - chain info', () => {
     const parsed = JSON.parse(
       await fakeRpc.parseAddressInfo(mockAddresses[0].address),
     );
-    expect(parsed.status).toBe(RPCParseAddressStatusEnum.successAddressParse);
+    expect(parsed.status).toBe(ParseAddressStatusEnum.successAddressParse);
     expect(parsed.chain_name).toBe(CHAIN);
     await expect(fakeRpc.parseAddressInfo('')).resolves.toMatch(/^error/i);
   });
@@ -318,7 +318,7 @@ describe('FakeRpc - backup and deletion', () => {
     );
     expect(viewed.ufvk).toBe(mockWallet.ufvk);
     const kind = JSON.parse(await fakeRpc.walletKindInfo());
-    expect(kind.kind).toBe(RPCWalletKindEnum.LoadedFromUnifiedFullViewingKey);
+    expect(kind.kind).toBe(WalletKindEnum.LoadedFromUnifiedFullViewingKey);
     const ufvk = JSON.parse(await fakeRpc.getUfvkInfo());
     expect(ufvk.ufvk).toBe(mockWallet.ufvk);
     await expect(fakeRpc.getSeedInfo()).resolves.toMatch(/^error/i);

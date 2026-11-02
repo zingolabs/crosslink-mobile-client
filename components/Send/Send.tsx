@@ -40,7 +40,7 @@ import {
   ScreenEnum,
 } from '../../app/AppState';
 import { parseZcashURI } from '../../app/uris';
-import RPCModule from '../../app/RPCModule';
+import WalletService from '../../app/wallet';
 import Utils from '../../app/utils';
 import { SessionStackParamList } from '../../app/types';
 import {
@@ -51,8 +51,8 @@ import {
   useWalletData,
 } from '../../app/context';
 import { createAlert } from '../../app/createAlert';
-import { RPCSendProposeType } from '../../app/wallet/types/RPCSendProposeType';
-import { RPCSpendablebalanceType } from '../../app/wallet/types/RPCSpendablebalanceType';
+import { SendProposeType } from '../../app/wallet/types/SendProposeType';
+import { SpendablebalanceType } from '../../app/wallet/types/SpendablebalanceType';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import Snackbars from '../Components/Snackbars';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -179,7 +179,7 @@ const Send: React.FunctionComponent<SendProps> = ({
 
   const runSendPropose = async (proposeJSON: string): Promise<string> => {
     try {
-      const proposeStr: string = await RPCModule.sendProcess(proposeJSON);
+      const proposeStr: string = await WalletService.sendProcess(proposeJSON);
       if (proposeStr) {
         if (proposeStr.toLowerCase().startsWith(GlobalConst.error)) {
           console.log(`Error propose ${proposeStr}`);
@@ -266,7 +266,7 @@ const Send: React.FunctionComponent<SendProps> = ({
       }
 
       try {
-        const runProposeJson: RPCSendProposeType = JSON.parse(runProposeStr);
+        const runProposeJson: SendProposeType = JSON.parse(runProposeStr);
 
         if (runProposeJson.error) {
           setProposeSendLastError(runProposeJson.error);
@@ -335,7 +335,7 @@ const Send: React.FunctionComponent<SendProps> = ({
 
       const start = Date.now();
       const runSpendableBalanceStr =
-        await RPCModule.getSpendableBalanceWithAddressInfo(
+        await WalletService.getSpendableBalanceWithAddressInfo(
           addressPar,
           zenniesForZingo ? 'true' : 'false',
         );
@@ -364,7 +364,7 @@ const Send: React.FunctionComponent<SendProps> = ({
       }
 
       try {
-        const runSpendableBalanceJson: RPCSpendablebalanceType = JSON.parse(
+        const runSpendableBalanceJson: SpendablebalanceType = JSON.parse(
           runSpendableBalanceStr,
         );
 

@@ -25,9 +25,9 @@ import { faCloudDownload } from '@fortawesome/free-solid-svg-icons';
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { isEqual } from 'lodash';
-import { RPCSyncStatusType } from '../../app/wallet/types/RPCSyncStatusType';
-import { RPCSyncScanRangeStatusType } from '../../app/wallet/types/RPCSyncScanRangeStatusType';
-import { RPCSyncScanRangePriorityStatusEnum } from '../../app/wallet/enums/RPCSyncScanRangePriorityStatusEnum';
+import { SyncStatusType } from '../../app/wallet/types/SyncStatusType';
+import { SyncScanRangeStatusType } from '../../app/wallet/types/SyncScanRangeStatusType';
+import { SyncScanRangePriorityStatusEnum } from '../../app/wallet/enums/SyncScanRangePriorityStatusEnum';
 import { RouteEnum, ScreenEnum } from '../../app/AppState';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { createAlert } from '../../app/createAlert';
@@ -44,21 +44,21 @@ type SyncReportProps = NativeStackScreenProps<
  * The semantic color of one scan range in the progress map.
  */
 const rangeColor = (
-  priority: RPCSyncScanRangePriorityStatusEnum,
+  priority: SyncScanRangePriorityStatusEnum,
   tokenColors: ReturnType<typeof useTheme>['colors'],
 ): string => {
   switch (priority) {
-    case RPCSyncScanRangePriorityStatusEnum.Scanning:
+    case SyncScanRangePriorityStatusEnum.Scanning:
       return tokenColors.fgSyncing;
-    case RPCSyncScanRangePriorityStatusEnum.Scanned:
-    case RPCSyncScanRangePriorityStatusEnum.ScannedWithoutMapping:
+    case SyncScanRangePriorityStatusEnum.Scanned:
+    case SyncScanRangePriorityStatusEnum.ScannedWithoutMapping:
       return tokenColors.fgSuccess;
-    case RPCSyncScanRangePriorityStatusEnum.Historic:
+    case SyncScanRangePriorityStatusEnum.Historic:
       return tokenColors.fgSubtle;
-    case RPCSyncScanRangePriorityStatusEnum.OpenAdjacent:
-    case RPCSyncScanRangePriorityStatusEnum.FoundNote:
-    case RPCSyncScanRangePriorityStatusEnum.ChainTip:
-    case RPCSyncScanRangePriorityStatusEnum.Verify:
+    case SyncScanRangePriorityStatusEnum.OpenAdjacent:
+    case SyncScanRangePriorityStatusEnum.FoundNote:
+    case SyncScanRangePriorityStatusEnum.ChainTip:
+    case SyncScanRangePriorityStatusEnum.Verify:
       return tokenColors.fgAccent;
     default:
       return tokenColors.fgDanger;
@@ -141,7 +141,7 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
   useEffect(() => {
     if (
       !syncingStatus ||
-      isEqual(syncingStatus, {} as RPCSyncStatusType) ||
+      isEqual(syncingStatus, {} as SyncStatusType) ||
       (!!syncingStatus.scan_ranges && syncingStatus.scan_ranges.length === 0) ||
       syncingStatus.percentage_total_outputs_scanned === 0
     ) {
@@ -467,7 +467,7 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
                       <View style={styles.rangeBar}>
                         {!!syncingStatus.scan_ranges &&
                           syncingStatus.scan_ranges.map(
-                            (range: RPCSyncScanRangeStatusType) => {
+                            (range: SyncScanRangeStatusType) => {
                               const percent: number =
                                 ((range.end_block - range.start_block) * 100) /
                                 (info.latestBlock - wallet.birthday);

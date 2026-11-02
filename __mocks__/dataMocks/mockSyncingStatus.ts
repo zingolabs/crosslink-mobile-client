@@ -1,11 +1,11 @@
-import { RPCSyncScanRangePriorityStatusEnum } from '../../app/wallet/enums/RPCSyncScanRangePriorityStatusEnum';
-import { RPCSyncStatusType } from '../../app/wallet/types/RPCSyncStatusType';
+import { SyncScanRangePriorityStatusEnum } from '../../app/wallet/enums/SyncScanRangePriorityStatusEnum';
+import { SyncStatusType } from '../../app/wallet/types/SyncStatusType';
 
-export const mockSyncingStatus: RPCSyncStatusType = {} as RPCSyncStatusType;
+export const mockSyncingStatus: SyncStatusType = {} as SyncStatusType;
 
 mockSyncingStatus.scan_ranges = [
   {
-    priority: RPCSyncScanRangePriorityStatusEnum.Scanned,
+    priority: SyncScanRangePriorityStatusEnum.Scanned,
     start_block: 2000000,
     end_block: 2500000,
   },

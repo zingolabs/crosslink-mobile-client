@@ -42,20 +42,11 @@ import ChooseIndexer from './components/ChooseIndexer';
 import ListedIndexers from './components/ListedIndexers';
 import CustomIndexer from './components/CustomIndexer';
 import { BackdropHost } from '../Backdrop';
-import { BootInfo, OpenRequest } from '../lifecycle/phase';
+import { BootInfo, Lifecycle, OpenRequest } from '../lifecycle/phase';
 import { useLifecycle } from '../lifecycle';
 import { getRecoveryWalletInfo } from '../recoveryWalletInfov10';
 
 const SetupStack = createNativeStackNavigator<SetupStackParamList>();
-
-type SetupClassProps = {
-  boot: BootInfo;
-  walletExists: boolean;
-  coldStart: boolean;
-  openFailed: boolean;
-  translate: (key: string) => TranslateType;
-  startOpening: (request: OpenRequest) => void;
-};
 
 type SetupState = SetupDomains & {
   appStateStatus: AppStateStatus;
@@ -69,29 +60,14 @@ type SetupState = SetupDomains & {
 
 export default function Setup() {
   const { lifecycle, translate, actions } = useLifecycle();
-  if (lifecycle.phase !== 'setup') {
-    return null;
-  }
-  return (
-    <SetupClass
-      boot={lifecycle.boot}
-      walletExists={lifecycle.walletExists}
-      coldStart={lifecycle.coldStart}
-      openFailed={lifecycle.openFailed}
-      translate={translate}
-      startOpening={actions.startOpening}
-    />
-  );
-}
+  // App.tsx only mounts this screen in the 'setup' phase.
+  const setup = lifecycle as Extract<Lifecycle, { phase: 'setup' }>;
+  const { boot } = setup;
+  const walletExists = setup.walletExists;
+  const coldStart = setup.coldStart;
+  const openFailed = setup.openFailed;
+  const startOpening = actions.startOpening;
 
-const SetupClass: React.FC<SetupClassProps> = ({
-  boot,
-  walletExists,
-  coldStart,
-  openFailed,
-  translate,
-  startOpening,
-}) => {
   const screenName = ScreenEnum.Boot;
 
   const setPrivacyOption = async (value: boolean): Promise<void> => {
@@ -338,6 +314,10 @@ const SetupClass: React.FC<SetupClassProps> = ({
     performanceLevel: state.performanceLevel,
   };
 
+  if (lifecycle.phase !== 'setup') {
+    return null;
+  }
+
   return (
     <BackdropHost>
       <ToastProvider>
@@ -422,4 +402,4 @@ const SetupClass: React.FC<SetupClassProps> = ({
       </ToastProvider>
     </BackdropHost>
   );
-};
+}

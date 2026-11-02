@@ -25,7 +25,7 @@ import { faChevronDown, faXmark } from '@fortawesome/free-solid-svg-icons';
 import ContextMenu, {
   ContextMenuOnPressNativeEvent,
 } from 'react-native-context-menu-view';
-import RPCModule from '../../../app/RPCModule';
+import WalletService from '../../../app/wallet';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
 import { space, text, useTheme } from '../../../app/theme';
 
@@ -66,9 +66,10 @@ const NewAddress: React.FunctionComponent<NewAddressProps> = ({
       let newAddressStr: string;
       if (receivers) {
         newAddressStr =
-          await RPCModule.createNewUnifiedAddressProcess(receivers);
+          await WalletService.createNewUnifiedAddressProcess(receivers);
       } else {
-        newAddressStr = await RPCModule.createNewTransparentAddressProcess();
+        newAddressStr =
+          await WalletService.createNewTransparentAddressProcess();
       }
 
       if (newAddressStr) {

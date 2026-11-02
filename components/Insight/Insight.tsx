@@ -23,9 +23,9 @@ import {
   useWalletData,
 } from '../../app/context';
 import Utils from '../../app/utils';
+import WalletService from '../../app/wallet';
 import FadeText from '../Components/FadeText';
 import { Header } from '../Header';
-import RPCModule from '../../app/RPCModule';
 import AddressItem from '../Components/AddressItem';
 import {
   RouteEnum,
@@ -86,15 +86,15 @@ const Insight: React.FunctionComponent<InsightProps> = ({ navigation }) => {
       let resultStr: string = '';
       switch (tab) {
         case 'sent':
-          resultStr = await RPCModule.getTotalValueToAddressInfo();
+          resultStr = await WalletService.getTotalValueToAddressInfo();
           //console.log('################# value', resultStr);
           break;
         case 'sends':
-          resultStr = await RPCModule.getTotalSpendsToAddressInfo();
+          resultStr = await WalletService.getTotalSpendsToAddressInfo();
           //console.log('################# sends', resultStr);
           break;
         case 'memobytes':
-          resultStr = await RPCModule.getTotalMemobytesToAddressInfo();
+          resultStr = await WalletService.getTotalMemobytesToAddressInfo();
           //console.log('################# memobytes', resultStr);
           break;
         default:

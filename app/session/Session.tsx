@@ -18,7 +18,6 @@ import {
 } from '@sayem314/react-native-keep-awake';
 
 import WalletService from '../wallet';
-import RPCModule from '../RPCModule';
 import { StakingDayActivitySync } from '../StakingDayActivity';
 import {
   AppStateLoaded,
@@ -65,7 +64,7 @@ import { readBackground } from '../storage/backgroundFile';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAlert } from '../createAlert';
 import Snackbars from '../../components/Components/Snackbars';
-import { RPCSeedType } from '../wallet/types/RPCSeedType';
+import { SeedType } from '../wallet/types/SeedType';
 import { Launching, useLifecycle } from '../lifecycle';
 import simpleBiometrics from '../simpleBiometrics';
 import ShowAddressAlertAsync from '../../components/Send/components/ShowAddressAlertAsync';
@@ -77,9 +76,9 @@ import notifee, { EventType } from '@notifee/react-native';
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ToastProvider } from 'react-native-toastier';
-import { RPCSyncStatusType } from '../wallet/types/RPCSyncStatusType';
-import { RPCUfvkType } from '../wallet/types/RPCUfvkType';
-import { RPCPerformanceLevelEnum } from '../wallet/enums/RPCPerformanceLevelEnum';
+import { SyncStatusType } from '../wallet/types/SyncStatusType';
+import { UfvkType } from '../wallet/types/UfvkType';
+import { PerformanceLevelEnum } from '../wallet/enums/PerformanceLevelEnum';
 import { SessionStackParamList } from '../types';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Send from '../../components/Send';
@@ -254,7 +253,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
         chainName: props.settings.indexerServer.chainName,
         serverUri: props.settings.indexerServer.uri,
       } as InfoType,
-      syncingStatus: {} as RPCSyncStatusType,
+      syncingStatus: {} as SyncStatusType,
       wallet: {} as WalletType,
       defaultUnifiedAddress: '',
       zecPrice: {
@@ -506,12 +505,12 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
         //console.log('&&&&& background yes in storage &&&&&');
         await this.walletService.clearTimers();
         //console.log('clear timers IOS');
-        this.setSyncingStatus({} as RPCSyncStatusType);
+        this.setSyncingStatus({} as SyncStatusType);
         //console.log('clear sync status state');
         //console.log('LOADED SAVED IOS background', nextAppState);
         // We need to save the wallet file here because
         // sometimes the App can lose the last synced chunk
-        await RPCModule.doSave();
+        await WalletService.doSave();
         return;
       }
     }
@@ -566,11 +565,11 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
       //console.log('&&&&& background yes in storage &&&&&');
       await this.walletService.clearTimers();
       //console.log('clear timers');
-      this.setSyncingStatus({} as RPCSyncStatusType);
+      this.setSyncingStatus({} as SyncStatusType);
       //console.log('clear sync status state');
       // We need to save the wallet file here because
       // sometimes the App can lose the last synced chunk
-      await RPCModule.doSave();
+      await WalletService.doSave();
       if (Platform.OS === GlobalConst.platformOSios) {
         //console.log('LOADED SAVED IOS background', nextAppState);
         this.setState({ appStateStatus: nextAppState });
@@ -650,7 +649,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
     if (prevProps.gated !== this.props.gated) {
       if (this.props.gated) {
         await this.walletService.clearTimers();
-        this.setSyncingStatus({} as RPCSyncStatusType);
+        this.setSyncingStatus({} as SyncStatusType);
       } else {
         await this.fetchBackgroundSyncing();
         await this.walletService.clearTimers();
@@ -825,7 +824,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
     }
   };
 
-  setSyncingStatus = (syncingStatus: RPCSyncStatusType) => {
+  setSyncingStatus = (syncingStatus: SyncStatusType) => {
     // here is a good place to fetch the background task info
     this.fetchBackgroundSyncing();
     if (!isEqual(this.state.syncingStatus, syncingStatus)) {
@@ -1246,7 +1245,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
   ): Promise<void> => {
     // here I know the server was changed, clean all the tasks before anything.
     await this.walletService.clearTimers();
-    this.setSyncingStatus({} as RPCSyncStatusType);
+    this.setSyncingStatus({} as SyncStatusType);
     this.keepAwake(false);
     // First we need to check the `chainName` between servers, if this is different
     // we cannot try to open the current wallet, because make not sense.
@@ -1259,7 +1258,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
       //   The App have to go to the initial screen
       // - the seed exists and the App can open the wallet in the new server.
       //   But I have to restart the sync if needed.
-      let result: string = await RPCModule.loadExistingWallet(
+      let result: string = await WalletService.loadExistingWallet(
         value.uri,
         // 'regtest',
         value.chainName,
@@ -1270,7 +1269,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
       if (result && !result.toLowerCase().startsWith(GlobalConst.error)) {
         try {
           // here result can have an `error` field for watch-only which is actually OK.
-          const resultJson: RPCSeedType & RPCUfvkType =
+          const resultJson: SeedType & UfvkType =
             await JSON.parse(result);
           if (!resultJson.error) {
             // Load the wallet and navigate to the ValueTransfers screen
@@ -1297,7 +1296,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
               this.state.currency === CurrencyEnum.USDTORCurrency ||
               this.state.currency === CurrencyEnum.USDCurrency
             ) {
-              const resp: string = await RPCModule.createTorClientProcess();
+              const resp: string = await WalletService.createTorClientProcess();
               if (resp && resp.toLowerCase().startsWith(GlobalConst.error)) {
                 this.setLastError(`Create tor client error: ${resp}`);
               }
@@ -1326,7 +1325,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
       // we need to restore the old server because the new one doesn't have the seed of the current wallet.
       const oldSettings = await readSettings();
       if (oldSettings.indexerServer && oldSettings.selectIndexerServer) {
-        await RPCModule.changeServerProcess(oldSettings.indexerServer.uri);
+        await WalletService.changeServerProcess(oldSettings.indexerServer.uri);
         this.setState({
           indexerServer: oldSettings.indexerServer,
           selectIndexerServer: oldSettings.selectIndexerServer,
@@ -1348,14 +1347,14 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
       // when the user select USD
       // the App have to create a Tor Client
       //console.log('before CREATE ------------------- TOR CLIENT');
-      const result = await RPCModule.createTorClientProcess();
+      const result = await WalletService.createTorClientProcess();
       //console.log('after CREATE ------------------- TOR CLIENT', result);
       if (result && result.toLowerCase().startsWith(GlobalConst.error)) {
         this.setLastError(`Create tor client error: ${result}`);
       }
     } else {
       //console.log('before REMOVE ------------------- TOR CLIENT');
-      const result = await RPCModule.removeTorClientProcess();
+      const result = await WalletService.removeTorClientProcess();
       //console.log('after REMOVE ------------------- TOR CLIENT', result);
       if (result && result.toLowerCase().startsWith(GlobalConst.error)) {
         this.setLastError(`Remove tor client error: ${result}`);
@@ -1439,15 +1438,15 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
   };
 
   setPerformanceLevelOption = async (
-    value: RPCPerformanceLevelEnum,
+    value: PerformanceLevelEnum,
   ): Promise<void> => {
     await writeSettings('performanceLevel', value);
     this.setState({
-      performanceLevel: value as RPCPerformanceLevelEnum,
+      performanceLevel: value as PerformanceLevelEnum,
     });
 
     // change it in zingolib as well.
-    const setConfigWallet = await RPCModule.setConfigWalletToProdProcess(
+    const setConfigWallet = await WalletService.setConfigWalletToProdProcess(
       this.state.performanceLevel,
       GlobalConst.minConfirmations.toString(),
     );
@@ -1563,6 +1562,9 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
   };
 
   setLastError = (error: string) => {
+    if (error === this.state.lastError) {
+      return;
+    }
     report(new Error(error));
     this.setState({ lastError: error });
   };

@@ -36,7 +36,7 @@ import {
   ScreenEnum,
   RouteEnum,
 } from '../../app/AppState';
-import { RPCAddressScopeEnum } from '../../app/wallet/enums/RPCAddressScopeEnum';
+import { AddressScopeEnum } from '../../app/wallet/enums/AddressScopeEnum';
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
@@ -162,7 +162,7 @@ const Receive: React.FunctionComponent<ReceiveProps> = (
         addresses.filter(
           (a: UnifiedAddressClass | TransparentAddressClass) =>
             a.addressKind === AddressKindEnum.t &&
-            a.scope === RPCAddressScopeEnum.external,
+            a.scope === AddressScopeEnum.external,
         ) || [];
       setUAddr(uAdd as UnifiedAddressClass[]);
       setTAddr(tAdd as TransparentAddressClass[]);

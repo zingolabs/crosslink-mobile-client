@@ -5,7 +5,6 @@ import NetInfo, {
   NetInfoState,
 } from '@react-native-community/netinfo/src/index';
 
-import RPCModule from '../RPCModule';
 import {
   BackgroundType,
   WalletType,
@@ -29,9 +28,9 @@ import WalletService from '../wallet';
 import { SetupDomains, SetupDomainsProvider } from '../context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAlert } from '../createAlert';
-import { RPCWalletKindType } from '../wallet/types/RPCWalletKindType';
+import { WalletKindType } from '../wallet/types/WalletKindType';
 import Snackbars from '../../components/Components/Snackbars';
-import { RPCSeedType } from '../wallet/types/RPCSeedType';
+import { SeedType } from '../wallet/types/SeedType';
 import Launching from '../lifecycle/Launching';
 import isEqual from 'lodash/isEqual';
 import {
@@ -39,9 +38,9 @@ import {
   hasRecoveryWalletInfo,
   removeRecoveryWalletInfo,
 } from '../recoveryWalletInfov10';
-import { RPCWalletKindEnum } from '../wallet/enums/RPCWalletKindEnum';
+import { WalletKindEnum } from '../wallet/enums/WalletKindEnum';
 import { ToastProvider } from 'react-native-toastier';
-import { RPCUfvkType } from '../wallet/types/RPCUfvkType';
+import { UfvkType } from '../wallet/types/UfvkType';
 import { resetScheduledActions } from '../storage/scheduledActionsFile';
 import { discoverIndexers, probeIndexer, selectBestIndexer } from '../indexers';
 import {
@@ -50,16 +49,13 @@ import {
 } from '../legacyWallet';
 import notifee from '@notifee/react-native';
 import { reportFailure } from '../reporting';
-import { BootInfo, OpenRequest, SessionHandle } from '../lifecycle/phase';
+import {
+  BootInfo,
+  Lifecycle,
+  OpenRequest,
+  SessionHandle,
+} from '../lifecycle/phase';
 import { useLifecycle } from '../lifecycle';
-
-type OpeningProps = {
-  boot: BootInfo;
-  request: OpenRequest;
-  translate: (key: string) => TranslateType;
-  sessionOpened: (session: SessionHandle) => void;
-  openingFailed: () => void;
-};
 
 type OpeningState = SetupDomains & {
   appStateStatus: AppStateStatus;
@@ -79,27 +75,13 @@ type WalletKind = {
 
 export default function Opening() {
   const { lifecycle, translate, actions } = useLifecycle();
-  if (lifecycle.phase !== 'opening') {
-    return null;
-  }
-  return (
-    <OpeningClass
-      boot={lifecycle.boot}
-      request={lifecycle.request}
-      translate={translate}
-      sessionOpened={actions.sessionOpened}
-      openingFailed={actions.openingFailed}
-    />
-  );
-}
+  // App.tsx only mounts this screen in the 'opening' phase.
+  const opening = lifecycle as Extract<Lifecycle, { phase: 'opening' }>;
+  const { boot } = opening;
+  const request = opening.request;
+  const sessionOpened = actions.sessionOpened;
+  const openingFailed = actions.openingFailed;
 
-const OpeningClass: React.FC<OpeningProps> = ({
-  boot,
-  request,
-  translate,
-  sessionOpened,
-  openingFailed,
-}) => {
   const screenName = ScreenEnum.Boot;
 
   const setBackgroundError = (title: string, error: string) => {
@@ -225,7 +207,7 @@ const OpeningClass: React.FC<OpeningProps> = ({
 
     fetchZingolibVersion();
 
-    await RPCModule.setCryptoDefaultProvider();
+    await WalletService.setCryptoDefaultProvider();
 
     const has = await hasRecoveryWalletInfo();
     patchState({ hasRecoveryWalletInfoSaved: has });
@@ -271,7 +253,7 @@ const OpeningClass: React.FC<OpeningProps> = ({
   };
 
   const openFlow = async () => {
-    const exists = await RPCModule.walletExists();
+    const exists = await WalletService.walletExists();
     if (!exists || exists === GlobalConst.false) {
       await finishToSetup();
       return;
@@ -317,7 +299,7 @@ const OpeningClass: React.FC<OpeningProps> = ({
       return;
     }
 
-    const result: string = await RPCModule.loadExistingWallet(
+    const result: string = await WalletService.loadExistingWallet(
       stateRef.current.indexerServer.uri,
       stateRef.current.indexerServer.chainName,
       stateRef.current.performanceLevel,
@@ -334,7 +316,7 @@ const OpeningClass: React.FC<OpeningProps> = ({
       await walletErrorHandle(result, title, true);
       return;
     }
-    let resultJson: RPCSeedType & RPCUfvkType;
+    let resultJson: SeedType & UfvkType;
     try {
       resultJson = await JSON.parse(result);
     } catch (e: unknown) {
@@ -385,7 +367,7 @@ const OpeningClass: React.FC<OpeningProps> = ({
     // creating a wallet works offline: the native side derives the seed and
     // sets the birthday without contacting the indexer. the first sync needs
     // the network, not the creation itself.
-    const seed: string = await RPCModule.createNewWallet(
+    const seed: string = await WalletService.createNewWallet(
       stateRef.current.indexerServer.uri,
       stateRef.current.indexerServer.chainName,
       stateRef.current.performanceLevel,
@@ -393,7 +375,7 @@ const OpeningClass: React.FC<OpeningProps> = ({
     );
 
     if (seed && !seed.toLowerCase().startsWith(GlobalConst.error)) {
-      let seedJSON = {} as RPCSeedType;
+      let seedJSON = {} as SeedType;
       try {
         seedJSON = await JSON.parse(seed);
         if (seedJSON.error) {
@@ -500,7 +482,7 @@ const OpeningClass: React.FC<OpeningProps> = ({
         ? '0'
         : String(parsedBirthday);
 
-    const result: string = await RPCModule.restoreWalletFromSeed(
+    const result: string = await WalletService.restoreWalletFromSeed(
       seed.toLowerCase(),
       walletBirthday,
       stateRef.current.indexerServer.uri,
@@ -517,7 +499,7 @@ const OpeningClass: React.FC<OpeningProps> = ({
       );
       return;
     }
-    let resultJson: RPCSeedType & RPCUfvkType;
+    let resultJson: SeedType & UfvkType;
     try {
       resultJson = await JSON.parse(result);
     } catch (e: unknown) {
@@ -565,13 +547,13 @@ const OpeningClass: React.FC<OpeningProps> = ({
       saplingPool: false,
       transparentPool: false,
     };
-    const walletKindStr: string = await RPCModule.walletKindInfo();
+    const walletKindStr: string = await WalletService.walletKindInfo();
     try {
-      const walletKindJSON: RPCWalletKindType = await JSON.parse(walletKindStr);
+      const walletKindJSON: WalletKindType = await JSON.parse(walletKindStr);
       kind.readOnly =
         walletKindJSON.kind ===
-          RPCWalletKindEnum.LoadedFromUnifiedFullViewingKey ||
-        walletKindJSON.kind === RPCWalletKindEnum.NoKeysFound;
+          WalletKindEnum.LoadedFromUnifiedFullViewingKey ||
+        walletKindJSON.kind === WalletKindEnum.NoKeysFound;
       kind.orchardPool = walletKindJSON.orchard;
       kind.saplingPool = walletKindJSON.sapling;
       kind.transparentPool = walletKindJSON.transparent;
@@ -600,7 +582,7 @@ const OpeningClass: React.FC<OpeningProps> = ({
       stateRef.current.currency === CurrencyEnum.USDTORCurrency ||
       stateRef.current.currency === CurrencyEnum.USDCurrency
     ) {
-      await RPCModule.createTorClientProcess();
+      await WalletService.createTorClientProcess();
     }
   };
 
@@ -765,7 +747,7 @@ const OpeningClass: React.FC<OpeningProps> = ({
 
   const fetchZingolibVersion = async (): Promise<void> => {
     try {
-      let zingolibStr: string = await RPCModule.getVersionInfo();
+      let zingolibStr: string = await WalletService.getVersionInfo();
       if (zingolibStr) {
         if (zingolibStr.toLowerCase().startsWith(GlobalConst.error)) {
           zingolibStr = GlobalConst.zingolibError;
@@ -812,6 +794,10 @@ const OpeningClass: React.FC<OpeningProps> = ({
     performanceLevel: state.performanceLevel,
   };
 
+  if (lifecycle.phase !== 'opening') {
+    return null;
+  }
+
   return (
     <ToastProvider>
       <Snackbars
@@ -829,4 +815,4 @@ const OpeningClass: React.FC<OpeningProps> = ({
       </SetupDomainsProvider>
     </ToastProvider>
   );
-};
+}

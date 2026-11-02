@@ -4,14 +4,14 @@ import {
   GlobalConst,
   ValueTransferKindEnum,
 } from '../AppState';
-import { RPCAddressKindEnum } from '../wallet/enums/RPCAddressKindEnum';
-import { RPCParseAddressStatusEnum } from '../wallet/enums/RPCParseAddressStatusEnum';
-import { RPCPerformanceLevelEnum } from '../wallet/enums/RPCPerformanceLevelEnum';
-import { RPCReceiversEnum } from '../wallet/enums/RPCReceiversEnum';
-import { RPCValueTransferKindEnum } from '../wallet/enums/RPCValueTransferKindEnum';
-import { RPCValueTransferStatusEnum } from '../wallet/enums/RPCValueTransferStatusEnum';
-import { RPCWalletKindEnum } from '../wallet/enums/RPCWalletKindEnum';
-import { RPCValueTransferType } from '../wallet/types/RPCValueTransferType';
+import { WalletAddressKindEnum } from '../wallet/enums/WalletAddressKindEnum';
+import { ParseAddressStatusEnum } from '../wallet/enums/ParseAddressStatusEnum';
+import { PerformanceLevelEnum } from '../wallet/enums/PerformanceLevelEnum';
+import { ReceiversEnum } from '../wallet/enums/ReceiversEnum';
+import { WalletValueTransferKindEnum } from '../wallet/enums/WalletValueTransferKindEnum';
+import { ValueTransferStatusEnum } from '../wallet/enums/ValueTransferStatusEnum';
+import { WalletKindEnum } from '../wallet/enums/WalletKindEnum';
+import { WalletValueTransferType } from '../wallet/types/WalletValueTransferType';
 import { mockAddresses } from '../../__mocks__/dataMocks/mockAddresses';
 import { mockInfo } from '../../__mocks__/dataMocks/mockInfo';
 import { mockIndexerServer } from '../../__mocks__/dataMocks/mockServers';
@@ -32,23 +32,24 @@ const err = (message: string) => `${GlobalConst.error}: ${message}`;
 
 const zats = (amount: number) => Math.round(amount * ZATS);
 
-const KINDS: Record<ValueTransferKindEnum, RPCValueTransferKindEnum> = {
-  [ValueTransferKindEnum.Sent]: RPCValueTransferKindEnum.sent,
-  [ValueTransferKindEnum.Received]: RPCValueTransferKindEnum.received,
-  [ValueTransferKindEnum.MemoToSelf]: RPCValueTransferKindEnum.memoToSelf,
-  [ValueTransferKindEnum.SendToSelf]: RPCValueTransferKindEnum.sendToSelf,
-  [ValueTransferKindEnum.Shield]: RPCValueTransferKindEnum.shield,
-  [ValueTransferKindEnum.Rejection]: RPCValueTransferKindEnum.rejection,
-  [ValueTransferKindEnum.CreateBond]: RPCValueTransferKindEnum.createBond,
-  [ValueTransferKindEnum.BeginUnbond]: RPCValueTransferKindEnum.beginUnbond,
-  [ValueTransferKindEnum.WithdrawBond]: RPCValueTransferKindEnum.withdrawBond,
+const KINDS: Record<ValueTransferKindEnum, WalletValueTransferKindEnum> = {
+  [ValueTransferKindEnum.Sent]: WalletValueTransferKindEnum.sent,
+  [ValueTransferKindEnum.Received]: WalletValueTransferKindEnum.received,
+  [ValueTransferKindEnum.MemoToSelf]: WalletValueTransferKindEnum.memoToSelf,
+  [ValueTransferKindEnum.SendToSelf]: WalletValueTransferKindEnum.sendToSelf,
+  [ValueTransferKindEnum.Shield]: WalletValueTransferKindEnum.shield,
+  [ValueTransferKindEnum.Rejection]: WalletValueTransferKindEnum.rejection,
+  [ValueTransferKindEnum.CreateBond]: WalletValueTransferKindEnum.createBond,
+  [ValueTransferKindEnum.BeginUnbond]: WalletValueTransferKindEnum.beginUnbond,
+  [ValueTransferKindEnum.WithdrawBond]:
+    WalletValueTransferKindEnum.withdrawBond,
   [ValueTransferKindEnum.RetargetDelegationBond]:
-    RPCValueTransferKindEnum.retargetDelegationBond,
-  [ValueTransferKindEnum.Unknown]: RPCValueTransferKindEnum.rejection,
+    WalletValueTransferKindEnum.retargetDelegationBond,
+  [ValueTransferKindEnum.Unknown]: WalletValueTransferKindEnum.rejection,
 };
 
 type Propose = {
-  kind: RPCValueTransferKindEnum;
+  kind: WalletValueTransferKindEnum;
   amount: number;
   address: string;
 };
@@ -60,7 +61,7 @@ type FakeWallet = {
   readOnly: boolean;
 };
 
-const baseEvents = (): RPCValueTransferType[] =>
+const baseEvents = (): WalletValueTransferType[] =>
   mockValueTransfers.map(v => ({
     txid: v.txid,
     datetime: v.time,
@@ -93,12 +94,12 @@ const indexerReport = (uri: string) =>
 let wallet: FakeWallet | null = null;
 let backup: FakeWallet | null = null;
 let propose: Propose | null = null;
-let events: RPCValueTransferType[] = baseEvents();
+let events: WalletValueTransferType[] = baseEvents();
 let syncLaunched = false;
 let syncComplete = false;
 let serverUri = mockIndexerServer.uri;
 let chainName: ChainNameEnum = mockInfo.chainName;
-let performanceLevel: RPCPerformanceLevelEnum = RPCPerformanceLevelEnum.Medium;
+let performanceLevel: PerformanceLevelEnum = PerformanceLevelEnum.Medium;
 let txCounter = 0;
 
 const txid = () => (txCounter++).toString(16).padStart(64, '0');
@@ -120,7 +121,7 @@ const fakeRpc = {
     }
     serverUri = uri;
     chainName = name as ChainNameEnum;
-    performanceLevel = level as RPCPerformanceLevelEnum;
+    performanceLevel = level as PerformanceLevelEnum;
     return JSON.stringify({
       seed_phrase: wallet.seed,
       ufvk: wallet.ufvk,
@@ -139,7 +140,7 @@ const fakeRpc = {
     }
     serverUri = uri;
     chainName = name as ChainNameEnum;
-    performanceLevel = level as RPCPerformanceLevelEnum;
+    performanceLevel = level as PerformanceLevelEnum;
     const created: FakeWallet = {
       seed: mockWallet.seed ?? '',
       birthday: mockWallet.birthday,
@@ -163,7 +164,7 @@ const fakeRpc = {
   ) => {
     serverUri = uri;
     chainName = name as ChainNameEnum;
-    performanceLevel = level as RPCPerformanceLevelEnum;
+    performanceLevel = level as PerformanceLevelEnum;
     const lower = seed.toLowerCase();
     const readOnly =
       lower.startsWith(GlobalConst.uview) ||
@@ -189,8 +190,8 @@ const fakeRpc = {
     }
     return JSON.stringify({
       kind: wallet.readOnly
-        ? RPCWalletKindEnum.LoadedFromUnifiedFullViewingKey
-        : RPCWalletKindEnum.LoadedFromSeedPhrase,
+        ? WalletKindEnum.LoadedFromUnifiedFullViewingKey
+        : WalletKindEnum.LoadedFromSeedPhrase,
       transparent: true,
       sapling: true,
       orchard: true,
@@ -291,7 +292,7 @@ const fakeRpc = {
     } catch (e) {
       return err('invalid propose json');
     }
-    propose = { kind: RPCValueTransferKindEnum.sent, amount, address };
+    propose = { kind: WalletValueTransferKindEnum.sent, amount, address };
     return JSON.stringify({ fee: FEE_ZATS, amount });
   },
 
@@ -307,7 +308,7 @@ const fakeRpc = {
       {
         txid: created,
         datetime: Date.now(),
-        status: RPCValueTransferStatusEnum.confirmed,
+        status: ValueTransferStatusEnum.confirmed,
         blockheight: HEIGHT,
         transaction_fee: FEE_ZATS,
         kind: current.kind,
@@ -332,7 +333,7 @@ const fakeRpc = {
     } catch (e) {
       return err('invalid stake json');
     }
-    propose = { kind: RPCValueTransferKindEnum.createBond, amount, address };
+    propose = { kind: WalletValueTransferKindEnum.createBond, amount, address };
     return JSON.stringify({ fee: FEE_ZATS, amount });
   },
 
@@ -344,7 +345,7 @@ const fakeRpc = {
       return err('begin_unstake requires a 64-hex create bond txid');
     }
     propose = {
-      kind: RPCValueTransferKindEnum.beginUnbond,
+      kind: WalletValueTransferKindEnum.beginUnbond,
       amount: 0,
       address: '',
     };
@@ -369,7 +370,7 @@ const fakeRpc = {
       return err('retarget_bond requires a 64-hex create bond txid');
     }
     propose = {
-      kind: RPCValueTransferKindEnum.retargetDelegationBond,
+      kind: WalletValueTransferKindEnum.retargetDelegationBond,
       amount: 0,
       address: finalizer,
     };
@@ -469,13 +470,13 @@ const fakeRpc = {
       return err('empty address');
     }
     return JSON.stringify({
-      status: RPCParseAddressStatusEnum.successAddressParse,
+      status: ParseAddressStatusEnum.successAddressParse,
       chain_name: chainName,
-      address_kind: RPCAddressKindEnum.unifiedAddressKind,
+      address_kind: WalletAddressKindEnum.unifiedAddressKind,
       receivers_available: [
-        RPCReceiversEnum.orchardRPCReceiver,
-        RPCReceiversEnum.saplingRPCReceiver,
-        RPCReceiversEnum.transparentRPCReceiver,
+        ReceiversEnum.orchard,
+        ReceiversEnum.sapling,
+        ReceiversEnum.transparent,
       ],
       only_orchard_ua: '',
     });
@@ -516,7 +517,7 @@ const fakeRpc = {
     level: string,
     _minConfirmations: string,
   ) => {
-    performanceLevel = level as RPCPerformanceLevelEnum;
+    performanceLevel = level as PerformanceLevelEnum;
     return 'ok';
   },
 

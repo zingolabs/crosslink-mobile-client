@@ -1,5 +1,5 @@
 import { GlobalConst, IndexerNetworkEnum } from './AppState';
-import RPCModule from './RPCModule';
+import WalletService from './wallet';
 
 export { IndexerNetworkEnum };
 
@@ -63,19 +63,19 @@ export const parseIndexerReport = (resp: string): IndexerReport => {
 
 export const discoverIndexers: Discover = async (
   network = IndexerNetworkEnum.stable,
-) => parseIndexerReport(await RPCModule.discoverIndexers(network));
+) => parseIndexerReport(await WalletService.discoverIndexers(network));
 
 export const probeIndexer: Probe = async (
   uri,
   network = IndexerNetworkEnum.stable,
 ) =>
-  parseIndexerReport(await RPCModule.probeIndexer(uri, network)).indexers[0] ??
-  null;
+  parseIndexerReport(await WalletService.probeIndexer(uri, network))
+    .indexers[0] ?? null;
 
 export const selectBestIndexer: SelectBest = async (
   network = IndexerNetworkEnum.stable,
 ) => {
-  const uri: string = await RPCModule.selectBestIndexer(network);
+  const uri: string = await WalletService.selectBestIndexer(network);
   if (!uri || uri.toLowerCase().startsWith(GlobalConst.error)) {
     return null;
   }
