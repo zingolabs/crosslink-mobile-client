@@ -1,8 +1,6 @@
 import TotalBalanceClass from '../AppState/classes/TotalBalanceClass';
 import UnifiedAddressClass from '../AppState/classes/UnifiedAddressClass';
 import TransparentAddressClass from '../AppState/classes/TransparentAddressClass';
-import { emptySendPageState } from '../AppState/types/SendPageState';
-import type { SendPageState } from '../AppState/types/SendPageState';
 
 import InfoType from '../AppState/types/InfoType';
 import WalletType from '../AppState/types/WalletType';
@@ -155,14 +153,10 @@ export const defaultWalletData: WalletDataValue = {
 };
 
 export interface UiValue {
-  sendPageState: SendPageState;
-  setSendPageState: (s: SendPageState) => void;
   showSwipeableIcons: boolean;
 }
 
 export const defaultUi: UiValue = {
-  sendPageState: emptySendPageState(),
-  setSendPageState: () => {},
   showSwipeableIcons: true,
 };
 

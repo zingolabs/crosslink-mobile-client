@@ -32,7 +32,7 @@ function makeDrawerProps(): NativeStackScreenProps<
     route: {
       key: 'Key-1',
       name: RouteEnum.Send,
-      params: undefined,
+      params: { toaddr: mockSendPageState.toaddr },
     },
   };
 }
@@ -46,7 +46,6 @@ describe('Component Send - test', () => {
   state.info = mockInfo;
   state.zecPrice = mockZecPrice;
   state.totalBalance = mockTotalBalance;
-  state.sendPageState = mockSendPageState;
   const onFunction = jest.fn();
 
   test('Send no currency, privacy normal & mode basic - snapshot', () => {
@@ -60,7 +59,6 @@ describe('Component Send - test', () => {
         <Send
           {...props}
           sendTransaction={onFunction}
-          clearToAddr={onFunction}
           setShieldingAmount={onFunction}
           setScrollToTop={onFunction}
           setScrollToBottom={onFunction}
@@ -83,7 +81,6 @@ describe('Component Send - test', () => {
         <Send
           {...props}
           sendTransaction={onFunction}
-          clearToAddr={onFunction}
           setShieldingAmount={onFunction}
           setScrollToTop={onFunction}
           setScrollToBottom={onFunction}

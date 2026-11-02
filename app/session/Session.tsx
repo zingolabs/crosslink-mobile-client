@@ -24,10 +24,8 @@ import {
   AppStateLoaded,
   TotalBalanceClass,
   SendPageState,
-  emptySendPageState,
-  InfoType,
-  ToAddr,
   emptyToAddr,
+  InfoType,
   ZecPriceType,
   BackgroundType,
   TranslateType,
@@ -63,7 +61,7 @@ import Utils from '../utils';
 import { readSettings, writeSettings } from '../storage/settingsFile';
 import { LoadedDomains, SessionDomainsProvider } from '../context';
 import { parseZcashURI } from '../uris';
-import BackgroundFileImpl from '../../components/Background';
+import { readBackground } from '../storage/backgroundFile';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAlert } from '../createAlert';
 import Snackbars from '../../components/Components/Snackbars';
@@ -101,7 +99,11 @@ import Redelegate from '../../components/Staking/components/Redelegate';
 import Finalizers from '../../components/Finalizers/Finalizers';
 import { reverseHex32Bytes } from '../utils/hex';
 import SettingsNavigator from '../../components/Settings/SettingsNavigator';
-import ScheduledActionsFileImpl from '../../components/ScheduledActions/ScheduledActionsFileImpl';
+import {
+  readScheduledActions,
+  removeScheduledAction,
+  resetScheduledActions,
+} from '../storage/scheduledActionsFile';
 import ScheduledActionDetail from '../../components/ScheduledActions/ScheduledActionDetail';
 import { FinalizerDetail } from '../../components/Staking/Finalizers/FinalizerDetail';
 import { scheduleReminder } from '../../components/Staking/components/scheduleReminder';
@@ -134,7 +136,6 @@ const buildInitialState = (
   props: SessionClassProps,
   callbacks: Pick<
     SessionState,
-    | 'setSendPageState'
     | 'getUfvk'
     | 'setBackgroundError'
     | 'addLastSnackbar'
@@ -157,8 +158,6 @@ const buildInitialState = (
   valueTransfersTotal: null,
   messages: null,
   messagesTotal: null,
-  sendPageState: emptySendPageState(),
-  setSendPageState: callbacks.setSendPageState,
   getUfvk: callbacks.getUfvk,
   info: {
     currencyName:
@@ -321,12 +320,6 @@ export const SessionClass: React.FC<SessionClassProps> = props => {
 
   // The callbacks stored in the initial state must be declared before the
   // lazy state initializer below captures them.
-  const setSendPageState = (sendPageState: SendPageState) => {
-    //console.log('fetch send page state');
-    //const start = Date.now();
-    patchState({ sendPageState });
-    //console.log('=========================================== > SEND PAGE STORED SETSTATE - ', Date.now() - start);
-  };
 
   const getUfvk = async (): Promise<string> => {
     let wallet = await WalletService.rpcFetchWallet(true);
@@ -403,7 +396,6 @@ export const SessionClass: React.FC<SessionClassProps> = props => {
 
   const [state, setState] = useState<SessionState>(() =>
     buildInitialState(props, {
-      setSendPageState,
       getUfvk,
       setBackgroundError,
       addLastSnackbar,
@@ -477,16 +469,16 @@ export const SessionClass: React.FC<SessionClassProps> = props => {
     const newSeconds = remaining * avgBlockTime;
 
     // delete any redelegation action if needed
-    let actions = await ScheduledActionsFileImpl.listActions();
+    let actions = await readScheduledActions();
     if (
       actions.filter(sa => sa.kind === StakingActionKindEnum.Move).length > 0
     ) {
       actions
         .filter(sa => sa.kind === StakingActionKindEnum.Move)
         .forEach(async sa => {
-          await ScheduledActionsFileImpl.removeAction(sa.id);
+          await removeScheduledAction(sa.id);
         });
-      actions = await ScheduledActionsFileImpl.listActions();
+      actions = await readScheduledActions();
     }
 
     // when the Staking day begins, the App re-schedule
@@ -529,7 +521,7 @@ export const SessionClass: React.FC<SessionClassProps> = props => {
   const startSession = async () => {
     await stakingDayCalculation();
 
-    setScheduledActions(await ScheduledActionsFileImpl.listActions());
+    setScheduledActions(await readScheduledActions());
 
     const netInfoState = await NetInfo.fetch();
     patchState({
@@ -558,8 +550,6 @@ export const SessionClass: React.FC<SessionClassProps> = props => {
     // Configure the wallet service to start doing refreshes
     await walletService.clearTimers();
     await walletService.configure();
-
-    clearToAddr();
   };
 
   const subscribe = () => {
@@ -849,11 +839,12 @@ export const SessionClass: React.FC<SessionClassProps> = props => {
 
       if (target) {
         let update = false;
-        if (
-          stateRef.current.sendPageState.toaddr.to &&
-          target.address &&
-          stateRef.current.sendPageState.toaddr.to !== target.address
-        ) {
+        const currentRoute = navigationRef.getCurrentRoute();
+        const draftTo =
+          currentRoute?.name === RouteEnum.Send
+            ? currentRoute.params?.toaddr.to
+            : '';
+        if (draftTo && target.address && draftTo !== target.address) {
           await ShowAddressAlertAsync(stateRef.current.translate)
             .then(async () => {
               // fill the fields in the screen with the donation data
@@ -866,23 +857,15 @@ export const SessionClass: React.FC<SessionClassProps> = props => {
         }
         if (update) {
           // redo the to addresses
-          const newSendPageState = emptySendPageState();
-          let uriToAddr: ToAddr = emptyToAddr();
-          [target].forEach(tgt => {
-            const to = emptyToAddr();
+          const to = emptyToAddr();
 
-            to.to = tgt.address || '';
-            to.amount = tgt.amount
-              ? Utils.parseNumberFloatToStringLocale(tgt.amount, 8)
-              : '';
-            to.memo = tgt.memoString || '';
+          to.to = target.address || '';
+          to.amount = target.amount
+            ? Utils.parseNumberFloatToStringLocale(target.amount, 8)
+            : '';
+          to.memo = target.memoString || '';
 
-            uriToAddr = to;
-          });
-
-          newSendPageState.toaddr = uriToAddr;
-
-          setSendPageState(newSendPageState);
+          navigateTo(RouteEnum.Send, { toaddr: to });
           filled = true;
         }
       }
@@ -894,8 +877,7 @@ export const SessionClass: React.FC<SessionClassProps> = props => {
   };
 
   const fetchBackgroundSyncing = async () => {
-    const backgroundJson: BackgroundType =
-      await BackgroundFileImpl.readBackground();
+    const backgroundJson: BackgroundType = await readBackground();
     if (!isEqual(stateRef.current.background, backgroundJson)) {
       if (
         backgroundJson.error &&
@@ -1151,7 +1133,7 @@ export const SessionClass: React.FC<SessionClassProps> = props => {
                   sa => sa.txid === vtNew[0].txid,
                 ).length > 0
               ) {
-                const list = await ScheduledActionsFileImpl.removeAction(
+                const list = await removeScheduledAction(
                   stateRef.current.scheduledActions.filter(
                     sa => sa.txid === vtNew[0].txid,
                   )[0].id,
@@ -1234,16 +1216,6 @@ export const SessionClass: React.FC<SessionClassProps> = props => {
     } else {
       patchState({ defaultUnifiedAddress: '' });
     }
-  };
-
-  const clearToAddr = () => {
-    const newToAddr = emptyToAddr();
-
-    // Create the new state object
-    const newState = emptySendPageState();
-    newState.toaddr = newToAddr;
-
-    setSendPageState(newState);
   };
 
   const setInfo = (newInfo: InfoType) => {
@@ -1646,7 +1618,7 @@ export const SessionClass: React.FC<SessionClassProps> = props => {
       return;
     }
 
-    await ScheduledActionsFileImpl.resetSA();
+    await resetScheduledActions();
     setScheduledActions([]);
     await notifee.cancelAllNotifications();
 
@@ -1676,7 +1648,7 @@ export const SessionClass: React.FC<SessionClassProps> = props => {
       return;
     }
 
-    await ScheduledActionsFileImpl.resetSA();
+    await resetScheduledActions();
     setScheduledActions([]);
     await notifee.cancelAllNotifications();
 
@@ -1748,8 +1720,6 @@ export const SessionClass: React.FC<SessionClassProps> = props => {
     info: state.info,
     zecPrice: state.zecPrice,
     defaultUnifiedAddress: state.defaultUnifiedAddress,
-    sendPageState: state.sendPageState,
-    setSendPageState: state.setSendPageState,
     background: state.background,
     translate: state.translate,
     backgroundError: state.backgroundError,
@@ -1833,7 +1803,6 @@ export const SessionClass: React.FC<SessionClassProps> = props => {
                     setScrollToTop={setScrollToTop}
                     setScrollToBottom={setScrollToBottom}
                     setServerOption={setServerOption}
-                    clearToAddr={clearToAddr}
                     setSecurityOption={setSecurityOption}
                     {...stackProps}
                     sendTransaction={sendTransaction}
