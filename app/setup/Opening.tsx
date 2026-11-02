@@ -1,14 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  AppState,
-  AppStateStatus,
-  NativeEventSubscription,
-  Platform,
-} from 'react-native';
+import { AppState, AppStateStatus, Platform } from 'react-native';
 
 import NetInfo, {
   NetInfoState,
-  NetInfoSubscription,
 } from '@react-native-community/netinfo/src/index';
 
 import RPCModule from '../RPCModule';
@@ -164,12 +158,11 @@ const OpeningClass: React.FC<OpeningProps> = ({
   // async flows read state across awaits; the ref mirrors it so reads stay
   // live like this.state was in the class component.
   const stateRef = useRef(state);
-  stateRef.current = state;
+  useEffect(() => {
+    stateRef.current = state;
+  });
   const patchState = (part: Partial<OpeningState>) =>
     setState(prev => ({ ...prev, ...part }));
-
-  const appStateSubscription = useRef<NativeEventSubscription | null>(null);
-  const netInfoSubscription = useRef<NetInfoSubscription | null>(null);
 
   useEffect(() => {
     const handleAppStateChange = async (nextAppState: AppStateStatus) => {
@@ -205,16 +198,16 @@ const OpeningClass: React.FC<OpeningProps> = ({
       }
     };
 
-    appStateSubscription.current = AppState.addEventListener(
+    const appStateSubscription = AppState.addEventListener(
       EventListenerEnum.change,
       handleAppStateChange,
     );
-    netInfoSubscription.current = NetInfo.addEventListener(handleNetInfoChange);
-    void run(request);
+    const netInfoSubscription = NetInfo.addEventListener(handleNetInfoChange);
+    run(request);
 
     return () => {
-      appStateSubscription.current?.remove();
-      netInfoSubscription.current?.();
+      appStateSubscription?.remove?.();
+      netInfoSubscription?.();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

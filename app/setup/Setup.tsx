@@ -1,10 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  Alert,
-  AppState,
-  AppStateStatus,
-  NativeEventSubscription,
-} from 'react-native';
+import { Alert, AppState, AppStateStatus } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 
 import {
@@ -13,7 +8,6 @@ import {
 } from '@react-navigation/native-stack';
 import NetInfo, {
   NetInfoState,
-  NetInfoSubscription,
 } from '@react-native-community/netinfo/src/index';
 
 import {
@@ -164,12 +158,11 @@ const SetupClass: React.FC<SetupClassProps> = ({
   // async handlers read state across awaits; the ref mirrors it so reads
   // stay live like this.state was in the class component.
   const stateRef = useRef(state);
-  stateRef.current = state;
+  useEffect(() => {
+    stateRef.current = state;
+  });
   const patchState = (part: Partial<SetupState>) =>
     setState(prev => ({ ...prev, ...part }));
-
-  const appStateSubscription = useRef<NativeEventSubscription | null>(null);
-  const netInfoSubscription = useRef<NetInfoSubscription | null>(null);
 
   useEffect(() => {
     const fetchBackgroundSyncing = async () => {
@@ -228,16 +221,16 @@ const SetupClass: React.FC<SetupClassProps> = ({
       }
     };
 
-    appStateSubscription.current = AppState.addEventListener(
+    const appStateSubscription = AppState.addEventListener(
       EventListenerEnum.change,
       handleAppStateChange,
     );
-    netInfoSubscription.current = NetInfo.addEventListener(handleNetInfoChange);
+    const netInfoSubscription = NetInfo.addEventListener(handleNetInfoChange);
     fetchBackgroundSyncing();
 
     return () => {
-      appStateSubscription.current?.remove();
-      netInfoSubscription.current?.();
+      appStateSubscription?.remove?.();
+      netInfoSubscription?.();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
