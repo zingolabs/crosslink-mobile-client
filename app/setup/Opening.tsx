@@ -1,14 +1,8 @@
-import React, { Component } from 'react';
-import {
-  AppState,
-  AppStateStatus,
-  NativeEventSubscription,
-  Platform,
-} from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { AppState, AppStateStatus, Platform } from 'react-native';
 
 import NetInfo, {
   NetInfoState,
-  NetInfoSubscription,
 } from '@react-native-community/netinfo/src/index';
 
 import {
@@ -55,16 +49,13 @@ import {
 } from '../legacyWallet';
 import notifee from '@notifee/react-native';
 import { reportFailure } from '../reporting';
-import { BootInfo, OpenRequest, SessionHandle } from '../lifecycle/phase';
+import {
+  BootInfo,
+  Lifecycle,
+  OpenRequest,
+  SessionHandle,
+} from '../lifecycle/phase';
 import { useLifecycle } from '../lifecycle';
-
-type OpeningProps = {
-  boot: BootInfo;
-  request: OpenRequest;
-  translate: (key: string) => TranslateType;
-  sessionOpened: (session: SessionHandle) => void;
-  openingFailed: () => void;
-};
 
 type OpeningState = SetupDomains & {
   appStateStatus: AppStateStatus;
@@ -84,115 +75,128 @@ type WalletKind = {
 
 export default function Opening() {
   const { lifecycle, translate, actions } = useLifecycle();
-  if (lifecycle.phase !== 'opening') {
-    return null;
-  }
-  return (
-    <OpeningClass
-      boot={lifecycle.boot}
-      request={lifecycle.request}
-      translate={translate}
-      sessionOpened={actions.sessionOpened}
-      openingFailed={actions.openingFailed}
-    />
-  );
-}
+  // App.tsx only mounts this screen in the 'opening' phase.
+  const opening = lifecycle as Extract<Lifecycle, { phase: 'opening' }>;
+  const { boot } = opening;
+  const request = opening.request;
+  const sessionOpened = actions.sessionOpened;
+  const openingFailed = actions.openingFailed;
 
-class OpeningClass extends Component<OpeningProps, OpeningState> {
-  private appStateSubscription: NativeEventSubscription | null = null;
-  private netInfoSubscription: NetInfoSubscription | null = null;
-  screenName = ScreenEnum.Boot;
+  const screenName = ScreenEnum.Boot;
 
-  constructor(props: OpeningProps) {
-    super(props);
+  const setBackgroundError = (title: string, error: string) => {
+    patchState({ backgroundError: { title, error } });
+  };
 
-    this.state = {
-      // context
-      netInfo: {} as NetInfoType,
-      wallet: {} as WalletType,
-      zecPrice: {} as ZecPriceType,
-      background: {
-        batches: 0,
-        message: '',
-        date: 0,
-        dateEnd: 0,
-      } as BackgroundType,
-      translate: props.translate,
-      backgroundError: {} as BackgroundErrorType,
-      setBackgroundError: this.setBackgroundError,
-      readOnly: false,
-      orchardPool: true,
-      saplingPool: true,
-      transparentPool: true,
-      snackbars: [] as SnackbarType[],
-      addLastSnackbar: this.addLastSnackbar,
-      removeFirstSnackbar: this.removeFirstSnackbar,
-      zingolibVersion: '',
-      setPrivacyOption: async () => {},
+  const addLastSnackbar = (snackbar: SnackbarType) => {
+    setState(prev => {
+      const last = prev.snackbars[prev.snackbars.length - 1];
+      if (last && last.message === snackbar.message) {
+        return prev;
+      }
+      return { ...prev, snackbars: [...prev.snackbars, snackbar] };
+    });
+  };
 
-      // context settings
-      ...props.boot.settings,
+  const removeFirstSnackbar = () => {
+    setState(prev => ({ ...prev, snackbars: prev.snackbars.slice(1) }));
+  };
 
-      // state
-      appStateStatus: AppState.currentState,
-      indexerNetwork: props.boot.indexerNetwork,
-      indexerServerPinned: props.boot.indexerServerPinned,
-      serverErrorTries: 0,
-      hasRecoveryWalletInfoSaved: false,
-      actionButtonsDisabled: true,
+  const [state, setState] = useState<OpeningState>({
+    // context
+    netInfo: {} as NetInfoType,
+    wallet: {} as WalletType,
+    zecPrice: {} as ZecPriceType,
+    background: {
+      batches: 0,
+      message: '',
+      date: 0,
+      dateEnd: 0,
+    } as BackgroundType,
+    translate: translate,
+    backgroundError: {} as BackgroundErrorType,
+    setBackgroundError: setBackgroundError,
+    readOnly: false,
+    orchardPool: true,
+    saplingPool: true,
+    transparentPool: true,
+    snackbars: [] as SnackbarType[],
+    addLastSnackbar: addLastSnackbar,
+    removeFirstSnackbar: removeFirstSnackbar,
+    zingolibVersion: '',
+    setPrivacyOption: async () => {},
+
+    // context settings
+    ...boot.settings,
+
+    // state
+    appStateStatus: AppState.currentState,
+    indexerNetwork: boot.indexerNetwork,
+    indexerServerPinned: boot.indexerServerPinned,
+    serverErrorTries: 0,
+    hasRecoveryWalletInfoSaved: false,
+    actionButtonsDisabled: true,
+  });
+  // async flows read state across awaits; the ref mirrors it so reads stay
+  // live like this.state was in the class component.
+  const stateRef = useRef(state);
+  useEffect(() => {
+    stateRef.current = state;
+  });
+  const patchState = (part: Partial<OpeningState>) =>
+    setState(prev => ({ ...prev, ...part }));
+
+  useEffect(() => {
+    const handleAppStateChange = async (nextAppState: AppStateStatus) => {
+      patchState({ appStateStatus: nextAppState });
+      if (nextAppState === AppStateStatusEnum.active) {
+        await AsyncStorage.setItem(GlobalConst.background, GlobalConst.no);
+      }
+      if (
+        nextAppState === AppStateStatusEnum.inactive ||
+        nextAppState === AppStateStatusEnum.background
+      ) {
+        await AsyncStorage.setItem(GlobalConst.background, GlobalConst.yes);
+      }
     };
-  }
 
-  componentDidMount() {
-    this.appStateSubscription = AppState.addEventListener(
+    const handleNetInfoChange = (connectionState: NetInfoState) => {
+      const { isConnected, type, isConnectionExpensive } =
+        stateRef.current.netInfo;
+      if (
+        isConnected !== connectionState.isConnected ||
+        type !== connectionState.type ||
+        isConnectionExpensive !== connectionState.details?.isConnectionExpensive
+      ) {
+        patchState({
+          netInfo: {
+            isConnected: connectionState.isConnected,
+            type: connectionState.type,
+            isConnectionExpensive:
+              connectionState.details &&
+              connectionState.details.isConnectionExpensive,
+          },
+        });
+      }
+    };
+
+    const appStateSubscription = AppState.addEventListener(
       EventListenerEnum.change,
-      this.handleAppStateChange,
+      handleAppStateChange,
     );
-    this.netInfoSubscription = NetInfo.addEventListener(
-      this.handleNetInfoChange,
-    );
-    void this.run(this.props.request);
-  }
+    const netInfoSubscription = NetInfo.addEventListener(handleNetInfoChange);
+    run(request);
 
-  componentWillUnmount() {
-    this.appStateSubscription?.remove();
-    this.netInfoSubscription?.();
-  }
+    return () => {
+      appStateSubscription?.remove?.();
+      netInfoSubscription?.();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  handleAppStateChange = async (nextAppState: AppStateStatus) => {
-    this.setState({ appStateStatus: nextAppState });
-    if (nextAppState === AppStateStatusEnum.active) {
-      await AsyncStorage.setItem(GlobalConst.background, GlobalConst.no);
-    }
-    if (
-      nextAppState === AppStateStatusEnum.inactive ||
-      nextAppState === AppStateStatusEnum.background
-    ) {
-      await AsyncStorage.setItem(GlobalConst.background, GlobalConst.yes);
-    }
-  };
-
-  handleNetInfoChange = (state: NetInfoState) => {
-    const { isConnected, type, isConnectionExpensive } = this.state.netInfo;
-    if (
-      isConnected !== state.isConnected ||
-      type !== state.type ||
-      isConnectionExpensive !== state.details?.isConnectionExpensive
-    ) {
-      this.setState({
-        netInfo: {
-          isConnected: state.isConnected,
-          type: state.type,
-          isConnectionExpensive:
-            state.details && state.details.isConnectionExpensive,
-        },
-      });
-    }
-  };
-
-  run = async (request: OpenRequest) => {
+  const run = async (openRequest: OpenRequest) => {
     const netInfoState = await NetInfo.fetch();
-    this.setState({
+    patchState({
       netInfo: {
         isConnected: netInfoState.isConnected,
         type: netInfoState.type,
@@ -201,55 +205,57 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
       },
     });
 
-    this.fetchZingolibVersion();
+    fetchZingolibVersion();
 
     await WalletService.setCryptoDefaultProvider();
 
     const has = await hasRecoveryWalletInfo();
-    this.setState({ hasRecoveryWalletInfoSaved: has });
+    patchState({ hasRecoveryWalletInfoSaved: has });
 
-    if (!this.state.indexerServer.uri) {
-      const { indexers } = await discoverIndexers(this.state.indexerNetwork);
+    if (!stateRef.current.indexerServer.uri) {
+      const { indexers } = await discoverIndexers(
+        stateRef.current.indexerNetwork,
+      );
       const best = indexers[0];
       if (best) {
         const server: ServerType = {
           uri: best.uri,
           chainName: ChainNameEnum.testChainName,
         };
-        this.setState({ indexerServer: server });
+        patchState({ indexerServer: server });
         await writeSettings('indexerServer', server);
       } else {
-        this.addLastSnackbar({
-          message: this.state.translate('loadingapp.noservers') as string,
-          screenName: [this.screenName],
+        addLastSnackbar({
+          message: stateRef.current.translate('loadingapp.noservers') as string,
+          screenName: [screenName],
         });
       }
     }
 
     await AsyncStorage.setItem(GlobalConst.background, GlobalConst.no);
 
-    switch (request.kind) {
+    switch (openRequest.kind) {
       case 'create':
-        await this.createFlow();
+        await createFlow();
         return;
       case 'restore':
-        await this.restoreFlow(request.seed, request.birthday);
+        await restoreFlow(openRequest.seed, openRequest.birthday);
         return;
       case 'open':
-        await this.openFlow();
+        await openFlow();
         return;
     }
   };
 
-  finishToSetup = async () => {
+  const finishToSetup = async () => {
     await writeSettings('basicFirstViewSeed', true);
-    this.props.openingFailed();
+    openingFailed();
   };
 
-  openFlow = async () => {
+  const openFlow = async () => {
     const exists = await WalletService.walletExists();
     if (!exists || exists === GlobalConst.false) {
-      await this.finishToSetup();
+      await finishToSetup();
       return;
     }
 
@@ -257,23 +263,25 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
     // configured indexer first, abandon it when it cannot serve this chain,
     // and quarantine a wallet file this build cannot read.
     if (
-      this.state.netInfo.isConnected &&
-      this.state.selectIndexerServer !== SelectServerEnum.offline &&
-      this.state.indexerServer.uri
+      stateRef.current.netInfo.isConnected &&
+      stateRef.current.selectIndexerServer !== SelectServerEnum.offline &&
+      stateRef.current.indexerServer.uri
     ) {
       const probed = await probeIndexer(
-        this.state.indexerServer.uri,
-        this.state.indexerNetwork,
+        stateRef.current.indexerServer.uri,
+        stateRef.current.indexerNetwork,
       ).catch(() => null);
       if (!probed) {
-        const { indexers } = await discoverIndexers(this.state.indexerNetwork);
+        const { indexers } = await discoverIndexers(
+          stateRef.current.indexerNetwork,
+        );
         const best = indexers[0];
-        if (best && best.uri !== this.state.indexerServer.uri) {
+        if (best && best.uri !== stateRef.current.indexerServer.uri) {
           const server: ServerType = {
             uri: best.uri,
             chainName: ChainNameEnum.testChainName,
           };
-          this.setState({
+          patchState({
             indexerServer: server,
             indexerServerPinned: false,
           });
@@ -283,36 +291,36 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
       }
     }
     const quarantined = await quarantineLegacyWalletIfNeeded(
-      this.state.indexerServer.uri,
+      stateRef.current.indexerServer.uri,
       Platform.OS,
     );
     if (quarantined) {
-      await this.finishToSetup();
+      await finishToSetup();
       return;
     }
 
     const result: string = await WalletService.loadExistingWallet(
-      this.state.indexerServer.uri,
-      this.state.indexerServer.chainName,
-      this.state.performanceLevel,
+      stateRef.current.indexerServer.uri,
+      stateRef.current.indexerServer.chainName,
+      stateRef.current.performanceLevel,
       GlobalConst.minConfirmations.toString(),
     );
-    const title = this.state.translate(
+    const title = stateRef.current.translate(
       'loadingapp.readingwallet-label',
     ) as string;
     if (!result || result.toLowerCase().startsWith(GlobalConst.error)) {
       if (await quarantineUnreadableWallet(Platform.OS)) {
-        await this.finishToSetup();
+        await finishToSetup();
         return;
       }
-      await this.walletErrorHandle(result, title, true);
+      await walletErrorHandle(result, title, true);
       return;
     }
     let resultJson: SeedType & UfvkType;
     try {
       resultJson = await JSON.parse(result);
     } catch (e: unknown) {
-      await this.walletErrorHandle(
+      await walletErrorHandle(
         e instanceof Error ? e.message : String(e),
         title,
         true,
@@ -320,7 +328,7 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
       return;
     }
     if (resultJson.error) {
-      await this.walletErrorHandle(resultJson.error, title, true);
+      await walletErrorHandle(resultJson.error, title, true);
       return;
     }
 
@@ -329,37 +337,40 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
     // the wallet is already open against the configured one, and the rust
     // side re-points the client when a better one wins — so it must never
     // gate opening. Run it in the background; failures are non-fatal.
-    if (!this.state.indexerServerPinned && this.state.netInfo.isConnected) {
-      selectBestIndexer(this.state.indexerNetwork)
+    if (
+      !stateRef.current.indexerServerPinned &&
+      stateRef.current.netInfo.isConnected
+    ) {
+      selectBestIndexer(stateRef.current.indexerNetwork)
         .then(async best => {
-          if (best && best !== this.state.indexerServer.uri) {
+          if (best && best !== stateRef.current.indexerServer.uri) {
             const winner: ServerType = {
               uri: best,
-              chainName: this.state.indexerServer.chainName,
+              chainName: stateRef.current.indexerServer.chainName,
             };
-            this.setState({ indexerServer: winner });
+            patchState({ indexerServer: winner });
             await writeSettings('indexerServer', winner);
           }
         })
         .catch(() => {});
     }
 
-    const wallet = await this.readWalletKind();
-    await this.ensureTorClient();
-    this.props.sessionOpened({
+    const wallet = await readWalletKind();
+    await ensureTorClient();
+    sessionOpened({
       walletKind: wallet,
-      launching: this.props.boot.launching,
+      launching: boot.launching,
     });
   };
 
-  createFlow = async (): Promise<void> => {
+  const createFlow = async (): Promise<void> => {
     // creating a wallet works offline: the native side derives the seed and
     // sets the birthday without contacting the indexer. the first sync needs
     // the network, not the creation itself.
     const seed: string = await WalletService.createNewWallet(
-      this.state.indexerServer.uri,
-      this.state.indexerServer.chainName,
-      this.state.performanceLevel,
+      stateRef.current.indexerServer.uri,
+      stateRef.current.indexerServer.chainName,
+      stateRef.current.performanceLevel,
       GlobalConst.minConfirmations.toString(),
     );
 
@@ -369,24 +380,32 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
         seedJSON = await JSON.parse(seed);
         if (seedJSON.error) {
           reportFailure(
-            this.state.translate('loadingapp.creatingwallet-label') as string,
+            stateRef.current.translate(
+              'loadingapp.creatingwallet-label',
+            ) as string,
             seedJSON.error,
           );
-          await this.walletErrorHandle(
+          await walletErrorHandle(
             seedJSON.error,
-            this.state.translate('loadingapp.creatingwallet-label') as string,
+            stateRef.current.translate(
+              'loadingapp.creatingwallet-label',
+            ) as string,
             false,
           );
           return;
         }
       } catch (e: unknown) {
         reportFailure(
-          this.state.translate('loadingapp.creatingwallet-label') as string,
+          stateRef.current.translate(
+            'loadingapp.creatingwallet-label',
+          ) as string,
           e instanceof Error ? e.message : String(e),
         );
-        await this.walletErrorHandle(
+        await walletErrorHandle(
           e instanceof Error ? e.message : String(e),
-          this.state.translate('loadingapp.creatingwallet-label') as string,
+          stateRef.current.translate(
+            'loadingapp.creatingwallet-label',
+          ) as string,
           false,
         );
         return;
@@ -395,46 +414,46 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
         seed: seedJSON.seed_phrase || '',
         birthday: seedJSON.birthday || 0,
       };
-      if (this.state.recoveryWalletInfoOnDevice) {
+      if (stateRef.current.recoveryWalletInfoOnDevice) {
         await createUpdateRecoveryWalletInfo(wallet);
-      } else if (this.state.hasRecoveryWalletInfoSaved) {
+      } else if (stateRef.current.hasRecoveryWalletInfoSaved) {
         await removeRecoveryWalletInfo();
       }
-      this.setState({ wallet });
-      await this.ensureTorClient();
+      patchState({ wallet });
+      await ensureTorClient();
 
       await resetScheduledActions();
       await notifee.cancelAllNotifications();
 
-      this.props.sessionOpened({
+      sessionOpened({
         walletKind: {
           readOnly: false,
           orchardPool: true,
           saplingPool: true,
           transparentPool: true,
         },
-        launching: this.props.boot.launching,
+        launching: boot.launching,
       });
     } else {
-      await this.walletErrorHandle(
+      await walletErrorHandle(
         seed,
-        this.state.translate('loadingapp.creatingwallet-label') as string,
+        stateRef.current.translate('loadingapp.creatingwallet-label') as string,
         false,
       );
     }
   };
 
-  restoreFlow = async (seed: string, birthday: number) => {
+  const restoreFlow = async (seed: string, birthday: number) => {
     if (!seed) {
       createAlert(
-        this.setBackgroundError,
-        this.addLastSnackbar,
-        [this.screenName],
-        this.state.translate('loadingapp.emptyseedufvk-label') as string,
-        this.state.translate('loadingapp.emptyseedufvk-error') as string,
+        setBackgroundError,
+        addLastSnackbar,
+        [screenName],
+        stateRef.current.translate('loadingapp.emptyseedufvk-label') as string,
+        stateRef.current.translate('loadingapp.emptyseedufvk-error') as string,
         false,
       );
-      this.props.openingFailed();
+      openingFailed();
       return;
     }
     if (
@@ -442,14 +461,18 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
       seed.toLowerCase().startsWith(GlobalConst.utestview)
     ) {
       createAlert(
-        this.setBackgroundError,
-        this.addLastSnackbar,
-        [this.screenName],
-        this.state.translate('loadingapp.invalidseedufvk-label') as string,
-        this.state.translate('loadingapp.invalidseedufvk-error') as string,
+        setBackgroundError,
+        addLastSnackbar,
+        [screenName],
+        stateRef.current.translate(
+          'loadingapp.invalidseedufvk-label',
+        ) as string,
+        stateRef.current.translate(
+          'loadingapp.invalidseedufvk-error',
+        ) as string,
         false,
       );
-      this.props.openingFailed();
+      openingFailed();
       return;
     }
 
@@ -462,16 +485,16 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
     const result: string = await WalletService.restoreWalletFromSeed(
       seed.toLowerCase(),
       walletBirthday,
-      this.state.indexerServer.uri,
-      this.state.indexerServer.chainName,
-      this.state.performanceLevel,
+      stateRef.current.indexerServer.uri,
+      stateRef.current.indexerServer.chainName,
+      stateRef.current.performanceLevel,
       GlobalConst.minConfirmations.toString(),
     );
 
     if (!result || result.toLowerCase().startsWith(GlobalConst.error)) {
-      await this.walletErrorHandle(
+      await walletErrorHandle(
         result,
-        this.state.translate('loadingapp.readingwallet-label') as string,
+        stateRef.current.translate('loadingapp.readingwallet-label') as string,
         false,
       );
       return;
@@ -480,44 +503,44 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
     try {
       resultJson = await JSON.parse(result);
     } catch (e: unknown) {
-      await this.walletErrorHandle(
+      await walletErrorHandle(
         e instanceof Error ? e.message : String(e),
-        this.state.translate('loadingapp.readingwallet-label') as string,
+        stateRef.current.translate('loadingapp.readingwallet-label') as string,
         false,
       );
       return;
     }
     if (resultJson.error) {
-      await this.walletErrorHandle(
+      await walletErrorHandle(
         resultJson.error,
-        this.state.translate('loadingapp.readingwallet-label') as string,
+        stateRef.current.translate('loadingapp.readingwallet-label') as string,
         false,
       );
       return;
     }
 
-    if (this.state.recoveryWalletInfoOnDevice) {
+    if (stateRef.current.recoveryWalletInfoOnDevice) {
       await createUpdateRecoveryWalletInfo({
         seed: seed.toLowerCase(),
         birthday: Number(walletBirthday),
       });
-    } else if (this.state.hasRecoveryWalletInfoSaved) {
+    } else if (stateRef.current.hasRecoveryWalletInfoSaved) {
       await removeRecoveryWalletInfo();
     }
     await writeSettings('basicFirstViewSeed', true);
 
-    const wallet = await this.readWalletKind();
-    await this.ensureTorClient();
+    const wallet = await readWalletKind();
+    await ensureTorClient();
     await resetScheduledActions();
     await notifee.cancelAllNotifications();
 
-    this.props.sessionOpened({
+    sessionOpened({
       walletKind: wallet,
-      launching: this.props.boot.launching,
+      launching: boot.launching,
     });
   };
 
-  readWalletKind = async (): Promise<WalletKind> => {
+  const readWalletKind = async (): Promise<WalletKind> => {
     const kind: WalletKind = {
       readOnly: false,
       orchardPool: false,
@@ -534,37 +557,39 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
       kind.orchardPool = walletKindJSON.orchard;
       kind.saplingPool = walletKindJSON.sapling;
       kind.transparentPool = walletKindJSON.transparent;
-      await this.syncRecoveryWalletInfo(kind.readOnly);
+      await syncRecoveryWalletInfo(kind.readOnly);
     } catch (e) {
-      this.addLastSnackbar({
+      addLastSnackbar({
         message: walletKindStr,
-        screenName: [this.screenName],
+        screenName: [screenName],
       });
     }
-    this.setState({ ...kind });
+    patchState({ ...kind });
     return kind;
   };
 
-  syncRecoveryWalletInfo = async (readOnly: boolean) => {
-    if (this.state.recoveryWalletInfoOnDevice) {
+  const syncRecoveryWalletInfo = async (readOnly: boolean) => {
+    if (stateRef.current.recoveryWalletInfoOnDevice) {
       const wallet: WalletType = await WalletService.rpcFetchWallet(readOnly);
       await createUpdateRecoveryWalletInfo(wallet);
-    } else if (this.state.hasRecoveryWalletInfoSaved) {
+    } else if (stateRef.current.hasRecoveryWalletInfoSaved) {
       await removeRecoveryWalletInfo();
     }
   };
 
-  ensureTorClient = async () => {
+  const ensureTorClient = async () => {
     if (
-      this.state.currency === CurrencyEnum.USDTORCurrency ||
-      this.state.currency === CurrencyEnum.USDCurrency
+      stateRef.current.currency === CurrencyEnum.USDTORCurrency ||
+      stateRef.current.currency === CurrencyEnum.USDCurrency
     ) {
       await WalletService.createTorClientProcess();
     }
   };
 
-  selectTheBestServer = async (aDifferentOne: boolean): Promise<boolean> => {
-    const actualServer = this.state.indexerServer;
+  const selectTheBestServer = async (
+    aDifferentOne: boolean,
+  ): Promise<boolean> => {
+    const actualServer = stateRef.current.indexerServer;
     const { indexers } = await discoverIndexers();
     const best = indexers.find(
       i => !aDifferentOne || i.uri !== actualServer.uri,
@@ -576,7 +601,7 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
       uri: best.uri,
       chainName: ChainNameEnum.testChainName,
     };
-    this.setState({
+    patchState({
       indexerServer: fasterServer,
       selectIndexerServer: SelectServerEnum.custom,
       indexerServerPinned: false,
@@ -585,155 +610,142 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
     await writeSettings('selectIndexerServer', SelectServerEnum.custom);
     await writeSettings('indexerServerPinned', false);
     if (isEqual(actualServer, fasterServer)) {
-      this.addLastSnackbar({
-        message: this.state.translate(
+      addLastSnackbar({
+        message: stateRef.current.translate(
           'loadedapp.selectingserversame',
         ) as string,
         duration: SnackbarDurationEnum.long,
-        screenName: [this.screenName],
+        screenName: [screenName],
       });
     } else {
-      this.addLastSnackbar({
+      addLastSnackbar({
         message:
-          (this.state.translate('loadedapp.selectingserverbest') as string) +
+          (stateRef.current.translate(
+            'loadedapp.selectingserverbest',
+          ) as string) +
           ' ' +
           fasterServer.uri,
         duration: SnackbarDurationEnum.long,
-        screenName: [this.screenName],
+        screenName: [screenName],
       });
     }
     return true;
   };
 
-  checkServer = async (server: ServerType): Promise<boolean> =>
+  const checkServer = async (server: ServerType): Promise<boolean> =>
     (await probeIndexer(server.uri)) !== null;
 
-  walletErrorHandle = async (result: string, title: string, start: boolean) => {
+  const walletErrorHandle = async (
+    result: string,
+    title: string,
+    start: boolean,
+  ) => {
     if (
       start &&
-      this.state.netInfo.isConnected &&
-      this.state.selectIndexerServer !== SelectServerEnum.offline
+      stateRef.current.netInfo.isConnected &&
+      stateRef.current.selectIndexerServer !== SelectServerEnum.offline
     ) {
-      this.addLastSnackbar({
-        message: this.state.translate('restarting') as string,
+      addLastSnackbar({
+        message: stateRef.current.translate('restarting') as string,
         duration: SnackbarDurationEnum.long,
-        screenName: [this.screenName],
+        screenName: [screenName],
       });
     }
     if (
-      !this.state.netInfo.isConnected ||
-      this.state.selectIndexerServer === SelectServerEnum.offline
+      !stateRef.current.netInfo.isConnected ||
+      stateRef.current.selectIndexerServer === SelectServerEnum.offline
     ) {
       createAlert(
-        this.setBackgroundError,
-        this.addLastSnackbar,
-        [this.screenName],
+        setBackgroundError,
+        addLastSnackbar,
+        [screenName],
         title,
         result,
         false,
       );
-      this.setState({ serverErrorTries: 0 });
-      this.props.openingFailed();
+      patchState({ serverErrorTries: 0 });
+      openingFailed();
     } else {
-      const workingServer = await this.checkServer(this.state.indexerServer);
+      const workingServer = await checkServer(stateRef.current.indexerServer);
       if (workingServer) {
         // the server is working -> this error is not related to availability
         reportFailure(title, result);
         createAlert(
-          this.setBackgroundError,
-          this.addLastSnackbar,
-          [this.screenName],
+          setBackgroundError,
+          addLastSnackbar,
+          [screenName],
           title,
           result,
           false,
         );
-        this.setState({ serverErrorTries: 0 });
-        this.props.openingFailed();
+        patchState({ serverErrorTries: 0 });
+        openingFailed();
       } else {
-        if (this.state.serverErrorTries === 0) {
+        if (stateRef.current.serverErrorTries === 0) {
           // first try: a different server, then re-run the same request
-          this.addLastSnackbar({
-            message: this.state.translate(
+          addLastSnackbar({
+            message: stateRef.current.translate(
               'loadingapp.serverfirsttry',
             ) as string,
             duration: SnackbarDurationEnum.longer,
-            screenName: [this.screenName],
+            screenName: [screenName],
           });
-          const someServerIsWorking = await this.selectTheBestServer(true);
+          const someServerIsWorking = await selectTheBestServer(true);
           if (someServerIsWorking) {
             if (start) {
-              this.setState({ serverErrorTries: 1 }, () =>
-                this.run(this.props.request),
-              );
+              patchState({ serverErrorTries: 1 });
+              run(request);
             } else {
               createAlert(
-                this.setBackgroundError,
-                this.addLastSnackbar,
-                [this.screenName],
+                setBackgroundError,
+                addLastSnackbar,
+                [screenName],
                 title,
                 result,
                 false,
               );
-              this.setState({ serverErrorTries: 0 });
-              this.props.openingFailed();
+              patchState({ serverErrorTries: 0 });
+              openingFailed();
             }
           } else {
             createAlert(
-              this.setBackgroundError,
-              this.addLastSnackbar,
-              [this.screenName],
+              setBackgroundError,
+              addLastSnackbar,
+              [screenName],
               title,
-              this.state.translate('loadingapp.noservers') as string,
+              stateRef.current.translate('loadingapp.noservers') as string,
               false,
             );
-            this.setState({ serverErrorTries: 0 });
-            this.props.openingFailed();
+            patchState({ serverErrorTries: 0 });
+            openingFailed();
           }
         } else {
           // second try
-          this.addLastSnackbar({
-            message: this.state.translate(
+          addLastSnackbar({
+            message: stateRef.current.translate(
               'loadingapp.serversecondtry',
             ) as string,
             duration: SnackbarDurationEnum.longer,
-            screenName: [this.screenName],
+            screenName: [screenName],
           });
           setTimeout(() => {
             createAlert(
-              this.setBackgroundError,
-              this.addLastSnackbar,
-              [this.screenName],
+              setBackgroundError,
+              addLastSnackbar,
+              [screenName],
               title,
               result,
               false,
             );
-            this.setState({ serverErrorTries: 0 });
-            this.props.openingFailed();
+            patchState({ serverErrorTries: 0 });
+            openingFailed();
           }, 1 * 1000);
         }
       }
     }
   };
 
-  setBackgroundError = (title: string, error: string) => {
-    this.setState({ backgroundError: { title, error } });
-  };
-
-  addLastSnackbar = (snackbar: SnackbarType) => {
-    this.setState(({ snackbars }) => {
-      const last = snackbars[snackbars.length - 1];
-      if (last && last.message === snackbar.message) {
-        return null;
-      }
-      return { snackbars: [...snackbars, snackbar] };
-    });
-  };
-
-  removeFirstSnackbar = () => {
-    this.setState(({ snackbars }) => ({ snackbars: snackbars.slice(1) }));
-  };
-
-  async fetchZingolibVersion(): Promise<void> {
+  const fetchZingolibVersion = async (): Promise<void> => {
     try {
       let zingolibStr: string = await WalletService.getVersionInfo();
       if (zingolibStr) {
@@ -743,62 +755,64 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
       } else {
         zingolibStr = GlobalConst.zingolibNone;
       }
-      this.setState({ zingolibVersion: zingolibStr });
+      patchState({ zingolibVersion: zingolibStr });
     } catch (error) {
       console.log(`Critical Error info ${error}`);
     }
+  };
+
+  const { snackbars } = state;
+
+  const context: SetupDomains = {
+    netInfo: state.netInfo,
+    wallet: state.wallet,
+    zecPrice: state.zecPrice,
+    background: state.background,
+    translate: state.translate,
+    backgroundError: state.backgroundError,
+    setBackgroundError: state.setBackgroundError,
+    readOnly: state.readOnly,
+    orchardPool: state.orchardPool,
+    saplingPool: state.saplingPool,
+    transparentPool: state.transparentPool,
+    snackbars: state.snackbars,
+    addLastSnackbar: state.addLastSnackbar,
+    removeFirstSnackbar: removeFirstSnackbar,
+    zingolibVersion: state.zingolibVersion,
+    setPrivacyOption: state.setPrivacyOption,
+
+    indexerServer: state.indexerServer,
+    selectIndexerServer: state.selectIndexerServer,
+    currency: state.currency,
+    language: state.language,
+    sendAll: state.sendAll,
+    donation: state.donation,
+    privacy: state.privacy,
+    security: state.security,
+    rescanMenu: state.rescanMenu,
+    recoveryWalletInfoOnDevice: state.recoveryWalletInfoOnDevice,
+    performanceLevel: state.performanceLevel,
+  };
+
+  if (lifecycle.phase !== 'opening') {
+    return null;
   }
 
-  render() {
-    const { snackbars } = this.state;
-
-    const context: SetupDomains = {
-      netInfo: this.state.netInfo,
-      wallet: this.state.wallet,
-      zecPrice: this.state.zecPrice,
-      background: this.state.background,
-      translate: this.state.translate,
-      backgroundError: this.state.backgroundError,
-      setBackgroundError: this.state.setBackgroundError,
-      readOnly: this.state.readOnly,
-      orchardPool: this.state.orchardPool,
-      saplingPool: this.state.saplingPool,
-      transparentPool: this.state.transparentPool,
-      snackbars: this.state.snackbars,
-      addLastSnackbar: this.state.addLastSnackbar,
-      removeFirstSnackbar: this.removeFirstSnackbar,
-      zingolibVersion: this.state.zingolibVersion,
-      setPrivacyOption: this.state.setPrivacyOption,
-
-      indexerServer: this.state.indexerServer,
-      selectIndexerServer: this.state.selectIndexerServer,
-      currency: this.state.currency,
-      language: this.state.language,
-      sendAll: this.state.sendAll,
-      donation: this.state.donation,
-      privacy: this.state.privacy,
-      security: this.state.security,
-      rescanMenu: this.state.rescanMenu,
-      recoveryWalletInfoOnDevice: this.state.recoveryWalletInfoOnDevice,
-      performanceLevel: this.state.performanceLevel,
-    };
-
-    return (
-      <ToastProvider>
-        <Snackbars
-          snackbars={snackbars}
-          removeFirstSnackbar={this.removeFirstSnackbar}
-          screenName={this.screenName}
+  return (
+    <ToastProvider>
+      <Snackbars
+        snackbars={snackbars}
+        removeFirstSnackbar={removeFirstSnackbar}
+        screenName={screenName}
+      />
+      <SetupDomainsProvider value={context}>
+        <Launching
+          empty={true}
+          translate={translate}
+          firstLaunchingMessage={boot.launching}
+          biometricsFailed={false}
         />
-        <SetupDomainsProvider value={context}>
-          <Launching
-            empty={true}
-            translate={this.props.translate}
-            firstLaunchingMessage={this.props.boot.launching}
-            biometricsFailed={false}
-          />
-        </SetupDomainsProvider>
-      </ToastProvider>
-    );
-  }
+      </SetupDomainsProvider>
+    </ToastProvider>
+  );
 }
