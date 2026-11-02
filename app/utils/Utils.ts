@@ -23,10 +23,10 @@ import {
 import randomColor from 'randomcolor';
 import { Buffer } from 'buffer';
 import WalletService from '../wallet';
-import { ParseAddressType } from '../wallet/types/ParseAddressType';
-import { ParseAddressStatusEnum } from '../wallet/enums/ParseAddressStatusEnum';
-import { WalletAddressKindEnum } from '../wallet/enums/WalletAddressKindEnum';
-import { ReceiversEnum } from '../wallet/enums/ReceiversEnum';
+import { ParseAddressType } from '../wallet/types';
+import { ParseAddressStatusEnum } from '../wallet/enums';
+import { WalletAddressKindEnum } from '../wallet/enums';
+import { ReceiversEnum } from '../wallet/enums';
 
 export default class Utils {
   static trimToSmall(addr?: string, numChars?: number): string {

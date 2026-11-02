@@ -9,7 +9,7 @@ import {
   SelectServerEnum,
   ServerType,
 } from '../AppState';
-import { PerformanceLevelEnum } from '../wallet/enums/PerformanceLevelEnum';
+import { PerformanceLevelEnum } from '../wallet/enums';
 
 export interface SettingsFile {
   indexerServer?: ServerType;

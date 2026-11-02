@@ -26,7 +26,7 @@ import {
 import ZecAmount from '../Components/ZecAmount';
 import FadeText from '../Components/FadeText';
 import simpleBiometrics from '../../app/simpleBiometrics';
-import { SyncStatusType } from '../../app/wallet/types/SyncStatusType';
+import { SyncStatusType } from '../../app/wallet/types';
 import { isEqual } from 'lodash';
 import SettingsIcon from '../../assets/icons/settings.svg';
 import { radiusPill, space, text, useTheme } from '../../app/theme';

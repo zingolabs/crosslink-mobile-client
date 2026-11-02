@@ -1,4 +1,4 @@
-import { ValueTransferStatusEnum } from '../../wallet/enums/ValueTransferStatusEnum';
+import { ValueTransferStatusEnum } from '../../wallet/enums';
 import { ValueTransferKindEnum } from '../enums/ValueTransferKindEnum';
 
 export default interface ContactType {

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { ValueTransferType } from '../../app/AppState';
-import { ValueTransferStatusEnum as S } from '../../app/wallet/enums/ValueTransferStatusEnum';
+import { ValueTransferStatusEnum as S } from '../../app/wallet/enums';
 import { Incoming, makeIncoming, seedTransfers } from './data';
 
 export type FeedItem = ValueTransferType & {

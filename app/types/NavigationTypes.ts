@@ -13,7 +13,7 @@ import {
   UfvkActionEnum,
   ValueTransferType,
 } from '../AppState';
-import { ParseAddressType } from '../wallet/types/ParseAddressType';
+import { ParseAddressType } from '../wallet/types';
 
 export type SetupStackParamList = {
   [RouteEnum.StartMenu]: undefined;

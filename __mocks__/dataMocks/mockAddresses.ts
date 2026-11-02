@@ -3,7 +3,7 @@ import {
   AddressKindEnum,
   TransparentAddressClass,
 } from '../../app/AppState';
-import { AddressScopeEnum } from '../../app/wallet/enums/AddressScopeEnum';
+import { AddressScopeEnum } from '../../app/wallet/enums';
 
 export const mockAddresses: (UnifiedAddressClass | TransparentAddressClass)[] =
   [

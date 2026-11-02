@@ -10,7 +10,7 @@ import {
   SelectServerEnum,
   ServerType,
 } from './AppState';
-import { PerformanceLevelEnum } from './wallet/enums/PerformanceLevelEnum';
+import { PerformanceLevelEnum } from './wallet/enums';
 
 export const translations = {
   en: require('./translations/en.json'),

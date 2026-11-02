@@ -35,7 +35,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faAngleUp } from '@fortawesome/free-solid-svg-icons';
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
-import { AddressScopeEnum } from '../../app/wallet/enums/AddressScopeEnum';
+import { AddressScopeEnum } from '../../app/wallet/enums';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
 import { radiusPill, space, useTheme } from '../../app/theme';

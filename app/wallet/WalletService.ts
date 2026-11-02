@@ -20,29 +20,31 @@ import {
   IndexerNetworkEnum,
 } from '../AppState';
 import RPCModule from '../RPCModule';
-import { UnifiedAddressType } from './types/UnifiedAddressType';
-import { BalancesType } from './types/BalancesType';
-import { WalletInfoType } from './types/WalletInfoType';
-import { WalletHeight } from './types/WalletHeightType';
-import { SeedType } from './types/SeedType';
-import { SyncStatusType } from './types/SyncStatusType';
-import { SendType } from './types/SendType';
-import { ValueTransfersType } from './types/ValueTransfersType';
-import { WalletValueTransferKindEnum } from './enums/WalletValueTransferKindEnum';
-import { WalletValueTransferType } from './types/WalletValueTransferType';
-import { ValueTransferStatusEnum } from './enums/ValueTransferStatusEnum';
-import { SendProposeType } from './types/SendProposeType';
-import { SyncPollType } from './types/SyncPollType';
-import { WalletZecPriceType } from './types/WalletZecPriceType';
-import { TransparentAddressType } from './types/TransparentAddressType';
-import { SpendablebalanceType } from './types/SpendablebalanceType';
-//import { WalletSaveRequiredType } from './types/WalletSaveRequiredType';
-import { ConfigWalletPerformanceType } from './types/ConfigWalletPerformanceType';
-import { PerformanceLevelEnum } from './enums/PerformanceLevelEnum';
-import { WalletVersionType } from './types/WalletVersionType';
+import WalletBondsInfoType, {
+  BalancesType,
+  ConfigWalletPerformanceType,
+  SendProposeType,
+  SendType,
+  SeedType,
+  SpendablebalanceType,
+  StakedType,
+  SyncPollType,
+  SyncStatusType,
+  TransparentAddressType,
+  UnifiedAddressType,
+  ValueTransfersType,
+  WalletHeight,
+  WalletInfoType,
+  WalletValueTransferType,
+  WalletVersionType,
+  WalletZecPriceType,
+} from './types';
+import {
+  PerformanceLevelEnum,
+  ValueTransferStatusEnum,
+  WalletValueTransferKindEnum,
+} from './enums';
 import { StakeJsonToTypeType } from '../AppState/types/ValueTransferType';
-import WalletBondsInfoType from './types/WalletBondsInfoType';
-import { StakedType } from './types/StakedType';
 import { reverseHex32Bytes } from '../utils/hex';
 import { WalletBondsStatusEnum } from '../AppState/enums/WalletBondsStatusEnum';
 
