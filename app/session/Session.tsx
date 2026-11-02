@@ -23,9 +23,7 @@ import {
   AppStateLoaded,
   TotalBalanceClass,
   SendPageState,
-  emptySendPageState,
   InfoType,
-  ToAddr,
   emptyToAddr,
   ZecPriceType,
   BackgroundType,
@@ -62,7 +60,7 @@ import Utils from '../utils';
 import { readSettings, writeSettings } from '../storage/settingsFile';
 import { LoadedDomains, SessionDomainsProvider } from '../context';
 import { parseZcashURI } from '../uris';
-import BackgroundFileImpl from '../../components/Background';
+import { readBackground } from '../storage/backgroundFile';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAlert } from '../createAlert';
 import Snackbars from '../../components/Components/Snackbars';
@@ -100,7 +98,11 @@ import Redelegate from '../../components/Staking/components/Redelegate';
 import Finalizers from '../../components/Finalizers/Finalizers';
 import { reverseHex32Bytes } from '../utils/hex';
 import SettingsNavigator from '../../components/Settings/SettingsNavigator';
-import ScheduledActionsFileImpl from '../../components/ScheduledActions/ScheduledActionsFileImpl';
+import {
+  readScheduledActions,
+  removeScheduledAction,
+  resetScheduledActions,
+} from '../storage/scheduledActionsFile';
 import ScheduledActionDetail from '../../components/ScheduledActions/ScheduledActionDetail';
 import { FinalizerDetail } from '../../components/Staking/Finalizers/FinalizerDetail';
 import { scheduleReminder } from '../../components/Staking/components/scheduleReminder';
@@ -242,8 +244,6 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
       valueTransfersTotal: null,
       messages: null,
       messagesTotal: null,
-      sendPageState: emptySendPageState(),
-      setSendPageState: this.setSendPageState,
       getUfvk: this.getUfvk,
       info: {
         currencyName:
@@ -364,16 +364,16 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
     const newSeconds = remaining * avgBlockTime;
 
     // delete any redelegation action if needed
-    let actions = await ScheduledActionsFileImpl.listActions();
+    let actions = await readScheduledActions();
     if (
       actions.filter(sa => sa.kind === StakingActionKindEnum.Move).length > 0
     ) {
       actions
         .filter(sa => sa.kind === StakingActionKindEnum.Move)
         .forEach(async sa => {
-          await ScheduledActionsFileImpl.removeAction(sa.id);
+          await removeScheduledAction(sa.id);
         });
-      actions = await ScheduledActionsFileImpl.listActions();
+      actions = await readScheduledActions();
     }
 
     // when the Staking day begins, the App re-schedule
@@ -423,7 +423,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
   startSession = async () => {
     await this.stakingDayCalculation();
 
-    this.setScheduledActions(await ScheduledActionsFileImpl.listActions());
+    this.setScheduledActions(await readScheduledActions());
 
     const netInfoState = await NetInfo.fetch();
     this.setState({
@@ -452,8 +452,6 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
     // Configure the wallet service to start doing refreshes
     await this.walletService.clearTimers();
     await this.walletService.configure();
-
-    this.clearToAddr();
   };
 
   subscribe = () => {
@@ -599,10 +597,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
     if (!url) {
       return;
     }
-    const filled = await this.readUrl(url);
-    if (filled) {
-      this.navigateTo(RouteEnum.Send);
-    }
+    await this.readUrl(url);
   };
 
   handleNetInfoChange = async (state: NetInfoState) => {
@@ -732,11 +727,12 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
 
       if (target) {
         let update = false;
-        if (
-          this.state.sendPageState.toaddr.to &&
-          target.address &&
-          this.state.sendPageState.toaddr.to !== target.address
-        ) {
+        const currentRoute = navigationRef.getCurrentRoute();
+        const draftTo =
+          currentRoute?.name === RouteEnum.Send
+            ? currentRoute.params?.toaddr.to
+            : '';
+        if (draftTo && target.address && draftTo !== target.address) {
           await ShowAddressAlertAsync(this.state.translate)
             .then(async () => {
               // fill the fields in the screen with the donation data
@@ -749,23 +745,15 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
         }
         if (update) {
           // redo the to addresses
-          const newSendPageState = emptySendPageState();
-          let uriToAddr: ToAddr = emptyToAddr();
-          [target].forEach(tgt => {
-            const to = emptyToAddr();
+          const to = emptyToAddr();
 
-            to.to = tgt.address || '';
-            to.amount = tgt.amount
-              ? Utils.parseNumberFloatToStringLocale(tgt.amount, 8)
-              : '';
-            to.memo = tgt.memoString || '';
+          to.to = target.address || '';
+          to.amount = target.amount
+            ? Utils.parseNumberFloatToStringLocale(target.amount, 8)
+            : '';
+          to.memo = target.memoString || '';
 
-            uriToAddr = to;
-          });
-
-          newSendPageState.toaddr = uriToAddr;
-
-          this.setSendPageState(newSendPageState);
+          this.navigateTo(RouteEnum.Send, { toaddr: to });
           filled = true;
         }
       }
@@ -777,8 +765,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
   };
 
   fetchBackgroundSyncing = async () => {
-    const backgroundJson: BackgroundType =
-      await BackgroundFileImpl.readBackground();
+    const backgroundJson = await readBackground();
     if (!isEqual(this.state.background, backgroundJson)) {
       if (
         backgroundJson.error &&
@@ -1013,7 +1000,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
                   sa => sa.txid === vtNew[0].txid,
                 ).length > 0
               ) {
-                const list = await ScheduledActionsFileImpl.removeAction(
+                const list = await removeScheduledAction(
                   this.state.scheduledActions.filter(
                     sa => sa.txid === vtNew[0].txid,
                   )[0].id,
@@ -1093,23 +1080,6 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
     } else {
       this.setState({ defaultUnifiedAddress: '' });
     }
-  };
-
-  setSendPageState = (sendPageState: SendPageState) => {
-    //console.log('fetch send page state');
-    //const start = Date.now();
-    this.setState({ sendPageState });
-    //console.log('=========================================== > SEND PAGE STORED SETSTATE - ', Date.now() - start);
-  };
-
-  clearToAddr = () => {
-    const newToAddr = emptyToAddr();
-
-    // Create the new state object
-    const newState = emptySendPageState();
-    newState.toaddr = newToAddr;
-
-    this.setSendPageState(newState);
   };
 
   setZecPrice = (newZecPrice: number, newDate: number) => {
@@ -1540,7 +1510,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
       return;
     }
 
-    await ScheduledActionsFileImpl.resetSA();
+    await resetScheduledActions();
     this.setScheduledActions([]);
     await notifee.cancelAllNotifications();
 
@@ -1569,7 +1539,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
       return;
     }
 
-    await ScheduledActionsFileImpl.resetSA();
+    await resetScheduledActions();
     this.setScheduledActions([]);
     await notifee.cancelAllNotifications();
 
@@ -1642,8 +1612,6 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
       info: this.state.info,
       zecPrice: this.state.zecPrice,
       defaultUnifiedAddress: this.state.defaultUnifiedAddress,
-      sendPageState: this.state.sendPageState,
-      setSendPageState: this.state.setSendPageState,
       background: this.state.background,
       translate: this.state.translate,
       backgroundError: this.state.backgroundError,
@@ -1727,7 +1695,6 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
                       setScrollToTop={this.setScrollToTop}
                       setScrollToBottom={this.setScrollToBottom}
                       setServerOption={this.setServerOption}
-                      clearToAddr={this.clearToAddr}
                       setSecurityOption={this.setSecurityOption}
                       {...props}
                       sendTransaction={this.sendTransaction}

@@ -37,7 +37,7 @@ import {
 } from '../AppState';
 import { writeSettings } from '../storage/settingsFile';
 import { SetupDomains, SetupDomainsProvider } from '../context';
-import BackgroundFileImpl from '../../components/Background';
+import { readBackground } from '../storage/backgroundFile';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Snackbars from '../../components/Components/Snackbars';
 import { SetupStackParamList } from '../types';
@@ -201,8 +201,7 @@ class SetupClass extends Component<SetupClassProps, SetupState> {
   };
 
   fetchBackgroundSyncing = async () => {
-    const backgroundJson: BackgroundType =
-      await BackgroundFileImpl.readBackground();
+    const backgroundJson = await readBackground();
     this.setState({ background: backgroundJson });
   };
 

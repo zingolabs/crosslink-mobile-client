@@ -24,6 +24,7 @@ import {
   ScreenEnum,
   RouteEnum,
   SendPageState,
+  emptySendPageState,
 } from '../../../app/AppState';
 import { WalletAddressKindEnum } from '../../../app/wallet/enums/WalletAddressKindEnum';
 import { ReceiversEnum } from '../../../app/wallet/enums/ReceiversEnum';
@@ -92,7 +93,7 @@ const Confirm: React.FunctionComponent<ConfirmProps> = ({
   const [sendPageState, setSendPageState] = useState<SendPageState>(
     !!route.params && route.params.sendPageState !== undefined
       ? route.params.sendPageState
-      : ({} as SendPageState),
+      : emptySendPageState(),
   );
 
   const [memoTotal, setMemoTotal] = useState<string>(
@@ -123,7 +124,7 @@ const Confirm: React.FunctionComponent<ConfirmProps> = ({
     const _sendPageState =
       !!route.params && route.params.sendPageState !== undefined
         ? route.params.sendPageState
-        : ({} as SendPageState);
+        : emptySendPageState();
     const _memoTotal = Utils.buildMemo(
       sendPageState.toaddr.memo,
       sendPageState.toaddr.includeUAMemo,

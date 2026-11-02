@@ -47,7 +47,7 @@ import {
 import { WalletKindEnum } from '../wallet/enums/WalletKindEnum';
 import { ToastProvider } from 'react-native-toastier';
 import { UfvkType } from '../wallet/types/UfvkType';
-import ScheduledActionsFileImpl from '../../components/ScheduledActions/ScheduledActionsFileImpl';
+import { resetScheduledActions } from '../storage/scheduledActionsFile';
 import { discoverIndexers, probeIndexer, selectBestIndexer } from '../indexers';
 import {
   quarantineLegacyWalletIfNeeded,
@@ -403,7 +403,7 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
       this.setState({ wallet });
       await this.ensureTorClient();
 
-      await ScheduledActionsFileImpl.resetSA();
+      await resetScheduledActions();
       await notifee.cancelAllNotifications();
 
       this.props.sessionOpened({
@@ -508,7 +508,7 @@ class OpeningClass extends Component<OpeningProps, OpeningState> {
 
     const wallet = await this.readWalletKind();
     await this.ensureTorClient();
-    await ScheduledActionsFileImpl.resetSA();
+    await resetScheduledActions();
     await notifee.cancelAllNotifications();
 
     this.props.sessionOpened({

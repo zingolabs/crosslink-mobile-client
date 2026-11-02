@@ -42,3 +42,5 @@ export const DEV_BUNDLE: boolean = __DEV__;
 export const BUILD_ID: string = process.env.DELEGATOR_BUILD_ID || 'unknown';
 
 export const CRASH_TEST: boolean = process.env.DELEGATOR_CRASH_TEST === '1';
+
+export const FAKE_RPC: boolean = process.env.DELEGATOR_FAKE_RPC === '1';

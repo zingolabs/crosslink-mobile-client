@@ -4,9 +4,6 @@ import {
   CurrencyEnum,
   LanguageEnum,
   SelectServerEnum,
-  SendPageState,
-  emptySendPageState,
-  ToAddr,
   TranslateType,
 } from '../app/AppState';
 import { LoadedDomains, SetupDomains } from '../app/context/domains';
@@ -66,7 +63,6 @@ export const mockContextLoaded: LoadedDomains = {
   defaultUnifiedAddress: mockAddresses[0]?.address ?? '',
   zenniesDonationAddress: mockAddresses[0]?.address ?? '',
   zingolibVersion: 'storybook',
-  sendPageState: emptySendPageState(),
 
   staked: [],
   globalStaked: [],
@@ -74,7 +70,6 @@ export const mockContextLoaded: LoadedDomains = {
   scheduledActions: [],
 
   // Actions are no-ops. A story that needs to assert on one passes its own.
-  setSendPageState: () => {},
   setBackgroundError: () => {},
   addLastSnackbar: () => {},
   removeFirstSnackbar: () => {},
