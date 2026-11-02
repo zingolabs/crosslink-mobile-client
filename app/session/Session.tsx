@@ -24,9 +24,7 @@ import {
   AppStateLoaded,
   TotalBalanceClass,
   SendPageState,
-  emptySendPageState,
   InfoType,
-  ToAddr,
   emptyToAddr,
   ZecPriceType,
   BackgroundType,
@@ -247,8 +245,6 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
       valueTransfersTotal: null,
       messages: null,
       messagesTotal: null,
-      sendPageState: emptySendPageState(),
-      setSendPageState: this.setSendPageState,
       getUfvk: this.getUfvk,
       info: {
         currencyName:
@@ -457,8 +453,6 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
     // Configure the wallet service to start doing refreshes
     await this.walletService.clearTimers();
     await this.walletService.configure();
-
-    this.clearToAddr();
   };
 
   subscribe = () => {
@@ -604,10 +598,7 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
     if (!url) {
       return;
     }
-    const filled = await this.readUrl(url);
-    if (filled) {
-      this.navigateTo(RouteEnum.Send);
-    }
+    await this.readUrl(url);
   };
 
   handleNetInfoChange = async (state: NetInfoState) => {
@@ -737,11 +728,12 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
 
       if (target) {
         let update = false;
-        if (
-          this.state.sendPageState.toaddr.to &&
-          target.address &&
-          this.state.sendPageState.toaddr.to !== target.address
-        ) {
+        const currentRoute = navigationRef.getCurrentRoute();
+        const draftTo =
+          currentRoute?.name === RouteEnum.Send
+            ? currentRoute.params?.toaddr.to
+            : '';
+        if (draftTo && target.address && draftTo !== target.address) {
           await ShowAddressAlertAsync(this.state.translate)
             .then(async () => {
               // fill the fields in the screen with the donation data
@@ -754,23 +746,15 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
         }
         if (update) {
           // redo the to addresses
-          const newSendPageState = emptySendPageState();
-          let uriToAddr: ToAddr = emptyToAddr();
-          [target].forEach(tgt => {
-            const to = emptyToAddr();
+          const to = emptyToAddr();
 
-            to.to = tgt.address || '';
-            to.amount = tgt.amount
-              ? Utils.parseNumberFloatToStringLocale(tgt.amount, 8)
-              : '';
-            to.memo = tgt.memoString || '';
+          to.to = target.address || '';
+          to.amount = target.amount
+            ? Utils.parseNumberFloatToStringLocale(target.amount, 8)
+            : '';
+          to.memo = target.memoString || '';
 
-            uriToAddr = to;
-          });
-
-          newSendPageState.toaddr = uriToAddr;
-
-          this.setSendPageState(newSendPageState);
+          this.navigateTo(RouteEnum.Send, { toaddr: to });
           filled = true;
         }
       }
@@ -1097,23 +1081,6 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
     } else {
       this.setState({ defaultUnifiedAddress: '' });
     }
-  };
-
-  setSendPageState = (sendPageState: SendPageState) => {
-    //console.log('fetch send page state');
-    //const start = Date.now();
-    this.setState({ sendPageState });
-    //console.log('=========================================== > SEND PAGE STORED SETSTATE - ', Date.now() - start);
-  };
-
-  clearToAddr = () => {
-    const newToAddr = emptyToAddr();
-
-    // Create the new state object
-    const newState = emptySendPageState();
-    newState.toaddr = newToAddr;
-
-    this.setSendPageState(newState);
   };
 
   setZecPrice = (newZecPrice: number, newDate: number) => {
@@ -1646,8 +1613,6 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
       info: this.state.info,
       zecPrice: this.state.zecPrice,
       defaultUnifiedAddress: this.state.defaultUnifiedAddress,
-      sendPageState: this.state.sendPageState,
-      setSendPageState: this.state.setSendPageState,
       background: this.state.background,
       translate: this.state.translate,
       backgroundError: this.state.backgroundError,
@@ -1731,7 +1696,6 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
                       setScrollToTop={this.setScrollToTop}
                       setScrollToBottom={this.setScrollToBottom}
                       setServerOption={this.setServerOption}
-                      clearToAddr={this.clearToAddr}
                       setSecurityOption={this.setSecurityOption}
                       {...props}
                       sendTransaction={this.sendTransaction}
