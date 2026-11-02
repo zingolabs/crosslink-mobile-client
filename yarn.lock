@@ -9538,6 +9538,11 @@ react-doctor@^0.9.18:
   dependencies:
     scheduler "^0.27.0"
 
+react-error-boundary@^6.1.6:
+  version "6.1.6"
+  resolved "https://registry.yarnpkg.com/react-error-boundary/-/react-error-boundary-6.1.6.tgz#1bdecd011681682db9112c204f8f5c5aad813318"
+  integrity sha512-CDXPnXDGyFIbkwaaJ6u+xgsRmJhSi6YdgUDW1vnyKHfXp1a9pfAlM+ZET2CDu80/A+8iRcmXN0NSY9BCCoWP5A==
+
 react-freeze@^1.0.0:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/react-freeze/-/react-freeze-1.0.4.tgz#cbbea2762b0368b05cbe407ddc9d518c57c6f3ad"
