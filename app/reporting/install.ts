@@ -1,4 +1,4 @@
-import { report } from './report';
+import { report, startReportQueue } from './report';
 
 type RejectionTracker = {
   enablePromiseRejectionTracker?: (options: {
@@ -49,4 +49,5 @@ export const installReporting = (): void => {
     previous(error, isFatal);
   });
   trackRejections();
+  startReportQueue();
 };

@@ -69,6 +69,8 @@ export default class WalletService {
 
   lastWalletBlockHeight: number;
   lastServerBlockHeight: number;
+  /** Last info fetched successfully; reused when the server cannot be reached. */
+  lastGoodInfo: InfoType | null;
   walletBirthday: number;
   walletSeed: string;
   UFVK: string;
@@ -140,6 +142,7 @@ export default class WalletService {
 
     this.lastWalletBlockHeight = 0;
     this.lastServerBlockHeight = 0;
+    this.lastGoodInfo = null;
     this.walletBirthday = 0;
     this.walletSeed = '';
     this.UFVK = '';
@@ -1031,12 +1034,17 @@ export default class WalletService {
       }
 
       if (infoError) {
+        // Keep the last known good values instead of writing zeroes, so the
+        // UI keeps showing stale data and `latestBlock` does not flap between
+        // a real height and 0 while the server is unstable.
         this.fnSetInfo({
-          latestBlock: 0,
-          serverUri: '',
-          version: '',
+          ...(this.lastGoodInfo ?? {
+            latestBlock: 0,
+            serverUri: '',
+            version: '',
+          }),
+          serverUnreachable: true,
         } as InfoType);
-        this.lastServerBlockHeight = 0;
         this.fetchInfoAndServerHeightLock = false;
         return;
       }
@@ -1057,6 +1065,7 @@ export default class WalletService {
       };
 
       this.fnSetInfo(info);
+      this.lastGoodInfo = info;
       this.lastServerBlockHeight = info.latestBlock;
       this.fetchInfoAndServerHeightLock = false;
     } catch (error) {
