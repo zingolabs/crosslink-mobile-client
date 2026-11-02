@@ -48,7 +48,7 @@ import {
 import { RPCWalletKindEnum } from '../wallet/enums/RPCWalletKindEnum';
 import { ToastProvider } from 'react-native-toastier';
 import { RPCUfvkType } from '../wallet/types/RPCUfvkType';
-import ScheduledActionsFileImpl from '../../components/ScheduledActions/ScheduledActionsFileImpl';
+import { resetScheduledActions } from '../storage/scheduledActionsFile';
 import { discoverIndexers, probeIndexer, selectBestIndexer } from '../indexers';
 import {
   quarantineLegacyWalletIfNeeded,
@@ -447,7 +447,7 @@ const OpeningClass: React.FC<OpeningProps> = ({
       patchState({ wallet });
       await ensureTorClient();
 
-      await ScheduledActionsFileImpl.resetSA();
+      await resetScheduledActions();
       await notifee.cancelAllNotifications();
 
       sessionOpened({
@@ -556,7 +556,7 @@ const OpeningClass: React.FC<OpeningProps> = ({
 
     const wallet = await readWalletKind();
     await ensureTorClient();
-    await ScheduledActionsFileImpl.resetSA();
+    await resetScheduledActions();
     await notifee.cancelAllNotifications();
 
     sessionOpened({

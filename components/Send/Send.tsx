@@ -29,6 +29,7 @@ import RegText from '../Components/RegText';
 import ZecAmount from '../Components/ZecAmount';
 import {
   emptySendPageState,
+  emptyToAddr,
   SendPageState,
   ChainNameEnum,
   GlobalConst,
@@ -47,7 +48,6 @@ import {
   useSession,
   useSettings,
   useStatus,
-  useUi,
   useWalletData,
 } from '../../app/context';
 import { createAlert } from '../../app/createAlert';
@@ -78,7 +78,6 @@ type SendProps = NativeStackScreenProps<
     toast: boolean,
     sameServerChainName: boolean,
   ) => Promise<void>;
-  clearToAddr: () => void;
   setSecurityOption: (s: SecurityType) => Promise<void>;
 };
 
@@ -91,9 +90,9 @@ type SpendabilityState = {
 
 const Send: React.FunctionComponent<SendProps> = ({
   sendTransaction,
-  clearToAddr,
   setScrollToTop,
   setScrollToBottom,
+  route,
 }) => {
   const navigation: any = useNavigation();
   const { translate, setBackgroundError, addLastSnackbar, removeFirstSnackbar } = useFeedback();
@@ -101,7 +100,7 @@ const Send: React.FunctionComponent<SendProps> = ({
   const { zenniesDonationAddress } = useSession();
   const { info, totalBalance, somePending, addresses, defaultUnifiedAddress, shieldingAmount } = useWalletData();
   const { zecPrice, netInfo } = useStatus();
-  const { sendPageState } = useUi();
+  const draft = route.params?.toaddr;
   const { snackbars } = useFeedback();
 
   const { colors } = useTheme();
@@ -121,18 +120,14 @@ const Send: React.FunctionComponent<SendProps> = ({
   const [donationAddress, setDonationAddress] = useState<boolean>(false);
   const [proposeSendLastError, setProposeSendLastError] = useState<string>('');
   const [negativeMaxAmount, setNegativeMaxAmount] = useState<boolean>(false);
-  const [addressText, setAddressText] = useState<string>(
-    sendPageState.toaddr.to,
-  );
-  const [memoText, setMemoText] = useState<string>(sendPageState.toaddr.memo);
-  const [amountText, setAmountText] = useState<string>(
-    sendPageState.toaddr.amount,
-  );
+  const [addressText, setAddressText] = useState<string>(draft?.to ?? '');
+  const [memoText, setMemoText] = useState<string>(draft?.memo ?? '');
+  const [amountText, setAmountText] = useState<string>(draft?.amount ?? '');
   const [amountCurrencyText, setAmountCurrencyText] = useState<string>(
-    sendPageState.toaddr.amountCurrency,
+    draft?.amountCurrency ?? '',
   );
   const [includeUAMemoBoolean, setIncludeUAMemoBoolean] = useState<boolean>(
-    sendPageState.toaddr.includeUAMemo,
+    draft?.includeUAMemo ?? false,
   );
   const [title, setTitle] = useState<'Send to' | 'Send'>('Send to');
   const [kbOpen, setKbOpen] = React.useState(false);
@@ -678,18 +673,15 @@ const Send: React.FunctionComponent<SendProps> = ({
   }, [addresses, addressText, indexerServer.chainName, zenniesDonationAddress]);
 
   useEffect(() => {
-    setAddressText(sendPageState.toaddr.to);
-    setAmountText(sendPageState.toaddr.amount);
-    setAmountCurrencyText(sendPageState.toaddr.amountCurrency);
-    setMemoText(sendPageState.toaddr.memo);
-    setIncludeUAMemoBoolean(sendPageState.toaddr.includeUAMemo);
-  }, [
-    sendPageState.toaddr.amount,
-    sendPageState.toaddr.amountCurrency,
-    sendPageState.toaddr.includeUAMemo,
-    sendPageState.toaddr.memo,
-    sendPageState.toaddr.to,
-  ]);
+    if (!draft) {
+      return;
+    }
+    setAddressText(draft.to);
+    setAmountText(draft.amount);
+    setAmountCurrencyText(draft.amountCurrency);
+    setMemoText(draft.memo);
+    setIncludeUAMemoBoolean(draft.includeUAMemo);
+  }, [draft]);
 
   const clearState = () => {
     setAddressText('');
@@ -697,20 +689,19 @@ const Send: React.FunctionComponent<SendProps> = ({
     setAmountCurrencyText('');
     setMemoText('');
     setIncludeUAMemoBoolean(false);
-    clearToAddr();
+    navigation.setParams({ toaddr: emptyToAddr() });
     syncSendabilityFromGlobal();
   };
 
-  const buildSendState = () =>
-    ({
-      toaddr: {
-        to: addressText,
-        amount: amountText,
-        amountCurrency: amountCurrencyText,
-        memo: memoText,
-        includeUAMemo: includeUAMemoBoolean,
-      },
-    }) as SendPageState;
+  const buildSendState = (): SendPageState => ({
+    toaddr: {
+      to: addressText,
+      amount: amountText,
+      amountCurrency: amountCurrencyText,
+      memo: memoText,
+      includeUAMemo: includeUAMemoBoolean,
+    },
+  });
 
   const interceptCustomError = (error: string) => {
     if (

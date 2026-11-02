@@ -10,12 +10,11 @@ import {
   useFeedback,
   useSettings,
   useStatus,
-  useUi,
 } from '../../app/context';
 import RegText from './RegText';
 import Utils from '../../app/utils';
 import {
-  emptySendPageState,
+  emptyToAddr,
   SnackbarDurationEnum,
   RouteEnum,
   SelectServerEnum,
@@ -48,7 +47,6 @@ const AddressItem: React.FunctionComponent<AddressItemProps> = ({
 }) => {
   const navigation: any = useNavigation();
   const { translate, addLastSnackbar } = useFeedback();
-  const { setSendPageState } = useUi();
   const { privacy, selectIndexerServer } = useSettings();
   const { readOnly } = useStatus();
   const { colors } = useTheme();
@@ -134,10 +132,9 @@ const AddressItem: React.FunctionComponent<AddressItemProps> = ({
                 style={styles.sendButton}
                 onPress={() => {
                   // enviar
-                  const sendPageState = emptySendPageState();
-                  sendPageState.toaddr.to = address;
-                  setSendPageState(sendPageState);
-                  navigation.navigate(RouteEnum.Send);
+                  const toaddr = emptyToAddr();
+                  toaddr.to = address;
+                  navigation.navigate(RouteEnum.Send, { toaddr });
                 }}
               >
                 <FontAwesomeIcon
