@@ -26,7 +26,7 @@ import {
 import ZecAmount from '../Components/ZecAmount';
 import FadeText from '../Components/FadeText';
 import simpleBiometrics from '../../app/simpleBiometrics';
-import { RPCSyncStatusType } from '../../app/wallet/types/RPCSyncStatusType';
+import { SyncStatusType } from '../../app/wallet/types/SyncStatusType';
 import { isEqual } from 'lodash';
 import SettingsIcon from '../../assets/icons/settings.svg';
 import { radiusPill, space, text, useTheme } from '../../app/theme';
@@ -97,7 +97,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
       0;
     if (
       !syncingStatus ||
-      isEqual(syncingStatus, {} as RPCSyncStatusType) ||
+      isEqual(syncingStatus, {} as SyncStatusType) ||
       (!!syncingStatus.scan_ranges && syncingStatus.scan_ranges.length === 0) ||
       percentage === 0
     ) {

@@ -18,7 +18,6 @@ import {
 } from '@sayem314/react-native-keep-awake';
 
 import WalletService from '../wallet';
-import RPCModule from '../RPCModule';
 import { StakingDayActivitySync } from '../StakingDayActivity';
 import {
   AppStateLoaded,
@@ -65,7 +64,7 @@ import { readBackground } from '../storage/backgroundFile';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAlert } from '../createAlert';
 import Snackbars from '../../components/Components/Snackbars';
-import { RPCSeedType } from '../wallet/types/RPCSeedType';
+import { SeedType } from '../wallet/types/SeedType';
 import { Launching, useLifecycle } from '../lifecycle';
 import simpleBiometrics from '../simpleBiometrics';
 import ShowAddressAlertAsync from '../../components/Send/components/ShowAddressAlertAsync';
@@ -77,9 +76,9 @@ import notifee, { EventType } from '@notifee/react-native';
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ToastProvider } from 'react-native-toastier';
-import { RPCSyncStatusType } from '../wallet/types/RPCSyncStatusType';
-import { RPCUfvkType } from '../wallet/types/RPCUfvkType';
-import { RPCPerformanceLevelEnum } from '../wallet/enums/RPCPerformanceLevelEnum';
+import { SyncStatusType } from '../wallet/types/SyncStatusType';
+import { UfvkType } from '../wallet/types/UfvkType';
+import { PerformanceLevelEnum } from '../wallet/enums/PerformanceLevelEnum';
 import { SessionStackParamList } from '../types';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Send from '../../components/Send';
@@ -599,7 +598,7 @@ export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
         //console.log('LOADED SAVED IOS background', nextAppState);
         // We need to save the wallet file here because
         // sometimes the App can lose the last synced chunk
-        await RPCModule.doSave();
+        await WalletService.doSave();
         return;
       }
     }
@@ -659,7 +658,7 @@ export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
       //console.log('clear sync status state');
       // We need to save the wallet file here because
       // sometimes the App can lose the last synced chunk
-      await RPCModule.doSave();
+      await WalletService.doSave();
       if (Platform.OS === GlobalConst.platformOSios) {
         //console.log('LOADED SAVED IOS background', nextAppState);
         patchState({ appStateStatus: nextAppState });
@@ -1358,7 +1357,7 @@ export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
       //   The App have to go to the initial screen
       // - the seed exists and the App can open the wallet in the new server.
       //   But I have to restart the sync if needed.
-      let result: string = await RPCModule.loadExistingWallet(
+      let result: string = await WalletService.loadExistingWallet(
         value.uri,
         // 'regtest',
         value.chainName,
@@ -1369,7 +1368,7 @@ export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
       if (result && !result.toLowerCase().startsWith(GlobalConst.error)) {
         try {
           // here result can have an `error` field for watch-only which is actually OK.
-          const resultJson: RPCSeedType & RPCUfvkType =
+          const resultJson: SeedType & UfvkType =
             await JSON.parse(result);
           if (!resultJson.error) {
             // Load the wallet and navigate to the ValueTransfers screen
@@ -1396,7 +1395,7 @@ export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
               stateRef.current.currency === CurrencyEnum.USDTORCurrency ||
               stateRef.current.currency === CurrencyEnum.USDCurrency
             ) {
-              const resp: string = await RPCModule.createTorClientProcess();
+              const resp: string = await WalletService.createTorClientProcess();
               if (resp && resp.toLowerCase().startsWith(GlobalConst.error)) {
                 setLastError(`Create tor client error: ${resp}`);
               }
@@ -1448,14 +1447,14 @@ export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
       // when the user select USD
       // the App have to create a Tor Client
       //console.log('before CREATE ------------------- TOR CLIENT');
-      const result = await RPCModule.createTorClientProcess();
+      const result = await WalletService.createTorClientProcess();
       //console.log('after CREATE ------------------- TOR CLIENT', result);
       if (result && result.toLowerCase().startsWith(GlobalConst.error)) {
         setLastError(`Create tor client error: ${result}`);
       }
     } else {
       //console.log('before REMOVE ------------------- TOR CLIENT');
-      const result = await RPCModule.removeTorClientProcess();
+      const result = await WalletService.removeTorClientProcess();
       //console.log('after REMOVE ------------------- TOR CLIENT', result);
       if (result && result.toLowerCase().startsWith(GlobalConst.error)) {
         setLastError(`Remove tor client error: ${result}`);

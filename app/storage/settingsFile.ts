@@ -9,7 +9,7 @@ import {
   SelectServerEnum,
   ServerType,
 } from '../AppState';
-import { RPCPerformanceLevelEnum } from '../wallet/enums/RPCPerformanceLevelEnum';
+import { PerformanceLevelEnum } from '../wallet/enums/PerformanceLevelEnum';
 
 export interface SettingsFile {
   indexerServer?: ServerType;
@@ -27,7 +27,7 @@ export interface SettingsFile {
   security?: SecurityType;
   rescanMenu?: boolean;
   recoveryWalletInfoOnDevice?: boolean;
-  performanceLevel?: RPCPerformanceLevelEnum;
+  performanceLevel?: PerformanceLevelEnum;
 }
 
 const fileName = (): string => RNFS.DocumentDirectoryPath + '/settings.json';

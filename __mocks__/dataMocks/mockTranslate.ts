@@ -1,5 +1,5 @@
 import { CurrencyEnum, LanguageEnum } from '../../app/AppState';
-import { RPCPerformanceLevelEnum } from '../../app/wallet/enums/RPCPerformanceLevelEnum';
+import { PerformanceLevelEnum } from '../../app/wallet/enums/PerformanceLevelEnum';
 
 export const mockTranslate = (p: string) => {
   if (p === 'about.copyright') {
@@ -104,19 +104,19 @@ export const mockTranslate = (p: string) => {
   } else if (p === 'settings.performancelevels') {
     return [
       {
-        value: RPCPerformanceLevelEnum.High,
+        value: PerformanceLevelEnum.High,
         text: 'text high',
       },
       {
-        value: RPCPerformanceLevelEnum.Low,
+        value: PerformanceLevelEnum.Low,
         text: 'text low',
       },
       {
-        value: RPCPerformanceLevelEnum.Maximum,
+        value: PerformanceLevelEnum.Maximum,
         text: 'text maximum',
       },
       {
-        value: RPCPerformanceLevelEnum.Medium,
+        value: PerformanceLevelEnum.Medium,
         text: 'text medium',
       },
     ];

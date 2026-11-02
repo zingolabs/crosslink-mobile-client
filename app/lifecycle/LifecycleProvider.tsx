@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 
 import { LaunchingModeEnum, GlobalConst } from '../AppState';
-import RPCModule from '../RPCModule';
+import WalletService from '../wallet';
 import simpleBiometrics from '../simpleBiometrics';
 import { readSettings, writeSettings } from '../storage/settingsFile';
 import {
@@ -95,7 +95,7 @@ const readBootInfo = async (
 };
 
 const walletExists = async (): Promise<boolean> => {
-  const exists = await RPCModule.walletExists();
+  const exists = await WalletService.walletExists();
   return !!exists && exists !== GlobalConst.false;
 };
 

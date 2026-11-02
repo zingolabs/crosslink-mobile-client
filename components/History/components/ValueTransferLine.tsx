@@ -27,7 +27,7 @@ import {
   useSettings,
   useWalletData,
 } from '../../../app/context';
-import { RPCValueTransferStatusEnum } from '../../../app/wallet/enums/RPCValueTransferStatusEnum';
+import { ValueTransferStatusEnum } from '../../../app/wallet/enums/ValueTransferStatusEnum';
 import Utils from '../../../app/utils';
 import RegText from '../../Components/RegText';
 import Stake from '../../../assets/icons/stake-blue.svg';
@@ -170,12 +170,12 @@ const ValueTransferLine: React.FunctionComponent<ValueTransferLineProps> = ({
                             ...styles.statusLabel,
                             color:
                               vt.status ===
-                                RPCValueTransferStatusEnum.transmitted ||
+                                ValueTransferStatusEnum.transmitted ||
                               vt.status ===
-                                RPCValueTransferStatusEnum.calculated ||
+                                ValueTransferStatusEnum.calculated ||
                               vt.status ===
-                                RPCValueTransferStatusEnum.mempool ||
-                              vt.status === RPCValueTransferStatusEnum.failed
+                                ValueTransferStatusEnum.mempool ||
+                              vt.status === ValueTransferStatusEnum.failed
                                 ? colors.fgAccent
                                 : colors.fgAccentDisabled,
                           }}
