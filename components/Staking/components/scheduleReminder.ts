@@ -26,6 +26,18 @@ async function requestPermissions() {
   }
 }
 
+// The block-time estimate changes on every new block, so the caller can
+// recompute a slightly different `seconds` each time. Re-creating the
+// trigger notification for every block is wasted work; only reschedule
+// when the rounded fire time or the action count actually changes.
+const ROUND_TO_SECONDS = 60;
+
+let lastScheduled = '';
+
+export const resetScheduledReminder = (): void => {
+  lastScheduled = '';
+};
+
 export async function scheduleReminder({
   seconds,
   numberActions,
@@ -33,6 +45,13 @@ export async function scheduleReminder({
   seconds: number;
   numberActions: number;
 }) {
+  const scheduleKey = `${numberActions}:${Math.max(
+    0,
+    Math.round(seconds / ROUND_TO_SECONDS),
+  )}`;
+  if (scheduleKey === lastScheduled) {
+    return;
+  }
   const allowed: boolean = await requestPermissions();
 
   if (allowed) {
@@ -76,6 +95,8 @@ export async function scheduleReminder({
     };
 
     await notifee.createTriggerNotification(notification, trigger);
+
+    lastScheduled = scheduleKey;
 
     return;
   }

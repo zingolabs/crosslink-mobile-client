@@ -1560,6 +1560,9 @@ export class SessionClass extends Component<SessionClassProps, SessionState> {
   };
 
   setLastError = (error: string) => {
+    if (error === this.state.lastError) {
+      return;
+    }
     report(new Error(error));
     this.setState({ lastError: error });
   };

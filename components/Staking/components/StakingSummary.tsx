@@ -27,6 +27,9 @@ const StakingSummary: React.FC = () => {
     syncingStatus?.percentage_total_blocks_scanned ||
     0;
   const icon = { size: 22, strokeWidth: 2.2, color: colors.fgDefault };
+  // the device can be online while the indexer itself is unreachable;
+  // both cases mean the amounts shown are stale
+  const reachable = !!netInfo.isConnected && !info.serverUnreachable;
 
   return (
     <SummaryPanel
@@ -34,7 +37,7 @@ const StakingSummary: React.FC = () => {
       amount={totalBalance?.stakedAmount ?? 0}
       unit={info.currencyName}
       settled={pct >= 100}
-      connected={!!netInfo.isConnected}
+      connected={reachable}
       privacy={privacy}
       leading={<StakingDayStatusBar />}
       trailing={

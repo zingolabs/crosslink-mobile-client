@@ -71,6 +71,8 @@ export default class WalletService {
 
   lastWalletBlockHeight: number;
   lastServerBlockHeight: number;
+  /** Last info fetched successfully; reused when the server cannot be reached. */
+  lastGoodInfo: InfoType | null;
   walletBirthday: number;
   walletSeed: string;
   UFVK: string;
@@ -142,6 +144,7 @@ export default class WalletService {
 
     this.lastWalletBlockHeight = 0;
     this.lastServerBlockHeight = 0;
+    this.lastGoodInfo = null;
     this.walletBirthday = 0;
     this.walletSeed = '';
     this.UFVK = '';
@@ -668,26 +671,32 @@ export default class WalletService {
   // - Internet from Not Connected to Connected.
   // - Server change.
   async configure(): Promise<void> {
-    // takes a while to start
-    await this.fetchTandZandOValueTransfers();
-    await this.fetchAddresses();
-    await this.fetchTotalBalance();
-    await this.fetchStaked();
-    await this.fetchInfoAndServerHeight();
-
-    // I need to fetch this quickly.
-    await this.fetchZingolibVersion();
-
-    await this.fetchTandZandOMessages();
-    await this.fetchWalletHeight();
-    await this.fetchWalletBirthdaySeedUfvk();
-
-    // every 5 seconds the App update part of the data
+    // start the periodic updates immediately; the initial fetches below
+    // fill the data in as they complete. Starting the timer only after
+    // the fetches left the app without updates for the whole duration
+    // of the chain when the server was slow to answer.
     if (!this.updateTimerID) {
       this.updateTimerID = setInterval(() => this.runTaskPromises(), 5 * 1000); // 5 secs
       //console.log('create update timer', this.updateVTTimerID);
       this.timers.push(this.updateTimerID);
     }
+
+    // these fetches are independent: each has its own lock and its own
+    // error handling, so they run concurrently. Serialized, a dead
+    // server made the whole chain take the sum of nine timeouts.
+    await Promise.allSettled([
+      // takes a while to start
+      this.fetchTandZandOValueTransfers(),
+      this.fetchAddresses(),
+      this.fetchTotalBalance(),
+      this.fetchStaked(),
+      this.fetchInfoAndServerHeight(),
+      // I need to fetch this quickly.
+      this.fetchZingolibVersion(),
+      this.fetchTandZandOMessages(),
+      this.fetchWalletHeight(),
+      this.fetchWalletBirthdaySeedUfvk(),
+    ]);
 
     await this.sanitizeTimers();
   }
@@ -1033,12 +1042,17 @@ export default class WalletService {
       }
 
       if (infoError) {
+        // Keep the last known good values instead of writing zeroes, so the
+        // UI keeps showing stale data and `latestBlock` does not flap between
+        // a real height and 0 while the server is unstable.
         this.fnSetInfo({
-          latestBlock: 0,
-          serverUri: '',
-          version: '',
+          ...(this.lastGoodInfo ?? {
+            latestBlock: 0,
+            serverUri: '',
+            version: '',
+          }),
+          serverUnreachable: true,
         } as InfoType);
-        this.lastServerBlockHeight = 0;
         this.fetchInfoAndServerHeightLock = false;
         return;
       }
@@ -1059,6 +1073,7 @@ export default class WalletService {
       };
 
       this.fnSetInfo(info);
+      this.lastGoodInfo = info;
       this.lastServerBlockHeight = info.latestBlock;
       this.fetchInfoAndServerHeightLock = false;
     } catch (error) {
