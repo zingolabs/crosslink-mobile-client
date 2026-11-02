@@ -305,7 +305,6 @@ export default function Session() {
 export const SessionClass: React.FC<SessionClassProps> = props => {
   const screenName = ScreenEnum.Session;
 
-  const subscriptionsRef = useRef<(() => void)[]>([]);
   const blockTimesRef = useRef<number[]>([
     props.session &&
     props.settings.indexerServer.chainName === ChainNameEnum.regtestChainName
@@ -408,7 +407,9 @@ export const SessionClass: React.FC<SessionClassProps> = props => {
     }),
   );
   const stateRef = useRef(state);
-  stateRef.current = state;
+  useEffect(() => {
+    stateRef.current = state;
+  });
   const patchState = (
     part:
       | Partial<SessionState>
@@ -422,11 +423,28 @@ export const SessionClass: React.FC<SessionClassProps> = props => {
 
   useEffect(() => {
     startSession();
-    subscribe();
     handleInitialUrl();
     handleInitialNotification();
+
+    const appState = AppState.addEventListener(
+      EventListenerEnum.change,
+      handleAppStateChange,
+    );
+    const linking = Linking.addEventListener(EventListenerEnum.url, ({ url }) =>
+      handleUrl(url),
+    );
+    const netInfo = NetInfo.addEventListener(handleNetInfoChange);
+    const notifeeUnsubscribe = notifee.onForegroundEvent(({ type, detail }) => {
+      if (type === EventType.PRESS) {
+        handleNotificationDeeplink(detail.notification?.data?.deeplink);
+      }
+    });
+
     return () => {
-      unsubscribe();
+      appState?.remove?.();
+      linking?.remove?.();
+      netInfo?.();
+      notifeeUnsubscribe?.();
       keepAwake(false);
       walletService.clearTimers();
     };
@@ -550,33 +568,6 @@ export const SessionClass: React.FC<SessionClassProps> = props => {
     // Configure the wallet service to start doing refreshes
     await walletService.clearTimers();
     await walletService.configure();
-  };
-
-  const subscribe = () => {
-    const appState = AppState.addEventListener(
-      EventListenerEnum.change,
-      handleAppStateChange,
-    );
-    const linking = Linking.addEventListener(EventListenerEnum.url, ({ url }) =>
-      handleUrl(url),
-    );
-    const netInfo = NetInfo.addEventListener(handleNetInfoChange);
-    const notifee_ = notifee.onForegroundEvent(({ type, detail }) => {
-      if (type === EventType.PRESS) {
-        handleNotificationDeeplink(detail.notification?.data?.deeplink);
-      }
-    });
-    subscriptionsRef.current = [
-      () => appState?.remove?.(),
-      () => linking?.remove?.(),
-      netInfo,
-      notifee_,
-    ];
-  };
-
-  const unsubscribe = () => {
-    subscriptionsRef.current.forEach(off => typeof off === 'function' && off());
-    subscriptionsRef.current = [];
   };
 
   const handleAppStateChange = async (nextAppState: AppStateStatus) => {
@@ -1676,31 +1667,29 @@ export const SessionClass: React.FC<SessionClassProps> = props => {
     });
   };
 
-  const walletServiceRef = useRef<WalletService | null>(null);
-  if (walletServiceRef.current === null) {
-    walletServiceRef.current = new WalletService(
-      setTotalBalance,
-      setStaked,
-      setGlobalStaked,
-      setWalletBonds,
-      setValueTransfersList,
-      setMessagesList,
-      setAllAddresses,
-      setInfo,
-      setSyncingStatus,
-      props.translate,
-      keepAwake,
-      setZingolibVersion,
-      setWallet,
-      setLastError,
-      recoverWalletFromSeed,
-      props.session.walletKind.readOnly,
-      props.settings.indexerServer,
-      props.settings.performanceLevel,
-    );
-  }
-  const walletService = walletServiceRef.current;
-
+  const [walletService] = useState(
+    () =>
+      new WalletService(
+        setTotalBalance,
+        setStaked,
+        setGlobalStaked,
+        setWalletBonds,
+        setValueTransfersList,
+        setMessagesList,
+        setAllAddresses,
+        setInfo,
+        setSyncingStatus,
+        props.translate,
+        keepAwake,
+        setZingolibVersion,
+        setWallet,
+        setLastError,
+        recoverWalletFromSeed,
+        props.session.walletKind.readOnly,
+        props.settings.indexerServer,
+        props.settings.performanceLevel,
+      ),
+  );
   const { snackbars, scrollToTop } = state;
 
   const context = {

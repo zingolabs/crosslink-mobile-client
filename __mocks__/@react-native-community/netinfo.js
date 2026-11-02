@@ -18,7 +18,7 @@ RN.NativeModules.RNCNetInfo = {
 
 export default {
   RNCNetInfo: RN,
-  addEventListener: jest.fn(),
+  addEventListener: jest.fn(() => ({ remove: jest.fn() })),
   fetch: jest.fn().mockImplementation(() =>
     Promise.resolve({
       isConnected: true,
