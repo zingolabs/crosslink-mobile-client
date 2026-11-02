@@ -9,7 +9,7 @@ import {
   ValueTransferType,
 } from '../../app/AppState';
 import { WalletBondsStatusEnum } from '../../app/AppState/enums/WalletBondsStatusEnum';
-import { ValueTransferStatusEnum as S } from '../../app/wallet/enums/ValueTransferStatusEnum';
+import { ValueTransferStatusEnum as S } from '../../app/wallet/enums';
 
 const HOUR = 3600;
 const DAY = 24 * HOUR;

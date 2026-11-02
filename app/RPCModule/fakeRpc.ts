@@ -4,14 +4,16 @@ import {
   GlobalConst,
   ValueTransferKindEnum,
 } from '../AppState';
-import { WalletAddressKindEnum } from '../wallet/enums/WalletAddressKindEnum';
-import { ParseAddressStatusEnum } from '../wallet/enums/ParseAddressStatusEnum';
-import { PerformanceLevelEnum } from '../wallet/enums/PerformanceLevelEnum';
-import { ReceiversEnum } from '../wallet/enums/ReceiversEnum';
-import { WalletValueTransferKindEnum } from '../wallet/enums/WalletValueTransferKindEnum';
-import { ValueTransferStatusEnum } from '../wallet/enums/ValueTransferStatusEnum';
-import { WalletKindEnum } from '../wallet/enums/WalletKindEnum';
-import { WalletValueTransferType } from '../wallet/types/WalletValueTransferType';
+import {
+  ParseAddressStatusEnum,
+  PerformanceLevelEnum,
+  ReceiversEnum,
+  ValueTransferStatusEnum,
+  WalletAddressKindEnum,
+  WalletKindEnum,
+  WalletValueTransferKindEnum,
+} from '../wallet/enums';
+import { WalletValueTransferType } from '../wallet/types';
 import { mockAddresses } from '../../__mocks__/dataMocks/mockAddresses';
 import { mockInfo } from '../../__mocks__/dataMocks/mockInfo';
 import { mockIndexerServer } from '../../__mocks__/dataMocks/mockServers';

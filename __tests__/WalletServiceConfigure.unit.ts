@@ -3,7 +3,7 @@
  */
 
 import WalletService from '../app/wallet/WalletService';
-import { PerformanceLevelEnum } from '../app/wallet/enums/PerformanceLevelEnum';
+import { PerformanceLevelEnum } from '../app/wallet/enums';
 
 jest.mock('../app/RPCModule/RPCModule', () => ({}));
 

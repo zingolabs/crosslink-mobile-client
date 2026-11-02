@@ -20,7 +20,7 @@ import {
   ValueTransferKindEnum as K,
   ValueTransferType,
 } from '../../app/AppState';
-import { ValueTransferStatusEnum } from '../../app/wallet/enums/ValueTransferStatusEnum';
+import { ValueTransferStatusEnum } from '../../app/wallet/enums';
 import {
   useFeedback,
   useSettings,

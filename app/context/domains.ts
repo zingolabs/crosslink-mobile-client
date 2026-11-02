@@ -21,8 +21,8 @@ import { LanguageEnum } from '../AppState/enums/LanguageEnum';
 import { CurrencyEnum } from '../AppState/enums/CurrencyEnum';
 import { SelectServerEnum } from '../AppState/enums/SelectServerEnum';
 import { ScreenEnum } from '../AppState/enums/ScreenEnum';
-import { PerformanceLevelEnum } from '../wallet/enums/PerformanceLevelEnum';
-import { SyncStatusType } from '../wallet/types/SyncStatusType';
+import { PerformanceLevelEnum } from '../wallet/enums';
+import { SyncStatusType } from '../wallet/types';
 
 export interface SettingsValue {
   indexerServer: ServerType;

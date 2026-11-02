@@ -1,5 +1,5 @@
 import { CurrencyEnum, LanguageEnum } from '../../app/AppState';
-import { PerformanceLevelEnum } from '../../app/wallet/enums/PerformanceLevelEnum';
+import { PerformanceLevelEnum } from '../../app/wallet/enums';
 
 export const mockTranslate = (p: string) => {
   if (p === 'about.copyright') {

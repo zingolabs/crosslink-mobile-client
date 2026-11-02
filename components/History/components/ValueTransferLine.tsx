@@ -27,7 +27,7 @@ import {
   useSettings,
   useWalletData,
 } from '../../../app/context';
-import { ValueTransferStatusEnum } from '../../../app/wallet/enums/ValueTransferStatusEnum';
+import { ValueTransferStatusEnum } from '../../../app/wallet/enums';
 import Utils from '../../../app/utils';
 import RegText from '../../Components/RegText';
 import Stake from '../../../assets/icons/stake-blue.svg';

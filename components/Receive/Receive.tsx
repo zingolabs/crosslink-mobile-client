@@ -36,7 +36,7 @@ import {
   ScreenEnum,
   RouteEnum,
 } from '../../app/AppState';
-import { AddressScopeEnum } from '../../app/wallet/enums/AddressScopeEnum';
+import { AddressScopeEnum } from '../../app/wallet/enums';
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,

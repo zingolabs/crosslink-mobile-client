@@ -3,7 +3,7 @@ import {
   ValueTransferKindEnum as K,
   ValueTransferType,
 } from '../../app/AppState';
-import { ValueTransferStatusEnum as S } from '../../app/wallet/enums/ValueTransferStatusEnum';
+import { ValueTransferStatusEnum as S } from '../../app/wallet/enums';
 
 const MIN = 60;
 const HOUR = 60 * MIN;

@@ -1,4 +1,4 @@
-import { AddressScopeEnum } from '../../wallet/enums/AddressScopeEnum';
+import { AddressScopeEnum } from '../../wallet/enums';
 import { AddressKindEnum } from '../enums/AddressKindEnum';
 
 export default class TransparentAddressClass {

@@ -37,7 +37,7 @@ import {
   useWalletData,
 } from '../../app/context';
 import Utils from '../../app/utils';
-import { ValueTransferStatusEnum } from '../../app/wallet/enums/ValueTransferStatusEnum';
+import { ValueTransferStatusEnum } from '../../app/wallet/enums';
 import { MainTabParamList } from '../../app/types/NavigationTypes';
 import { text, curve, duration, useTheme } from '../../app/theme';
 import EmptyState from '../Components/EmptyState';

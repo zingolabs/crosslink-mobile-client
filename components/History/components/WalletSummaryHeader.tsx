@@ -10,7 +10,7 @@ import {
   useWalletData,
 } from '../../../app/context';
 import { RouteEnum, SelectServerEnum } from '../../../app/AppState';
-import { SyncStatusType } from '../../../app/wallet/types/SyncStatusType';
+import { SyncStatusType } from '../../../app/wallet/types';
 import ZecAmount from '../../Components/ZecAmount';
 import FadeText from '../../Components/FadeText';
 import { space, text, useTheme } from '../../../app/theme';

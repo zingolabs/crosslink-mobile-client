@@ -51,8 +51,8 @@ import {
   useWalletData,
 } from '../../app/context';
 import { createAlert } from '../../app/createAlert';
-import { SendProposeType } from '../../app/wallet/types/SendProposeType';
-import { SpendablebalanceType } from '../../app/wallet/types/SpendablebalanceType';
+import { SendProposeType } from '../../app/wallet/types';
+import { SpendablebalanceType } from '../../app/wallet/types';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import Snackbars from '../Components/Snackbars';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';

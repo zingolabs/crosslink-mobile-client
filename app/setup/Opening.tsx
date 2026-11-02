@@ -28,9 +28,8 @@ import WalletService from '../wallet';
 import { SetupDomains, SetupDomainsProvider } from '../context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAlert } from '../createAlert';
-import { WalletKindType } from '../wallet/types/WalletKindType';
+import { SeedType, UfvkType, WalletKindType } from '../wallet/types';
 import Snackbars from '../../components/Components/Snackbars';
-import { SeedType } from '../wallet/types/SeedType';
 import Launching from '../lifecycle/Launching';
 import isEqual from 'lodash/isEqual';
 import {
@@ -38,9 +37,8 @@ import {
   hasRecoveryWalletInfo,
   removeRecoveryWalletInfo,
 } from '../recoveryWalletInfov10';
-import { WalletKindEnum } from '../wallet/enums/WalletKindEnum';
+import { WalletKindEnum } from '../wallet/enums';
 import { ToastProvider } from 'react-native-toastier';
-import { UfvkType } from '../wallet/types/UfvkType';
 import { resetScheduledActions } from '../storage/scheduledActionsFile';
 import { discoverIndexers, probeIndexer, selectBestIndexer } from '../indexers';
 import {

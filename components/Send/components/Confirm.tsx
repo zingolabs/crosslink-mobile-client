@@ -26,13 +26,15 @@ import {
   SendPageState,
   emptySendPageState,
 } from '../../../app/AppState';
-import { WalletAddressKindEnum } from '../../../app/wallet/enums/WalletAddressKindEnum';
-import { ReceiversEnum } from '../../../app/wallet/enums/ReceiversEnum';
-import { ParseAddressStatusEnum } from '../../../app/wallet/enums/ParseAddressStatusEnum';
+import {
+  ParseAddressStatusEnum,
+  ReceiversEnum,
+  WalletAddressKindEnum,
+} from '../../../app/wallet/enums';
 import Snackbars from '../../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ParseAddressType } from '../../../app/wallet/types/ParseAddressType';
+import { ParseAddressType } from '../../../app/wallet/types';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../../Header';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';

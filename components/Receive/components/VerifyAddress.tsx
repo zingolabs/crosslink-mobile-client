@@ -18,7 +18,7 @@ import { parseZcashURI } from '../../../app/uris';
 import TextInputAddress from '../../Components/TextInputAddress';
 import FadeText from '../../Components/FadeText';
 import RegText from '../../Components/RegText';
-import { CheckAddressType } from '../../../app/wallet/types/CheckAddressType';
+import { CheckAddressType } from '../../../app/wallet/types';
 import { VerifyCheckIcon } from '../../Components/Icons/VerifyCheckIcon';
 import { VerifyXIcon } from '../../Components/Icons/VerifyXIcon';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';

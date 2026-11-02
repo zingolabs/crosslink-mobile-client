@@ -1,5 +1,5 @@
-import { SyncScanRangePriorityStatusEnum } from '../../app/wallet/enums/SyncScanRangePriorityStatusEnum';
-import { SyncStatusType } from '../../app/wallet/types/SyncStatusType';
+import { SyncScanRangePriorityStatusEnum } from '../../app/wallet/enums';
+import { SyncStatusType } from '../../app/wallet/types';
 
 export const mockSyncingStatus: SyncStatusType = {} as SyncStatusType;
 
