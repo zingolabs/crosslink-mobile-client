@@ -120,7 +120,7 @@ const SessionStack = createNativeStackNavigator<SessionStackParamList>();
 
 const navigationRef = createNavigationContainerRef<SessionStackParamList>();
 
-type SessionClassProps = {
+type SessionLoadedProps = {
   boot: BootInfo;
   settings: BootstrappedSettings;
   session: SessionHandle;
@@ -133,7 +133,7 @@ type SessionClassProps = {
 type SessionState = AppStateLoaded & LoadedDomains;
 
 const buildInitialState = (
-  props: SessionClassProps,
+  props: SessionLoadedProps,
   callbacks: Pick<
     SessionState,
     | 'getUfvk'
@@ -275,7 +275,7 @@ export default function Session() {
 
   return (
     <View style={{ flex: 1 }}>
-      <SessionClass
+      <SessionLoaded
         boot={lifecycle.boot}
         settings={lifecycle.boot.settings}
         session={lifecycle.session}
@@ -302,7 +302,7 @@ export default function Session() {
   );
 }
 
-export const SessionClass: React.FC<SessionClassProps> = props => {
+export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
   const screenName = ScreenEnum.Session;
 
   const blockTimesRef = useRef<number[]>([
