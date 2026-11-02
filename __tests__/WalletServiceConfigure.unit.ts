@@ -3,7 +3,7 @@
  */
 
 import WalletService from '../app/wallet/WalletService';
-import { RPCPerformanceLevelEnum } from '../app/wallet/enums/RPCPerformanceLevelEnum';
+import { PerformanceLevelEnum } from '../app/wallet/enums/PerformanceLevelEnum';
 
 jest.mock('../app/RPCModule/RPCModule', () => ({}));
 
@@ -29,7 +29,7 @@ const buildService = (): WalletService =>
     jest.fn(),
     false,
     { uri: 'http://localhost', chainName: 'test' } as any,
-    RPCPerformanceLevelEnum.Medium,
+    PerformanceLevelEnum.Medium,
   );
 
 const never = (): Promise<never> => new Promise(() => undefined);

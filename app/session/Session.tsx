@@ -166,7 +166,7 @@ const buildInitialState = (
     chainName: props.settings.indexerServer.chainName,
     serverUri: props.settings.indexerServer.uri,
   } as InfoType,
-  syncingStatus: {} as RPCSyncStatusType,
+  syncingStatus: {} as SyncStatusType,
   wallet: {} as WalletType,
   defaultUnifiedAddress: '',
   zecPrice: {
@@ -593,7 +593,7 @@ export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
         //console.log('&&&&& background yes in storage &&&&&');
         await walletService.clearTimers();
         //console.log('clear timers IOS');
-        setSyncingStatus({} as RPCSyncStatusType);
+        setSyncingStatus({} as SyncStatusType);
         //console.log('clear sync status state');
         //console.log('LOADED SAVED IOS background', nextAppState);
         // We need to save the wallet file here because
@@ -654,7 +654,7 @@ export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
       //console.log('&&&&& background yes in storage &&&&&');
       await walletService.clearTimers();
       //console.log('clear timers');
-      setSyncingStatus({} as RPCSyncStatusType);
+      setSyncingStatus({} as SyncStatusType);
       //console.log('clear sync status state');
       // We need to save the wallet file here because
       // sometimes the App can lose the last synced chunk
@@ -742,7 +742,7 @@ export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
       if (prevGated !== props.gated) {
         if (props.gated) {
           await walletService.clearTimers();
-          setSyncingStatus({} as RPCSyncStatusType);
+          setSyncingStatus({} as SyncStatusType);
         } else {
           await fetchBackgroundSyncing();
           await walletService.clearTimers();
@@ -927,7 +927,7 @@ export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
     }
   };
 
-  const setSyncingStatus = (syncingStatus: RPCSyncStatusType) => {
+  const setSyncingStatus = (syncingStatus: SyncStatusType) => {
     // here is a good place to fetch the background task info
     fetchBackgroundSyncing();
     if (!isEqual(stateRef.current.syncingStatus, syncingStatus)) {
@@ -1344,7 +1344,7 @@ export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
   ): Promise<void> => {
     // here I know the server was changed, clean all the tasks before anything.
     await walletService.clearTimers();
-    setSyncingStatus({} as RPCSyncStatusType);
+    setSyncingStatus({} as SyncStatusType);
     keepAwake(false);
     // First we need to check the `chainName` between servers, if this is different
     // we cannot try to open the current wallet, because make not sense.
@@ -1368,8 +1368,7 @@ export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
       if (result && !result.toLowerCase().startsWith(GlobalConst.error)) {
         try {
           // here result can have an `error` field for watch-only which is actually OK.
-          const resultJson: SeedType & UfvkType =
-            await JSON.parse(result);
+          const resultJson: SeedType & UfvkType = await JSON.parse(result);
           if (!resultJson.error) {
             // Load the wallet and navigate to the ValueTransfers screen
             //console.log(`wallet loaded ok ${value.uri}`);
@@ -1424,7 +1423,7 @@ export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
       // we need to restore the old server because the new one doesn't have the seed of the current wallet.
       const oldSettings = await readSettings();
       if (oldSettings.indexerServer && oldSettings.selectIndexerServer) {
-        await RPCModule.changeServerProcess(oldSettings.indexerServer.uri);
+        await WalletService.changeServerProcess(oldSettings.indexerServer.uri);
         patchState({
           indexerServer: oldSettings.indexerServer,
           selectIndexerServer: oldSettings.selectIndexerServer,
@@ -1536,15 +1535,15 @@ export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const setPerformanceLevelOption = async (
-    value: RPCPerformanceLevelEnum,
+    value: PerformanceLevelEnum,
   ): Promise<void> => {
     await writeSettings('performanceLevel', value);
     patchState({
-      performanceLevel: value as RPCPerformanceLevelEnum,
+      performanceLevel: value as PerformanceLevelEnum,
     });
 
     // change it in zingolib as well.
-    const setConfigWallet = await RPCModule.setConfigWalletToProdProcess(
+    const setConfigWallet = await WalletService.setConfigWalletToProdProcess(
       stateRef.current.performanceLevel,
       GlobalConst.minConfirmations.toString(),
     );
