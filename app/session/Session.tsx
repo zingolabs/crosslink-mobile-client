@@ -450,15 +450,6 @@ export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const formatSeconds = (totalSeconds: number): string => {
-    const safeSeconds = Math.max(0, Math.round(totalSeconds));
-    const minutes = Math.floor(safeSeconds / 60);
-    const seconds = safeSeconds % 60;
-
-    return `${minutes}min ${seconds}sec`;
-  };
-
   const getAverageBlockTime = (): number => {
     if (blockTimesRef.current.length === 0) {
       return 0;
@@ -884,11 +875,6 @@ export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
     //const start = Date.now();
     patchState({ shieldingAmount: value });
     //console.log('=========================================== > SH AMOUNT STORED SETSTATE - ', Date.now() - start);
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const setShowSwipeableIcons = (value: boolean) => {
-    patchState({ showSwipeableIcons: value });
   };
 
   const setTotalBalance = (totalBalance: TotalBalanceClass) => {
@@ -1319,14 +1305,6 @@ export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const doRescan = async () => {
-    // in the rescan case if the shield button is visible
-    // we need to hide it fast.
-    setShieldingAmount(0);
-    await walletService.refreshSync(true);
-  };
-
   const setWallet = async (wallet: WalletType) => {
     //console.log(wallet, this.state.readOnly);
     if (!isEqual(stateRef.current.wallet, wallet)) {
@@ -1432,131 +1410,11 @@ export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const setCurrencyOption = async (value: CurrencyEnum): Promise<void> => {
-    await writeSettings('currency', value);
-    patchState({
-      currency: value as CurrencyEnum,
-    });
-
-    if (
-      value === CurrencyEnum.USDTORCurrency ||
-      value === CurrencyEnum.USDCurrency
-    ) {
-      // when the user select USD
-      // the App have to create a Tor Client
-      //console.log('before CREATE ------------------- TOR CLIENT');
-      const result = await WalletService.createTorClientProcess();
-      //console.log('after CREATE ------------------- TOR CLIENT', result);
-      if (result && result.toLowerCase().startsWith(GlobalConst.error)) {
-        setLastError(`Create tor client error: ${result}`);
-      }
-    } else {
-      //console.log('before REMOVE ------------------- TOR CLIENT');
-      const result = await WalletService.removeTorClientProcess();
-      //console.log('after REMOVE ------------------- TOR CLIENT', result);
-      if (result && result.toLowerCase().startsWith(GlobalConst.error)) {
-        setLastError(`Remove tor client error: ${result}`);
-      }
-    }
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const setLanguageOption = async (
-    value: string,
-    reset: boolean,
-  ): Promise<void> => {
-    await writeSettings('language', value as LanguageEnum);
-    patchState({
-      language: value as LanguageEnum,
-    });
-    if (reset) {
-      restartSession({ kind: 'open' });
-    }
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const setSendAllOption = async (value: boolean): Promise<void> => {
-    await writeSettings('sendAll', value);
-    patchState({
-      sendAll: value as boolean,
-    });
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const setDonationOption = async (value: boolean): Promise<void> => {
-    await writeSettings('donation', value);
-    patchState({
-      donation: value as boolean,
-    });
-  };
-
   const setSecurityOption = async (value: SecurityType): Promise<void> => {
     await writeSettings('security', value);
     patchState({
       security: value as SecurityType,
     });
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const setSelectServerOption = async (value: string): Promise<void> => {
-    await writeSettings('selectIndexerServer', value as SelectServerEnum);
-    patchState({
-      selectIndexerServer: value as SelectServerEnum,
-    });
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const setRescanMenuOption = async (value: boolean): Promise<void> => {
-    await writeSettings('rescanMenu', value);
-    patchState({
-      rescanMenu: value as boolean,
-    });
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const setRecoveryWalletInfoOnDeviceOption = async (
-    value: boolean,
-  ): Promise<void> => {
-    await writeSettings('recoveryWalletInfoOnDevice', value);
-    patchState({
-      recoveryWalletInfoOnDevice: value as boolean,
-    });
-
-    if (!value) {
-      await removeRecoveryWalletInfo();
-    } else {
-      const wallet: WalletType = await WalletService.rpcFetchWallet(
-        stateRef.current.readOnly,
-      );
-      await createUpdateRecoveryWalletInfo(wallet);
-    }
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const setPerformanceLevelOption = async (
-    value: PerformanceLevelEnum,
-  ): Promise<void> => {
-    await writeSettings('performanceLevel', value);
-    patchState({
-      performanceLevel: value as PerformanceLevelEnum,
-    });
-
-    // change it in zingolib as well.
-    const setConfigWallet = await WalletService.setConfigWalletToProdProcess(
-      stateRef.current.performanceLevel,
-      GlobalConst.minConfirmations.toString(),
-    );
-    console.log(
-      '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SET CONFIG WALLET',
-      setConfigWallet,
-    );
-    if (
-      setConfigWallet &&
-      setConfigWallet.toLowerCase().startsWith(GlobalConst.error)
-    ) {
-      setLastError(`Set performance level error: ${setConfigWallet}`);
-    }
   };
 
   const restartSession = async (request?: OpenRequest) => {
@@ -1613,36 +1471,6 @@ export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
 
     keepAwake(false);
     restartSession(request);
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const onClickOKRestoreBackup = async () => {
-    const resultStr = (await walletService.restoreBackup()) as string;
-
-    //console.log("jc restore", resultStr);
-    if (resultStr && resultStr.toLowerCase().startsWith(GlobalConst.error)) {
-      //console.log(`Error restore backup wallet. ${resultStr}`);
-      reportFailure(
-        stateRef.current.translate('loadedapp.restoringwallet-label') as string,
-        resultStr,
-      );
-      createAlert(
-        setBackgroundError,
-        addLastSnackbar,
-        [screenName],
-        stateRef.current.translate('loadedapp.restoringwallet-label') as string,
-        resultStr,
-        false,
-      );
-      return;
-    }
-
-    await resetScheduledActions();
-    setScheduledActions([]);
-    await notifee.cancelAllNotifications();
-
-    keepAwake(false);
-    restartSession({ kind: 'open' });
   };
 
   const setLastError = (error: string) => {
