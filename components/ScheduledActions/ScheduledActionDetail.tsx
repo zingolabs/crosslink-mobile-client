@@ -35,7 +35,10 @@ import {
 import { HeaderTitle } from '../Header';
 import RegText from '../Components/RegText';
 import ZecAmount from '../Components/ZecAmount';
-import ScheduledActionsFileImpl from '../ScheduledActions/ScheduledActionsFileImpl';
+import {
+  addScheduledAction,
+  removeScheduledAction,
+} from '../../app/storage/scheduledActionsFile';
 import Utils from '../../app/utils';
 import notifee from '@notifee/react-native';
 import StakingDayBubble from '../Staking/StakingDayBubble';
@@ -104,7 +107,7 @@ const ScheduledActionDetail: React.FC<ScheduledActionDetailProps> = ({
   }, []);
 
   const handleCancelPress = async () => {
-    const list = await ScheduledActionsFileImpl.removeAction(item.id);
+    const list = await removeScheduledAction(item.id);
     setScheduledActions(list);
     if (list.length === 0) {
       await notifee.cancelAllNotifications();
@@ -182,7 +185,7 @@ const ScheduledActionDetail: React.FC<ScheduledActionDetailProps> = ({
       }
 
       if (scheduledActions.filter(sa => sa.txid === bondTxid).length > 0) {
-        const list = await ScheduledActionsFileImpl.removeAction(
+        const list = await removeScheduledAction(
           scheduledActions.filter(sa => sa.txid === bondTxid)[0].id,
         );
         setScheduledActions(list);
@@ -215,7 +218,7 @@ const ScheduledActionDetail: React.FC<ScheduledActionDetailProps> = ({
   const handleScheduleActionPress = async () => {
     setModalState('sending');
 
-    const list = await ScheduledActionsFileImpl.addAction(item);
+    const list = await addScheduledAction(item);
     setScheduledActions(list);
     await scheduleReminder({
       seconds: timeToStakingDay,
