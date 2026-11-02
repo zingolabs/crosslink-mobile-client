@@ -8,7 +8,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import NetInfo, {
   NetInfoState,
 } from '@react-native-community/netinfo/src/index';
@@ -479,11 +479,11 @@ export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
     if (
       actions.filter(sa => sa.kind === StakingActionKindEnum.Move).length > 0
     ) {
-      actions
-        .filter(sa => sa.kind === StakingActionKindEnum.Move)
-        .forEach(async sa => {
-          await removeScheduledAction(sa.id);
-        });
+      await Promise.all(
+        actions
+          .filter(sa => sa.kind === StakingActionKindEnum.Move)
+          .map(sa => removeScheduledAction(sa.id)),
+      );
       actions = await readScheduledActions();
     }
 
@@ -949,189 +949,196 @@ export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
       stateRef.current.valueTransfers &&
         stateRef.current.valueTransfersTotal !== null &&
         stateRef.current.valueTransfersTotal > 0 &&
-        stateRef.current.valueTransfers
-          .filter((vtOld: ValueTransferType) => vtOld.confirmations === 0) // not confirmed
-          .forEach(async (vtOld: ValueTransferType) => {
-            const vtNew = valueTransfers.filter(
-              (vt: ValueTransferType) =>
-                vt.txid === vtOld.txid &&
-                vt.address === vtOld.address &&
-                vt.poolType === vtOld.poolType,
-            );
-            //console.log('old', vtOld);
-            //console.log('new', vtNew);
-            // the ValueTransfer is confirmed when the confirmations are > 0
-            if (vtNew.length > 0 && vtNew[0].confirmations > 0) {
-              let message: string = '';
-              let title: string = '';
-              if (
-                (vtNew[0].kind === ValueTransferKindEnum.Received ||
-                  vtNew[0].kind === ValueTransferKindEnum.WithdrawBond) &&
-                vtNew[0].amount > 0
-              ) {
-                message =
-                  (stateRef.current.translate(
-                    'loadedapp.incoming-funds',
-                  ) as string) +
-                  (stateRef.current.translate('history.received') as string) +
-                  ' ' +
-                  Utils.parseNumberFloatToStringLocale(vtNew[0].amount, 8) +
-                  ' ' +
-                  stateRef.current.info.currencyName;
-                title = stateRef.current.translate(
-                  'loadedapp.receive-menu',
-                ) as string;
-              } else if (
-                vtNew[0].kind === ValueTransferKindEnum.MemoToSelf &&
-                vtNew[0].fee &&
-                vtNew[0].fee > 0
-              ) {
-                message =
-                  (stateRef.current.translate(
-                    'loadedapp.valuetransfer-confirmed',
-                  ) as string) +
-                  (stateRef.current.translate('history.memotoself') as string) +
-                  (vtNew[0].fee
-                    ? ((' ' +
-                        stateRef.current.translate('send.fee')) as string) +
-                      ' ' +
-                      Utils.parseNumberFloatToStringLocale(vtNew[0].fee, 8) +
-                      ' ' +
-                      stateRef.current.info.currencyName
-                    : '');
-                title = stateRef.current.translate(
-                  'loadedapp.send-menu',
-                ) as string;
-              } else if (
-                vtNew[0].kind === ValueTransferKindEnum.SendToSelf &&
-                vtNew[0].fee &&
-                vtNew[0].fee > 0
-              ) {
-                message =
-                  (stateRef.current.translate(
-                    'loadedapp.valuetransfer-confirmed',
-                  ) as string) +
-                  (stateRef.current.translate('history.sendtoself') as string) +
-                  (vtNew[0].fee
-                    ? ((' ' +
-                        stateRef.current.translate('send.fee')) as string) +
-                      ' ' +
-                      Utils.parseNumberFloatToStringLocale(vtNew[0].fee, 8) +
-                      ' ' +
-                      stateRef.current.info.currencyName
-                    : '');
-                title = stateRef.current.translate(
-                  'loadedapp.send-menu',
-                ) as string;
-              } else if (
-                vtNew[0].kind === ValueTransferKindEnum.Rejection &&
-                vtNew[0].amount > 0
-              ) {
-                // not so sure about this `kind`...
-                // I guess the wallet is receiving some refund from a TEX sent.
-                message =
-                  (stateRef.current.translate(
-                    'loadedapp.incoming-funds',
-                  ) as string) +
-                  (stateRef.current.translate('history.received') as string) +
-                  ' ' +
-                  Utils.parseNumberFloatToStringLocale(vtNew[0].amount, 8) +
-                  ' ' +
-                  stateRef.current.info.currencyName;
-                title = stateRef.current.translate(
-                  'loadedapp.receive-menu',
-                ) as string;
-              } else if (
-                vtNew[0].kind === ValueTransferKindEnum.Shield &&
-                vtNew[0].amount > 0
-              ) {
-                message =
-                  (stateRef.current.translate(
-                    'loadedapp.incoming-funds',
-                  ) as string) +
-                  (stateRef.current.translate('history.shield') as string) +
-                  ' ' +
-                  Utils.parseNumberFloatToStringLocale(vtNew[0].amount, 8) +
-                  ' ' +
-                  stateRef.current.info.currencyName;
-                title = stateRef.current.translate(
-                  'loadedapp.receive-menu',
-                ) as string;
-              } else if (
-                vtNew[0].kind === ValueTransferKindEnum.Sent &&
-                vtNew[0].amount > 0
-              ) {
-                message =
-                  (stateRef.current.translate(
-                    'loadedapp.payment-made',
-                  ) as string) +
-                  (stateRef.current.translate('history.sent') as string) +
-                  ' ' +
-                  Utils.parseNumberFloatToStringLocale(vtNew[0].amount, 8) +
-                  ' ' +
-                  stateRef.current.info.currencyName;
-                title = stateRef.current.translate(
-                  'loadedapp.send-menu',
-                ) as string;
-              } else if (
-                vtNew[0].kind === ValueTransferKindEnum.CreateBond &&
-                vtNew[0].amount > 0
-              ) {
-                message =
-                  (stateRef.current.translate(
-                    'loadedapp.payment-made',
-                  ) as string) +
-                  'Staked' +
-                  ' ' +
-                  Utils.parseNumberFloatToStringLocale(vtNew[0].amount, 8) +
-                  ' ' +
-                  stateRef.current.info.currencyName;
-                title = stateRef.current.translate(
-                  'loadedapp.send-menu',
-                ) as string;
-              }
-              if (message && title) {
-                createAlert(
-                  setBackgroundError,
-                  addLastSnackbar,
-                  [screenName],
-                  title,
-                  message,
-                  true,
-                );
-              }
-              // here I know a new transaction is confirmed
-              // lets check the scheduled actions & remove it
-              if (
-                stateRef.current.scheduledActions.filter(
-                  sa => sa.txid === vtNew[0].txid,
-                ).length > 0
-              ) {
-                const list = await removeScheduledAction(
+        (await Promise.all(
+          stateRef.current.valueTransfers
+            .filter((vtOld: ValueTransferType) => vtOld.confirmations === 0) // not confirmed
+            .map(async (vtOld: ValueTransferType) => {
+              const vtNew = valueTransfers.filter(
+                (vt: ValueTransferType) =>
+                  vt.txid === vtOld.txid &&
+                  vt.address === vtOld.address &&
+                  vt.poolType === vtOld.poolType,
+              );
+              //console.log('old', vtOld);
+              //console.log('new', vtNew);
+              // the ValueTransfer is confirmed when the confirmations are > 0
+              if (vtNew.length > 0 && vtNew[0].confirmations > 0) {
+                let message: string = '';
+                let title: string = '';
+                if (
+                  (vtNew[0].kind === ValueTransferKindEnum.Received ||
+                    vtNew[0].kind === ValueTransferKindEnum.WithdrawBond) &&
+                  vtNew[0].amount > 0
+                ) {
+                  message =
+                    (stateRef.current.translate(
+                      'loadedapp.incoming-funds',
+                    ) as string) +
+                    (stateRef.current.translate('history.received') as string) +
+                    ' ' +
+                    Utils.parseNumberFloatToStringLocale(vtNew[0].amount, 8) +
+                    ' ' +
+                    stateRef.current.info.currencyName;
+                  title = stateRef.current.translate(
+                    'loadedapp.receive-menu',
+                  ) as string;
+                } else if (
+                  vtNew[0].kind === ValueTransferKindEnum.MemoToSelf &&
+                  vtNew[0].fee &&
+                  vtNew[0].fee > 0
+                ) {
+                  message =
+                    (stateRef.current.translate(
+                      'loadedapp.valuetransfer-confirmed',
+                    ) as string) +
+                    (stateRef.current.translate(
+                      'history.memotoself',
+                    ) as string) +
+                    (vtNew[0].fee
+                      ? ((' ' +
+                          stateRef.current.translate('send.fee')) as string) +
+                        ' ' +
+                        Utils.parseNumberFloatToStringLocale(vtNew[0].fee, 8) +
+                        ' ' +
+                        stateRef.current.info.currencyName
+                      : '');
+                  title = stateRef.current.translate(
+                    'loadedapp.send-menu',
+                  ) as string;
+                } else if (
+                  vtNew[0].kind === ValueTransferKindEnum.SendToSelf &&
+                  vtNew[0].fee &&
+                  vtNew[0].fee > 0
+                ) {
+                  message =
+                    (stateRef.current.translate(
+                      'loadedapp.valuetransfer-confirmed',
+                    ) as string) +
+                    (stateRef.current.translate(
+                      'history.sendtoself',
+                    ) as string) +
+                    (vtNew[0].fee
+                      ? ((' ' +
+                          stateRef.current.translate('send.fee')) as string) +
+                        ' ' +
+                        Utils.parseNumberFloatToStringLocale(vtNew[0].fee, 8) +
+                        ' ' +
+                        stateRef.current.info.currencyName
+                      : '');
+                  title = stateRef.current.translate(
+                    'loadedapp.send-menu',
+                  ) as string;
+                } else if (
+                  vtNew[0].kind === ValueTransferKindEnum.Rejection &&
+                  vtNew[0].amount > 0
+                ) {
+                  // not so sure about this `kind`...
+                  // I guess the wallet is receiving some refund from a TEX sent.
+                  message =
+                    (stateRef.current.translate(
+                      'loadedapp.incoming-funds',
+                    ) as string) +
+                    (stateRef.current.translate('history.received') as string) +
+                    ' ' +
+                    Utils.parseNumberFloatToStringLocale(vtNew[0].amount, 8) +
+                    ' ' +
+                    stateRef.current.info.currencyName;
+                  title = stateRef.current.translate(
+                    'loadedapp.receive-menu',
+                  ) as string;
+                } else if (
+                  vtNew[0].kind === ValueTransferKindEnum.Shield &&
+                  vtNew[0].amount > 0
+                ) {
+                  message =
+                    (stateRef.current.translate(
+                      'loadedapp.incoming-funds',
+                    ) as string) +
+                    (stateRef.current.translate('history.shield') as string) +
+                    ' ' +
+                    Utils.parseNumberFloatToStringLocale(vtNew[0].amount, 8) +
+                    ' ' +
+                    stateRef.current.info.currencyName;
+                  title = stateRef.current.translate(
+                    'loadedapp.receive-menu',
+                  ) as string;
+                } else if (
+                  vtNew[0].kind === ValueTransferKindEnum.Sent &&
+                  vtNew[0].amount > 0
+                ) {
+                  message =
+                    (stateRef.current.translate(
+                      'loadedapp.payment-made',
+                    ) as string) +
+                    (stateRef.current.translate('history.sent') as string) +
+                    ' ' +
+                    Utils.parseNumberFloatToStringLocale(vtNew[0].amount, 8) +
+                    ' ' +
+                    stateRef.current.info.currencyName;
+                  title = stateRef.current.translate(
+                    'loadedapp.send-menu',
+                  ) as string;
+                } else if (
+                  vtNew[0].kind === ValueTransferKindEnum.CreateBond &&
+                  vtNew[0].amount > 0
+                ) {
+                  message =
+                    (stateRef.current.translate(
+                      'loadedapp.payment-made',
+                    ) as string) +
+                    'Staked' +
+                    ' ' +
+                    Utils.parseNumberFloatToStringLocale(vtNew[0].amount, 8) +
+                    ' ' +
+                    stateRef.current.info.currencyName;
+                  title = stateRef.current.translate(
+                    'loadedapp.send-menu',
+                  ) as string;
+                }
+                if (message && title) {
+                  createAlert(
+                    setBackgroundError,
+                    addLastSnackbar,
+                    [screenName],
+                    title,
+                    message,
+                    true,
+                  );
+                }
+                // here I know a new transaction is confirmed
+                // lets check the scheduled actions & remove it
+                if (
                   stateRef.current.scheduledActions.filter(
                     sa => sa.txid === vtNew[0].txid,
-                  )[0].id,
-                );
-                setScheduledActions(list);
-                if (list.length === 0) {
-                  await notifee.cancelAllNotifications();
+                  ).length > 0
+                ) {
+                  const list = await removeScheduledAction(
+                    stateRef.current.scheduledActions.filter(
+                      sa => sa.txid === vtNew[0].txid,
+                    )[0].id,
+                  );
+                  setScheduledActions(list);
+                  if (list.length === 0) {
+                    await notifee.cancelAllNotifications();
+                  }
                 }
               }
-            }
-            // the ValueTransfer is gone -> Likely Reverted by the server
-            // this is really confusing...
-            //if (vtNew.length === 0) {
-            //  createAlert(
-            //    this.setBackgroundError,
-            //    this.addLastSnackbar,
-            //    [this.screenName],
-            //    this.state.translate('loadedapp.send-menu') as string,
-            //    this.state.translate('loadedapp.valuetransfer-reverted') as string,
-            //    true,
-            //    this.state.translate,
-            //  );
-            //}
-          });
+              // the ValueTransfer is gone -> Likely Reverted by the server
+              // this is really confusing...
+              //if (vtNew.length === 0) {
+              //  createAlert(
+              //    this.setBackgroundError,
+              //    this.addLastSnackbar,
+              //    [this.screenName],
+              //    this.state.translate('loadedapp.send-menu') as string,
+              //    this.state.translate('loadedapp.valuetransfer-reverted') as string,
+              //    true,
+              //    this.state.translate,
+              //  );
+              //}
+            }),
+        ));
+
       // if some tx is confirmed the UI needs some time to
       // acomodate the bottom tabs.
       //const start = Date.now();
