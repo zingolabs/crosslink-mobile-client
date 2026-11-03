@@ -97,7 +97,8 @@ platform :android do
       track: "beta",
       aab: "android/app/build/outputs/bundle/release/app-release.aab",
       json_key: json_key,
-      metadata_path: "fastlane/metadata/android",
+      skip_upload_metadata: true,
+      skip_upload_changelogs: true,
       skip_upload_images: true,
       skip_upload_screenshots: true,
       skip_upload_apk: true
