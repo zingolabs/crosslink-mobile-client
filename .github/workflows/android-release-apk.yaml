@@ -90,6 +90,7 @@ jobs:
 
       - name: Version from tag
         run: |
+          echo "ARTIFACT_TAG=${GITHUB_REF_NAME//\//-}" >> "$GITHUB_ENV"
           if [[ "${GITHUB_REF}" == refs/tags/release-* ]]; then
             echo "MARKETING_VERSION=${GITHUB_REF_NAME#release-}" >> "$GITHUB_ENV"
           else
@@ -121,22 +122,22 @@ jobs:
       - name: Collect artifacts
         run: |
           mv android/app/build/outputs/apk/release/app-release.apk \
-            "ZingoDelegator-${{ github.ref_name }}.apk"
+            "ZingoDelegator-${{ env.ARTIFACT_TAG }}.apk"
           mv android/app/build/outputs/bundle/release/app-release.aab \
-            "ZingoDelegator-${{ github.ref_name }}.aab"
+            "ZingoDelegator-${{ env.ARTIFACT_TAG }}.aab"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ZingoDelegator-${{ github.ref_name }}-android
+          name: ZingoDelegator-${{ env.ARTIFACT_TAG }}-android
           path: |
-            ZingoDelegator-${{ github.ref_name }}.apk
-            ZingoDelegator-${{ github.ref_name }}.aab
+            ZingoDelegator-${{ env.ARTIFACT_TAG }}.apk
+            ZingoDelegator-${{ env.ARTIFACT_TAG }}.aab
 
       - name: Attach to release
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            ZingoDelegator-${{ github.ref_name }}.apk
-            ZingoDelegator-${{ github.ref_name }}.aab
+            ZingoDelegator-${{ env.ARTIFACT_TAG }}.apk
+            ZingoDelegator-${{ env.ARTIFACT_TAG }}.aab
