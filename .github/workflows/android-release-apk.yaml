@@ -1,4 +1,4 @@
-name: Android Release APK
+name: Android Release
 
 on:
   push:
@@ -20,7 +20,7 @@ jobs:
       arch: ${{ matrix.arch }}
 
   android-release-apk:
-    name: Build release APK
+    name: Build, sign and upload to Google Play
     needs: [create-cache-key, android-build]
     runs-on: ubuntu-24.04
     env:
@@ -82,26 +82,57 @@ jobs:
       - name: Yarn install
         run: yarn
 
-      - name: Build release APK
-        working-directory: android
+      - name: Ruby and bundler
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - name: Version from tag
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/release-* ]]; then
+            echo "MARKETING_VERSION=${GITHUB_REF_NAME#release-}" >> "$GITHUB_ENV"
+          else
+            echo "MARKETING_VERSION=$(node -p "require('./package.json').version")" >> "$GITHUB_ENV"
+          fi
+
+      - name: Google Play credentials
         env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          set -euo pipefail
+          echo "${KEYSTORE_BASE64}" | base64 --decode > android/app/Zingo.jks
+          printf '%s' "${PLAY_SERVICE_ACCOUNT_JSON}" > "${RUNNER_TEMP}/play-service-account.json"
+          echo "PLAY_SERVICE_ACCOUNT_JSON_PATH=${RUNNER_TEMP}/play-service-account.json" >> "$GITHUB_ENV"
+
+      - name: Build, sign and upload
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           DELEGATOR_REPORT_URL: ${{ secrets.DELEGATOR_REPORT_URL }}
           DELEGATOR_REPORT_TOKEN: ${{ secrets.DELEGATOR_REPORT_TOKEN }}
-        run: ./gradlew assembleRelease
+        run: bundle exec fastlane android release
 
-      - name: Rename APK
+      - name: Collect artifacts
         run: |
           mv android/app/build/outputs/apk/release/app-release.apk \
             "ZingoDelegator-${{ github.ref_name }}.apk"
+          mv android/app/build/outputs/bundle/release/app-release.aab \
+            "ZingoDelegator-${{ github.ref_name }}.aab"
 
-      - name: Upload APK artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ZingoDelegator-${{ github.ref_name }}-apk
-          path: ZingoDelegator-${{ github.ref_name }}.apk
+          name: ZingoDelegator-${{ github.ref_name }}-android
+          path: |
+            ZingoDelegator-${{ github.ref_name }}.apk
+            ZingoDelegator-${{ github.ref_name }}.aab
 
-      - name: Attach APK to release
+      - name: Attach to release
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: softprops/action-gh-release@v2
         with:
-          files: ZingoDelegator-${{ github.ref_name }}.apk
+          files: |
+            ZingoDelegator-${{ github.ref_name }}.apk
+            ZingoDelegator-${{ github.ref_name }}.aab
