@@ -76,12 +76,14 @@ platform :android do
     json_key = File.expand_path(ENV.fetch("PLAY_SERVICE_ACCOUNT_JSON_PATH"))
     version_name = ENV.fetch("MARKETING_VERSION")
 
-    latest = %w[production beta alpha internal].flat_map do |track|
+    codes = %w[production beta alpha internal].flat_map do |track|
       google_play_track_version_codes(package_name: package_name, track: track, json_key: json_key)
-    rescue StandardError
+    rescue StandardError => e
+      UI.error("#{track}: #{e.message}")
       []
-    end.max || 0
-    version_code = latest + 1
+    end
+    UI.user_error!("No version code could be read from any Google Play track") if codes.empty?
+    version_code = codes.max + 1
     UI.important("Building #{version_name} (#{version_code})")
 
     gradle(
