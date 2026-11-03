@@ -104,6 +104,9 @@ jobs:
           set -euo pipefail
           echo "${KEYSTORE_BASE64}" | base64 --decode > android/app/Zingo.jks
           printf '%s' "${PLAY_SERVICE_ACCOUNT_JSON}" > "${RUNNER_TEMP}/play-service-account.json"
+          jq -e '.type == "service_account" and (.client_email | length > 0) and (.private_key | length > 0)' \
+            "${RUNNER_TEMP}/play-service-account.json" > /dev/null \
+            || { echo "PLAY_SERVICE_ACCOUNT_JSON is not a Google service account key" >&2; exit 1; }
           echo "PLAY_SERVICE_ACCOUNT_JSON_PATH=${RUNNER_TEMP}/play-service-account.json" >> "$GITHUB_ENV"
 
       - name: Build, sign and upload
