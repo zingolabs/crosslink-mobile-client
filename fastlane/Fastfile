@@ -68,3 +68,40 @@ platform :ios do
     )
   end
 end
+
+platform :android do
+  desc "CI: build the release bundle with a version code above every Play track, then upload it to open testing"
+  lane :release do
+    package_name = "org.ZingoLabs.ZingoDelegator"
+    json_key = File.expand_path(ENV.fetch("PLAY_SERVICE_ACCOUNT_JSON_PATH"))
+    version_name = ENV.fetch("MARKETING_VERSION")
+
+    codes = %w[production beta alpha internal].flat_map do |track|
+      google_play_track_version_codes(package_name: package_name, track: track, json_key: json_key)
+    rescue StandardError => e
+      UI.error("#{track}: #{e.message}")
+      []
+    end
+    UI.user_error!("No version code could be read from any Google Play track") if codes.empty?
+    version_code = codes.max + 1
+    UI.important("Building #{version_name} (#{version_code})")
+
+    gradle(
+      project_dir: "android",
+      tasks: ["bundleRelease", "assembleRelease"],
+      properties: { "appVersionName" => version_name, "appVersionCode" => version_code }
+    )
+
+    upload_to_play_store(
+      package_name: package_name,
+      track: "beta",
+      aab: "android/app/build/outputs/bundle/release/app-release.aab",
+      json_key: json_key,
+      skip_upload_metadata: true,
+      skip_upload_changelogs: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_apk: true
+    )
+  end
+end

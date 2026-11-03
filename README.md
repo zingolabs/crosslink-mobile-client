@@ -58,7 +58,7 @@ Release bundles read the Worker URL and report token from `.env` (see `.env.exam
 
 ## Release
 
-Pushing a `release-X.Y.Z` tag builds both platforms. Android runs `android-release-apk.yaml`. iOS runs `ios-release.yaml`: it builds the Rust framework for device and simulator, fetches the Hermes dSYM the archive script expects, archives with automatic signing through an App Store Connect API key, uploads to TestFlight, and attaches the IPA and dSYMs to the GitHub release. The marketing version comes from the tag and the build number is the latest TestFlight build number for that version plus one.
+Pushing a `release-X.Y.Z` tag builds both platforms. Android runs `android-release-apk.yaml`: it builds the release bundle and APK signed with the upload keystore from CI secrets, uploads the bundle to the Google Play open testing track through a service account without touching the store listing, and attaches both files to the GitHub release. The version name comes from the tag and the version code is the highest code on any Play track plus one. iOS runs `ios-release.yaml`: it builds the Rust framework for device and simulator, fetches the Hermes dSYM the archive script expects, archives with automatic signing through an App Store Connect API key, uploads to TestFlight, and attaches the IPA and dSYMs to the GitHub release. The marketing version comes from the tag and the build number is the latest TestFlight build number for that version plus one.
 
 Repository secrets the iOS job reads:
 

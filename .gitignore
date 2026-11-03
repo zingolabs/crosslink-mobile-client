@@ -94,7 +94,7 @@ buck-out/
 .cxx
 
 # Keystore
-/android/app/Zingo.jks
+*.jks
 /android/local.zingo.jks.properties
 # storybook
 storybook-static
