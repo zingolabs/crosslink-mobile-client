@@ -120,65 +120,72 @@ half4 main(float2 fragCoord) {
       float2 q = P - float2(laneX(i), cy);
       q.x += (vnoise(float2(P.y / 42., fi * 3.1)) - .5) * 1.2;
       float d = sdBox(q, float2(halfW, hl)) - .5;
-      float pr = u_pressure * (.88 + .12 * hash21(float2(fi, 3.)));
-      pr *= .65 + .6 * vnoise(float2(P.y / 34., fi * 7.3 + 3.));
-      pr *= .85 + .3 * vnoise(float2(P.y / 9., fi * 2.7 + 5.));
-      float fadeLen = 30. + 70. * hash21(float2(fi, 11.));
-      pr *= mix(.55, 1., smoothstep(top, top - fadeLen, P.y));
-      ink = max(ink, chalk(d, halfW, pr, tooth, edge, sign(q.x)) * rm * u_columns);
+      if (d < 2.) {
+        float pr = u_pressure * (.88 + .12 * hash21(float2(fi, 3.)));
+        pr *= .65 + .6 * vnoise(float2(P.y / 34., fi * 7.3 + 3.));
+        pr *= .85 + .3 * vnoise(float2(P.y / 9., fi * 2.7 + 5.));
+        float fadeLen = 30. + 70. * hash21(float2(fi, 11.));
+        pr *= mix(.55, 1., smoothstep(top, top - fadeLen, P.y));
+        ink = max(ink, chalk(d, halfW, pr, tooth, edge, sign(q.x)) * rm * u_columns);
+      }
       float baseD = length(float2(q.x, P.y - yBase));
       glow += exp(-baseD / 9.) * .22 * u_glow * u_line;
     }
   }
 
-  if (u_lights > 0.) {
+  if (u_lights > 0. && P.y > yTop - 2. * CELL * H && P.y < u_rainTop * H + CELL * H) {
     float dashBottom = yTop + 2.;
     float dashTop = u_rainTop * H;
     float cellPx = CELL * H;
+    float span = dashTop - dashBottom;
     float colHalf = .27 * u_spacing * DESIGN_W + u_pairGap * .5;
     int row0 = int(floor((P.y - dashBottom) / cellPx));
     for (int r = -1; r <= 1; r++) {
       float row = float(row0 + r);
-      if (row >= 0.) {
+      if (row >= 0. && row * cellPx < span) {
         bool anchor = row == 0.;
+        float t0 = clamp((row * cellPx) / span, 0., 1.);
         for (int i = 0; i < 8; i++) {
           float nx = (laneX(i) - DESIGN_W * .5) / colHalf;
           int pair = i / 2;
           int side = int(floor(hash21(float2(float(pair), u_seed + 5.)) * 2.));
+          float cluster = .35 + 1.3 * vnoise(float2(row * .45, float(i) * .6) + u_seed);
           for (int k = 0; k < 3; k++) {
             bool root = anchor && k == 0 && (i - pair * 2) == side;
             float3 id = float3(row, float(i * 3 + k), u_seed);
             float h1 = hash31(id);
             float h2 = hash31(id + 1.7);
             float h3 = hash31(id + 3.1);
-            float h4 = hash31(id + 5.3);
-            float h5 = hash31(id + 7.9);
             float h6 = hash31(id + 11.3);
-            float t0 = clamp((row * cellPx) / (dashTop - dashBottom), 0., 1.);
             float hl = mix(14., 5., t0) * (.5 + 1. * h3);
             float cy = root ? dashBottom + hl : dashBottom + (row + h1) * cellPx;
-            float t = clamp((cy - dashBottom) / (dashTop - dashBottom), 0., 1.);
-            float cluster = .35 + 1.3 * vnoise(float2(row * .45, float(i) * .6) + u_seed);
+            float t = clamp((cy - dashBottom) / span, 0., 1.);
             float dens = u_density * mix(.3, 1., t) * cluster * (k == 0 ? 1. : k == 1 ? .6 : .35);
             float presence = root ? 1. : smoothstep(h2 - .08, h2 + .08, dens);
             presence *= 1. - smoothstep(dashTop - 2. * cellPx, dashTop, cy);
             float on = (1. - t) * .78 + h6 * .12;
             float lit = smoothstep(on, on + .1, u_lights);
             presence *= lit;
-            if (presence > 0.) {
-              float w = halfW * mix(1., .6, t) * (root ? .92 : .6 + .4 * h4);
-              float halfSpan = colHalf + DESIGN_W * mix(u_spanBottom, u_spanTop, t);
-              float jitter = root ? 0. : (h5 - .5) * 2. * u_spread * mix(4., 30., t);
-              float x = DESIGN_W * .5 + nx * halfSpan + jitter;
-              float2 q = P - float2(x, cy);
-              float d = sdBox(q, float2(w, hl)) - .5;
-              float pr = u_pressure * mix(.9, .7, t) * (.85 + .15 * h4) * presence;
-              pr *= 1. - .45 * smoothstep(.55, 1., t);
-              pr *= .8 + .4 * vnoise(float2(P.y / 18., h1 * 40.));
-              ink = max(ink, chalk(d, w, pr, tooth, edge, sign(q.x)));
-              float pulse = presence * exp(-(u_lights - on) * 20.);
-              glow += exp(-max(d, 0.) / 5.) * .5 * u_glow * pulse;
+            if (presence <= 0.) {
+              continue;
             }
+            float h4 = hash31(id + 5.3);
+            float h5 = hash31(id + 7.9);
+            float w = halfW * mix(1., .6, t) * (root ? .92 : .6 + .4 * h4);
+            float halfSpan = colHalf + DESIGN_W * mix(u_spanBottom, u_spanTop, t);
+            float jitter = root ? 0. : (h5 - .5) * 2. * u_spread * mix(4., 30., t);
+            float x = DESIGN_W * .5 + nx * halfSpan + jitter;
+            float2 q = P - float2(x, cy);
+            float d = sdBox(q, float2(w, hl)) - .5;
+            if (d >= 20.) {
+              continue;
+            }
+            float pr = u_pressure * mix(.9, .7, t) * (.85 + .15 * h4) * presence;
+            pr *= 1. - .45 * smoothstep(.55, 1., t);
+            pr *= .8 + .4 * vnoise(float2(P.y / 18., h1 * 40.));
+            ink = max(ink, chalk(d, w, pr, tooth, edge, sign(q.x)));
+            float pulse = presence * exp(-(u_lights - on) * 20.);
+            glow += exp(-max(d, 0.) / 5.) * .5 * u_glow * pulse;
           }
         }
       }
