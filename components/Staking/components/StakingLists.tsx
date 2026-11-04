@@ -1,8 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   FlatList,
-  Image,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Platform,
@@ -13,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import Animated, { Easing, LinearTransition } from 'react-native-reanimated';
 
 import {
   CurrencyNameEnum,
@@ -28,11 +28,8 @@ import Unstake from '../../../assets/icons/unstake-white.svg';
 import RegText from '../../Components/RegText';
 import FadeText from '../../Components/FadeText';
 import Utils from '../../../app/utils';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import ZecAmount from '../../Components/ZecAmount';
 import { WalletBondsStatusEnum } from '../../../app/AppState/enums/WalletBondsStatusEnum';
-import Button from '../../Components/Button';
 import { formatSeconds } from '../../../app/utils/Utils';
 import {
   useTheme,
@@ -40,19 +37,11 @@ import {
   space,
   radiusCard,
   radiusPill,
+  curve,
+  duration,
 } from '../../../app/theme';
-import { lifehashDataUrlFromStringSync } from '../../../app/utils/lifehash';
-
-export type Finalizer = {
-  svg: {
-    data: string;
-  };
-  value: number;
-  key: string;
-  finalizer: string;
-  tag: string;
-};
-
+import StakingPositionRow, { PositionAction } from './StakingPositionRow';
+import FinalizerRow from '../Finalizers/FinalizerRow';
 type ScheduledActionsListProps = {
   scheduledActions: ScheduledActionType[];
   walletBonds: WalletBondsType[];
@@ -70,17 +59,15 @@ type ScheduledActionsListProps = {
 
 type StakingPositionsListProps = {
   walletBonds: WalletBondsType[];
-  currencyName: CurrencyNameEnum;
   privacy: boolean;
-  dimensionsWidth: number;
   onScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
   scrollToTopSignal: number;
 };
 
 type FinalizersListProps = {
   staked: StakeType[];
-  currencyName: CurrencyNameEnum;
-  dimensionsWidth: number;
+  walletBonds: WalletBondsType[];
+  privacy: boolean;
   onScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
   scrollToTopSignal: number;
 };
@@ -452,239 +439,72 @@ export const ScheduledActionsList = React.memo<ScheduledActionsListProps>(
   ScheduledActionsListBase,
 );
 
+const ROWS_LAYOUT = LinearTransition.duration(duration.list).easing(
+  Easing.bezier(curve[0], curve[1], curve[2], curve[3]),
+);
+
 const StakingPositionsListBase = ({
   walletBonds,
-  currencyName,
   privacy,
-  dimensionsWidth,
   onScroll,
   scrollToTopSignal,
 }: StakingPositionsListProps) => {
   const navigation: any = useNavigation();
-  const { colors } = useTheme();
-  const scrollViewRef = useRef<ScrollView & FlatList<any>>(null);
+  const listRef = useRef<FlatList<WalletBondsType>>(null);
 
-  const movements: WalletBondsType[] = useMemo(() => {
-    if (!walletBonds) {
-      return [];
-    }
-
-    return walletBonds
-      .filter(b => {
-        // all bonds
-        if (b.status === WalletBondsStatusEnum.Withdrawn) return false;
-        return true;
-      })
-      .sort((a, b) => b.amount - a.amount);
-  }, [walletBonds]);
+  const positions: WalletBondsType[] = useMemo(
+    () =>
+      (walletBonds ?? [])
+        .filter(b => b.status !== WalletBondsStatusEnum.Withdrawn)
+        .sort((a, b) => b.amount - a.amount),
+    [walletBonds],
+  );
 
   useEffect(() => {
     if (scrollToTopSignal === 0) {
       return;
     }
-    try {
-      scrollViewRef.current?.scrollTo({ y: 0, animated: true });
-    } catch (error) {
-      console.log('scrollToTop failed:', error);
-      scrollViewRef.current?.scrollToOffset({ offset: 0, animated: true });
-    }
+    listRef.current?.scrollToOffset({ offset: 0, animated: true });
   }, [scrollToTopSignal]);
 
-  return (
-    <FlatList
-      ref={scrollViewRef}
-      onScroll={onScroll}
-      data={movements}
-      keyExtractor={item => `movements-${item.txid}`}
-      contentContainerStyle={{
-        paddingTop: space.sm,
-        paddingBottom: space.xs,
-      }}
-      ListHeaderComponent={
-        <View
-          style={{
-            borderTopLeftRadius: radiusCard,
-            borderTopRightRadius: radiusCard,
-            paddingVertical: 10,
-            paddingHorizontal: 25,
-            paddingTop: 15,
-            backgroundColor: colors.bgSurface,
-            borderTopColor: colors.borderFaint,
-            borderLeftColor: colors.borderFaint,
-            borderRightColor: colors.borderFaint,
-            borderTopWidth: 1,
-            borderLeftWidth: 1,
-            borderRightWidth: 1,
-          }}
-        >
-          <Text style={[text.headline, { color: colors.fgDefault }]}>
-            {'Staking Positions'}
-          </Text>
-        </View>
-      }
-      ListFooterComponent={
-        <>
-          <View
-            style={{
-              borderBottomLeftRadius: radiusCard,
-              borderBottomRightRadius: radiusCard,
-              paddingBottom: 15,
-              backgroundColor: colors.bgSurface,
-              borderBottomColor: colors.borderFaint,
-              borderLeftColor: colors.borderFaint,
-              borderRightColor: colors.borderFaint,
-              borderBottomWidth: 1,
-              borderLeftWidth: 1,
-              borderRightWidth: 1,
-            }}
-          />
-          <View
-            style={{
-              height: Platform.OS === GlobalConst.platformOSios ? 100 : 10,
-            }}
-          />
-        </>
-      }
-      renderItem={({ item }: { item: WalletBondsType }) => {
-        return (
-          <View
-            style={{
-              backgroundColor: colors.bgSurface,
-              alignItems: 'center',
-              paddingVertical: 10,
-              paddingHorizontal: 10,
-              borderLeftColor: colors.borderFaint,
-              borderRightColor: colors.borderFaint,
-              borderLeftWidth: 1,
-              borderRightWidth: 1,
-            }}
-          >
-            <View
-              style={{
-                backgroundColor: colors.bgSurface,
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                paddingVertical: 10,
-                paddingHorizontal: 10,
-                borderRadius: 16,
-              }}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                  }}
-                >
-                  <View>
-                    <Text
-                      style={[
-                        text.caption,
-                        {
-                          color: colors.fgDefault,
-                          marginBottom: 2,
-                          marginLeft: 5,
-                        },
-                      ]}
-                    >
-                      {item.finalizer.length > (dimensionsWidth < 500 ? 10 : 20)
-                        ? Utils.trimToSmall(
-                            item.finalizer,
-                            dimensionsWidth < 500 ? 5 : 10,
-                          )
-                        : item.finalizer}
-                    </Text>
-                    <Text
-                      style={[
-                        text.caption1,
-                        { color: colors.fgSubtle, marginLeft: 5 },
-                      ]}
-                    >
-                      2026
-                      {/* {formatMovementDate(
-                        valueTransfers?.filter(
-                          vt => vt.txid === item.txid,
-                        )[0]?.time,
-                      )} */}
-                    </Text>
-                  </View>
-                </View>
+  const onAction = useCallback(
+    (action: PositionAction, bond: WalletBondsType) => {
+      const params = {
+        finalizer: bond.finalizer,
+        txid: bond.txid,
+        staked: bond.amount,
+      };
+      navigation.navigate(
+        action === 'redelegate' ? RouteEnum.Redelegate : RouteEnum.Unstake,
+        params,
+      );
+    },
+    [navigation],
+  );
 
-                <ZecAmount
-                  style={{
-                    flexGrow: 1,
-                    alignSelf: 'auto',
-                    justifyContent: 'flex-end',
-                  }}
-                  size={14}
-                  currencyName={currencyName}
-                  color={colors.fgDefault}
-                  amtZec={item.amount}
-                  privacy={privacy}
-                />
-              </View>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  marginTop: 10,
-                  gap: space.sm,
-                }}
-              >
-                {item.status === WalletBondsStatusEnum.Active && (
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      gap: space.sm,
-                      width: '100%',
-                    }}
-                  >
-                    <Button
-                      title={'Redelegate'}
-                      variant="secondary"
-                      style={{ width: '48%' }}
-                      onPress={() => {
-                        navigation.navigate(RouteEnum.Redelegate, {
-                          finalizer: item.finalizer,
-                          txid: item.txid,
-                          staked: item.amount,
-                        });
-                      }}
-                    />
-                    <Button
-                      variant="primary"
-                      title={'Unstake'}
-                      style={{ width: '48%' }}
-                      onPress={() => {
-                        navigation.navigate(RouteEnum.Unstake, {
-                          finalizer: item.finalizer,
-                          txid: item.txid,
-                          staked: item.amount,
-                        });
-                      }}
-                    />
-                  </View>
-                )}
-                {item.status === WalletBondsStatusEnum.Unbonding && (
-                  <Button
-                    title={'Withdraw'}
-                    variant="primary"
-                    style={{ width: '48%' }}
-                    onPress={() => {
-                      navigation.navigate(RouteEnum.Unstake, {
-                        finalizer: item.finalizer,
-                        txid: item.txid,
-                        staked: item.amount,
-                      });
-                    }}
-                  />
-                )}
-              </View>
-            </View>
-          </View>
-        );
-      }}
+  const renderItem = useCallback(
+    ({ item, index }: { item: WalletBondsType; index: number }) => (
+      <StakingPositionRow
+        testID={`position-${index + 1}`}
+        bond={item}
+        privacy={privacy}
+        last={index === positions.length - 1}
+        onAction={onAction}
+      />
+    ),
+    [privacy, positions.length, onAction],
+  );
+
+  return (
+    <Animated.FlatList
+      ref={listRef}
+      onScroll={onScroll}
+      scrollEventThrottle={100}
+      data={positions}
+      keyExtractor={item => `position-${item.txid}`}
+      renderItem={renderItem}
+      itemLayoutAnimation={ROWS_LAYOUT}
+      contentContainerStyle={styles.positions}
     />
   );
 };
@@ -693,175 +513,75 @@ export const StakingPositionsList = React.memo<StakingPositionsListProps>(
   StakingPositionsListBase,
 );
 
+export const positionsText = (n: number) =>
+  n === 1 ? '1 position' : `${n} positions`;
+
 const FinalizersListBase = ({
   staked,
-  currencyName,
-  dimensionsWidth,
+  walletBonds,
+  privacy,
   onScroll,
   scrollToTopSignal,
 }: FinalizersListProps) => {
   const navigation: any = useNavigation();
-  const { colors } = useTheme();
-  const scrollViewRef = useRef<ScrollView & FlatList<any>>(null);
+  const listRef = useRef<FlatList<StakeType>>(null);
 
-  const stakedData: Finalizer[] = useMemo(() => {
-    const resultJSON: StakeType[] = staked;
-    // const randomColors = Utils.generateColorList(resultJSON.length + 10);
-    const r = resultJSON
-      .filter((i: StakeType) => i.votingPower > 0 && !!i.finalizer)
-      .sort((a, b) => b.votingPower - a.votingPower)
-      .map((item, index) => {
-        return {
-          value: item.votingPower,
-          finalizer: item.finalizer,
-          tag: '',
-          svg: {
-            data: lifehashDataUrlFromStringSync(item.finalizer),
-          },
-          key: `pie-${index}`,
-        };
-      });
-    return r;
-  }, [staked]);
+  const finalizers: StakeType[] = useMemo(
+    () =>
+      staked
+        .filter(s => s.votingPower > 0 && !!s.finalizer)
+        .sort((a, b) => b.votingPower - a.votingPower),
+    [staked],
+  );
+
+  const positionsOf = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const b of walletBonds) {
+      if (b.status !== WalletBondsStatusEnum.Withdrawn) {
+        counts.set(b.finalizer, (counts.get(b.finalizer) ?? 0) + 1);
+      }
+    }
+    return counts;
+  }, [walletBonds]);
 
   useEffect(() => {
     if (scrollToTopSignal === 0) {
       return;
     }
-    try {
-      scrollViewRef.current?.scrollTo({ y: 0, animated: true });
-    } catch (error) {
-      console.log('scrollToTop failed:', error);
-      scrollViewRef.current?.scrollToOffset({ offset: 0, animated: true });
-    }
+    listRef.current?.scrollToOffset({ offset: 0, animated: true });
   }, [scrollToTopSignal]);
 
-  const line = (item: Finalizer, index: number, last: boolean) => {
-    return (
-      <TouchableOpacity
-        style={{ width: '100%' }}
-        key={`tag-${index}`}
-        onPress={() => {
-          navigation.navigate(RouteEnum.FinalizerDetail, {
-            finalizer: item.finalizer,
-            lifehash: item.svg.data,
-          });
-        }}
-      >
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginHorizontal: space.xl,
-            paddingVertical: 15,
-            borderBottomColor: colors.borderFaint,
-            borderBottomWidth: last ? 0 : StyleSheet.hairlineWidth,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Image
-              source={{ uri: item.svg.data }}
-              style={{
-                width: 28,
-                height: 28,
-                marginRight: space.sm,
-                borderRadius: 12,
-              }}
-              resizeMode="contain"
-            />
-            {!!item.tag && (
-              <FadeText style={{ marginHorizontal: 5 }}>{item.tag}</FadeText>
-            )}
+  const open = useCallback(
+    (finalizer: string) =>
+      navigation.navigate(RouteEnum.FinalizerDetail, { finalizer }),
+    [navigation],
+  );
 
-            <View
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                flexWrap: 'wrap',
-              }}
-            >
-              <RegText>
-                {item.finalizer.length > (dimensionsWidth < 500 ? 10 : 20)
-                  ? Utils.trimToSmall(
-                      item.finalizer,
-                      dimensionsWidth < 500 ? 5 : 10,
-                    )
-                  : item.finalizer}
-              </RegText>
-              <View
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                }}
-              >
-                <Stake width={15} height={15} style={{ opacity: 0.7 }} />
-                <ZecAmount
-                  amtZec={item.value}
-                  size={14}
-                  currencyName={currencyName}
-                />
-              </View>
-            </View>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <FontAwesomeIcon
-              style={{ marginRight: space.sm, marginLeft: 15 }}
-              size={15}
-              icon={faChevronRight}
-              color={colors.fgDefault}
-            />
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
-  };
+  const renderItem = useCallback(
+    ({ item, index }: { item: StakeType; index: number }) => (
+      <FinalizerRow
+        testID={`finalizer-${index + 1}`}
+        stake={item}
+        detail={positionsText(positionsOf.get(item.finalizer) ?? 0)}
+        privacy={privacy}
+        last={index === finalizers.length - 1}
+        onPress={open}
+      />
+    ),
+    [positionsOf, privacy, finalizers.length, open],
+  );
 
   return (
-    <>
-      <ScrollView
-        ref={scrollViewRef}
-        onScroll={onScroll}
-        showsVerticalScrollIndicator={true}
-        persistentScrollbar={true}
-        indicatorStyle={'white'}
-        style={{ maxHeight: '100%' }}
-        contentContainerStyle={{}}
-      >
-        <View
-          style={{
-            marginTop: 5,
-            display: 'flex',
-            marginHorizontal: 10,
-            padding: 5,
-            alignItems: 'flex-start',
-            backgroundColor: colors.bgSurface,
-            borderRadius: radiusCard,
-          }}
-        >
-          {stakedData.map((item, index) => {
-            return line(item, index, index + 1 === stakedData.length);
-          })}
-        </View>
-        <View
-          style={{
-            height: Platform.OS === GlobalConst.platformOSios ? 100 : 10,
-          }}
-        />
-      </ScrollView>
-    </>
+    <Animated.FlatList
+      ref={listRef}
+      onScroll={onScroll}
+      scrollEventThrottle={100}
+      data={finalizers}
+      keyExtractor={item => `finalizer-${item.finalizer}`}
+      renderItem={renderItem}
+      itemLayoutAnimation={ROWS_LAYOUT}
+      contentContainerStyle={styles.positions}
+    />
   );
 };
 
@@ -869,6 +589,9 @@ export const FinalizersList =
   React.memo<FinalizersListProps>(FinalizersListBase);
 
 const styles = StyleSheet.create({
+  positions: {
+    paddingBottom: Platform.OS === GlobalConst.platformOSios ? 100 : 24,
+  },
   scheduledRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

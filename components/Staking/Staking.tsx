@@ -10,7 +10,6 @@ import {
   ActivityIndicator,
   View,
   StyleSheet,
-  TouchableOpacity,
   Dimensions,
   Platform,
   Pressable,
@@ -29,7 +28,6 @@ import { WalletBondsStatusEnum } from '../../app/AppState/enums/WalletBondsStatu
 import StakingSummary from './components/StakingSummary';
 import EmptyState from '../Components/EmptyState';
 import { useFeedback, useSettings, useWalletData } from '../../app/context';
-import RegText from '../Components/RegText';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faAngleUp } from '@fortawesome/free-solid-svg-icons';
 import Snackbars from '../Components/Snackbars';
@@ -41,7 +39,10 @@ import {
   StakingPositionsList,
 } from './components/StakingLists';
 import { MainTabParamList } from '../../app/types/NavigationTypes';
-import { useTheme, text, space, radiusPill } from '../../app/theme';
+import { useTheme, space, radiusPill } from '../../app/theme';
+import Segmented from '../Components/Segmented';
+import { SUMMARY_RADIUS } from '../Components/SummaryPanel';
+import { warmLifehashes } from '../../app/utils/lifehash';
 
 // const formatMovementDate = (unixSeconds: number | undefined) => {
 //   if (!unixSeconds) return '-';
@@ -53,6 +54,14 @@ import { useTheme, text, space, radiusPill } from '../../app/theme';
 //     minute: '2-digit',
 //   }); // "Oct 10, 4:30 PM"
 // };
+
+type StakingTab = 'scheduled' | 'active' | 'my';
+
+const TABS: { value: StakingTab; label: string }[] = [
+  { value: 'scheduled', label: 'Scheduled' },
+  { value: 'active', label: 'Active Stake' },
+  { value: 'my', label: 'My Finalizers' },
+];
 
 type StakingProps = NativeStackScreenProps<
   MainTabParamList,
@@ -69,6 +78,7 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
   const { privacy } = useSettings();
   const {
     staked,
+    globalStaked,
     info,
     stakingDay,
     timeToStakingDaySeconds: timeToStakingDay,
@@ -83,7 +93,7 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
   const screenName = ScreenEnum.StakingHome;
 
   const [loading] = useState(false);
-  const [tab, setTab] = useState<'scheduled' | 'active' | 'my'>(tabParam);
+  const [tab, setTab] = useState<StakingTab>(tabParam);
   const [isAtTop, setIsAtTop] = useState<boolean>(true);
   const [isScrollingToTop, setIsScrollingToTop] = useState<boolean>(false);
   const [scrollToTopSignal, setScrollToTopSignal] = useState<number>(0);
@@ -100,6 +110,10 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
       setTab(route.params.tab);
     }
   }, [route.params, route.params?.tab]);
+
+  useEffect(() => {
+    warmLifehashes([...staked, ...globalStaked].map(s => s.finalizer));
+  }, [staked, globalStaked]);
 
   const hasMovements: boolean = useMemo(() => {
     if (!walletBonds) {
@@ -158,14 +172,8 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
     [isScrollingToTop],
   );
 
-  console.log('scheduled actions', scheduledActions);
-
-  console.log(
-    'render staking',
-    stakingDay,
-    timeToStakingDay,
-    timeLeftStakingDay,
-  );
+  const pane = (name: StakingTab) =>
+    tab === name ? styles.pane : styles.paneHidden;
 
   return (
     <ToastProvider>
@@ -184,104 +192,8 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
       >
         <StakingSummary />
 
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginTop: space.xl,
-            borderRadius: 20,
-            backgroundColor: colors.bgSurface,
-            padding: 5,
-            marginHorizontal: space.xl,
-          }}
-        >
-          <TouchableOpacity
-            style={{
-              flexGrow: 1,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 20,
-              backgroundColor:
-                tab === 'scheduled' ? colors.bgFaint : 'transparent',
-              padding: 5,
-              overflow: 'hidden',
-            }}
-            onPress={() => setTab('scheduled')}
-            hitSlop={10}
-          >
-            <View>
-              <RegText
-                style={[
-                  text.subheadline,
-                  {
-                    fontWeight: tab === 'scheduled' ? '600' : '400',
-                    color: colors.fgDefault,
-                  },
-                ]}
-              >
-                {'Scheduled'}
-              </RegText>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{
-              flexGrow: 1,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 20,
-              backgroundColor:
-                tab === 'active' ? colors.bgFaint : 'transparent',
-              padding: 5,
-              overflow: 'hidden',
-            }}
-            onPress={() => setTab('active')}
-            hitSlop={10}
-          >
-            <View>
-              <RegText
-                style={[
-                  text.subheadline,
-                  {
-                    fontWeight: tab === 'active' ? '600' : '400',
-                    color: colors.fgDefault,
-                  },
-                ]}
-              >
-                {'Active Stake'}
-              </RegText>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{
-              flexGrow: 1,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 20,
-              backgroundColor: tab === 'my' ? colors.bgFaint : 'transparent',
-              padding: 5,
-              overflow: 'hidden',
-            }}
-            onPress={() => setTab('my')}
-            hitSlop={10}
-          >
-            <View>
-              <RegText
-                style={[
-                  text.subheadline,
-                  {
-                    fontWeight: tab === 'my' ? '600' : '400',
-                    color: colors.fgDefault,
-                  },
-                ]}
-              >
-                {'My Finalizers'}
-              </RegText>
-            </View>
-          </TouchableOpacity>
+        <View style={[styles.tray, { backgroundColor: colors.bgChrome }]}>
+          <Segmented options={TABS} value={tab} onChange={setTab} />
         </View>
 
         <View
@@ -302,67 +214,68 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
               </View>
             )}
 
-            {/* TODO: Use Router */}
-            {!loading && !hasScheduledActions && tab === 'scheduled' && (
-              <EmptyState
-                art="pair"
-                title="No scheduled actions yet."
-                style={styles.emptyState}
-              />
-            )}
+            {!loading && (
+              <>
+                <View style={pane('scheduled')}>
+                  {hasScheduledActions ? (
+                    <ScheduledActionsList
+                      scheduledActions={scheduledActions}
+                      walletBonds={walletBonds}
+                      stakingDay={stakingDay}
+                      blocksToStakingDay={blocksToStakingDay}
+                      blocksTotalStakingDay={blocksTotalStakingDay}
+                      timeToStakingDaySeconds={timeToStakingDay}
+                      timeLeftStakingDaySeconds={timeLeftStakingDay}
+                      currencyName={info.currencyName}
+                      privacy={privacy}
+                      dimensionsWidth={dimensions.width}
+                      onScroll={handleScroll}
+                      scrollToTopSignal={scrollToTopSignal}
+                    />
+                  ) : (
+                    <EmptyState
+                      art="pair"
+                      title="No scheduled actions yet."
+                      style={styles.emptyState}
+                    />
+                  )}
+                </View>
 
-            {!loading && !hasMovements && tab === 'active' && (
-              <EmptyState
-                art="pair"
-                title="No staking positions yet."
-                style={styles.emptyState}
-              />
-            )}
+                <View style={pane('active')}>
+                  {hasMovements ? (
+                    <StakingPositionsList
+                      walletBonds={walletBonds}
+                      privacy={privacy}
+                      onScroll={handleScroll}
+                      scrollToTopSignal={scrollToTopSignal}
+                    />
+                  ) : (
+                    <EmptyState
+                      art="pair"
+                      title="No staking positions yet."
+                      style={styles.emptyState}
+                    />
+                  )}
+                </View>
 
-            {!loading && !hasStaked && tab === 'my' && (
-              <EmptyState
-                art="pair"
-                title="No active finalizers yet."
-                style={styles.emptyState}
-              />
-            )}
-
-            {!loading && hasScheduledActions && tab === 'scheduled' && (
-              <ScheduledActionsList
-                scheduledActions={scheduledActions}
-                walletBonds={walletBonds}
-                stakingDay={stakingDay}
-                blocksToStakingDay={blocksToStakingDay}
-                blocksTotalStakingDay={blocksTotalStakingDay}
-                timeToStakingDaySeconds={timeToStakingDay}
-                timeLeftStakingDaySeconds={timeLeftStakingDay}
-                currencyName={info.currencyName}
-                privacy={privacy}
-                dimensionsWidth={dimensions.width}
-                onScroll={handleScroll}
-                scrollToTopSignal={scrollToTopSignal}
-              />
-            )}
-
-            {!loading && hasMovements && tab === 'active' && (
-              <StakingPositionsList
-                walletBonds={walletBonds}
-                currencyName={info.currencyName}
-                privacy={privacy}
-                dimensionsWidth={dimensions.width}
-                onScroll={handleScroll}
-                scrollToTopSignal={scrollToTopSignal}
-              />
-            )}
-
-            {!loading && hasStaked && tab === 'my' && (
-              <FinalizersList
-                staked={staked}
-                currencyName={info.currencyName}
-                dimensionsWidth={dimensions.width}
-                onScroll={handleScroll}
-                scrollToTopSignal={scrollToTopSignal}
-              />
+                <View style={pane('my')}>
+                  {hasStaked ? (
+                    <FinalizersList
+                      staked={staked}
+                      walletBonds={walletBonds}
+                      privacy={privacy}
+                      onScroll={handleScroll}
+                      scrollToTopSignal={scrollToTopSignal}
+                    />
+                  ) : (
+                    <EmptyState
+                      art="pair"
+                      title="No active finalizers yet."
+                      style={styles.emptyState}
+                    />
+                  )}
+                </View>
+              </>
             )}
 
             {!isAtTop && (
@@ -403,10 +316,26 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
+  tray: {
+    marginTop: -SUMMARY_RADIUS,
+    marginHorizontal: space.xl,
+    paddingTop: SUMMARY_RADIUS + space.xs,
+    paddingBottom: space.xs,
+    paddingHorizontal: space.xs,
+    borderBottomLeftRadius: 14,
+    borderBottomRightRadius: 14,
+    borderCurve: 'continuous',
+  },
   centerContent: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  pane: {
+    flex: 1,
+  },
+  paneHidden: {
+    display: 'none',
   },
   emptyState: {
     paddingBottom: 96,

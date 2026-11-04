@@ -1,746 +1,318 @@
-/* eslint-disable react-native/no-inline-styles */
-import React, { useEffect, useMemo, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  Modal,
-  ActivityIndicator,
-  Platform,
-  TouchableWithoutFeedback,
-  Keyboard,
-  KeyboardAvoidingView,
-  FlatList,
-  Alert,
-  TextInput,
-  TouchableOpacity,
-} from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, {
+  CSSTransitionProperties,
+  Easing,
+  LinearTransition,
+  cubicBezier,
+  useReducedMotion,
+} from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import {
-  faArrowDown,
-  faCheckCircle,
-  faCircle,
-} from '@fortawesome/free-solid-svg-icons';
-import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
+import { ChevronRight } from 'lucide-react-native';
+
 import {
   RouteEnum,
   ScheduledActionType,
   StakingActionKindEnum,
   WalletBondsType,
 } from '../../../app/AppState';
-import { SessionStackParamList } from '../../../app/types';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import {
-  useSettings,
-  useWalletData,
-} from '../../../app/context';
-import { HeaderTitle } from '../../Header';
-import { ChevronDown } from '../../Components/Icons/Chevron';
-import FadeText from '../../Components/FadeText';
-import Refresh from '../../../assets/icons/refresh.svg';
-import RegText from '../../Components/RegText';
 import { WalletBondsStatusEnum } from '../../../app/AppState/enums/WalletBondsStatusEnum';
-import ZecAmount from '../../Components/ZecAmount';
-import { ChevronRight } from 'lucide-react-native';
-import { useTheme, text, space } from '../../../app/theme';
+import { useSettings, useWalletData } from '../../../app/context';
+import { SessionStackParamList } from '../../../app/types';
+import {
+  curve,
+  duration,
+  radiusCard,
+  space,
+  text,
+  useTheme,
+} from '../../../app/theme';
+import Utils from '../../../app/utils';
+import { HeaderTitle } from '../../Header';
+import LifehashDisc from '../../Components/LifehashDisc';
+import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
+import StakingDayBubble from '../StakingDayBubble';
+import StakingPositionRow from './StakingPositionRow';
+import { bondProblem, bondTransfer } from './bondChecks';
 
-type ModalState = 'idle' | 'sending' | 'success';
+const CSS_EASE_OUT = cubicBezier(curve[0], curve[1], curve[2], curve[3]);
+const ROWS_LAYOUT = LinearTransition.duration(duration.list).easing(
+  Easing.bezier(curve[0], curve[1], curve[2], curve[3]),
+);
 
 type RedelegateProps = NativeStackScreenProps<
   SessionStackParamList,
   RouteEnum.Redelegate
 >;
 
+type EndpointProps = {
+  label: string;
+  finalizer: string;
+  placeholder: string;
+  onPress?: () => void;
+};
+
+const Endpoint: React.FC<EndpointProps> = ({
+  label,
+  finalizer,
+  placeholder,
+  onPress,
+}) => {
+  const { colors } = useTheme();
+  const reduced = useReducedMotion();
+  const [pressed, setPressed] = useState(false);
+  const press: CSSTransitionProperties = {
+    transitionProperty: ['backgroundColor'],
+    transitionDuration: reduced ? '0ms' : `${duration.press}ms`,
+    transitionTimingFunction: CSS_EASE_OUT,
+  };
+
+  return (
+    <Pressable
+      accessibilityRole={onPress ? 'button' : undefined}
+      accessibilityLabel={`${label}, ${finalizer ? Utils.trimToSmall(finalizer, 6) : placeholder}`}
+      disabled={!onPress}
+      onPress={onPress}
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
+      pressRetentionOffset={16}
+    >
+      <Animated.View
+        style={[
+          styles.endpoint,
+          pressed && onPress && { backgroundColor: colors.bgPress },
+          press,
+        ]}
+      >
+        <Text style={[styles.endpointLabel, { color: colors.fgMuted }]}>
+          {label}
+        </Text>
+        <LifehashDisc
+          finalizer={finalizer}
+          size={28}
+          style={{ backgroundColor: colors.bgFaint }}
+        />
+        <Text
+          numberOfLines={1}
+          style={[
+            text.body,
+            styles.endpointValue,
+            { color: finalizer ? colors.fgDefault : colors.fgSubtle },
+          ]}
+        >
+          {finalizer ? Utils.trimToSmall(finalizer, 6) : placeholder}
+        </Text>
+        {onPress && (
+          <ChevronRight size={18} strokeWidth={2} color={colors.fgSubtle} />
+        )}
+      </Animated.View>
+    </Pressable>
+  );
+};
+
 const Redelegate: React.FC<RedelegateProps> = ({ route }) => {
-  const finalizer =
-    !!route.params && route.params.finalizer !== undefined
-      ? route.params.finalizer
-      : '';
-  const txid =
-    !!route.params && route.params.txid !== undefined ? route.params.txid : '';
-  const stakedFrom =
-    !!route.params && route.params.staked !== undefined
-      ? route.params.staked
-      : 0;
+  const finalizer = route.params?.finalizer ?? '';
+  const txid = route.params?.txid ?? '';
 
   const navigation: any = useNavigation();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-
-  const [finalizerFromText, setFinalizerFromText] = useState<string>(finalizer);
-  const [txidFrom, setTxidFrom] = useState<string>(txid);
-  const [stakedFromNumber, setStakedFromNumber] = useState<number>(stakedFrom);
-  const [finalizerToText, setFinalizerToText] = useState<string>('');
-  const [stakedToNumber, setStakedToNumber] = useState<number>(0);
-
-  const [selectedTxid, setSelectedTxid] = useState<string>('');
-  const [modalState, setModalState] = useState<ModalState>('idle');
-  const [kbOpen, setKbOpen] = useState(false);
-
-  const modalVisible = modalState !== 'idle';
-
   const { privacy } = useSettings();
-  const { walletBonds, valueTransfers, staked, globalStaked, info } = useWalletData();
+  const { walletBonds, valueTransfers, stakingDay, scheduledActions } =
+    useWalletData();
 
-  const movements = useMemo(() => {
-    return walletBonds
-      .filter(b => {
-        // only active bonds.
-        if (
-          b.status === WalletBondsStatusEnum.Withdrawn ||
-          b.status === WalletBondsStatusEnum.Unbonding
-        )
-          return false;
-        if (!!txidFrom && b.txid === txidFrom) return true;
-        if (txidFrom) return false;
-        if (!!finalizerFromText && b.finalizer === finalizerFromText)
-          return true;
-        // no finalizer selected, all bonds visible. Impossible case for now.
-        if (!finalizerFromText) return true;
-        return false;
-      })
-      .sort((a, b) => b.amount - a.amount);
-  }, [finalizerFromText, txidFrom, walletBonds]);
+  const positions: WalletBondsType[] = useMemo(
+    () =>
+      walletBonds
+        .filter(b => b.status === WalletBondsStatusEnum.Active)
+        .filter(b => (txid ? b.txid === txid : true))
+        .filter(b => (finalizer ? b.finalizer === finalizer : true))
+        .sort((a, b) => b.amount - a.amount),
+    [walletBonds, txid, finalizer],
+  );
 
-  const selectedBond = movements.find(tx => tx.txid === selectedTxid);
-  const hasSelectedTx = !!selectedBond;
-  const hasFinalizerFrom = !!finalizerFromText;
-  const hasFinalizerTo =
-    !!finalizerToText && finalizerToText !== finalizerFromText;
-  // selected a tx & selected a 'to' finalizer & different finalizers
-  const isValidForm = hasSelectedTx && hasFinalizerFrom && hasFinalizerTo;
+  const [selectedTxid, setSelectedTxid] = useState<string>(
+    txid || (positions.length === 1 ? positions[0].txid : ''),
+  );
+  const [to, setTo] = useState<string>('');
+  const selected = positions.find(b => b.txid === selectedTxid);
+  const from = selected?.finalizer ?? finalizer;
+  const ready = !!selected && !!to && to !== from;
 
-  useEffect(() => {
-    const s1 = Keyboard.addListener('keyboardDidShow', () => setKbOpen(true));
-    const s2 = Keyboard.addListener('keyboardDidHide', () => setKbOpen(false));
-    return () => {
-      s1.remove();
-      s2.remove();
-    };
-  }, []);
+  const select = useCallback(
+    (bond: WalletBondsType) => setSelectedTxid(bond.txid),
+    [],
+  );
 
-  useEffect(() => {
-    if (
-      !!finalizerFromText &&
-      !!finalizerToText &&
-      finalizerFromText === finalizerToText
-    ) {
-      setFinalizerToText('');
-      setStakedToNumber(0);
-    }
-  }, [finalizerFromText, finalizerToText]);
+  const pickTo = () =>
+    navigation.navigate(RouteEnum.Finalizers, {
+      setFinalizer: (f: string) => setTo(f),
+      scope: 'network',
+      exclude: from,
+    });
 
-  useEffect(() => {
-    // looking for the voting power of the finalizer
-    if (staked.filter(g => g.finalizer === finalizerFromText).length === 1) {
-      setStakedFromNumber(
-        staked.filter(g => g.finalizer === finalizerFromText)[0].votingPower,
-      );
-    } else {
-      setStakedFromNumber(0);
-    }
-  }, [finalizerFromText, staked]);
-
-  useEffect(() => {
-    // looking for the voting power of the finalizer
-    if (
-      globalStaked.filter(g => g.finalizer === finalizerToText).length === 1
-    ) {
-      setStakedToNumber(
-        globalStaked.filter(g => g.finalizer === finalizerToText)[0]
-          .votingPower,
-      );
-    } else {
-      setStakedToNumber(0);
-    }
-  }, [finalizerToText, globalStaked]);
-
-  const shortenTxid = (_txid: string) => {
-    if (_txid.length <= 16) {
-      return _txid;
-    }
-    return `${_txid.slice(0, 10)}…${_txid.slice(-8)}`;
-  };
-
-  const handleRedelegatePress = async () => {
-    if (!isValidForm || !selectedBond) return;
-
-    const selectedKind = selectedBond.status;
-
-    const bondTxid = selectedBond.txid;
-    if (!bondTxid) {
-      Alert.alert('Error', 'Could not determine the original bond txid.');
+  const submit = () => {
+    if (!selected || !ready) {
       return;
     }
-
-    if (valueTransfers?.filter(v => v.txid === bondTxid).length === 0) {
-      Alert.alert(
-        'Error',
-        'Could not determine the original bond txid as a existent Transaction.',
-      );
-      return;
-    } else {
-      const confirmations =
-        valueTransfers?.filter(v => v.txid === bondTxid)[0].confirmations || 0;
-      if (confirmations <= 0) {
-        Alert.alert(
-          'Error',
-          'This bond is still processing, wait for confirmations.',
-        );
-        return;
-      }
-    }
-
-    console.log('bondTxid', bondTxid);
-
-    let bondKey = selectedBond.pubKey;
-    console.log('selectedKind', selectedKind);
-
-    if (selectedKind === WalletBondsStatusEnum.Active) {
-      // confirm screen
-      const item: ScheduledActionType = {
-        id: 0,
-        kind: StakingActionKindEnum.Move,
-        amount:
-          (valueTransfers?.filter(v => v.txid === bondTxid)[0].amount || 0) *
-          10 ** 8,
-        finalizer: finalizerFromText,
-        finalizerTo: finalizerToText,
-        txid: bondTxid,
-        bondKey: bondKey,
-      };
-      navigation.navigate(RouteEnum.ScheduledActionDetail, {
-        item,
-      });
-    } else {
-      Alert.alert(
-        'Error',
-        `Unsupported selection kind: ${selectedKind ?? 'none'}`,
-      );
-      setModalState('idle');
-      return;
-    }
-  };
-
-  const actionVerb = useMemo(() => {
-    return 'Redelegate';
-  }, []);
-
-  const handleViewMovements = () => {
-    setModalState('idle');
-    if (navigation.canGoBack()) {
-      navigation.goBack();
-    }
-  };
-
-  const renderSeparator = () => <View style={{ height: space.sm }} />;
-
-  const renderStakedTxItem = ({ item }: { item: WalletBondsType }) => {
-    console.log('item', item);
-    const isSelected = item.txid === selectedTxid;
-
-    let confirmations =
-      valueTransfers &&
-      valueTransfers.filter(v => v.txid === item.txid).length > 0
-        ? valueTransfers.filter(v => v.txid === item.txid)[0].confirmations
-        : 0;
-
-    return (
-      <Pressable
-        onPress={() => {
-          setSelectedTxid(item.txid);
-        }}
-        style={[
-          styles.txRow,
-          {
-            borderColor: isSelected ? colors.borderAccent : colors.borderFaint,
-            backgroundColor: isSelected ? colors.bgSurface : colors.bgCanvas,
-          },
-        ]}
-      >
-        <View style={{ flex: 1 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            {!confirmations && (
-              <Refresh width={15} height={15} style={{ marginRight: 5 }} />
-            )}
-            <Text
-              style={[text.caption, { color: colors.fgDefault }]}
-              numberOfLines={1}
-            >
-              {item.status === WalletBondsStatusEnum.Unbonding
-                ? 'Inactive'
-                : item.status}
-            </Text>
-          </View>
-          <Text
-            style={[text.caption2, { color: colors.fgSubtle, marginTop: 2 }]}
-          >
-            {shortenTxid(item.pubKey)}
-          </Text>
-        </View>
-        <ZecAmount
-          style={{
-            alignSelf: 'center',
-            marginLeft: space.md,
-          }}
-          size={14}
-          currencyName={info.currencyName}
-          color={colors.fgDefault}
-          amtZec={item.amount}
-          privacy={privacy}
-        />
-      </Pressable>
+    const transfers = valueTransfers ?? [];
+    const problem = bondProblem(
+      selected,
+      transfers,
+      scheduledActions,
+      stakingDay,
     );
+    if (problem) {
+      Alert.alert('Error', problem);
+      return;
+    }
+    const item: ScheduledActionType = {
+      id: 0,
+      kind: StakingActionKindEnum.Move,
+      amount: (bondTransfer(selected, transfers)?.amount || 0) * 10 ** 8,
+      finalizer: selected.finalizer,
+      finalizerTo: to,
+      txid: selected.txid,
+      bondKey: selected.pubKey,
+    };
+    navigation.navigate(RouteEnum.ScheduledActionDetail, { item });
   };
+
+  const renderItem = useCallback(
+    ({ item, index }: { item: WalletBondsType; index: number }) => (
+      <StakingPositionRow
+        testID={`redelegate-position-${index + 1}`}
+        bond={item}
+        privacy={privacy}
+        last={index === positions.length - 1}
+        selected={item.txid === selectedTxid}
+        onSelect={select}
+      />
+    ),
+    [privacy, positions.length, selectedTxid, select],
+  );
+
+  const header = (
+    <View style={styles.header}>
+      <View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
+        <Endpoint
+          label="From"
+          finalizer={from}
+          placeholder="Choose a position below"
+        />
+        <View
+          style={[styles.hairline, { backgroundColor: colors.borderFaint }]}
+        />
+        <Endpoint
+          label="To"
+          finalizer={to}
+          placeholder="Choose a finalizer"
+          onPress={pickTo}
+        />
+      </View>
+      <Text style={[text.footnote, styles.section, { color: colors.fgSubtle }]}>
+        Position to move
+      </Text>
+    </View>
+  );
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <KeyboardAvoidingView
-        style={{
-          flex: 1,
-          backgroundColor: colors.bgCanvas,
+    <View style={[styles.screen, { backgroundColor: colors.bgCanvas }]}>
+      <HeaderTitle
+        title="Redelegate"
+        goBack={() => {
+          if (navigation.canGoBack()) {
+            navigation.goBack();
+          }
         }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={
-          Platform.OS === 'ios' ? 0 : kbOpen ? insets.top : 0
+        ExtraComponent={<StakingDayBubble />}
+      />
+
+      <Animated.FlatList
+        data={positions}
+        keyExtractor={item => item.txid}
+        renderItem={renderItem}
+        itemLayoutAnimation={ROWS_LAYOUT}
+        ListHeaderComponent={header}
+        ListEmptyComponent={
+          <Text
+            style={[text.footnote, styles.empty, { color: colors.fgSubtle }]}
+          >
+            No active positions to move.
+          </Text>
         }
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
+      />
+
+      <View
+        style={[styles.footer, { paddingBottom: insets.bottom + space.xl }]}
       >
-        <HeaderTitle
+        <LiquidPrimaryButton
           title="Redelegate"
-          goBack={() => {
-            if (navigation.canGoBack()) {
-              navigation.goBack();
-            }
-          }}
+          disabled={!ready}
+          onPress={submit}
+          style={styles.cta}
         />
-
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            borderRadius: 20,
-            marginBottom: 10,
-            padding: space.lg,
-            marginHorizontal: 10,
-            marginTop: space.xl,
-            borderWidth: 0.5,
-            borderColor: colors.borderFaint,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              flexGrow: 1,
-              flexShrink: 1,
-            }}
-          >
-            <FontAwesomeIcon
-              style={{ marginRight: 15 }}
-              size={20}
-              icon={faCircle}
-              color={colors.fgAccent}
-            />
-            <View
-              style={{
-                justifyContent: 'center',
-                alignItems: 'flex-start',
-                flexGrow: 1,
-                flexShrink: 1,
-                gap: 0,
-              }}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <TextInput
-                  style={[
-                    text.body,
-                    {
-                      flexGrow: 1,
-                      flexShrink: 1,
-                      color: colors.fgDefault,
-                    },
-                  ]}
-                  placeholder="Tap here for finalizer address"
-                  placeholderTextColor={colors.fgSubtle}
-                  value={shortenTxid(finalizerFromText)}
-                  editable={false}
-                  onChangeText={setFinalizerFromText}
-                />
-                {!!finalizerFromText && false && (
-                  <TouchableOpacity
-                    style={{ marginLeft: 5 }}
-                    onPress={() => {
-                      setFinalizerFromText('');
-                      setStakedFromNumber(0);
-                      setTxidFrom('');
-                    }}
-                  >
-                    <View
-                      style={{
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        backgroundColor: colors.bgMuted,
-                        borderRadius: 11,
-                        height: 22,
-                        width: 22,
-                        padding: 0,
-                      }}
-                    >
-                      <RegText
-                        style={{ color: colors.bgCanvas, marginTop: -3 }}
-                      >
-                        x
-                      </RegText>
-                    </View>
-                  </TouchableOpacity>
-                )}
-              </View>
-              {!!stakedFromNumber && (
-                <FadeText
-                  style={{ marginBottom: 5 }}
-                >{`Staked: ${stakedFromNumber.toFixed(5)} ${info.currencyName}`}</FadeText>
-              )}
-            </View>
-          </View>
-          {false && (
-            <ChevronDown
-              onPress={() =>
-                navigation.navigate(RouteEnum.Finalizers, {
-                  setFinalizer: (f: string, s: number) => {
-                    setFinalizerFromText(f);
-                    setStakedFromNumber(s);
-                    setTxidFrom('');
-                  },
-                  scope: 'my',
-                  exclude: '',
-                })
-              }
-              width={30}
-              height={30}
-              style={{ marginLeft: 5 }}
-              color={colors.fgDefault}
-            />
-          )}
-        </View>
-
-        <View>
-          <View
-            style={{
-              padding: 10,
-              paddingHorizontal: 12,
-              borderColor: colors.fgDefault,
-              backgroundColor: colors.bgCanvas,
-              borderWidth: 1,
-              borderRadius: 30,
-              marginTop: -25,
-              zIndex: 999,
-              width: 50,
-              alignSelf: 'center',
-            }}
-          >
-            <FontAwesomeIcon
-              icon={faArrowDown}
-              size={25}
-              color={colors.fgDefault}
-            />
-          </View>
-        </View>
-
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            borderRadius: 20,
-            marginBottom: 10,
-            backgroundColor: colors.bgSurface,
-
-            padding: space.lg,
-            marginHorizontal: 10,
-            borderWidth: 0.5,
-            borderColor: colors.borderFaint,
-            marginTop: -15,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              flexGrow: 1,
-              flexShrink: 1,
-            }}
-          >
-            <FontAwesomeIcon
-              style={{ marginRight: 15 }}
-              size={20}
-              icon={faCircle}
-              color={colors.fgWarning}
-            />
-            <View
-              style={{
-                justifyContent: 'center',
-                alignItems: 'flex-start',
-                flexGrow: 1,
-                flexShrink: 1,
-                gap: 0,
-              }}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <TextInput
-                  style={[
-                    text.body,
-                    {
-                      flexGrow: 1,
-                      flexShrink: 1,
-                      color: colors.fgDefault,
-                    },
-                  ]}
-                  placeholder="Tap here for finalizer address"
-                  placeholderTextColor={colors.fgSubtle}
-                  value={finalizerToText}
-                  editable={true}
-                  onChangeText={setFinalizerToText}
-                />
-                {!!finalizerToText && (
-                  <TouchableOpacity
-                    style={{ marginLeft: 5 }}
-                    onPress={() => {
-                      setFinalizerToText('');
-                      setStakedToNumber(0);
-                    }}
-                  >
-                    <View
-                      style={{
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        backgroundColor: colors.bgMuted,
-                        borderRadius: 11,
-                        height: 22,
-                        width: 22,
-                        padding: 0,
-                      }}
-                    >
-                      <RegText
-                        style={{ color: colors.bgCanvas, marginTop: -3 }}
-                      >
-                        x
-                      </RegText>
-                    </View>
-                  </TouchableOpacity>
-                )}
-              </View>
-              {!!stakedToNumber && (
-                <FadeText
-                  style={{ marginLeft: 15, marginBottom: 5 }}
-                >{`Voting power: ${stakedToNumber.toFixed(5)} ${info.currencyName}`}</FadeText>
-              )}
-            </View>
-          </View>
-          <ChevronRight
-            onPress={() =>
-              navigation.navigate(RouteEnum.Finalizers, {
-                setFinalizer: (f: string, s: number) => {
-                  setFinalizerToText(f);
-                  setStakedToNumber(s);
-                },
-                scope: 'network',
-                exclude: finalizerFromText,
-              })
-            }
-            width={30}
-            height={30}
-            style={{ marginLeft: 5 }}
-            color={colors.fgDefault}
-          />
-        </View>
-
-        {/* Content */}
-        <View
-          style={{
-            flex: 1,
-            paddingHorizontal: space.xxl,
-            paddingTop: space.xxl,
-          }}
-        >
-          {/* Staked TX list */}
-          <Text
-            style={[
-              text.headline,
-              { color: colors.fgDefault, marginBottom: space.sm },
-            ]}
-          >
-            Bonds
-          </Text>
-
-          <Text
-            style={[
-              text.caption1,
-              { color: colors.fgSubtle, marginBottom: space.sm },
-            ]}
-          >
-            Select the original staking transaction. The redelegate amount will
-            be the value from that transaction.
-          </Text>
-
-          <View
-            style={{
-              flex: 1,
-              marginBottom: space.lg,
-            }}
-          >
-            <FlatList
-              data={movements}
-              keyExtractor={item => item.txid}
-              renderItem={renderStakedTxItem}
-              ItemSeparatorComponent={renderSeparator}
-              ListEmptyComponent={
-                <Text
-                  style={[
-                    text.footnote,
-                    {
-                      color: colors.fgSubtle,
-                      textAlign: 'center',
-                      marginTop: space.lg,
-                    },
-                  ]}
-                >
-                  You don&apos;t have any delegation bonds active.
-                </Text>
-              }
-            />
-          </View>
-        </View>
-
-        {/* Bottom CTA */}
-        <View
-          style={{
-            alignItems: 'center',
-            justifyContent: 'center',
-            paddingTop: 10,
-            paddingBottom: insets.bottom + 20,
-            paddingHorizontal: space.xxl,
-          }}
-        >
-          <LiquidPrimaryButton
-            title={actionVerb}
-            disabled={!isValidForm || modalState === 'sending'}
-            onPress={handleRedelegatePress}
-            style={{ alignSelf: 'stretch' }}
-          />
-        </View>
-
-        {/* Modal */}
-        <Modal
-          visible={modalVisible}
-          transparent
-          animationType="fade"
-          onRequestClose={() => {
-            if (modalState === 'success') {
-              setModalState('idle');
-            }
-          }}
-        >
-          <View style={styles.modalBackdrop}>
-            <View
-              style={[
-                styles.modalCard,
-                {
-                  backgroundColor: colors.bgCanvas,
-                  borderColor: colors.borderFaint,
-                },
-              ]}
-            >
-              {modalState === 'sending' && (
-                <>
-                  <ActivityIndicator size="large" color={colors.fgDefault} />
-                  <Text
-                    style={[
-                      text.callout,
-                      {
-                        marginTop: space.lg,
-                        color: colors.fgDefault,
-                        textAlign: 'center',
-                      },
-                    ]}
-                  >
-                    Sending redelegate transaction…
-                  </Text>
-                </>
-              )}
-
-              {modalState === 'success' && (
-                <>
-                  <FontAwesomeIcon
-                    icon={faCheckCircle}
-                    size={40}
-                    color={colors.fgAccent}
-                  />
-                  <Text
-                    style={[
-                      text.headline,
-                      {
-                        marginTop: space.lg,
-                        color: colors.fgDefault,
-                        textAlign: 'center',
-                      },
-                    ]}
-                  >
-                    Redelegate request transaction sent!
-                  </Text>
-
-                  <View
-                    style={{
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      paddingTop: space.xxl,
-                      paddingBottom: space.xl,
-                      paddingHorizontal: space.xxl,
-                    }}
-                  >
-                    <LiquidPrimaryButton
-                      title="View movements"
-                      onPress={handleViewMovements}
-                    />
-                  </View>
-                </>
-              )}
-            </View>
-          </View>
-        </Modal>
-      </KeyboardAvoidingView>
-    </TouchableWithoutFeedback>
+      </View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  modalBackdrop: {
+  screen: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
-  modalCard: {
-    width: '80%',
-    maxWidth: 320,
-    borderRadius: 18,
-    paddingHorizontal: space.xl,
-    paddingVertical: space.xxl,
-    alignItems: 'center',
-    borderWidth: StyleSheet.hairlineWidth,
+  content: {
+    flexGrow: 1,
+    paddingHorizontal: 10,
   },
-  txRow: {
+  header: {
+    paddingHorizontal: 10,
+    paddingTop: space.sm,
+  },
+  card: {
+    borderRadius: radiusCard,
+    borderCurve: 'continuous',
+    paddingVertical: space.xs,
+    overflow: 'hidden',
+  },
+  endpoint: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingHorizontal: space.md,
-    paddingVertical: 10,
+    gap: space.md,
+    paddingHorizontal: space.lg,
+    paddingVertical: space.md,
+  },
+  endpointLabel: {
+    ...text.caption,
+    width: 40,
+  },
+  endpointValue: {
+    flex: 1,
+  },
+  hairline: {
+    height: StyleSheet.hairlineWidth,
+    marginLeft: space.lg,
+  },
+  section: {
+    fontWeight: '600',
+    paddingHorizontal: 10,
+    paddingTop: space.xxl,
+    paddingBottom: space.xs,
+  },
+  empty: {
+    textAlign: 'center',
+    paddingVertical: space.lg,
+  },
+  footer: {
+    paddingTop: space.sm,
+    paddingHorizontal: space.xxl,
+  },
+  cta: {
+    alignSelf: 'stretch',
   },
 });
 
