@@ -6,6 +6,7 @@ import {
   NativeStackNavigationProp,
   createNativeStackNavigator,
 } from '@react-navigation/native-stack';
+import { NavigationContainer } from '@react-navigation/native';
 import NetInfo, {
   NetInfoState,
 } from '@react-native-community/netinfo/src/index';
@@ -45,6 +46,7 @@ import { BackdropHost } from '../Backdrop';
 import { BootInfo, Lifecycle, OpenRequest } from '../lifecycle/phase';
 import { useLifecycle } from '../lifecycle';
 import { getRecoveryWalletInfo } from '../recoveryWalletInfov10';
+import { navigationTheme, useTheme } from '../theme';
 
 const SetupStack = createNativeStackNavigator<SetupStackParamList>();
 
@@ -60,6 +62,7 @@ type SetupState = SetupDomains & {
 
 export default function Setup() {
   const { lifecycle, translate, actions } = useLifecycle();
+  const { colors } = useTheme();
   // App.tsx only mounts this screen in the 'setup' phase.
   const setup = lifecycle as Extract<Lifecycle, { phase: 'setup' }>;
   const { boot } = setup;
@@ -328,76 +331,78 @@ export default function Setup() {
         />
 
         <SetupDomainsProvider value={context}>
-          <SetupStack.Navigator
-            initialRouteName={RouteEnum.StartMenu}
-            screenOptions={{ headerShown: false }}
-          >
-            <SetupStack.Screen
-              name={RouteEnum.StartMenu}
-              options={{
-                contentStyle: { backgroundColor: 'transparent' },
-              }}
+          <NavigationContainer theme={navigationTheme(colors)}>
+            <SetupStack.Navigator
+              initialRouteName={RouteEnum.StartMenu}
+              screenOptions={{ headerShown: false }}
             >
-              {({ navigation }) => (
-                <StartMenu
-                  actionButtonsDisabled={state.actionButtonsDisabled}
-                  walletExists={state.walletExists}
-                  openWalletFailed={state.openWalletFailed}
-                  playIntro={coldStart && !state.walletExists}
-                  openCurrentWallet={() => startOpening({ kind: 'open' })}
-                  createNewWallet={() => startOpening({ kind: 'create' })}
-                  getwalletToRestore={() => {
-                    getwalletToRestore();
-                    navigation.navigate(RouteEnum.Import);
-                  }}
-                  openServers={() =>
-                    navigation.navigate(RouteEnum.ChooseIndexer)
-                  }
-                />
-              )}
-            </SetupStack.Screen>
-            <SetupStack.Screen name={RouteEnum.Import}>
-              {({ navigation }) => (
-                <Import
-                  actionButtonsDisabled={state.actionButtonsDisabled}
-                  onClickOK={(s: string, b: number) =>
-                    startOpening({
-                      kind: 'restore',
-                      seed: s,
-                      birthday: b,
-                    })
-                  }
-                  onClickCancel={() => {
-                    if (navigation.canGoBack()) {
-                      navigation.goBack();
-                      return;
+              <SetupStack.Screen
+                name={RouteEnum.StartMenu}
+                options={{
+                  contentStyle: { backgroundColor: 'transparent' },
+                }}
+              >
+                {({ navigation }) => (
+                  <StartMenu
+                    actionButtonsDisabled={state.actionButtonsDisabled}
+                    walletExists={state.walletExists}
+                    openWalletFailed={state.openWalletFailed}
+                    playIntro={coldStart && !state.walletExists}
+                    openCurrentWallet={() => startOpening({ kind: 'open' })}
+                    createNewWallet={() => startOpening({ kind: 'create' })}
+                    getwalletToRestore={() => {
+                      getwalletToRestore();
+                      navigation.navigate(RouteEnum.Import);
+                    }}
+                    openServers={() =>
+                      navigation.navigate(RouteEnum.ChooseIndexer)
                     }
-                    navigation.replace(RouteEnum.StartMenu);
-                  }}
-                />
-              )}
-            </SetupStack.Screen>
-            <SetupStack.Screen name={RouteEnum.ChooseIndexer}>
-              {() => <ChooseIndexer />}
-            </SetupStack.Screen>
-            <SetupStack.Screen name={RouteEnum.ListedIndexers}>
-              {({ navigation }) => (
-                <ListedIndexers
-                  setIndexerServer={setIndexerServer}
-                  closeServers={() => closeServers(navigation)}
-                  previousServer={state.indexerServer.uri}
-                />
-              )}
-            </SetupStack.Screen>
-            <SetupStack.Screen name={RouteEnum.CustomIndexer}>
-              {({ navigation }) => (
-                <CustomIndexer
-                  setIndexerServer={setIndexerServer}
-                  closeServers={() => closeServers(navigation)}
-                />
-              )}
-            </SetupStack.Screen>
-          </SetupStack.Navigator>
+                  />
+                )}
+              </SetupStack.Screen>
+              <SetupStack.Screen name={RouteEnum.Import}>
+                {({ navigation }) => (
+                  <Import
+                    actionButtonsDisabled={state.actionButtonsDisabled}
+                    onClickOK={(s: string, b: number) =>
+                      startOpening({
+                        kind: 'restore',
+                        seed: s,
+                        birthday: b,
+                      })
+                    }
+                    onClickCancel={() => {
+                      if (navigation.canGoBack()) {
+                        navigation.goBack();
+                        return;
+                      }
+                      navigation.replace(RouteEnum.StartMenu);
+                    }}
+                  />
+                )}
+              </SetupStack.Screen>
+              <SetupStack.Screen name={RouteEnum.ChooseIndexer}>
+                {() => <ChooseIndexer />}
+              </SetupStack.Screen>
+              <SetupStack.Screen name={RouteEnum.ListedIndexers}>
+                {({ navigation }) => (
+                  <ListedIndexers
+                    setIndexerServer={setIndexerServer}
+                    closeServers={() => closeServers(navigation)}
+                    previousServer={state.indexerServer.uri}
+                  />
+                )}
+              </SetupStack.Screen>
+              <SetupStack.Screen name={RouteEnum.CustomIndexer}>
+                {({ navigation }) => (
+                  <CustomIndexer
+                    setIndexerServer={setIndexerServer}
+                    closeServers={() => closeServers(navigation)}
+                  />
+                )}
+              </SetupStack.Screen>
+            </SetupStack.Navigator>
+          </NavigationContainer>
         </SetupDomainsProvider>
       </ToastProvider>
     </BackdropHost>
