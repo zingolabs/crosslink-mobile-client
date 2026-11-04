@@ -32,10 +32,9 @@ use json::{JsonValue, object};
 use once_cell::sync::Lazy;
 use rustls::crypto::{CryptoProvider, ring::default_provider};
 
-use zcash_address::unified::{Container, Encoding, Ufvk};
 use zcash_keys::address::Address;
 use zcash_keys::keys::UnifiedFullViewingKey;
-use zcash_protocol::consensus::{BlockHeight, NetworkType};
+use zcash_protocol::consensus::BlockHeight;
 
 use pepper_sync::config::{PerformanceLevel, SyncConfig, TransparentAddressDiscovery};
 use pepper_sync::keys::transparent;
@@ -51,7 +50,7 @@ use zingolib::data::receivers::Receivers;
 use zingolib::data::receivers::transaction_request_from_receivers;
 use zingolib::lightclient::LightClient;
 use zingolib::perspective::sync_progress::{SessionReport, SyncProgress};
-use zingolib::utils::{conversion::address_from_str, conversion::txid_from_hex_encoded_str};
+use zingolib::utils::conversion::address_from_str;
 use zingolib::wallet::keys::{
     WalletAddressRef,
     unified::{ReceiverSelection, UnifiedKeyStore},
@@ -70,45 +69,6 @@ pub enum ZingolibError {
     // Should be avoided
     #[error("Error: panic: {0}")]
     Panic(String),
-}
-
-#[derive(Debug)]
-enum FfiStringError {
-    NotInitialized,
-    InvalidArgument(String),
-    Parse(String),
-    Network(String),
-    Wallet(String),
-    Internal(String),
-}
-
-impl FfiStringError {
-    fn to_ffi_string(self) -> String {
-        match self {
-            Self::NotInitialized => "Error: Lightclient is not initialized".to_string(),
-            Self::InvalidArgument(msg) => format!("Error: invalid_argument: {msg}"),
-            Self::Parse(msg) => format!("Error: parse: {msg}"),
-            Self::Network(msg) => format!("Error: network: {msg}"),
-            Self::Wallet(msg) => format!("Error: wallet: {msg}"),
-            Self::Internal(msg) => format!("Error: internal: {msg}"),
-        }
-    }
-}
-
-fn ffi_wallet_err(e: impl ToString) -> String {
-    FfiStringError::Wallet(e.to_string()).to_ffi_string()
-}
-
-fn ffi_parse_err(e: impl ToString) -> String {
-    FfiStringError::Parse(e.to_string()).to_ffi_string()
-}
-
-fn ffi_invalid_arg(msg: impl ToString) -> String {
-    FfiStringError::InvalidArgument(msg.to_string()).to_ffi_string()
-}
-
-fn ffi_network_err(e: impl ToString) -> String {
-    FfiStringError::Network(e.to_string()).to_ffi_string()
 }
 
 pub fn with_panic_guard<T, F>(f: F) -> Result<T, ZingolibError>
@@ -457,45 +417,6 @@ pub fn init_from_seed(
         let _ = store_client(lightclient);
 
         get_seed()
-    })
-}
-
-#[uniffi::export]
-pub fn init_from_ufvk(
-    ufvk: String,
-    birthday: u32,
-    server_uri: String,
-    chain_hint: String,
-    performance_level: String,
-    min_confirmations: u32,
-) -> Result<String, ZingolibError> {
-    with_panic_guard(|| {
-        reset_lightclient();
-        let (config, _lightwalletd_uri) = match construct_uri_load_config(
-            server_uri,
-            chain_hint,
-            performance_level,
-            min_confirmations,
-        ) {
-            Ok(c) => c,
-            Err(e) => return Ok(format!("Error: {e}")),
-        };
-        let wallet = match LightWallet::new(
-            config.chain,
-            WalletBase::Ufvk(ufvk),
-            BlockHeight::from_u32(birthday),
-            config.wallet_settings.clone(),
-        ) {
-            Ok(w) => w,
-            Err(e) => return Ok(format!("Error: {e}")),
-        };
-        let lightclient = match LightClient::create_from_wallet(wallet, config, false) {
-            Ok(l) => l,
-            Err(e) => return Ok(format!("Error: {e}")),
-        };
-        let _ = store_client(lightclient);
-
-        get_ufvk()
     })
 }
 
@@ -1338,76 +1259,8 @@ pub fn parse_address(address: String) -> Result<String, ZingolibError> {
 }
 
 #[uniffi::export]
-pub fn parse_ufvk(ufvk: String) -> Result<String, ZingolibError> {
-    with_panic_guard(|| {
-        if ufvk.is_empty() {
-            Ok("Error: The ufvk is empty".to_string())
-        } else {
-            Ok(json::stringify_pretty(
-                match Ufvk::decode(&ufvk) {
-                    Ok((network, ufvk)) => {
-                        let mut pools_available = vec![];
-                        for fvk in ufvk.items_as_parsed() {
-                            match fvk {
-                                zcash_address::unified::Fvk::Orchard(_) => {
-                                    pools_available.push("orchard")
-                                }
-                                zcash_address::unified::Fvk::Sapling(_) => {
-                                    pools_available.push("sapling")
-                                }
-                                zcash_address::unified::Fvk::P2pkh(_) => {
-                                    pools_available.push("transparent")
-                                }
-                                zcash_address::unified::Fvk::Unknown { .. } => pools_available.push(
-                                    "Error: Unknown future protocol. Perhaps you're using old software",
-                                ),
-                            }
-                        }
-                        object! {
-                            "status" => "success",
-                            "chain_name" => match network {
-                                NetworkType::Main => "main",
-                                NetworkType::Test => "test",
-                                NetworkType::Regtest => "regtest",
-                            },
-                            "address_kind" => "ufvk",
-                            "pools_available" => pools_available,
-                        }
-                    }
-                    Err(_) => {
-                        object! {
-                            "status" => "Invalid viewkey",
-                            "chain_name" => json::JsonValue::Null,
-                            "address_kind" => json::JsonValue::Null
-                        }
-                    }
-                },
-                2,
-            ))
-        }
-    })
-}
-
-#[uniffi::export]
 pub fn get_version() -> Result<String, ZingolibError> {
     with_panic_guard(|| Ok(zingolib::git_description().to_string()))
-}
-
-#[uniffi::export]
-pub fn get_messages(address: String) -> Result<String, ZingolibError> {
-    with_panic_guard(|| {
-        with_lightclient_read(|lightclient| {
-            Ok(RT.block_on(async move {
-                match lightclient
-                    .messages_containing(Some(address.as_str()))
-                    .await
-                {
-                    Ok(wallet_events) => json::JsonValue::from(wallet_events).pretty(2),
-                    Err(e) => format!("Error: {e}"),
-                }
-            }))
-        })
-    })
 }
 
 #[uniffi::export]
@@ -1502,30 +1355,6 @@ pub fn zec_price(tor: String) -> Result<String, ZingolibError> {
     })
 }
 
-#[uniffi::export]
-pub fn remove_transaction(txid: String) -> Result<String, ZingolibError> {
-    with_panic_guard(|| {
-        let mut guard = LIGHTCLIENT
-            .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
-        if let Some(lightclient) = &mut *guard {
-            let txid = match txid_from_hex_encoded_str(&txid) {
-                Ok(txid) => txid,
-                Err(e) => return Ok(format!("Error: {e}")),
-            };
-            Ok(RT.block_on(async move {
-                let mut wallet = lightclient.wallet.write().await;
-                match wallet.remove_failed_transaction(txid) {
-                    Ok(_) => "Successfully removed transaction.".to_string(),
-                    Err(e) => format!("Error: {e}"),
-                }
-            }))
-        } else {
-            Err(ZingolibError::LightclientNotInitialized)
-        }
-    })
-}
-
 // we don't use this anymore...
 #[uniffi::export]
 pub fn get_spendable_balance_with_address(
@@ -1571,16 +1400,6 @@ pub fn get_spendable_balance_total() -> Result<String, ZingolibError> {
             }))
         })
     })
-}
-
-#[uniffi::export]
-pub fn set_option_wallet() -> Result<String, ZingolibError> {
-    with_panic_guard(|| Ok("Error: unimplemented".to_string()))
-}
-
-#[uniffi::export]
-pub fn get_option_wallet() -> Result<String, ZingolibError> {
-    with_panic_guard(|| Ok("Error: unimplemented".to_string()))
 }
 
 #[uniffi::export]
@@ -1790,26 +1609,6 @@ pub fn get_wallet_save_required() -> Result<String, ZingolibError> {
                 object! { "save_required" => wallet.save_required }.pretty(2)
             }))
         })
-    })
-}
-
-#[uniffi::export]
-pub fn set_config_wallet_to_test() -> Result<String, ZingolibError> {
-    with_panic_guard(|| {
-        let mut guard = LIGHTCLIENT
-            .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
-        if let Some(lightclient) = &mut *guard {
-            Ok(RT.block_on(async move {
-                let mut wallet = lightclient.wallet.write().await;
-                wallet.wallet_settings.min_confirmations = NonZeroU32::try_from(3).unwrap();
-                wallet.wallet_settings.sync_config.performance_level = PerformanceLevel::Medium;
-                wallet.save_required = true;
-                "Successfully set config wallet to test. (1 - Medium)".to_string()
-            }))
-        } else {
-            Err(ZingolibError::LightclientNotInitialized)
-        }
     })
 }
 
@@ -2203,46 +2002,6 @@ fn parse_hex_32(s: &str) -> Result<[u8; 32], String> {
     let mut arr = [0u8; 32];
     arr.copy_from_slice(&bytes);
     Ok(arr)
-}
-
-#[uniffi::export]
-pub fn shield() -> Result<String, ZingolibError> {
-    with_panic_guard(|| {
-        let mut guard = LIGHTCLIENT
-            .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
-        if let Some(lightclient) = &mut *guard {
-            Ok(RT.block_on(async move {
-                match lightclient.propose_shield(AccountId::ZERO).await {
-                    Ok(proposal) => {
-                        if proposal.steps().len() != 1 {
-                            return object! { "error" => "shielding transactions should not have multiple proposal steps" }.pretty(2);
-                        }
-                        let step = proposal.steps().first();
-                        let Some(value_to_shield) = step
-                            .balance()
-                            .proposed_change()
-                            .iter()
-                            .try_fold(Zatoshis::ZERO, |acc, c| acc + c.value()) else {
-                                return object! { "error" => "shield amount outside valid range of zatoshis" }
-                                    .pretty(2);
-                        };
-                        let fee = step.balance().fee_required();
-                        object! {
-                            "value_to_shield" => value_to_shield.into_u64(),
-                            "fee" => fee.into_u64(),
-                        }
-                    }
-                    Err(e) => {
-                        object! { "error" => e.to_string() }
-                    }
-                }
-                .pretty(2)
-            }))
-        } else {
-            Err(ZingolibError::LightclientNotInitialized)
-        }
-    })
 }
 
 #[uniffi::export]

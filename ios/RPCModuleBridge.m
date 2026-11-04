@@ -18,9 +18,6 @@ RCT_EXTERN_METHOD(walletBackupExists:
 RCT_EXTERN_METHOD(deleteExistingWallet:
     (RCTPromiseResolveBlock)resolve 
                   reject:(RCTPromiseRejectBlock)reject)
-RCT_EXTERN_METHOD(deleteExistingWalletBackup:
-    (RCTPromiseResolveBlock)resolve 
-                  reject:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(createNewWallet:
     (NSString)serveruri 
                   chainhint:(NSString)chainhint
@@ -30,15 +27,6 @@ RCT_EXTERN_METHOD(createNewWallet:
                   reject:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(restoreWalletFromSeed:
     (NSString)restoreSeed 
-                  birthday:(NSString)birthday
-                  serveruri:(NSString)serveruri
-                  chainhint:(NSString)chainhint
-                  performancelevel:(NSString)performancelevel
-                  minconfirmations:(NSString)minconfirmations
-                  resolve:(RCTPromiseResolveBlock)resolve
-                  reject:(RCTPromiseRejectBlock)reject)
-RCT_EXTERN_METHOD(restoreWalletFromUfvk:
-    (NSString)restoreUfvk 
                   birthday:(NSString)birthday
                   serveruri:(NSString)serveruri
                   chainhint:(NSString)chainhint
@@ -135,16 +123,8 @@ RCT_EXTERN_METHOD(parseAddressInfo:
     (NSString)address 
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
-RCT_EXTERN_METHOD(parseUfvkInfo:
-    (NSString)ufvk 
-                  resolve:(RCTPromiseResolveBlock)resolve
-                  reject:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(getVersionInfo:
     (RCTPromiseResolveBlock)resolve
-                  reject:(RCTPromiseRejectBlock)reject)
-RCT_EXTERN_METHOD(getMessagesInfo:
-    (NSString)address 
-                  resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(getBalanceInfo:
     (RCTPromiseResolveBlock)resolve
@@ -162,22 +142,12 @@ RCT_EXTERN_METHOD(zecPriceInfo:
     (NSString)tor 
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
-RCT_EXTERN_METHOD(removeTransactionProcess:
-    (NSString)txid 
-                  resolve:(RCTPromiseResolveBlock)resolve
-                  reject:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(getSpendableBalanceWithAddressInfo:
     (NSString)address 
                   zennies:(NSString)zennies
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(getSpendableBalanceTotalInfo:
-    (RCTPromiseResolveBlock)resolve
-                  reject:(RCTPromiseRejectBlock)reject)
-RCT_EXTERN_METHOD(getOptionWalletInfo:
-    (RCTPromiseResolveBlock)resolve
-                  reject:(RCTPromiseRejectBlock)reject)
-RCT_EXTERN_METHOD(setOptionWalletProcess:
     (RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(createTorClientProcess:
@@ -224,9 +194,6 @@ RCT_EXTERN_METHOD(sendProcess:
 RCT_EXTERN_METHOD(stakeProcess:
     (NSString)stake_json
                   resolve:(RCTPromiseResolveBlock)resolve
-                  reject:(RCTPromiseRejectBlock)reject)
-RCT_EXTERN_METHOD(shieldProcess:
-    (RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(confirmProcess:
     (RCTPromiseResolveBlock)resolve
