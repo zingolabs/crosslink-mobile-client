@@ -284,10 +284,6 @@ const fakeRpc = {
   getValueTransfersList: async () =>
     JSON.stringify({ wallet_events: events, total: events.length }),
 
-  getMessagesInfo: async (_address: string) => {
-    const messages = events.filter(e => e.memos && e.memos.join('').length > 0);
-    return JSON.stringify({ wallet_events: messages, total: messages.length });
-  },
 
   runSyncProcess: async () => {
     syncLaunched = true;

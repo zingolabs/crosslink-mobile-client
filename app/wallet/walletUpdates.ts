@@ -70,19 +70,6 @@ export const setSyncingStatus = (syncingStatus: SyncStatusType): void => {
   }
 };
 
-export const setMessagesList = (
-  messages: ValueTransferType[],
-  messagesTotal: number,
-): void => {
-  const current = read();
-  if (
-    !isEqual(current.messages, messages) ||
-    current.messagesTotal !== messagesTotal
-  ) {
-    patch({ messages, messagesTotal });
-  }
-};
-
 export const setAllAddresses = (
   addresses: (UnifiedAddressClass | TransparentAddressClass)[],
 ): void => {

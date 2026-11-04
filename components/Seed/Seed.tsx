@@ -13,7 +13,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 
 import RegText from '../Components/RegText';
 import FadeText from '../Components/FadeText';
-import { SessionStackParamList } from '../../app/types';
+import { SettingsStackParamList } from '../../app/types';
 import {
   useFeedback,
   useSession,
@@ -41,10 +41,7 @@ import Animated, {
 import type { CSSTransitionProperties } from 'react-native-reanimated';
 import { curve, duration as motionDuration, useTheme } from '../../app/theme';
 
-type SeedProps = NativeStackScreenProps<
-  SessionStackParamList,
-  RouteEnum.Seed
->;
+type SeedProps = NativeStackScreenProps<SettingsStackParamList, RouteEnum.Seed>;
 
 const EASE_OUT = cubicBezier(curve[0], curve[1], curve[2], curve[3]);
 
@@ -73,9 +70,7 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
   const reducedMotion = useReducedMotion();
 
   const gridTransition: CSSTransitionProperties = {
-    transitionProperty: reducedMotion
-      ? ['opacity']
-      : ['opacity', 'transform'],
+    transitionProperty: reducedMotion ? ['opacity'] : ['opacity', 'transform'],
     transitionDuration: reducedMotion ? '120ms' : `${motionDuration.enter}ms`,
     transitionTimingFunction: EASE_OUT,
   };
@@ -299,21 +294,21 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                   !seedBlurred ? 'no-hide-descendants' : 'auto'
                 }
               >
-                  <ChalkLoop name="knot" size={240} blurRadius={2} />
+                <ChalkLoop name="knot" size={240} blurRadius={2} />
 
-                  <LiquidPrimaryButton
-                    title="View seed phrase"
-                    onPress={() => setSeedBlurred(false)}
-                    tintColor="rgba(255,255,255,0.10)"
-                    style={{
-                      alignSelf: 'center',
-                      borderRadius: 20,
-                      paddingHorizontal: 18,
-                      paddingVertical: 10,
-                      minWidth: 0,
-                    }}
-                    textStyle={{ fontSize: 16 }}
-                  />
+                <LiquidPrimaryButton
+                  title="View seed phrase"
+                  onPress={() => setSeedBlurred(false)}
+                  tintColor="rgba(255,255,255,0.10)"
+                  style={{
+                    alignSelf: 'center',
+                    borderRadius: 20,
+                    paddingHorizontal: 18,
+                    paddingVertical: 10,
+                    minWidth: 0,
+                  }}
+                  textStyle={{ fontSize: 16 }}
+                />
               </Animated.View>
             </View>
           )}

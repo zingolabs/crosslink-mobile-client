@@ -52,8 +52,6 @@ export const mockContextLoaded: LoadedDomains = {
   addresses: mockAddresses,
   valueTransfers: mockValueTransfers,
   valueTransfersTotal: mockValueTransfers.length,
-  messages: [],
-  messagesTotal: 0,
   security: mockSecurity,
   zecPrice: mockZecPrice,
   indexerServer: mockIndexerServer,

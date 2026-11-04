@@ -448,10 +448,10 @@ const Header: React.FunctionComponent<HeaderProps> = ({
               const parentNav = navigation.getParent();
 
               if (parentNav) {
-                parentNav.navigate(RouteEnum.Settings);
+                parentNav.navigate(RouteEnum.SettingsStack);
               } else {
                 // Fallback if for some reason there is no parent
-                navigation.navigate(RouteEnum.Settings);
+                navigation.navigate(RouteEnum.SettingsStack);
               }
             }}
           >

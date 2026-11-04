@@ -35,7 +35,6 @@ describe('WalletService.configure', () => {
     jest.spyOn(service, 'fetchStaked').mockImplementation(never);
     jest.spyOn(service, 'fetchInfoAndServerHeight').mockImplementation(never);
     jest.spyOn(service, 'fetchZingolibVersion').mockImplementation(never);
-    jest.spyOn(service, 'fetchTandZandOMessages').mockImplementation(never);
     jest.spyOn(service, 'fetchWalletHeight').mockImplementation(never);
     jest
       .spyOn(service, 'fetchWalletBirthdaySeedUfvk')
@@ -66,7 +65,6 @@ describe('WalletService.configure', () => {
       'fetchStaked',
       'fetchInfoAndServerHeight',
       'fetchZingolibVersion',
-      'fetchTandZandOMessages',
       'fetchWalletHeight',
       'fetchWalletBirthdaySeedUfvk',
     ] as const) {

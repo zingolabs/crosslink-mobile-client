@@ -1,11 +1,8 @@
 import React from 'react';
 import { StyleSheet, ScrollView, Text, View } from 'react-native';
 
-import { SessionStackParamList } from '../../../app/types';
-import {
-  useFeedback,
-  useSession,
-} from '../../../app/store';
+import { SettingsStackParamList } from '../../../app/types';
+import { useFeedback, useSession } from '../../../app/store';
 import Snackbars from '../../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { RouteEnum, ScreenEnum } from '../../../app/AppState';
@@ -15,7 +12,7 @@ import { HeaderTitle } from '../../Header';
 import { mono, radiusCard, space, useTheme } from '../../../app/theme';
 
 type DebugInfoProps = NativeStackScreenProps<
-  SessionStackParamList,
+  SettingsStackParamList,
   RouteEnum.DebugInfo
 >;
 

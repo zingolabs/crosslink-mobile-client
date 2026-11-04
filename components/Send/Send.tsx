@@ -95,10 +95,23 @@ const Send: React.FunctionComponent<SendProps> = ({
   route,
 }) => {
   const navigation: any = useNavigation();
-  const { translate, setBackgroundError, addLastSnackbar, removeFirstSnackbar } = useFeedback();
-  const { privacy, indexerServer, donation, selectIndexerServer } = useSettings();
+  const {
+    translate,
+    setBackgroundError,
+    addLastSnackbar,
+    removeFirstSnackbar,
+  } = useFeedback();
+  const { privacy, indexerServer, donation, selectIndexerServer } =
+    useSettings();
   const { zenniesDonationAddress } = useSession();
-  const { info, totalBalance, somePending, addresses, defaultUnifiedAddress, shieldingAmount } = useWalletData();
+  const {
+    info,
+    totalBalance,
+    somePending,
+    addresses,
+    defaultUnifiedAddress,
+    shieldingAmount,
+  } = useWalletData();
   const { zecPrice, netInfo } = useStatus();
   const draft = route.params?.toaddr;
   const { snackbars } = useFeedback();
@@ -1180,32 +1193,26 @@ const Send: React.FunctionComponent<SendProps> = ({
                       )}
 
                     {stillConfirming && (
-                      <TouchableOpacity
-                        onPress={() => {
-                          navigation.navigate(RouteEnum.Pools);
+                      <View
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                          marginTop: 0,
+                          backgroundColor: colors.bgSurface,
+                          padding: 5,
+                          borderRadius: 10,
                         }}
                       >
-                        <View
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            marginTop: 0,
-                            backgroundColor: colors.bgSurface,
-                            padding: 5,
-                            borderRadius: 10,
-                          }}
-                        >
-                          <FontAwesomeIcon
-                            icon={faInfoCircle}
-                            size={20}
-                            color={colors.fgAccent}
-                            style={{ marginRight: 5 }}
-                          />
-                          <FadeText style={{ fontSize: 12.5 }}>
-                            {translate('send.somefunds') as string}
-                          </FadeText>
-                        </View>
-                      </TouchableOpacity>
+                        <FontAwesomeIcon
+                          icon={faInfoCircle}
+                          size={20}
+                          color={colors.fgAccent}
+                          style={{ marginRight: 5 }}
+                        />
+                        <FadeText style={{ fontSize: 12.5 }}>
+                          {translate('send.somefunds') as string}
+                        </FadeText>
+                      </View>
                     )}
                   </View>
                 </View>

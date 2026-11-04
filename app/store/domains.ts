@@ -112,8 +112,6 @@ export interface WalletDataValue {
   addresses: (UnifiedAddressClass | TransparentAddressClass)[] | null;
   valueTransfers: ValueTransferType[] | null;
   valueTransfersTotal: number | null;
-  messages: ValueTransferType[] | null;
-  messagesTotal: number | null;
   info: InfoType;
   syncingStatus: SyncStatusType;
   defaultUnifiedAddress: string;
@@ -137,8 +135,6 @@ export const defaultWalletData: WalletDataValue = {
   addresses: null,
   valueTransfers: null,
   valueTransfersTotal: null,
-  messages: null,
-  messagesTotal: null,
   info: {} as InfoType,
   syncingStatus: {} as SyncStatusType,
   defaultUnifiedAddress: '',

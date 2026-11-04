@@ -18,13 +18,13 @@ import { mockWallet } from '../__mocks__/dataMocks/mockWallet';
 import { mockInfo } from '../__mocks__/dataMocks/mockInfo';
 import { mockTotalBalance } from '../__mocks__/dataMocks/mockTotalBalance';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { SessionStackParamList } from '../app/types';
+import { SettingsStackParamList } from '../app/types';
 import mockNavigation from '../__mocks__/dataMocks/mockNavigation';
 import NewSeed from '../app/setup/components/NewSeed';
 
 function makeDrawerProps(
   a: SeedActionEnum,
-): NativeStackScreenProps<SessionStackParamList, RouteEnum.Seed> {
+): NativeStackScreenProps<SettingsStackParamList, RouteEnum.Seed> {
   return {
     navigation: mockNavigation,
     route: {

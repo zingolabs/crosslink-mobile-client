@@ -1,19 +1,14 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
 import type { IndexerReport } from '../indexers';
 import {
-  AddressKindEnum,
   IndexerNetworkEnum,
   RouteEnum,
   ScheduledActionType,
   SeedActionEnum,
-  SelectServerEnum,
   SendPageState,
-  ServerType,
   ToAddr,
-  UfvkActionEnum,
   ValueTransferType,
 } from '../AppState';
-import { ParseAddressType } from '../wallet/types';
 
 export type SetupStackParamList = {
   [RouteEnum.StartMenu]: undefined;
@@ -39,39 +34,17 @@ export type SessionStackParamList = {
 
   [RouteEnum.Send]: SendNavigationState | undefined;
   [RouteEnum.Receive]: undefined;
-  [RouteEnum.Messages]: undefined;
-  [RouteEnum.ValueTransferDetailStack]: undefined;
-  [RouteEnum.ConfirmStack]: undefined;
-  [RouteEnum.InsightStack]: undefined;
-  [RouteEnum.Settings]: undefined;
-  [RouteEnum.SettingsMenu]: undefined;
-  [RouteEnum.SettingsServers]: undefined;
-  [RouteEnum.DebugInfo]: undefined;
   [RouteEnum.Faucet]: undefined;
-  [RouteEnum.About]: undefined;
   [RouteEnum.Distribution]: undefined;
-  [RouteEnum.Rescan]: undefined;
-  [RouteEnum.Info]: undefined;
-  [RouteEnum.Insight]: undefined;
   [RouteEnum.SyncReport]: undefined;
-  [RouteEnum.Pools]: undefined;
-  [RouteEnum.ContactList]: undefined;
   [RouteEnum.SettingsStack]:
     | NavigatorScreenParams<SettingsStackParamList>
     | undefined;
-  [RouteEnum.Notes]: undefined;
 
-  [RouteEnum.AddressList]: AddressListNavigationState | undefined;
   [RouteEnum.ScannerAddress]: ScannerAddressNavigationState | undefined;
   [RouteEnum.ValueTransferDetail]:
     | ValueTransferDetailNavigationState
     | undefined;
-  [RouteEnum.MessagesAddress]: MessagesAddressNavigationState | undefined;
-  [RouteEnum.MessagesAll]: MessagesAllNavigationState | undefined;
-  [RouteEnum.Memo]: MemoNavigationState | undefined;
-  [RouteEnum.Confirm]: ConfirmNavigationState | undefined;
-  [RouteEnum.Ufvk]: UfvkNavigationState | undefined;
-  [RouteEnum.Seed]: SeedNavigationState | undefined;
   [RouteEnum.Computing]: ComputingNavigationState | undefined;
   [RouteEnum.ComputingOK]: ComputingOKNavigationState | undefined;
   [RouteEnum.ComputingError]: ComputingErrorNavigationState | undefined;
@@ -86,17 +59,11 @@ export type SessionStackParamList = {
 };
 
 export type SettingsStackParamList = {
-  [RouteEnum.Settings]: undefined;
   [RouteEnum.SettingsMenu]: undefined;
   [RouteEnum.Seed]: SeedNavigationState | undefined;
   [RouteEnum.SettingsServers]: undefined;
   [RouteEnum.DebugInfo]: undefined;
   [RouteEnum.Notes]: undefined;
-};
-
-export type AddressListNavigationState = {
-  addressKind: AddressKindEnum;
-  setIndex: (n: number) => void;
 };
 
 export type ScannerAddressNavigationState = {
@@ -107,12 +74,6 @@ export type ScannerAddressNavigationState = {
 export type ValueTransferDetailNavigationState = {
   vt: ValueTransferType;
   totalLength: number;
-};
-
-export type MemoNavigationState = {
-  message: string;
-  includeUAMessage: boolean;
-  setMessage: (m: string) => void;
 };
 
 export type FinalizersNavigationState = {
@@ -147,43 +108,6 @@ export type RedelegateNavigationState = {
 
 export type ScheduledActionDetailNavigationState = {
   item: ScheduledActionType;
-};
-
-export type ConfirmNavigationState = {
-  calculatedFee: number;
-  parseAddressInfoJSON: ParseAddressType;
-  donationAmount: number;
-  confirmSend: (s: SendPageState) => Promise<void>;
-  sendAllAmount: boolean;
-  calculateFeeWithPropose: (
-    amount: string,
-    address: string,
-    memo: string,
-    includeUAMemo: boolean,
-  ) => Promise<void>;
-  sendPageState: SendPageState;
-};
-
-export type MessagesAddressNavigationState = {
-  setScrollToBottom: (value: boolean) => void;
-  scrollToBottom: boolean;
-  address: string;
-  sendTransaction: (s: SendPageState) => Promise<String>;
-  setServerOption: (
-    value: ServerType,
-    selectServer: SelectServerEnum,
-    toast: boolean,
-    sameServerChainName: boolean,
-  ) => Promise<void>;
-};
-
-export type MessagesAllNavigationState = {
-  setScrollToBottom: (value: boolean) => void;
-  scrollToBottom: boolean;
-};
-
-export type UfvkNavigationState = {
-  action: UfvkActionEnum;
 };
 
 export type SeedNavigationState = {

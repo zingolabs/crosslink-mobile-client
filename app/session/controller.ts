@@ -181,12 +181,8 @@ class SessionController {
     return wallet.ufvk || '';
   };
 
-  doRefresh = (screen: ScreenEnum): void => {
-    if (screen === ScreenEnum.History || screen === ScreenEnum.ContactList) {
-      this.walletService.fetchTandZandOValueTransfers();
-    } else {
-      this.walletService.fetchTandZandOMessages();
-    }
+  doRefresh = (): void => {
+    this.walletService.fetchTandZandOValueTransfers();
   };
 
   requestFaucetFunds = async (address: string): Promise<string> => {

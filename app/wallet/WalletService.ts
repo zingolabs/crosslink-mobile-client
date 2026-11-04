@@ -53,7 +53,6 @@ import {
   setGlobalStaked,
   setInfo,
   setLastError,
-  setMessagesList,
   setStaked,
   setSyncingStatus,
   setTotalBalance,
@@ -87,7 +86,6 @@ export default class WalletService {
   fetchWalletBirthdaySeedUfvkLock: boolean;
   fetchInfoAndServerHeightLock: boolean;
   fetchTandZandOValueTransfersLock: boolean;
-  fetchTandZandOMessagesLock: boolean;
   fetchTotalBalanceLock: boolean;
   fetchStakedLock: boolean;
   fetchAddressesLock: boolean;
@@ -135,7 +133,6 @@ export default class WalletService {
     this.fetchWalletBirthdaySeedUfvkLock = false;
     this.fetchInfoAndServerHeightLock = false;
     this.fetchTandZandOValueTransfersLock = false;
-    this.fetchTandZandOMessagesLock = false;
     this.fetchTotalBalanceLock = false;
     this.fetchStakedLock = false;
     this.fetchAddressesLock = false;
@@ -552,7 +549,6 @@ export default class WalletService {
       this.fetchInfoAndServerHeightLock ||
       this.fetchAddressesLock ||
       this.fetchTandZandOValueTransfersLock ||
-      this.fetchTandZandOMessagesLock ||
       this.fetchSyncStatusLock ||
       this.fetchSyncPollLock ||
       this.fetchZingolibVersionLock ||
@@ -630,14 +626,6 @@ export default class WalletService {
           resolve();
         }),
       );
-      taskPromises.push(
-        new Promise<void>(async resolve => {
-          //const s = Date.now();
-          await this.fetchTandZandOMessages();
-          //console.log('messages - ', Date.now() - s);
-          resolve();
-        }),
-      );
     }
     //}
 
@@ -673,7 +661,6 @@ export default class WalletService {
       this.fetchInfoAndServerHeight(),
       // I need to fetch this quickly.
       this.fetchZingolibVersion(),
-      this.fetchTandZandOMessages(),
       this.fetchWalletHeight(),
       this.fetchWalletBirthdaySeedUfvk(),
     ]);
@@ -751,7 +738,6 @@ export default class WalletService {
       await this.clearTimers();
       // clean the ValueTransfer list before.
       //setValueTransfersList([], 0);
-      //setMessagesList([], 0);
       //setTotalBalance({
       //  totalOrchardBalance: 0,
       //  totalSaplingBalance: 0,
@@ -1792,141 +1778,6 @@ export default class WalletService {
       await this.clearTimers();
       await this.configure();
       this.fetchTandZandOValueTransfersLock = false;
-      return;
-    }
-  }
-
-  // Fetch all T and Z and O ValueTransfers as a Messages
-  async fetchTandZandOMessages() {
-    try {
-      if (this.fetchTandZandOMessagesLock) {
-        //console.log('MESSAGES LOCKKKKKKKKKKKKKKKKKKKKKKK');
-        return;
-      }
-      this.fetchTandZandOMessagesLock = true;
-      const start = Date.now();
-      const messagesStr: string = await RPCModule.getMessagesInfo('');
-      if (Date.now() - start > 4000) {
-        console.log(
-          '=========================================== > messages - ',
-          Date.now() - start,
-        );
-      }
-      //console.log(messagesStr);
-      if (messagesStr) {
-        if (messagesStr.toLowerCase().startsWith(GlobalConst.error)) {
-          console.log(`Error value transfers messages ${messagesStr}`);
-          setLastError(`Error value transfers messages: ${messagesStr}`);
-          this.fetchTandZandOMessagesLock = false;
-          return;
-        }
-      } else {
-        console.log('Internal Error value transfers messages');
-        this.fetchTandZandOMessagesLock = false;
-        return;
-      }
-      const messagesJSON: ValueTransfersType = await JSON.parse(messagesStr);
-
-      //console.log(valueTransfersJSON);
-
-      let mList: ValueTransferType[] = [];
-
-      // oscar idea and I think it is the correct way to build the history of
-      // value transfers.
-      messagesJSON &&
-        messagesJSON.wallet_events &&
-        messagesJSON.wallet_events.forEach((m: WalletValueTransferType) => {
-          const currentMessageList: ValueTransferType = {} as ValueTransferType;
-
-          currentMessageList.txid = m.txid;
-          currentMessageList.time = m.datetime;
-          currentMessageList.kind =
-            m.kind === WalletValueTransferKindEnum.memoToSelf
-              ? ValueTransferKindEnum.MemoToSelf
-              : m.kind === WalletValueTransferKindEnum.sendToSelf
-                ? ValueTransferKindEnum.SendToSelf
-                : m.kind === WalletValueTransferKindEnum.received
-                  ? ValueTransferKindEnum.Received
-                  : m.kind === WalletValueTransferKindEnum.sent
-                    ? ValueTransferKindEnum.Sent
-                    : m.kind === WalletValueTransferKindEnum.shield
-                      ? ValueTransferKindEnum.Shield
-                      : m.kind === WalletValueTransferKindEnum.rejection
-                        ? ValueTransferKindEnum.Rejection
-                        : m.kind === WalletValueTransferKindEnum.createBond
-                          ? ValueTransferKindEnum.CreateBond
-                          : m.kind === WalletValueTransferKindEnum.beginUnbond
-                            ? ValueTransferKindEnum.BeginUnbond
-                            : m.kind ===
-                                WalletValueTransferKindEnum.withdrawBond
-                              ? ValueTransferKindEnum.WithdrawBond
-                              : m.kind ===
-                                  WalletValueTransferKindEnum.retargetDelegationBond
-                                ? ValueTransferKindEnum.RetargetDelegationBond
-                                : ValueTransferKindEnum.Unknown; // error
-          currentMessageList.fee =
-            (!m.transaction_fee ? 0 : m.transaction_fee) / 10 ** 8;
-          currentMessageList.zecPrice = !m.zec_price ? 0 : m.zec_price;
-          if (
-            m.status === ValueTransferStatusEnum.calculated ||
-            m.status === ValueTransferStatusEnum.transmitted ||
-            m.status === ValueTransferStatusEnum.mempool ||
-            m.status === ValueTransferStatusEnum.failed
-          ) {
-            currentMessageList.confirmations = 0;
-          } else if (m.status === ValueTransferStatusEnum.confirmed) {
-            currentMessageList.confirmations =
-              this.lastServerBlockHeight &&
-              this.lastServerBlockHeight >= this.lastWalletBlockHeight
-                ? this.lastServerBlockHeight - m.blockheight + 1
-                : this.lastWalletBlockHeight - m.blockheight + 1;
-          } else {
-            // impossible case... I guess.
-            currentMessageList.confirmations = 0;
-          }
-          currentMessageList.blockheight = m.blockheight;
-          currentMessageList.status = m.status;
-          currentMessageList.address = !m.recipient_address
-            ? undefined
-            : m.recipient_address;
-          currentMessageList.amount = (!m.value ? 0 : m.value) / 10 ** 8;
-          currentMessageList.memos =
-            !m.memos || m.memos.length === 0 || !m.memos.join('')
-              ? undefined
-              : m.memos;
-          currentMessageList.poolType = !m.pool_received
-            ? undefined
-            : m.pool_received;
-
-          if (m.txid.startsWith('xxxxxxxxx')) {
-            console.log('valuetransfer messages zingolib: ', m);
-            console.log('valuetransfer messages zingo', currentMessageList);
-            console.log('--------------------------------------------------');
-          }
-          //if (m.status === ValueTransferStatusEnum.calculated) {
-          //  console.log('CALCULATED ))))))))))))))))))))))))))))))))))');
-          //  console.log(m);
-          //}
-          //if (m.status === ValueTransferStatusEnum.transmitted) {
-          //  console.log('TRANSMITTED ))))))))))))))))))))))))))))))))))');
-          //  console.log(m);
-          //}
-
-          //console.log(currentValueTransferList);
-          mList.push(currentMessageList);
-        });
-
-      //console.log(mlist);
-
-      setMessagesList(mList, mList.length);
-      this.fetchTandZandOMessagesLock = false;
-    } catch (error) {
-      console.log(`Critical Error value transfers messages ${error}`);
-      setLastError(`Error value transfers messages: ${error}`);
-      // relaunch the interval tasks just in case they are aborted.
-      await this.clearTimers();
-      await this.configure();
-      this.fetchTandZandOMessagesLock = false;
       return;
     }
   }
