@@ -25,8 +25,9 @@ import { faCloudDownload } from '@fortawesome/free-solid-svg-icons';
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { isEqual } from 'lodash';
-import { SyncStatusType } from '../../app/wallet/types';
-import { SyncScanRangeStatusType } from '../../app/wallet/types';
+import type { ScanRange } from '../../app/wallet/generated/ScanRange';
+import type { ScanRangePriority } from '../../app/wallet/generated/ScanRangePriority';
+import type { SyncStatus } from '../../app/wallet/generated/SyncStatus';
 import { SyncScanRangePriorityStatusEnum } from '../../app/wallet/enums';
 import { RouteEnum, ScreenEnum } from '../../app/AppState';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -44,7 +45,7 @@ type SyncReportProps = NativeStackScreenProps<
  * The semantic color of one scan range in the progress map.
  */
 const rangeColor = (
-  priority: SyncScanRangePriorityStatusEnum,
+  priority: ScanRangePriority,
   tokenColors: ReturnType<typeof useTheme>['colors'],
 ): string => {
   switch (priority) {
@@ -68,7 +69,12 @@ const rangeColor = (
 const SyncReport: React.FunctionComponent<SyncReportProps> = ({
   navigation,
 }) => {
-  const { translate, removeFirstSnackbar, setBackgroundError, addLastSnackbar } = useFeedback();
+  const {
+    translate,
+    removeFirstSnackbar,
+    setBackgroundError,
+    addLastSnackbar,
+  } = useFeedback();
   const { language } = useSettings();
   const { wallet } = useStatus();
   const { syncingStatus, info } = useWalletData();
@@ -141,7 +147,7 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
   useEffect(() => {
     if (
       !syncingStatus ||
-      isEqual(syncingStatus, {} as SyncStatusType) ||
+      isEqual(syncingStatus, {} as SyncStatus) ||
       (!!syncingStatus.scan_ranges && syncingStatus.scan_ranges.length === 0) ||
       syncingStatus.percentage_total_outputs_scanned === 0
     ) {
@@ -466,28 +472,28 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
                       </View>
                       <View style={styles.rangeBar}>
                         {!!syncingStatus.scan_ranges &&
-                          syncingStatus.scan_ranges.map(
-                            (range: SyncScanRangeStatusType) => {
-                              const percent: number =
-                                ((range.end_block - range.start_block) * 100) /
-                                (info.latestBlock - wallet.birthday);
-                              return (
-                                <View
-                                  key={`${range.start_block.toString() + '-' + range.end_block.toString()}`}
-                                  style={[
-                                    styles.rangeSegment,
-                                    {
-                                      backgroundColor: rangeColor(
-                                        range.priority,
-                                        colors,
-                                      ),
-                                      width: `${percent}%`,
-                                    },
-                                  ]}
-                                />
-                              );
-                            },
-                          )}
+                          syncingStatus.scan_ranges.map((range: ScanRange) => {
+                            const percent: number =
+                              ((Number(range.end_block) -
+                                Number(range.start_block)) *
+                                100) /
+                              (info.latestBlock - wallet.birthday);
+                            return (
+                              <View
+                                key={`${range.start_block.toString() + '-' + range.end_block.toString()}`}
+                                style={[
+                                  styles.rangeSegment,
+                                  {
+                                    backgroundColor: rangeColor(
+                                      range.priority,
+                                      colors,
+                                    ),
+                                    width: `${percent}%`,
+                                  },
+                                ]}
+                              />
+                            );
+                          })}
                       </View>
                     </DetailLine>
                     <DetailLine

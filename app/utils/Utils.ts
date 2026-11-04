@@ -22,7 +22,7 @@ import {
 import randomColor from 'randomcolor';
 import { Buffer } from 'buffer';
 import WalletService from '../wallet';
-import { ParseAddressType } from '../wallet/types';
+import * as rpc from '../wallet/rpc';
 import { ParseAddressStatusEnum } from '../wallet/enums';
 import { WalletAddressKindEnum } from '../wallet/enums';
 import { ReceiversEnum } from '../wallet/enums';
@@ -333,27 +333,16 @@ export default class Utils {
     address: string,
     serverChainName: string,
   ): Promise<{ isValid: boolean; onlyOrchardUA: string }> {
-    //const start = Date.now();
-    const result: string = await WalletService.parseAddressInfo(address);
-    //console.log('=========================================== > parse address - ', Date.now() - start);
+    const result = await rpc.parseAddress(address);
     console.log('is valid address?', result, serverChainName);
     let isValid: boolean = false;
     let isFullUA: boolean = false;
     let onlyOrchardUA: string = '';
 
-    if (result) {
-      if (result.toLowerCase().startsWith(GlobalConst.error)) {
-        return { isValid, onlyOrchardUA };
-      }
-    } else {
+    if (!result.ok) {
       return { isValid, onlyOrchardUA };
     }
-    let resultJSON = {} as ParseAddressType;
-    try {
-      resultJSON = await JSON.parse(result);
-    } catch (e) {
-      return { isValid, onlyOrchardUA };
-    }
+    const resultJSON = result.value;
 
     isValid =
       resultJSON.status === ParseAddressStatusEnum.successAddressParse &&
@@ -380,25 +369,11 @@ export default class Utils {
     address: string,
     serverChainName: string,
   ): Promise<boolean> {
-    //const start = Date.now();
-    const result: string = await WalletService.parseAddressInfo(address);
-    //console.log('=========================================== > parse address - ', Date.now() - start);
-    //console.log(result);
-    if (result) {
-      if (result.toLowerCase().startsWith(GlobalConst.error)) {
-        return false;
-      }
-    } else {
+    const result = await rpc.parseAddress(address);
+    if (!result.ok) {
       return false;
     }
-    let resultJSON = {} as ParseAddressType;
-    try {
-      resultJSON = await JSON.parse(result);
-    } catch (e) {
-      return false;
-    }
-
-    //console.log('parse-memo', address, resultJSON);
+    const resultJSON = result.value;
 
     return (
       resultJSON.status === ParseAddressStatusEnum.successAddressParse &&

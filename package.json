@@ -30,6 +30,7 @@
     "build:android:all": "yarn rust:android-local:all",
     "cargo:update": "cd rust && cargo update -p zingolib --aggressive && cd ..",
     "cargo:clean": "cd rust && cargo clean && cd ..",
+    "rpc:types": "rm -rf app/wallet/generated && cd rust/lib && TS_RS_EXPORT_DIR=../../app/wallet/generated TS_RS_LARGE_INT=number cargo test export_bindings && cd ../.. && prettier app/wallet/generated -w",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "start:storybook": "STORYBOOK_ENABLED=true react-native start",

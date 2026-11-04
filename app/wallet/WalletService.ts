@@ -17,31 +17,17 @@ import {
   WalletBondsType,
   StakingActionKindEnum,
   IndexerNetworkEnum,
+  PoolEnum,
 } from '../AppState';
 import RPCModule from '../RPCModule';
-import WalletBondsInfoType, {
-  BalancesType,
-  ConfigWalletPerformanceType,
-  SendProposeType,
-  SendType,
-  SeedType,
-  SpendablebalanceType,
-  StakedType,
-  SyncPollType,
-  SyncStatusType,
-  TransparentAddressType,
-  UnifiedAddressType,
-  ValueTransfersType,
-  WalletHeight,
-  WalletInfoType,
-  WalletValueTransferType,
-  WalletVersionType,
-  WalletZecPriceType,
-} from './types';
+import * as rpc from './rpc';
+import type { Propose } from './generated/Propose';
+import type { ValueTransfer } from './generated/ValueTransfer';
+import type { ValueTransferKind } from './generated/ValueTransferKind';
 import {
+  AddressScopeEnum,
   PerformanceLevelEnum,
   ValueTransferStatusEnum,
-  WalletValueTransferKindEnum,
 } from './enums';
 import { StakeJsonToTypeType } from '../AppState/types/ValueTransferType';
 import { reverseHex32Bytes } from '../utils/hex';
@@ -61,6 +47,19 @@ import {
   setWalletBonds,
   setZingolibVersion,
 } from './walletUpdates';
+
+const VALUE_TRANSFER_KINDS: Record<ValueTransferKind, ValueTransferKindEnum> = {
+  sent: ValueTransferKindEnum.Sent,
+  received: ValueTransferKindEnum.Received,
+  'send-to-self': ValueTransferKindEnum.SendToSelf,
+  shield: ValueTransferKindEnum.Shield,
+  'memo-to-self': ValueTransferKindEnum.MemoToSelf,
+  rejection: ValueTransferKindEnum.Rejection,
+  'create-bond': ValueTransferKindEnum.CreateBond,
+  'begin-unbond': ValueTransferKindEnum.BeginUnbond,
+  'withdraw-bond': ValueTransferKindEnum.WithdrawBond,
+  'retarget-delegation-bond': ValueTransferKindEnum.RetargetDelegationBond,
+};
 
 export type WalletServiceOptions = {
   readOnly: boolean;
@@ -158,7 +157,7 @@ export default class WalletService {
       // create the tor client if needed
       if (withTOR) {
         const result: string = await RPCModule.createTorClientProcess();
-        if (result && result.toLowerCase().startsWith(GlobalConst.error)) {
+        if (rpc.isRpcError(result)) {
           console.log(`Create Tor client error: ${result}`);
         }
       }
@@ -168,45 +167,30 @@ export default class WalletService {
       // -2  - error in RPCModule, likely.
       // > 0 - real value
       const start = Date.now();
-      const resultStr: string = await RPCModule.zecPriceInfo(
-        withTOR ? GlobalConst.true : GlobalConst.false,
-      );
+      const price = await rpc.getZecPrice(withTOR);
       if (Date.now() - start > 4000) {
         console.log(
           '=========================================== > get ZEC price - ',
           Date.now() - start,
         );
       }
-      //console.log(resultStr);
 
-      if (resultStr) {
-        if (resultStr.toLowerCase().startsWith(GlobalConst.error)) {
-          console.log(`Error fetching price ${resultStr}`);
-          return { price: -1, error: resultStr };
-        } else {
-          const resultJSON: WalletZecPriceType = await JSON.parse(resultStr);
-          if (resultJSON.error) {
-            console.log(`Error fetching price ${resultJSON.error}`);
-            return { price: -1, error: resultJSON.error };
-          }
-          if (!resultJSON.current_price) {
-            // if no exists the field or is empty
-            return { price: 0, error: '' };
-          }
-          if (resultJSON.current_price && isNaN(resultJSON.current_price)) {
-            console.log(`Error fetching price ${resultJSON.current_price}`);
-            return {
-              price: -1,
-              error: `Error fetching price ${resultJSON.current_price}`,
-            };
-          } else {
-            return { price: resultJSON.current_price, error: '' };
-          }
-        }
-      } else {
-        console.log('Internal Error fetching price');
-        return { price: -2, error: 'Internal Error fetching price' };
+      if (!price.ok) {
+        console.log(`Error fetching price ${price.error}`);
+        const internal = price.error.startsWith(rpc.INTERNAL_RPC_ERROR);
+        return { price: internal ? -2 : -1, error: price.error };
       }
+      if (!price.value.current_price) {
+        return { price: 0, error: '' };
+      }
+      if (isNaN(price.value.current_price)) {
+        console.log(`Error fetching price ${price.value.current_price}`);
+        return {
+          price: -1,
+          error: `Error fetching price ${price.value.current_price}`,
+        };
+      }
+      return { price: price.value.current_price, error: '' };
     } catch (error) {
       console.log(`Critical Error fetching price ${error}`);
       return { price: -2, error: `Critical Error fetching price ${error}` };
@@ -235,76 +219,36 @@ export default class WalletService {
   }
 
   static async rpcFetchWallet(readOnly: boolean): Promise<WalletType> {
-    if (readOnly) {
-      // only viewing key & birthday
-      try {
-        const start = Date.now();
-        const ufvkStr: string = await RPCModule.getUfvkInfo();
-        if (Date.now() - start > 4000) {
-          console.log(
-            '=========================================== > get ufvk - ',
-            Date.now() - start,
-          );
-        }
-        if (ufvkStr) {
-          if (ufvkStr.toLowerCase().startsWith(GlobalConst.error)) {
-            console.log(`Error ufvk ${ufvkStr}`);
-            return {} as WalletType;
-          }
-        } else {
-          console.log('Internal Error ufvk');
-          return {} as WalletType;
-        }
-        const RPCufvk: WalletType = await JSON.parse(ufvkStr);
-
-        const wallet: WalletType = {} as WalletType;
-        if (RPCufvk.birthday) {
-          wallet.birthday = RPCufvk.birthday;
-        }
-        if (RPCufvk.ufvk) {
-          wallet.ufvk = RPCufvk.ufvk;
-        }
-
-        return wallet;
-      } catch (error) {
-        console.log(`Critical Error ufvk ${error}`);
+    const label = readOnly ? 'ufvk' : 'seed';
+    try {
+      const start = Date.now();
+      const keys = readOnly ? await rpc.getUfvk() : await rpc.getSeed();
+      if (Date.now() - start > 4000) {
+        console.log(
+          `=========================================== > get ${label} - `,
+          Date.now() - start,
+        );
+      }
+      if (!keys.ok) {
+        console.log(`Error ${label} ${keys.error}`);
         return {} as WalletType;
       }
-    } else {
-      // only seed & birthday
-      try {
-        const start2 = Date.now();
-        const seedStr: string = await RPCModule.getSeedInfo();
-        if (Date.now() - start2 > 4000) {
-          console.log(
-            '=========================================== > get seed - ',
-            Date.now() - start2,
-          );
-        }
-        if (seedStr) {
-          if (seedStr.toLowerCase().startsWith(GlobalConst.error)) {
-            console.log(`Error seed ${seedStr}`);
-            return {} as WalletType;
-          }
-        } else {
-          console.log('Internal Error seed');
-          return {} as WalletType;
-        }
-        const RPCseed: SeedType = await JSON.parse(seedStr);
 
-        const wallet: WalletType = {} as WalletType;
-        if (RPCseed.seed_phrase) {
-          wallet.seed = RPCseed.seed_phrase;
-        }
-        if (RPCseed.birthday) {
-          wallet.birthday = RPCseed.birthday;
-        }
-
-        return wallet;
-      } catch (error) {
-        console.log(`Critical Error seed ${error}`);
-        return {} as WalletType;
+      const wallet: WalletType = {} as WalletType;
+      if (keys.value.birthday) {
+        wallet.birthday = keys.value.birthday;
       }
+      if ('ufvk' in keys.value && keys.value.ufvk) {
+        wallet.ufvk = keys.value.ufvk;
+      }
+      if ('seed_phrase' in keys.value && keys.value.seed_phrase) {
+        wallet.seed = keys.value.seed_phrase;
+      }
+
+      return wallet;
+    } catch (error) {
+      console.log(`Critical Error ${label} ${error}`);
+      return {} as WalletType;
     }
   }
 
@@ -322,10 +266,6 @@ export default class WalletService {
 
   static async getVersionInfo(): Promise<string> {
     return RPCModule.getVersionInfo();
-  }
-
-  static async walletKindInfo(): Promise<string> {
-    return RPCModule.walletKindInfo();
   }
 
   static async createTorClientProcess(): Promise<string> {
@@ -348,56 +288,6 @@ export default class WalletService {
       performanceLevel,
       minConfirmations,
     );
-  }
-
-  static async loadExistingWallet(
-    serverUri: string,
-    chainName: string,
-    performanceLevel: PerformanceLevelEnum,
-    minConfirmations: string,
-  ): Promise<string> {
-    return RPCModule.loadExistingWallet(
-      serverUri,
-      chainName,
-      performanceLevel,
-      minConfirmations,
-    );
-  }
-
-  static async createNewWallet(
-    serverUri: string,
-    chainName: string,
-    performanceLevel: PerformanceLevelEnum,
-    minConfirmations: string,
-  ): Promise<string> {
-    return RPCModule.createNewWallet(
-      serverUri,
-      chainName,
-      performanceLevel,
-      minConfirmations,
-    );
-  }
-
-  static async restoreWalletFromSeed(
-    seed: string,
-    birthday: string,
-    serverUri: string,
-    chainName: string,
-    performanceLevel: PerformanceLevelEnum,
-    minConfirmations: string,
-  ): Promise<string> {
-    return RPCModule.restoreWalletFromSeed(
-      seed,
-      birthday,
-      serverUri,
-      chainName,
-      performanceLevel,
-      minConfirmations,
-    );
-  }
-
-  static async parseAddressInfo(address: string): Promise<string> {
-    return RPCModule.parseAddressInfo(address);
   }
 
   static async getDonationAddress(): Promise<string> {
@@ -453,22 +343,37 @@ export default class WalletService {
     return RPCModule.createNewTransparentAddressProcess();
   }
 
-  static async checkMyAddressInfo(address: string): Promise<string> {
-    return RPCModule.checkMyAddressInfo(address);
+  private static proposeError(
+    propose: rpc.RpcResult<Propose>,
+    label: string,
+  ): string {
+    if (!propose.ok) {
+      console.log(`Error ${label} ${propose.error}`);
+      return propose.error;
+    }
+    if (propose.value.error) {
+      console.log(`Error ${label} ${propose.value.error}`);
+      return propose.value.error;
+    }
+    return '';
   }
 
-  static async sendProcess(proposeJSON: string): Promise<string> {
-    return RPCModule.sendProcess(proposeJSON);
-  }
-
-  static async getSpendableBalanceWithAddressInfo(
-    address: string,
-    zenniesForZingo: string,
-  ): Promise<string> {
-    return RPCModule.getSpendableBalanceWithAddressInfo(
-      address,
-      zenniesForZingo,
-    );
+  private static async confirmProposal(
+    label: string,
+  ): Promise<{ txids: string; error: string }> {
+    const confirmed = await rpc.confirm();
+    if (!confirmed.ok) {
+      console.log(`Error ${label} ${confirmed.error}`);
+      return { txids: '', error: confirmed.error };
+    }
+    if (confirmed.value.error) {
+      console.log(`Error ${label} ${confirmed.value.error}`);
+      return { txids: '', error: confirmed.value.error };
+    }
+    if (confirmed.value.txids?.length) {
+      return { txids: confirmed.value.txids.join(', '), error: '' };
+    }
+    return { txids: '', error: 'Error: confirm returned no txids' };
   }
 
   async runTaskPromises(): Promise<void> {
@@ -798,33 +703,21 @@ export default class WalletService {
     }
     this.fetchSyncStatusLock = true;
     const start = Date.now();
-    const returnStatus: string = await RPCModule.statusSyncInfo();
+    const status = await rpc.getSyncStatus();
     if (Date.now() - start > 4000) {
       console.log(
         '=========================================== > sync status command - ',
         Date.now() - start,
       );
     }
-    if (
-      returnStatus &&
-      returnStatus.toLowerCase().startsWith(GlobalConst.error)
-    ) {
-      console.log('SYNC STATUS ERROR', returnStatus);
-      setLastError(`Error sync status: ${returnStatus}`);
+    if (!status.ok) {
+      console.log('SYNC STATUS ERROR', status.error);
+      setLastError(`Error sync status: ${status.error}`);
       this.fetchSyncStatusLock = false;
       return;
     }
-    let ss = {} as SyncStatusType;
-    try {
-      ss = await JSON.parse(returnStatus);
-    } catch (error) {
-      console.log('SYNC STATUS ERROR - PARSE JSON', returnStatus, error);
-      setLastError(`Error sync status parse: ${error} value: ${returnStatus}`);
-      this.fetchSyncStatusLock = false;
-      return;
-    }
+    const ss = status.value;
 
-    //console.log('SYNC STATUS', ss);
     console.log(
       'SYNC STATUS',
       ss.scan_ranges?.length,
@@ -835,7 +728,7 @@ export default class WalletService {
     //console.log('interval sync/rescan, secs', this.secondsBatch, 'timer', this.syncStatusTimerID);
 
     // store SyncStatus object for a new screen
-    setSyncingStatus(ss as SyncStatusType);
+    setSyncingStatus(ss);
 
     // Close the poll timer if the sync finished(checked via promise above)
     const percentage: number =
@@ -860,14 +753,15 @@ export default class WalletService {
     }
     this.fetchSyncPollLock = true;
     const start = Date.now();
-    const returnPoll: string = await RPCModule.pollSyncInfo();
+    const poll = await rpc.pollSync();
     if (Date.now() - start > 4000) {
       console.log(
         '=========================================== > sync poll command - ',
         Date.now() - start,
       );
     }
-    if (returnPoll && returnPoll.toLowerCase().startsWith(GlobalConst.error)) {
+    if (!poll.ok) {
+      const returnPoll = poll.error;
       console.log('SYNC POLL ERROR', returnPoll);
       setLastError(`Error sync poll: ${returnPoll}`);
       console.log(
@@ -932,10 +826,8 @@ export default class WalletService {
       return;
     }
 
-    if (
-      returnPoll.toLowerCase().startsWith('sync task has not been launched')
-    ) {
-      console.log('SYNC POLL -> RUN SYNC', returnPoll);
+    if (poll.value.state === 'notLaunched') {
+      console.log('SYNC POLL -> RUN SYNC', poll.value.state);
       setTimeout(async () => {
         await this.refreshSync();
       }, 0);
@@ -943,12 +835,12 @@ export default class WalletService {
       return;
     }
 
-    if (returnPoll.toLowerCase().startsWith('sync task is not complete')) {
-      console.log('SYNC POLL -> FETCH STATUS', returnPoll);
+    if (poll.value.state === 'notComplete') {
+      console.log('SYNC POLL -> FETCH STATUS', poll.value.state);
       setTimeout(async () => {
         await this.fetchSyncStatus();
       }, 0);
-      console.log('SYNC POLL -> RUN SYNC', returnPoll);
+      console.log('SYNC POLL -> RUN SYNC', poll.value.state);
       setTimeout(async () => {
         await this.refreshSync();
       }, 0);
@@ -956,17 +848,7 @@ export default class WalletService {
       return;
     }
 
-    let sp = {} as SyncPollType;
-    try {
-      sp = await JSON.parse(returnPoll);
-    } catch (error) {
-      console.log('SYNC POLL ERROR - PARSE JSON', returnPoll, error);
-      setLastError(`Error sync poll parse: ${error} value: ${returnPoll}`);
-      this.fetchSyncPollLock = false;
-      return;
-    }
-
-    console.log('SYNC POLL', sp);
+    console.log('SYNC POLL', poll.value.poll);
 
     console.log('SYNC POLL -> FETCH STATUS');
     setTimeout(async () => {
@@ -982,28 +864,18 @@ export default class WalletService {
         return;
       }
       this.fetchInfoAndServerHeightLock = true;
-      let infoError: boolean = false;
       const start = Date.now();
-      const infoStr: string = await RPCModule.infoServerInfo();
+      const infoResult = await rpc.getInfo();
       if (Date.now() - start > 4000) {
         console.log(
           '=========================================== > info - ',
           Date.now() - start,
         );
       }
-      //console.log('INFO', infoStr);
-      if (infoStr) {
-        if (infoStr.toLowerCase().startsWith(GlobalConst.error)) {
-          console.log(`Error info & server block height ${infoStr}`);
-          setLastError(`Error info: ${infoStr}`);
-          infoError = true;
-        }
-      } else {
-        console.log('Internal Error info & server block height');
-        infoError = true;
-      }
 
-      if (infoError) {
+      if (!infoResult.ok) {
+        console.log(`Error info & server block height ${infoResult.error}`);
+        setLastError(`Error info: ${infoResult.error}`);
         // Keep the last known good values instead of writing zeroes, so the
         // UI keeps showing stale data and `latestBlock` does not flap between
         // a real height and 0 while the server is unstable.
@@ -1019,12 +891,12 @@ export default class WalletService {
         return;
       }
 
-      const infoJSON: WalletInfoType = await JSON.parse(infoStr);
+      const infoJSON = infoResult.value;
 
       const info: InfoType = {
-        chainName: infoJSON.chain_name,
+        chainName: infoJSON.chain_name as ChainNameEnum,
         latestBlock: infoJSON.latest_block_height,
-        serverUri: infoJSON.server_uri || '',
+        serverUri: infoJSON.indexer_uri || '',
         version: `${infoJSON.vendor}/${infoJSON.git_commit ? infoJSON.git_commit.substring(0, 6) : ''}/${
           infoJSON.version
         }`,
@@ -1121,48 +993,36 @@ export default class WalletService {
       }
       this.fetchTotalBalanceLock = true;
       const start = Date.now();
-      const spendableStr: string =
-        await RPCModule.getSpendableBalanceTotalInfo();
+      const spendable = await rpc.getSpendableBalanceTotal();
       if (Date.now() - start > 4000) {
         console.log(
           '=========================================== > spendable balance - ',
           Date.now() - start,
         );
       }
-      //console.log(spendableStr);
-      let spendableJSON: SpendablebalanceType = {} as SpendablebalanceType;
-      if (spendableStr) {
-        if (spendableStr.toLowerCase().startsWith(GlobalConst.error)) {
-          console.log(`Error spendable balance ${spendableStr}`);
-          setLastError(`Error spendable balance: ${spendableStr}`);
-        } else {
-          spendableJSON = await JSON.parse(spendableStr);
-        }
+      let spendableBalance = 0;
+      if (!spendable.ok) {
+        console.log(`Error spendable balance ${spendable.error}`);
+        setLastError(`Error spendable balance: ${spendable.error}`);
       } else {
-        console.log('Internal Error spendable balance');
+        spendableBalance = spendable.value.spendable_balance;
       }
 
       const start2 = Date.now();
-      const balanceStr: string = await RPCModule.getBalanceInfo();
+      const balanceResult = await rpc.getBalance();
       if (Date.now() - start2 > 4000) {
         console.log(
           '=========================================== > balance - ',
           Date.now() - start2,
         );
       }
-      if (balanceStr) {
-        if (balanceStr.toLowerCase().startsWith(GlobalConst.error)) {
-          console.log(`Error balance ${balanceStr}`);
-          setLastError(`Error balance: ${balanceStr}`);
-          this.fetchTotalBalanceLock = false;
-          return;
-        }
-      } else {
-        console.log('Internal Error balance');
+      if (!balanceResult.ok) {
+        console.log(`Error balance ${balanceResult.error}`);
+        setLastError(`Error balance: ${balanceResult.error}`);
         this.fetchTotalBalanceLock = false;
         return;
       }
-      const balanceJSON: BalancesType = await JSON.parse(balanceStr);
+      const balanceJSON = balanceResult.value;
 
       //console.log('balance:', balanceJSON);
 
@@ -1179,7 +1039,7 @@ export default class WalletService {
         confirmedTransparentBalance:
           (balanceJSON.confirmed_transparent_balance || 0) / 10 ** 8,
         // header total balance
-        totalSpendableBalance: (spendableJSON.spendable_balance || 0) / 10 ** 8,
+        totalSpendableBalance: spendableBalance / 10 ** 8,
         //totalSpendableBalance: ((balanceJSON.confirmed_orchard_balance + balanceJSON.confirmed_sapling_balance) || 0) / 10 ** 8,
         stakedAmount: (balanceJSON.staked_amount || 0) / 10 ** 8,
       };
@@ -1202,25 +1062,16 @@ export default class WalletService {
       if (this.fetchStakedLock) return;
       this.fetchStakedLock = true;
 
-      const rosterInfoStr: string = await RPCModule.getRosterInfo();
-
-      if (!rosterInfoStr) {
-        setLastError('Error roster_info: empty response');
+      const roster = await rpc.getRoster();
+      if (!roster.ok) {
+        setLastError(`Error roster_info: ${roster.error}`);
         this.fetchStakedLock = false;
         return;
       }
-      if (rosterInfoStr.toLowerCase().startsWith(GlobalConst.error)) {
-        setLastError(`Error roster_info: ${rosterInfoStr}`);
-        this.fetchStakedLock = false;
-        return;
-      }
-
-      const rosterInfo = JSON.parse(rosterInfoStr) as {
-        roster_members: Array<StakedType>;
-      };
+      const rosterInfo = roster.value;
 
       const start3 = Date.now();
-      const walletBondsStr: string = await RPCModule.getWalletBondsInfo();
+      const walletBonds = await rpc.getWalletBonds();
 
       if (Date.now() - start3 > 4000) {
         console.log(
@@ -1229,22 +1080,13 @@ export default class WalletService {
         );
       }
 
-      //console.log(valueTransfersStr);
-      if (walletBondsStr) {
-        if (walletBondsStr.toLowerCase().startsWith(GlobalConst.error)) {
-          console.log(`Error wallet bonds ${walletBondsStr}`);
-          setLastError(`Error wallet bonds: ${walletBondsStr}`);
-          this.fetchStakedLock = false;
-          return;
-        }
-      } else {
-        console.log('Internal Error value transfers');
+      if (!walletBonds.ok) {
+        console.log(`Error wallet bonds ${walletBonds.error}`);
+        setLastError(`Error wallet bonds: ${walletBonds.error}`);
         this.fetchStakedLock = false;
         return;
       }
-      const walletBondsJSON = JSON.parse(walletBondsStr) as {
-        bonds: Array<WalletBondsInfoType>;
-      };
+      const walletBondsJSON = walletBonds.value;
 
       const globalStakedList: StakeType[] = (
         rosterInfo.roster_members ?? []
@@ -1324,79 +1166,61 @@ export default class WalletService {
 
       // UNIFIED
       const start = Date.now();
-      const unifiedAddressesStr: string =
-        await RPCModule.getUnifiedAddressesInfo();
+      const unified = await rpc.getUnifiedAddresses();
       if (Date.now() - start > 4000) {
         console.log(
           '=========================================== > addresses unified - ',
           Date.now() - start,
         );
       }
-      if (unifiedAddressesStr) {
-        if (unifiedAddressesStr.toLowerCase().startsWith(GlobalConst.error)) {
-          console.log(`Error addresses ${unifiedAddressesStr}`);
-          setLastError(`Error unified addresses: ${unifiedAddressesStr}`);
-          this.fetchAddressesLock = false;
-          return;
-        }
-      } else {
-        console.log('Internal Error addresses');
+      if (!unified.ok) {
+        console.log(`Error addresses ${unified.error}`);
+        setLastError(`Error unified addresses: ${unified.error}`);
         this.fetchAddressesLock = false;
         return;
       }
-      const unifiedAddressesJSON: UnifiedAddressType[] =
-        (await JSON.parse(unifiedAddressesStr)) || [];
 
       // TRANSPARENT
       const start2 = Date.now();
-      const transparentAddressStr: string =
-        await RPCModule.getTransparentAddressesInfo();
+      const transparent = await rpc.getTransparentAddresses();
       if (Date.now() - start2 > 4000) {
         console.log(
           '=========================================== > addresses transparent - ',
           Date.now() - start2,
         );
       }
-      if (transparentAddressStr) {
-        if (transparentAddressStr.toLowerCase().startsWith(GlobalConst.error)) {
-          console.log(`Error addresses ${transparentAddressStr}`);
-          setLastError(`Error transparent addresses: ${transparentAddressStr}`);
-          this.fetchAddressesLock = false;
-          return;
-        }
-      } else {
-        console.log('Internal Error addresses');
+      if (!transparent.ok) {
+        console.log(`Error addresses ${transparent.error}`);
+        setLastError(`Error transparent addresses: ${transparent.error}`);
         this.fetchAddressesLock = false;
         return;
       }
-      const transparentAddressesJSON: TransparentAddressType[] =
-        (await JSON.parse(transparentAddressStr)) || [];
 
       let allAddresses: (UnifiedAddressClass | TransparentAddressClass)[] = [];
 
-      unifiedAddressesJSON &&
-        unifiedAddressesJSON.forEach((u: UnifiedAddressType) => {
-          const ua: UnifiedAddressClass = new UnifiedAddressClass(
+      (unified.value || []).forEach(u => {
+        allAddresses.push(
+          new UnifiedAddressClass(
             u.address_index,
             u.encoded_address,
             AddressKindEnum.u,
             u.has_orchard,
             u.has_sapling,
             u.has_transparent,
-          );
-          allAddresses.push(ua);
-        });
+          ),
+        );
+      });
 
-      transparentAddressesJSON &&
-        transparentAddressesJSON.forEach((u: TransparentAddressType) => {
-          const t: TransparentAddressClass = new TransparentAddressClass(
+      (transparent.value || []).forEach(u => {
+        allAddresses.push(
+          new TransparentAddressClass(
             u.address_index,
             u.encoded_address,
             AddressKindEnum.t,
-            u.scope,
-          );
-          allAddresses.push(t);
-        });
+            u.scope as AddressScopeEnum,
+          ),
+        );
+      });
 
       //console.log(allAddresses);
 
@@ -1420,29 +1244,21 @@ export default class WalletService {
       }
       this.fetchWalletHeightLock = true;
       const start = Date.now();
-      const heightStr: string = await RPCModule.getLatestBlockWalletInfo();
+      const height = await rpc.getWalletHeight();
       if (Date.now() - start > 4000) {
         console.log(
           '=========================================== > wallet height - ',
           Date.now() - start,
         );
       }
-      //console.log('WALLET HEIGHT', heightStr);
-      if (heightStr) {
-        if (heightStr.toLowerCase().startsWith(GlobalConst.error)) {
-          console.log(`Error wallet height ${heightStr}`);
-          setLastError(`Error wallet height: ${heightStr}`);
-          this.fetchWalletHeightLock = false;
-          return;
-        }
-      } else {
-        console.log('Internal Error wallet height');
+      if (!height.ok) {
+        console.log(`Error wallet height ${height.error}`);
+        setLastError(`Error wallet height: ${height.error}`);
         this.fetchWalletHeightLock = false;
         return;
       }
-      const heightJSON: WalletHeight = await JSON.parse(heightStr);
 
-      this.lastWalletBlockHeight = heightJSON.height;
+      this.lastWalletBlockHeight = height.value.height;
       this.fetchWalletHeightLock = false;
     } catch (error) {
       console.log(`Critical Error wallet height ${error}`);
@@ -1454,82 +1270,25 @@ export default class WalletService {
       return;
     }
   }
-  /*
-  async getWalletSaveRequired(): Promise<boolean> {
-    try {
-      if (this.getWalletSaveRequiredLock) {
-        return false;
-      }
-      this.getWalletSaveRequiredLock = true;
-      const start = Date.now();
-      const walletSaveRequiredStr: string =
-        await RPCModule.getWalletSaveRequiredInfo();
-      if (Date.now() - start > 4000) {
-        console.log(
-          '=========================================== > wallet save required - ',
-          Date.now() - start,
-        );
-      }
-      if (walletSaveRequiredStr) {
-        if (walletSaveRequiredStr.toLowerCase().startsWith(GlobalConst.error)) {
-          console.log(`Error wallet save required ${walletSaveRequiredStr}`);
-          setLastError(
-            `Error wallet save required: ${walletSaveRequiredStr}`,
-          );
-          this.getWalletSaveRequiredLock = false;
-          return false;
-        }
-      } else {
-        console.log('Internal Error wallet save required');
-        this.getWalletSaveRequiredLock = false;
-        return false;
-      }
-      const walletSaveRequiredJSON: WalletSaveRequiredType =
-        await JSON.parse(walletSaveRequiredStr);
-
-      this.getWalletSaveRequiredLock = false;
-      return walletSaveRequiredJSON.save_required;
-    } catch (error) {
-      console.log(`Critical Error wallet save required ${error}`);
-      setLastError(`Error wallet save required: ${error}`);
-      this.getWalletSaveRequiredLock = false;
-      return false;
-    }
-  }
-*/
   async getConfigWalletPerformance(): Promise<
     PerformanceLevelEnum | undefined
   > {
     try {
       const start = Date.now();
-      const configWalletPerformanceStr: string =
-        await RPCModule.getConfigWalletPerformanceInfo();
+      const performance = await rpc.getConfigWalletPerformance();
       if (Date.now() - start > 4000) {
         console.log(
           '=========================================== > wallet config performance - ',
           Date.now() - start,
         );
       }
-      if (configWalletPerformanceStr) {
-        if (
-          configWalletPerformanceStr.toLowerCase().startsWith(GlobalConst.error)
-        ) {
-          console.log(
-            `Error wallet config performance ${configWalletPerformanceStr}`,
-          );
-          setLastError(
-            `Error wallet config performance: ${configWalletPerformanceStr}`,
-          );
-          return;
-        }
-      } else {
-        console.log('Internal Error wallet config performance');
+      if (!performance.ok) {
+        console.log(`Error wallet config performance ${performance.error}`);
+        setLastError(`Error wallet config performance: ${performance.error}`);
         return;
       }
-      const configWalletPerformanceJSON: ConfigWalletPerformanceType =
-        await JSON.parse(configWalletPerformanceStr);
 
-      return configWalletPerformanceJSON.performance_level;
+      return performance.value.performance_level as PerformanceLevelEnum;
     } catch (error) {
       console.log(`Critical Error wallet config performance ${error}`);
       setLastError(`Error wallet config performance: ${error}`);
@@ -1540,27 +1299,20 @@ export default class WalletService {
   async getWalletVersion(): Promise<number | undefined> {
     try {
       const start = Date.now();
-      const walletVersionStr: string = await RPCModule.getWalletVersionInfo();
+      const version = await rpc.getWalletVersion();
       if (Date.now() - start > 4000) {
         console.log(
           '=========================================== > wallet version - ',
           Date.now() - start,
         );
       }
-      if (walletVersionStr) {
-        if (walletVersionStr.toLowerCase().startsWith(GlobalConst.error)) {
-          console.log(`Error wallet version ${walletVersionStr}`);
-          setLastError(`Error wallet version: ${walletVersionStr}`);
-          return;
-        }
-      } else {
-        console.log('Internal Error wallet version');
+      if (!version.ok) {
+        console.log(`Error wallet version ${version.error}`);
+        setLastError(`Error wallet version: ${version.error}`);
         return;
       }
-      const walletVersionJSON: WalletVersionType =
-        await JSON.parse(walletVersionStr);
 
-      return walletVersionJSON.read_version;
+      return version.value.read_version;
     } catch (error) {
       console.log(`Critical Error wallet version ${error}`);
       setLastError(`Error wallet version: ${error}`);
@@ -1628,7 +1380,7 @@ export default class WalletService {
       //console.log('SERVER HEIGHT', this.lastServerBlockHeight);
 
       const start2 = Date.now();
-      const valueTransfersStr: string = await RPCModule.getValueTransfersList();
+      const valueTransfers = await rpc.getValueTransfers();
 
       if (Date.now() - start2 > 4000) {
         console.log(
@@ -1636,138 +1388,16 @@ export default class WalletService {
           Date.now() - start2,
         );
       }
-      //console.log(valueTransfersStr);
-      if (valueTransfersStr) {
-        if (valueTransfersStr.toLowerCase().startsWith(GlobalConst.error)) {
-          console.log(`Error value transfers ${valueTransfersStr}`);
-          setLastError(`Error value transfers: ${valueTransfersStr}`);
-          this.fetchTandZandOValueTransfersLock = false;
-          return;
-        }
-      } else {
-        console.log('Internal Error value transfers');
+      if (!valueTransfers.ok) {
+        console.log(`Error value transfers ${valueTransfers.error}`);
+        setLastError(`Error value transfers: ${valueTransfers.error}`);
         this.fetchTandZandOValueTransfersLock = false;
         return;
       }
-      const valueTransfersJSON: ValueTransfersType =
-        await JSON.parse(valueTransfersStr);
 
-      //console.log(valueTransfersJSON.wallet_events);
-
-      let vtList: ValueTransferType[] = [];
-
-      // oscar idea and I think it is the correct way to build the history of
-      // value transfers.
-      valueTransfersJSON &&
-        valueTransfersJSON.wallet_events &&
-        valueTransfersJSON.wallet_events.forEach(
-          (vt: WalletValueTransferType) => {
-            const currentValueTransferList: ValueTransferType =
-              {} as ValueTransferType;
-
-            currentValueTransferList.txid = vt.txid;
-            currentValueTransferList.time = vt.datetime;
-            currentValueTransferList.kind =
-              vt.kind === WalletValueTransferKindEnum.memoToSelf
-                ? ValueTransferKindEnum.MemoToSelf
-                : vt.kind === WalletValueTransferKindEnum.sendToSelf
-                  ? ValueTransferKindEnum.SendToSelf
-                  : vt.kind === WalletValueTransferKindEnum.received
-                    ? ValueTransferKindEnum.Received
-                    : vt.kind === WalletValueTransferKindEnum.sent
-                      ? ValueTransferKindEnum.Sent
-                      : vt.kind === WalletValueTransferKindEnum.shield
-                        ? ValueTransferKindEnum.Shield
-                        : vt.kind === WalletValueTransferKindEnum.rejection
-                          ? ValueTransferKindEnum.Rejection
-                          : vt.kind === WalletValueTransferKindEnum.createBond
-                            ? ValueTransferKindEnum.CreateBond
-                            : vt.kind ===
-                                WalletValueTransferKindEnum.beginUnbond
-                              ? ValueTransferKindEnum.BeginUnbond
-                              : vt.kind ===
-                                  WalletValueTransferKindEnum.withdrawBond
-                                ? ValueTransferKindEnum.WithdrawBond
-                                : vt.kind ===
-                                    WalletValueTransferKindEnum.retargetDelegationBond
-                                  ? ValueTransferKindEnum.RetargetDelegationBond
-                                  : ValueTransferKindEnum.Unknown; // error
-            currentValueTransferList.fee =
-              (!vt.transaction_fee ? 0 : vt.transaction_fee) / 10 ** 8;
-            currentValueTransferList.zecPrice = !vt.zec_price
-              ? 0
-              : vt.zec_price;
-            if (
-              vt.status === ValueTransferStatusEnum.calculated ||
-              vt.status === ValueTransferStatusEnum.transmitted ||
-              vt.status === ValueTransferStatusEnum.mempool ||
-              vt.status === ValueTransferStatusEnum.failed
-            ) {
-              currentValueTransferList.confirmations = 0;
-            } else if (vt.status === ValueTransferStatusEnum.confirmed) {
-              currentValueTransferList.confirmations =
-                this.lastServerBlockHeight &&
-                this.lastServerBlockHeight >= this.lastWalletBlockHeight
-                  ? this.lastServerBlockHeight - vt.blockheight + 1
-                  : this.lastWalletBlockHeight - vt.blockheight + 1;
-            } else {
-              // impossible case... I guess.
-              currentValueTransferList.confirmations = 0;
-            }
-            currentValueTransferList.blockheight = vt.blockheight;
-            currentValueTransferList.status = vt.status;
-            currentValueTransferList.address = !vt.recipient_address
-              ? undefined
-              : vt.recipient_address;
-            currentValueTransferList.amount =
-              (!vt.value ? 0 : vt.value) / 10 ** 8;
-            currentValueTransferList.memos =
-              !vt.memos || vt.memos.length === 0 || !vt.memos.join('')
-                ? undefined
-                : vt.memos;
-            currentValueTransferList.poolType = !vt.pool_received
-              ? undefined
-              : vt.pool_received;
-            if (vt.staking_action === null) {
-              currentValueTransferList.stakingAction = null;
-            } else {
-              currentValueTransferList.stakingAction = {
-                kind: vt.staking_action?.kind,
-                unique_public_key: vt.staking_action?.unique_public_key,
-                val:
-                  (!vt.staking_action?.val ? 0 : vt.staking_action.val) /
-                  10 ** 8,
-                target: vt.staking_action?.target,
-              } as StakingActionType;
-            }
-
-            if (vt.txid.startsWith('xxxxxxxxx')) {
-              console.log('server', this.lastServerBlockHeight);
-              console.log('wallet', this.lastWalletBlockHeight);
-              console.log('valuetransfer zingolib: ', vt);
-              console.log('valuetransfer zingo', currentValueTransferList);
-              console.log('--------------------------------------------------');
-            }
-            //if (vt.status === ValueTransferStatusEnum.calculated) {
-            //  console.log('CALCULATED ))))))))))))))))))))))))))))))))))');
-            //  console.log(vt);
-            //}
-            //if (vt.status === ValueTransferStatusEnum.transmitted) {
-            //  console.log('TRANSMITTED ))))))))))))))))))))))))))))))))))');
-            //  console.log(vt);
-            //}
-            //if (currentValueTransferList.kind === ValueTransferKindEnum.WithdrawBond) {
-            //  console.log('))))))))))))))))))))))))))))))))))');
-            //  console.log(vt);
-            //  console.log(currentValueTransferList);
-            //}
-
-            //console.log(currentValueTransferList);
-            vtList.push(currentValueTransferList);
-          },
-        );
-
-      //console.log(vtList);
+      const vtList: ValueTransferType[] = (
+        valueTransfers.value.wallet_events ?? []
+      ).map((vt: ValueTransfer) => this.toValueTransfer(vt));
 
       setValueTransfersList(vtList, vtList.length);
       this.fetchTandZandOValueTransfersLock = false;
@@ -1780,6 +1410,43 @@ export default class WalletService {
       this.fetchTandZandOValueTransfersLock = false;
       return;
     }
+  }
+
+  private toValueTransfer(vt: ValueTransfer): ValueTransferType {
+    const status = vt.status as ValueTransferStatusEnum;
+    const confirmations =
+      status === ValueTransferStatusEnum.confirmed
+        ? this.lastServerBlockHeight &&
+          this.lastServerBlockHeight >= this.lastWalletBlockHeight
+          ? this.lastServerBlockHeight - vt.blockheight + 1
+          : this.lastWalletBlockHeight - vt.blockheight + 1
+        : 0;
+    const stakingAction: StakingActionType | null = vt.staking_action
+      ? {
+          kind: vt.staking_action.kind as StakingActionKindEnum,
+          unique_public_key: vt.staking_action.unique_public_key,
+          val: (vt.staking_action.val || 0) / 10 ** 8,
+          target: vt.staking_action.target,
+        }
+      : null;
+    return {
+      txid: vt.txid,
+      time: vt.datetime,
+      kind: VALUE_TRANSFER_KINDS[vt.kind] ?? ValueTransferKindEnum.Unknown,
+      fee: (vt.transaction_fee || 0) / 10 ** 8,
+      zecPrice: vt.zec_price || 0,
+      confirmations,
+      blockheight: vt.blockheight,
+      status,
+      address: vt.recipient_address || undefined,
+      amount: (vt.value || 0) / 10 ** 8,
+      memos:
+        !vt.memos || vt.memos.length === 0 || !vt.memos.join('')
+          ? undefined
+          : vt.memos,
+      poolType: vt.pool_received ? (vt.pool_received as PoolEnum) : undefined,
+      stakingAction,
+    };
   }
 
   // Send a transaction using the already constructed sendJson structure
@@ -1796,47 +1463,13 @@ export default class WalletService {
       let sendTxids: string = '';
       try {
         console.log('send JSON', sendJson);
-        // creating the propose
-        const proposeStr: string = await RPCModule.sendProcess(
-          JSON.stringify(sendJson),
+        sendError = WalletService.proposeError(
+          await rpc.proposeSend(JSON.stringify(sendJson)),
+          'propose',
         );
-        if (proposeStr) {
-          if (proposeStr.toLowerCase().startsWith(GlobalConst.error)) {
-            console.log(`Error propose ${proposeStr}`);
-            sendError = proposeStr;
-          }
-        } else {
-          console.log('Internal Error propose');
-          sendError = 'Error: Internal RPC Error: propose';
-        }
         if (!sendError) {
-          const proposeJSON: SendProposeType = await JSON.parse(proposeStr);
-          if (proposeJSON.error) {
-            console.log(`Error propose ${proposeJSON.error}`);
-            sendError = proposeJSON.error;
-          }
-          if (!sendError) {
-            // creating the transaction
-            const sendStr: string = await RPCModule.confirmProcess();
-            if (sendStr) {
-              if (sendStr.toLowerCase().startsWith(GlobalConst.error)) {
-                console.log(`Error confirm ${sendStr}`);
-                sendError = sendStr;
-              }
-            } else {
-              console.log('Internal Error confirm');
-              sendError = 'Error: Internal RPC Error: confirm';
-            }
-            if (!sendError) {
-              const sendJSON: SendType = await JSON.parse(sendStr);
-              if (sendJSON.error) {
-                console.log(`Error confirm ${sendJSON.error}`);
-                sendError = sendJSON.error;
-              } else if (sendJSON.txids && sendJSON.txids.length > 0) {
-                sendTxids = sendJSON.txids.join(', ');
-              }
-            }
-          }
+          ({ txids: sendTxids, error: sendError } =
+            await WalletService.confirmProposal('confirm'));
         }
       } catch (error) {
         console.log(`Critical Error send ${error}`);
@@ -1871,60 +1504,23 @@ export default class WalletService {
 
         const action = stakeJson.stakingAction;
 
-        let proposeStr = '';
-
         if (action.kind === StakingActionKindEnum.CreateBond) {
           const payload = {
             amount_zats: action.val,
             finalizer_address: reverseHex32Bytes(action.target), // ONLY PLACE WHERE IT SHOULD BE USED
           };
 
-          proposeStr = await RPCModule.stakeProcess(JSON.stringify(payload));
+          sendError = WalletService.proposeError(
+            await rpc.proposeStake(JSON.stringify(payload)),
+            'staking propose',
+          );
         } else {
           sendError = `Error: Unsupported stakingAction.kind ${action.kind}`;
         }
 
         if (!sendError) {
-          if (proposeStr) {
-            if (proposeStr.toLowerCase().startsWith(GlobalConst.error)) {
-              console.log(`Error staking propose ${proposeStr}`);
-              sendError = proposeStr;
-            }
-          } else {
-            console.log('Internal Error staking propose');
-            sendError = 'Error: Internal RPC Error: staking propose';
-          }
-        }
-
-        if (!sendError) {
-          const proposeJSON: SendProposeType = JSON.parse(proposeStr);
-          if (proposeJSON.error) {
-            console.log(`Error staking propose ${proposeJSON.error}`);
-            sendError = proposeJSON.error;
-          }
-        }
-
-        if (!sendError) {
-          const sendStr: string = await RPCModule.confirmProcess();
-
-          if (sendStr) {
-            if (sendStr.toLowerCase().startsWith(GlobalConst.error)) {
-              console.log(`Error staking confirm ${sendStr}`);
-              sendError = sendStr;
-            }
-          } else {
-            console.log('Internal Error staking confirm');
-            sendError = 'Error: Internal RPC Error: staking confirm';
-          }
-
-          if (!sendError) {
-            const sendJSON: SendType = JSON.parse(sendStr);
-            if (sendJSON.error) {
-              sendError = sendJSON.error;
-            } else if (sendJSON.txids && sendJSON.txids.length > 0) {
-              sendTxids = sendJSON.txids.join(', ');
-            }
-          }
+          ({ txids: sendTxids, error: sendError } =
+            await WalletService.confirmProposal('staking confirm'));
         }
       } catch (error) {
         console.log(`Critical Error stake ${error}`);
@@ -1956,38 +1552,17 @@ export default class WalletService {
         }
 
         // 1) propose begin_unstake
-        let proposeStr = '';
         if (!sendError) {
-          proposeStr = await RPCModule.beginUnstakeProcess(bondCreateTxid);
-
-          if (!proposeStr) {
-            sendError = 'Error: Internal RPC Error: begin_unstake propose';
-          } else if (proposeStr.toLowerCase().startsWith(GlobalConst.error)) {
-            sendError = proposeStr;
-          } else {
-            const proposeJSON: SendProposeType = JSON.parse(proposeStr);
-            if (proposeJSON.error) sendError = proposeJSON.error;
-          }
+          sendError = WalletService.proposeError(
+            await rpc.proposeBeginUnstake(bondCreateTxid),
+            'begin_unstake propose',
+          );
         }
 
         // 2) confirm
         if (!sendError) {
-          const sendStr: string = await RPCModule.confirmProcess();
-
-          if (!sendStr) {
-            sendError = 'Error: Internal RPC Error: confirm';
-          } else if (sendStr.toLowerCase().startsWith(GlobalConst.error)) {
-            sendError = sendStr;
-          } else {
-            const sendJSON: SendType = JSON.parse(sendStr);
-            if (sendJSON.error) {
-              sendError = sendJSON.error;
-            } else if (sendJSON.txids?.length) {
-              sendTxids = sendJSON.txids.join(', ');
-            } else {
-              sendError = 'Error: confirm returned no txids';
-            }
-          }
+          ({ txids: sendTxids, error: sendError } =
+            await WalletService.confirmProposal('confirm'));
         }
       } catch (e) {
         sendError = `Error: begin_unstake ${e}`;
@@ -2019,37 +1594,16 @@ export default class WalletService {
         }
 
         if (!sendError) {
-          const respStr = await RPCModule.withdrawStakeProcess(bondCreateTxid);
+          const withdrawn = await rpc.withdrawStake(bondCreateTxid);
 
-          if (!respStr) {
-            sendError = 'Error: Internal RPC Error: withdraw_stake';
-          } else if (respStr.toLowerCase().startsWith(GlobalConst.error)) {
-            sendError = respStr;
+          if (!withdrawn.ok) {
+            sendError = withdrawn.error;
+          } else if (withdrawn.value.error) {
+            sendError = withdrawn.value.error;
+          } else if (withdrawn.value.txid) {
+            sendTxids = withdrawn.value.txid;
           } else {
-            let respJSON: any;
-            try {
-              respJSON = JSON.parse(respStr);
-            } catch {
-              sendError = `Error: withdraw_stake returned non-JSON: ${respStr}`;
-            }
-
-            if (!sendError) {
-              if (respJSON?.error) {
-                sendError = String(respJSON.error);
-              } else if (
-                typeof respJSON?.txid === 'string' &&
-                respJSON.txid.length
-              ) {
-                sendTxids = respJSON.txid;
-              } else if (
-                Array.isArray(respJSON?.txids) &&
-                respJSON.txids.length
-              ) {
-                sendTxids = respJSON.txids.join(', ');
-              } else {
-                sendError = 'Error: withdraw_stake returned no txid';
-              }
-            }
+            sendError = 'Error: withdraw_stake returned no txid';
           }
         }
       } catch (e: any) {
@@ -2084,41 +1638,17 @@ export default class WalletService {
         }
 
         // 1) propose Retarget_Bond
-        let proposeStr = '';
         if (!sendError) {
-          proposeStr = await RPCModule.retargetBondProcess(
-            bondCreateTxid,
-            finalizer,
+          sendError = WalletService.proposeError(
+            await rpc.proposeRetargetBond(bondCreateTxid, finalizer),
+            'Retarget_Bond propose',
           );
-
-          if (!proposeStr) {
-            sendError = 'Error: Internal RPC Error: Retarget_Bond propose';
-          } else if (proposeStr.toLowerCase().startsWith(GlobalConst.error)) {
-            sendError = proposeStr;
-          } else {
-            const proposeJSON: SendProposeType = JSON.parse(proposeStr);
-            if (proposeJSON.error) sendError = proposeJSON.error;
-          }
         }
 
         // 2) confirm
         if (!sendError) {
-          const sendStr: string = await RPCModule.confirmProcess();
-
-          if (!sendStr) {
-            sendError = 'Error: Internal RPC Error: confirm';
-          } else if (sendStr.toLowerCase().startsWith(GlobalConst.error)) {
-            sendError = sendStr;
-          } else {
-            const sendJSON: SendType = JSON.parse(sendStr);
-            if (sendJSON.error) {
-              sendError = sendJSON.error;
-            } else if (sendJSON.txids?.length) {
-              sendTxids = sendJSON.txids.join(', ');
-            } else {
-              sendError = 'Error: confirm returned no txids';
-            }
-          }
+          ({ txids: sendTxids, error: sendError } =
+            await WalletService.confirmProposal('confirm'));
         }
       } catch (e) {
         sendError = `Error: Retarget_Bond ${e}`;
