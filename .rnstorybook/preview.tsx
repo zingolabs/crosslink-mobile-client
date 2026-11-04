@@ -8,11 +8,7 @@ import type { Preview } from '@storybook/react-native';
 import { withBackgrounds } from '@storybook/addon-ondevice-backgrounds';
 
 import { ThemeProvider, navigationTheme, tokens } from '../app/theme';
-import { AppContextLoaded, AppContextLoading } from '../app/AppState';
-import {
-  ContextAppLoadedProvider,
-  ContextAppLoadingProvider,
-} from '../app/context';
+import { appStore } from '../app/store';
 import {
   mockContextLoaded,
   mockContextLoading,
@@ -49,21 +45,13 @@ const preview: Preview = {
     ),
 
     (Story, ctx) => {
-      const value: AppContextLoaded = {
+      appStore.setState({
         ...mockContextLoaded,
         ...(ctx.parameters.context ?? {}),
-      };
-      const loadingValue: AppContextLoading = {
         ...mockContextLoading,
         ...(ctx.parameters.contextLoading ?? {}),
-      };
-      return (
-        <ContextAppLoadedProvider value={value}>
-          <ContextAppLoadingProvider value={loadingValue}>
-            <Story />
-          </ContextAppLoadingProvider>
-        </ContextAppLoadedProvider>
-      );
+      });
+      return <Story />;
     },
 
     (Story, ctx) => {

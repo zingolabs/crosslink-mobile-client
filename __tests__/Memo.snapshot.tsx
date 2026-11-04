@@ -7,10 +7,7 @@ import React from 'react';
 
 import { render } from '@testing-library/react-native';
 import Memo from '../components/Memo';
-import {
-  SessionDomainsProvider,
-  defaultLoadedDomains,
-} from '../app/context';
+import { appStore, defaultLoadedDomains } from '../app/store';
 import { mockTranslate } from '../__mocks__/dataMocks/mockTranslate';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SessionStackParamList } from '../app/types';
@@ -41,11 +38,8 @@ describe('Component Memo - test', () => {
     const state = defaultLoadedDomains;
     state.translate = mockTranslate;
     const props = makeDrawerProps();
-    const memo = render(
-      <SessionDomainsProvider value={state}>
-        <Memo {...props} />
-      </SessionDomainsProvider>,
-    );
+    appStore.setState(state);
+    const memo = render(<Memo {...props} />);
     expect(memo.toJSON()).toMatchSnapshot();
   });
 });

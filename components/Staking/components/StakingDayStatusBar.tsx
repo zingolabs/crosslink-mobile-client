@@ -1,12 +1,19 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  Animated,
+  Easing,
+  Pressable,
+  StyleSheet,
+  View,
+  useAnimatedValue,
+} from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
 
-import RegText from '../../Components/RegText';
-import { useWalletData } from '../../../app/context';
+import { useWalletData } from '../../../app/store';
+import StakingDayCountdownText from './StakingDayCountdownText';
 import ClockActiveWithCheck from '../../../assets/icons/clock-active-with-check.svg';
 import TriangleYellow from '../../../assets/icons/triangle-yellow.svg';
-import { formatSeconds } from '../../../app/utils/Utils';
-import { duration, radiusPill, text, useTheme } from '../../../app/theme';
+import { duration, radiusPill, useTheme } from '../../../app/theme';
 
 type StakingDayStatusBarProps = {};
 
@@ -16,13 +23,14 @@ const EXPANDED_WIDTH = 210;
 
 const StakingDayStatusBar: React.FC<StakingDayStatusBarProps> = () => {
   const { colors } = useTheme();
-  const { stakingDay, timeToStakingDaySeconds: timeToStakingDay, timeLeftStakingDaySeconds: timeLeftStakingDay } = useWalletData();
+  const { stakingDay } = useWalletData();
+  const focused = useIsFocused();
 
   const [expanded, setExpanded] = useState(false);
 
-  const widthAnim = useRef(new Animated.Value(COLLAPSED_WIDTH)).current;
-  const contentOpacity = useRef(new Animated.Value(0)).current;
-  const contentTranslate = useRef(new Animated.Value(-8)).current;
+  const widthAnim = useAnimatedValue(COLLAPSED_WIDTH);
+  const contentOpacity = useAnimatedValue(0);
+  const contentTranslate = useAnimatedValue(-8);
 
   useEffect(() => {
     Animated.parallel([
@@ -46,16 +54,6 @@ const StakingDayStatusBar: React.FC<StakingDayStatusBarProps> = () => {
       }),
     ]).start();
   }, [expanded, widthAnim, contentOpacity, contentTranslate]);
-
-  const isCalculating = useMemo(() => {
-    const value = stakingDay ? timeLeftStakingDay : timeToStakingDay;
-    return value === 0;
-  }, [stakingDay, timeLeftStakingDay, timeToStakingDay]);
-
-  const mainValue = stakingDay
-    ? formatSeconds(timeLeftStakingDay)
-    : formatSeconds(timeToStakingDay);
-  const title = stakingDay ? 'Staking day active' : 'Staking day inactive';
 
   return (
     <Pressable onPress={() => setExpanded(prev => !prev)}>
@@ -89,20 +87,7 @@ const StakingDayStatusBar: React.FC<StakingDayStatusBarProps> = () => {
               },
             ]}
           >
-            <RegText
-              numberOfLines={1}
-              ellipsizeMode="clip"
-              style={isCalculating ? text.caption2 : text.subheadline}
-            >
-              {isCalculating ? 'calculating...' : mainValue}
-            </RegText>
-
-            <RegText
-              numberOfLines={1}
-              style={[text.caption1, { color: colors.fgMuted }]}
-            >
-              {title}
-            </RegText>
+            <StakingDayCountdownText active={expanded && focused} />
           </Animated.View>
         </View>
       </Animated.View>

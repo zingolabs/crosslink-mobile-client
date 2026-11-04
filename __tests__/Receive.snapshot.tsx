@@ -7,10 +7,7 @@ import React from 'react';
 
 import { render } from '@testing-library/react-native';
 import Receive from '../components/Receive';
-import {
-  SessionDomainsProvider,
-  defaultLoadedDomains,
-} from '../app/context';
+import { appStore, defaultLoadedDomains } from '../app/store';
 import { mockAddresses } from '../__mocks__/dataMocks/mockAddresses';
 import { mockTranslate } from '../__mocks__/dataMocks/mockTranslate';
 import { mockInfo } from '../__mocks__/dataMocks/mockInfo';
@@ -44,10 +41,9 @@ describe('Component Receive - test', () => {
     state.totalBalance = mockTotalBalance;
     const onFunction = jest.fn();
     const props = makeDrawerProps();
+    appStore.setState(state);
     const receive = render(
-      <SessionDomainsProvider value={state}>
-        <Receive {...props} setSecurityOption={onFunction} />
-      </SessionDomainsProvider>,
+      <Receive {...props} setSecurityOption={onFunction} />,
     );
     expect(receive.toJSON()).toMatchSnapshot();
   });

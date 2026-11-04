@@ -19,7 +19,7 @@ import {
   WalletBondsType,
 } from '../../../app/AppState';
 import { WalletBondsStatusEnum } from '../../../app/AppState/enums/WalletBondsStatusEnum';
-import { useSettings, useWalletData } from '../../../app/context';
+import { useSettings, useWalletData } from '../../../app/store';
 import { SessionStackParamList } from '../../../app/types';
 import {
   curve,

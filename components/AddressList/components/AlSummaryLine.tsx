@@ -17,7 +17,7 @@ import {
   ScreenEnum,
 } from '../../../app/AppState';
 import Utils from '../../../app/utils';
-import { useFeedback } from '../../../app/context';
+import { useFeedback } from '../../../app/store';
 import { space, text, useTheme } from '../../../app/theme';
 
 type AlSummaryLineProps = {

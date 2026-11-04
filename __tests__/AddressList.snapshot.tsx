@@ -6,10 +6,7 @@ import 'react-native';
 import React from 'react';
 
 import { render } from '@testing-library/react-native';
-import {
-  SessionDomainsProvider,
-  defaultLoadedDomains,
-} from '../app/context';
+import { appStore, defaultLoadedDomains } from '../app/store';
 import { AddressList } from '../components/AddressList';
 import { mockTranslate } from '../__mocks__/dataMocks/mockTranslate';
 import { mockAddresses } from '../__mocks__/dataMocks/mockAddresses';
@@ -41,11 +38,8 @@ describe('Component Unified Address List - test', () => {
     state.addresses = mockAddresses;
     state.translate = mockTranslate;
     const props = makeDrawerProps(AddressKindEnum.u);
-    const al: any = render(
-      <SessionDomainsProvider value={state}>
-        <AddressList {...props} />
-      </SessionDomainsProvider>,
-    );
+    appStore.setState(state);
+    const al: any = render(<AddressList {...props} />);
     expect(al.toJSON()).toMatchSnapshot();
   });
 
@@ -54,11 +48,8 @@ describe('Component Unified Address List - test', () => {
     state.addresses = mockAddresses;
     state.translate = mockTranslate;
     const props = makeDrawerProps(AddressKindEnum.t);
-    const al: any = render(
-      <SessionDomainsProvider value={state}>
-        <AddressList {...props} />
-      </SessionDomainsProvider>,
-    );
+    appStore.setState(state);
+    const al: any = render(<AddressList {...props} />);
     expect(al.toJSON()).toMatchSnapshot();
   });
 });

@@ -9,8 +9,7 @@ export default function Boot() {
 
   useEffect(() => {
     actions.boot();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [actions]);
 
   if (lifecycle.phase !== 'booting') {
     return null;

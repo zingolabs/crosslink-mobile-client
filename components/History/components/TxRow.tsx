@@ -29,7 +29,7 @@ import {
 import {
   useFeedback,
   useSettings,
-} from '../../../app/context';
+} from '../../../app/store';
 import { text, curve, duration, useTheme } from '../../../app/theme';
 import Utils from '../../../app/utils';
 import JellyLoader from '../../Components/Icons/JellyLoader';

@@ -22,7 +22,7 @@ import {
   RouteEnum,
   ScreenEnum,
 } from '../../AppState';
-import { useFeedback } from '../../context';
+import { useFeedback } from '../../store';
 import { SetupStackParamList } from '../../types';
 import { Discover, Indexer, discoverIndexers, hostOf } from '../../indexers';
 import { useIndexerDiscovery } from '../hooks/useIndexerDiscovery';

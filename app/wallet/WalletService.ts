@@ -3,7 +3,6 @@ import {
   InfoType,
   SendJsonToTypeType,
   WalletType,
-  TranslateType,
   ChainNameEnum,
   CurrencyNameEnum,
   AddressKindEnum,
@@ -47,25 +46,32 @@ import {
 import { StakeJsonToTypeType } from '../AppState/types/ValueTransferType';
 import { reverseHex32Bytes } from '../utils/hex';
 import { WalletBondsStatusEnum } from '../AppState/enums/WalletBondsStatusEnum';
+import { keepAwake } from '../keepAwake';
+import { read } from '../store/appStore';
+import {
+  setAllAddresses,
+  setGlobalStaked,
+  setInfo,
+  setLastError,
+  setMessagesList,
+  setStaked,
+  setSyncingStatus,
+  setTotalBalance,
+  setValueTransfersList,
+  setWallet,
+  setWalletBonds,
+  setZingolibVersion,
+} from './walletUpdates';
+
+export type WalletServiceOptions = {
+  readOnly: boolean;
+  indexerServer: ServerType;
+  performanceLevel: PerformanceLevelEnum;
+  recoverWallet: (seed: string, birthday: number) => Promise<void>;
+};
 
 export default class WalletService {
-  fnSetInfo: (info: InfoType) => void;
-  fnSetTotalBalance: (totalBalance: TotalBalanceClass) => void;
-  fnSetStaked: (staked: StakeType[]) => void;
-  fnSetGlobalStaked: (GlobalStaked: StakeType[]) => void;
-  fnSetWalletBonds: (walletBonds: WalletBondsType[]) => void;
-  fnSetValueTransfersList: (vtList: ValueTransferType[], total: number) => void;
-  fnSetMessagesList: (mList: ValueTransferType[], total: number) => void;
-  fnSetAllAddresses: (
-    allAddresses: (UnifiedAddressClass | TransparentAddressClass)[],
-  ) => void;
-  fnSetSyncingStatus: (syncingStatus: SyncStatusType) => void;
-  translate: (key: string) => TranslateType;
-  keepAwake: (keep: boolean) => void;
-  fnSetZingolib: (zingolib: string) => void;
-  fnSetWallet: (wallet: WalletType) => void;
-  fnSetLastError: (error: string) => void;
-  fnRecoverWallet: (seed: string, birthday: number) => Promise<void>;
+  recoverWallet: (seed: string, birthday: number) => Promise<void>;
 
   updateTimerID?: NodeJS.Timeout;
 
@@ -101,46 +107,22 @@ export default class WalletService {
 
   walletConfigPerformanceLevel: PerformanceLevelEnum | undefined;
 
-  constructor(
-    fnSetTotalBalance: (totalBalance: TotalBalanceClass) => void,
-    fnSetStaked: (staked: StakeType[]) => void,
-    fnSetGlobalStaked: (GlobalStaked: StakeType[]) => void,
-    fnSetWalletBonds: (walletBonds: WalletBondsType[]) => void,
-    fnSetValueTransfersList: (
-      vtlist: ValueTransferType[],
-      total: number,
-    ) => void,
-    fnSetMessagesList: (mlist: ValueTransferType[], total: number) => void,
-    fnSetAllAddresses: (
-      addresses: (UnifiedAddressClass | TransparentAddressClass)[],
-    ) => void,
-    fnSetInfo: (info: InfoType) => void,
-    fnSetSyncingStatus: (syncingStatus: SyncStatusType) => void,
-    translate: (key: string) => TranslateType,
-    keepAwake: (keep: boolean) => void,
-    fnSetZingolib: (zingolib: string) => void,
-    fnSetWallet: (wallet: WalletType) => void,
-    fnSetLastError: (error: string) => void,
-    fnRecoverWallet: (seed: string, birthday: number) => Promise<void>,
-    readOnly: boolean,
-    indexerServer: ServerType,
-    performanceLevel: PerformanceLevelEnum,
-  ) {
-    this.fnSetTotalBalance = fnSetTotalBalance;
-    this.fnSetStaked = fnSetStaked;
-    this.fnSetGlobalStaked = fnSetGlobalStaked;
-    this.fnSetWalletBonds = fnSetWalletBonds;
-    this.fnSetValueTransfersList = fnSetValueTransfersList;
-    this.fnSetMessagesList = fnSetMessagesList;
-    this.fnSetAllAddresses = fnSetAllAddresses;
-    this.fnSetInfo = fnSetInfo;
-    this.fnSetSyncingStatus = fnSetSyncingStatus;
-    this.translate = translate;
-    this.keepAwake = keepAwake;
-    this.fnSetZingolib = fnSetZingolib;
-    this.fnSetWallet = fnSetWallet;
-    this.fnSetLastError = fnSetLastError;
-    this.fnRecoverWallet = fnRecoverWallet;
+  blockTimes: number[];
+  lastBlockTimestamp: number | null;
+  lastKnownBlock: number | null;
+
+  constructor({
+    readOnly,
+    indexerServer,
+    performanceLevel,
+    recoverWallet,
+  }: WalletServiceOptions) {
+    this.recoverWallet = recoverWallet;
+    this.blockTimes = [
+      indexerServer.chainName === ChainNameEnum.regtestChainName ? 10 : 30,
+    ];
+    this.lastBlockTimestamp = null;
+    this.lastKnownBlock = null;
 
     this.lastWalletBlockHeight = 0;
     this.lastServerBlockHeight = 0;
@@ -440,9 +422,7 @@ export default class WalletService {
     return RPCModule.probeIndexer(uri, network);
   }
 
-  static async selectBestIndexer(
-    network: IndexerNetworkEnum,
-  ): Promise<string> {
+  static async selectBestIndexer(network: IndexerNetworkEnum): Promise<string> {
     return RPCModule.selectBestIndexer(network);
   }
 
@@ -519,7 +499,7 @@ export default class WalletService {
           setConfigWallet &&
           setConfigWallet.toLowerCase().startsWith(GlobalConst.error)
         ) {
-          this.fnSetLastError(`Set wallet to prod error: ${setConfigWallet}`);
+          setLastError(`Set wallet to prod error: ${setConfigWallet}`);
         }
         // I need to be sure in this point that the performance level is the selected setting
         await RPCModule.doSave();
@@ -711,7 +691,7 @@ export default class WalletService {
     ) {
       console.log('SYNC PAUSE ERROR', returnPause);
       if (!returnPause.toLowerCase().includes('sync is not running')) {
-        this.fnSetLastError(`Error sync pause: ${returnPause}`);
+        setLastError(`Error sync pause: ${returnPause}`);
       }
       return;
     } else {
@@ -764,15 +744,15 @@ export default class WalletService {
     // the App can called `sync run` no matter what
     // this is handy to have the wallet fully synced
     // anytime.
-    this.keepAwake(true);
+    keepAwake(true);
 
     // This is async, so when it is done, we finish the refresh.
     if (fullRescan) {
       await this.clearTimers();
       // clean the ValueTransfer list before.
-      //this.fnSetValueTransfersList([], 0);
-      //this.fnSetMessagesList([], 0);
-      //this.fnSetTotalBalance({
+      //setValueTransfersList([], 0);
+      //setMessagesList([], 0);
+      //setTotalBalance({
       //  totalOrchardBalance: 0,
       //  totalSaplingBalance: 0,
       //  totalTransparentBalance: 0,
@@ -781,7 +761,7 @@ export default class WalletService {
       //  confirmedSaplingBalance: 0,
       //  totalSpendableBalance: 0,
       //} as TotalBalanceClass);
-      //this.fnSetSyncingStatus({} as SyncStatusType);
+      //setSyncingStatus({} as SyncStatusType);
 
       // the rescan in zingolib do two tasks:
       // 1. stop the sync.
@@ -799,7 +779,7 @@ export default class WalletService {
       console.log('rescan RUN', rescanStr);
       if (rescanStr && rescanStr.toLowerCase().startsWith(GlobalConst.error)) {
         console.log(`Error rescan: ${rescanStr}`);
-        this.fnSetLastError(`Error rescan: ${rescanStr}`);
+        setLastError(`Error rescan: ${rescanStr}`);
       }
       // The App needs to calculate heights
 
@@ -817,7 +797,7 @@ export default class WalletService {
       if (syncStr && syncStr.toLowerCase().startsWith(GlobalConst.error)) {
         console.log(`Error sync: ${syncStr}`);
         if (!syncStr.toLowerCase().includes('sync is already running')) {
-          this.fnSetLastError(`Error sync: ${syncStr}`);
+          setLastError(`Error sync: ${syncStr}`);
         }
       }
     }
@@ -844,7 +824,7 @@ export default class WalletService {
       returnStatus.toLowerCase().startsWith(GlobalConst.error)
     ) {
       console.log('SYNC STATUS ERROR', returnStatus);
-      this.fnSetLastError(`Error sync status: ${returnStatus}`);
+      setLastError(`Error sync status: ${returnStatus}`);
       this.fetchSyncStatusLock = false;
       return;
     }
@@ -853,9 +833,7 @@ export default class WalletService {
       ss = await JSON.parse(returnStatus);
     } catch (error) {
       console.log('SYNC STATUS ERROR - PARSE JSON', returnStatus, error);
-      this.fnSetLastError(
-        `Error sync status parse: ${error} value: ${returnStatus}`,
-      );
+      setLastError(`Error sync status parse: ${error} value: ${returnStatus}`);
       this.fetchSyncStatusLock = false;
       return;
     }
@@ -871,7 +849,7 @@ export default class WalletService {
     //console.log('interval sync/rescan, secs', this.secondsBatch, 'timer', this.syncStatusTimerID);
 
     // store SyncStatus object for a new screen
-    this.fnSetSyncingStatus(ss as SyncStatusType);
+    setSyncingStatus(ss as SyncStatusType);
 
     // Close the poll timer if the sync finished(checked via promise above)
     const percentage: number =
@@ -882,7 +860,7 @@ export default class WalletService {
       !!ss.scan_ranges && ss.scan_ranges.length > 0 && percentage < 100;
     if (!inR) {
       // here we can release the screen...
-      this.keepAwake(false);
+      keepAwake(false);
     }
 
     this.fetchSyncStatusLock = false;
@@ -905,7 +883,7 @@ export default class WalletService {
     }
     if (returnPoll && returnPoll.toLowerCase().startsWith(GlobalConst.error)) {
       console.log('SYNC POLL ERROR', returnPoll);
-      this.fnSetLastError(`Error sync poll: ${returnPoll}`);
+      setLastError(`Error sync poll: ${returnPoll}`);
       console.log(
         'HEIGHTS  ------- ',
         this.lastWalletBlockHeight,
@@ -937,7 +915,7 @@ export default class WalletService {
           this.walletSeed,
         );
         if (this.walletSeed) {
-          this.fnRecoverWallet(
+          this.recoverWallet(
             this.walletSeed,
             this.walletBirthday > this.lastServerBlockHeight
               ? 1
@@ -997,9 +975,7 @@ export default class WalletService {
       sp = await JSON.parse(returnPoll);
     } catch (error) {
       console.log('SYNC POLL ERROR - PARSE JSON', returnPoll, error);
-      this.fnSetLastError(
-        `Error sync poll parse: ${error} value: ${returnPoll}`,
-      );
+      setLastError(`Error sync poll parse: ${error} value: ${returnPoll}`);
       this.fetchSyncPollLock = false;
       return;
     }
@@ -1033,7 +1009,7 @@ export default class WalletService {
       if (infoStr) {
         if (infoStr.toLowerCase().startsWith(GlobalConst.error)) {
           console.log(`Error info & server block height ${infoStr}`);
-          this.fnSetLastError(`Error info: ${infoStr}`);
+          setLastError(`Error info: ${infoStr}`);
           infoError = true;
         }
       } else {
@@ -1045,7 +1021,7 @@ export default class WalletService {
         // Keep the last known good values instead of writing zeroes, so the
         // UI keeps showing stale data and `latestBlock` does not flap between
         // a real height and 0 while the server is unstable.
-        this.fnSetInfo({
+        setInfo({
           ...(this.lastGoodInfo ?? {
             latestBlock: 0,
             serverUri: '',
@@ -1072,19 +1048,48 @@ export default class WalletService {
             : CurrencyNameEnum.cTAZ,
       };
 
-      this.fnSetInfo(info);
+      this.recordBlock(info.latestBlock);
+      setInfo(info);
       this.lastGoodInfo = info;
       this.lastServerBlockHeight = info.latestBlock;
       this.fetchInfoAndServerHeightLock = false;
     } catch (error) {
       console.log(`Critical Error info & server block height ${error}`);
-      this.fnSetLastError(`Error info: ${error}`);
+      setLastError(`Error info: ${error}`);
       // relaunch the interval tasks just in case they are aborted.
       await this.clearTimers();
       await this.configure();
       this.fetchInfoAndServerHeightLock = false;
       return;
     }
+  }
+
+  recordBlock(block: number | undefined): void {
+    if (block === undefined || block === this.lastKnownBlock) {
+      return;
+    }
+    const now = Date.now();
+    if (
+      this.lastBlockTimestamp !== null &&
+      this.lastKnownBlock !== null &&
+      block > this.lastKnownBlock
+    ) {
+      const elapsedSeconds = (now - this.lastBlockTimestamp) / 1000;
+      this.blockTimes.push(elapsedSeconds / (block - this.lastKnownBlock));
+      if (this.blockTimes.length > 100) {
+        this.blockTimes.shift();
+      }
+    }
+    this.lastBlockTimestamp = now;
+    this.lastKnownBlock = block;
+  }
+
+  getAverageBlockTime(): number {
+    if (this.blockTimes.length === 0) {
+      return 0;
+    }
+    const sum = this.blockTimes.reduce((acc, value) => acc + value, 0);
+    return sum / this.blockTimes.length;
   }
 
   async fetchZingolibVersion(): Promise<void> {
@@ -1104,7 +1109,7 @@ export default class WalletService {
       if (zingolibStr) {
         if (zingolibStr.toLowerCase().startsWith(GlobalConst.error)) {
           console.log(`Error zingolib version ${zingolibStr}`);
-          this.fnSetLastError(`Error zingolib version: ${zingolibStr}`);
+          setLastError(`Error zingolib version: ${zingolibStr}`);
           zingolibStr = GlobalConst.zingolibError;
         }
       } else {
@@ -1112,11 +1117,11 @@ export default class WalletService {
         zingolibStr = GlobalConst.zingolibNone;
       }
 
-      this.fnSetZingolib(zingolibStr);
+      setZingolibVersion(zingolibStr);
       this.fetchZingolibVersionLock = false;
     } catch (error) {
       console.log(`Critical Error zingolib version ${error}`);
-      this.fnSetLastError(`Error zingolib version: ${error}`);
+      setLastError(`Error zingolib version: ${error}`);
       this.fetchZingolibVersionLock = false;
       return;
     }
@@ -1139,12 +1144,11 @@ export default class WalletService {
         );
       }
       //console.log(spendableStr);
-      let spendableJSON: SpendablebalanceType =
-        {} as SpendablebalanceType;
+      let spendableJSON: SpendablebalanceType = {} as SpendablebalanceType;
       if (spendableStr) {
         if (spendableStr.toLowerCase().startsWith(GlobalConst.error)) {
           console.log(`Error spendable balance ${spendableStr}`);
-          this.fnSetLastError(`Error spendable balance: ${spendableStr}`);
+          setLastError(`Error spendable balance: ${spendableStr}`);
         } else {
           spendableJSON = await JSON.parse(spendableStr);
         }
@@ -1163,7 +1167,7 @@ export default class WalletService {
       if (balanceStr) {
         if (balanceStr.toLowerCase().startsWith(GlobalConst.error)) {
           console.log(`Error balance ${balanceStr}`);
-          this.fnSetLastError(`Error balance: ${balanceStr}`);
+          setLastError(`Error balance: ${balanceStr}`);
           this.fetchTotalBalanceLock = false;
           return;
         }
@@ -1194,11 +1198,11 @@ export default class WalletService {
         stakedAmount: (balanceJSON.staked_amount || 0) / 10 ** 8,
       };
       //console.log(balance);
-      this.fnSetTotalBalance(balance);
+      setTotalBalance(balance);
       this.fetchTotalBalanceLock = false;
     } catch (error) {
       console.log(`Critical Error balances ${error}`);
-      this.fnSetLastError(`Error balance: ${error}`);
+      setLastError(`Error balance: ${error}`);
       // relaunch the interval tasks just in case they are aborted.
       await this.clearTimers();
       await this.configure();
@@ -1215,12 +1219,12 @@ export default class WalletService {
       const rosterInfoStr: string = await RPCModule.getRosterInfo();
 
       if (!rosterInfoStr) {
-        this.fnSetLastError('Error roster_info: empty response');
+        setLastError('Error roster_info: empty response');
         this.fetchStakedLock = false;
         return;
       }
       if (rosterInfoStr.toLowerCase().startsWith(GlobalConst.error)) {
-        this.fnSetLastError(`Error roster_info: ${rosterInfoStr}`);
+        setLastError(`Error roster_info: ${rosterInfoStr}`);
         this.fetchStakedLock = false;
         return;
       }
@@ -1243,7 +1247,7 @@ export default class WalletService {
       if (walletBondsStr) {
         if (walletBondsStr.toLowerCase().startsWith(GlobalConst.error)) {
           console.log(`Error wallet bonds ${walletBondsStr}`);
-          this.fnSetLastError(`Error wallet bonds: ${walletBondsStr}`);
+          setLastError(`Error wallet bonds: ${walletBondsStr}`);
           this.fetchStakedLock = false;
           return;
         }
@@ -1310,14 +1314,14 @@ export default class WalletService {
       //console.log('BONDS', walletBondsList);
       //console.log('ROSTER', rosterInfo);
 
-      this.fnSetStaked(stakedList);
-      this.fnSetGlobalStaked(globalStakedList);
-      this.fnSetWalletBonds(walletBondsList);
+      setStaked(stakedList);
+      setGlobalStaked(globalStakedList);
+      setWalletBonds(walletBondsList);
 
       this.fetchStakedLock = false;
     } catch (error) {
       console.log(`Critical Error staked ${error}`);
-      this.fnSetLastError(`Error staked: ${error}`);
+      setLastError(`Error staked: ${error}`);
       await this.clearTimers();
       await this.configure();
       this.fetchStakedLock = false;
@@ -1345,9 +1349,7 @@ export default class WalletService {
       if (unifiedAddressesStr) {
         if (unifiedAddressesStr.toLowerCase().startsWith(GlobalConst.error)) {
           console.log(`Error addresses ${unifiedAddressesStr}`);
-          this.fnSetLastError(
-            `Error unified addresses: ${unifiedAddressesStr}`,
-          );
+          setLastError(`Error unified addresses: ${unifiedAddressesStr}`);
           this.fetchAddressesLock = false;
           return;
         }
@@ -1372,9 +1374,7 @@ export default class WalletService {
       if (transparentAddressStr) {
         if (transparentAddressStr.toLowerCase().startsWith(GlobalConst.error)) {
           console.log(`Error addresses ${transparentAddressStr}`);
-          this.fnSetLastError(
-            `Error transparent addresses: ${transparentAddressStr}`,
-          );
+          setLastError(`Error transparent addresses: ${transparentAddressStr}`);
           this.fetchAddressesLock = false;
           return;
         }
@@ -1414,11 +1414,11 @@ export default class WalletService {
 
       //console.log(allAddresses);
 
-      this.fnSetAllAddresses(allAddresses);
+      setAllAddresses(allAddresses);
       this.fetchAddressesLock = false;
     } catch (error) {
       console.log(`Critical Error addresses ${error}`);
-      this.fnSetLastError(`Error addresses: ${error}`);
+      setLastError(`Error addresses: ${error}`);
       // relaunch the interval tasks just in case they are aborted.
       await this.clearTimers();
       await this.configure();
@@ -1445,7 +1445,7 @@ export default class WalletService {
       if (heightStr) {
         if (heightStr.toLowerCase().startsWith(GlobalConst.error)) {
           console.log(`Error wallet height ${heightStr}`);
-          this.fnSetLastError(`Error wallet height: ${heightStr}`);
+          setLastError(`Error wallet height: ${heightStr}`);
           this.fetchWalletHeightLock = false;
           return;
         }
@@ -1460,7 +1460,7 @@ export default class WalletService {
       this.fetchWalletHeightLock = false;
     } catch (error) {
       console.log(`Critical Error wallet height ${error}`);
-      this.fnSetLastError(`Error wallet height: ${error}`);
+      setLastError(`Error wallet height: ${error}`);
       // relaunch the interval tasks just in case they are aborted.
       await this.clearTimers();
       await this.configure();
@@ -1487,7 +1487,7 @@ export default class WalletService {
       if (walletSaveRequiredStr) {
         if (walletSaveRequiredStr.toLowerCase().startsWith(GlobalConst.error)) {
           console.log(`Error wallet save required ${walletSaveRequiredStr}`);
-          this.fnSetLastError(
+          setLastError(
             `Error wallet save required: ${walletSaveRequiredStr}`,
           );
           this.getWalletSaveRequiredLock = false;
@@ -1505,7 +1505,7 @@ export default class WalletService {
       return walletSaveRequiredJSON.save_required;
     } catch (error) {
       console.log(`Critical Error wallet save required ${error}`);
-      this.fnSetLastError(`Error wallet save required: ${error}`);
+      setLastError(`Error wallet save required: ${error}`);
       this.getWalletSaveRequiredLock = false;
       return false;
     }
@@ -1531,7 +1531,7 @@ export default class WalletService {
           console.log(
             `Error wallet config performance ${configWalletPerformanceStr}`,
           );
-          this.fnSetLastError(
+          setLastError(
             `Error wallet config performance: ${configWalletPerformanceStr}`,
           );
           return;
@@ -1546,7 +1546,7 @@ export default class WalletService {
       return configWalletPerformanceJSON.performance_level;
     } catch (error) {
       console.log(`Critical Error wallet config performance ${error}`);
-      this.fnSetLastError(`Error wallet config performance: ${error}`);
+      setLastError(`Error wallet config performance: ${error}`);
       return;
     }
   }
@@ -1564,7 +1564,7 @@ export default class WalletService {
       if (walletVersionStr) {
         if (walletVersionStr.toLowerCase().startsWith(GlobalConst.error)) {
           console.log(`Error wallet version ${walletVersionStr}`);
-          this.fnSetLastError(`Error wallet version: ${walletVersionStr}`);
+          setLastError(`Error wallet version: ${walletVersionStr}`);
           return;
         }
       } else {
@@ -1577,7 +1577,7 @@ export default class WalletService {
       return walletVersionJSON.read_version;
     } catch (error) {
       console.log(`Critical Error wallet version ${error}`);
-      this.fnSetLastError(`Error wallet version: ${error}`);
+      setLastError(`Error wallet version: ${error}`);
       return;
     }
   }
@@ -1594,12 +1594,12 @@ export default class WalletService {
         this.walletBirthday = wallet.birthday;
         this.walletSeed = wallet.seed || '';
         this.UFVK = wallet.ufvk || '';
-        this.fnSetWallet(wallet);
+        setWallet(wallet);
       }
       this.fetchWalletBirthdaySeedUfvkLock = false;
     } catch (error) {
       console.log(`Critical Error wallet birthday ${error}`);
-      this.fnSetLastError(`Error wallet birthday: ${error}`);
+      setLastError(`Error wallet birthday: ${error}`);
       // relaunch the interval tasks just in case they are aborted.
       await this.clearTimers();
       await this.configure();
@@ -1631,7 +1631,7 @@ export default class WalletService {
       if (heightStr) {
         if (heightStr.toLowerCase().startsWith(GlobalConst.error)) {
           console.log(`Error server height ${heightStr}`);
-          this.fnSetLastError(`Error server height: ${heightStr}`);
+          setLastError(`Error server height: ${heightStr}`);
         } else {
           this.lastServerBlockHeight = Number(heightStr);
         }
@@ -1654,7 +1654,7 @@ export default class WalletService {
       if (valueTransfersStr) {
         if (valueTransfersStr.toLowerCase().startsWith(GlobalConst.error)) {
           console.log(`Error value transfers ${valueTransfersStr}`);
-          this.fnSetLastError(`Error value transfers: ${valueTransfersStr}`);
+          setLastError(`Error value transfers: ${valueTransfersStr}`);
           this.fetchTandZandOValueTransfersLock = false;
           return;
         }
@@ -1696,7 +1696,8 @@ export default class WalletService {
                           ? ValueTransferKindEnum.Rejection
                           : vt.kind === WalletValueTransferKindEnum.createBond
                             ? ValueTransferKindEnum.CreateBond
-                            : vt.kind === WalletValueTransferKindEnum.beginUnbond
+                            : vt.kind ===
+                                WalletValueTransferKindEnum.beginUnbond
                               ? ValueTransferKindEnum.BeginUnbond
                               : vt.kind ===
                                   WalletValueTransferKindEnum.withdrawBond
@@ -1782,11 +1783,11 @@ export default class WalletService {
 
       //console.log(vtList);
 
-      this.fnSetValueTransfersList(vtList, vtList.length);
+      setValueTransfersList(vtList, vtList.length);
       this.fetchTandZandOValueTransfersLock = false;
     } catch (error) {
       console.log(`Critical Error value transfers ${error}`);
-      this.fnSetLastError(`Error value transfers: ${error}`);
+      setLastError(`Error value transfers: ${error}`);
       // relaunch the interval tasks just in case they are aborted.
       await this.clearTimers();
       await this.configure();
@@ -1815,7 +1816,7 @@ export default class WalletService {
       if (messagesStr) {
         if (messagesStr.toLowerCase().startsWith(GlobalConst.error)) {
           console.log(`Error value transfers messages ${messagesStr}`);
-          this.fnSetLastError(`Error value transfers messages: ${messagesStr}`);
+          setLastError(`Error value transfers messages: ${messagesStr}`);
           this.fetchTandZandOMessagesLock = false;
           return;
         }
@@ -1856,7 +1857,8 @@ export default class WalletService {
                           ? ValueTransferKindEnum.CreateBond
                           : m.kind === WalletValueTransferKindEnum.beginUnbond
                             ? ValueTransferKindEnum.BeginUnbond
-                            : m.kind === WalletValueTransferKindEnum.withdrawBond
+                            : m.kind ===
+                                WalletValueTransferKindEnum.withdrawBond
                               ? ValueTransferKindEnum.WithdrawBond
                               : m.kind ===
                                   WalletValueTransferKindEnum.retargetDelegationBond
@@ -1916,11 +1918,11 @@ export default class WalletService {
 
       //console.log(mlist);
 
-      this.fnSetMessagesList(mList, mList.length);
+      setMessagesList(mList, mList.length);
       this.fetchTandZandOMessagesLock = false;
     } catch (error) {
       console.log(`Critical Error value transfers messages ${error}`);
-      this.fnSetLastError(`Error value transfers messages: ${error}`);
+      setLastError(`Error value transfers messages: ${error}`);
       // relaunch the interval tasks just in case they are aborted.
       await this.clearTimers();
       await this.configure();
@@ -1937,7 +1939,7 @@ export default class WalletService {
       // sending
       this.setInSend(true);
       // keep awake the screen/device while sending.
-      this.keepAwake(true);
+      keepAwake(true);
       // sometimes we need the result of send as well
       let sendError: string = '';
       let sendTxids: string = '';
@@ -2008,7 +2010,7 @@ export default class WalletService {
     return new Promise<string>(async (resolve, reject) => {
       await this.clearTimers();
       this.setInSend(true);
-      this.keepAwake(true);
+      keepAwake(true);
 
       let sendError = '';
       let sendTxids = '';
@@ -2092,7 +2094,7 @@ export default class WalletService {
     return new Promise<string>(async (resolve, reject) => {
       await this.clearTimers();
       this.setInSend(true);
-      this.keepAwake(true);
+      keepAwake(true);
 
       let sendError = '';
       let sendTxids = '';
@@ -2154,7 +2156,7 @@ export default class WalletService {
     return new Promise<string>(async (resolve, reject) => {
       await this.clearTimers();
       this.setInSend(true);
-      this.keepAwake(true);
+      keepAwake(true);
 
       let sendError = '';
       let sendTxids = '';
@@ -2220,7 +2222,7 @@ export default class WalletService {
     return new Promise<string>(async (resolve, reject) => {
       await this.clearTimers();
       this.setInSend(true);
-      this.keepAwake(true);
+      keepAwake(true);
 
       let sendError = '';
       let sendTxids = '';
@@ -2306,10 +2308,10 @@ export default class WalletService {
       const result = await RPCModule.deleteExistingWallet();
 
       if (!(result && result !== GlobalConst.false)) {
-        return this.translate('rpc.deletewallet-error') as string;
+        return read().translate('rpc.deletewallet-error') as string;
       }
     } else {
-      return this.translate('rpc.walletnotfound-error') as string;
+      return read().translate('rpc.walletnotfound-error') as string;
     }
     return '';
   }
@@ -2323,10 +2325,10 @@ export default class WalletService {
       const result = await RPCModule.deleteExistingWallet();
 
       if (!(result && result !== GlobalConst.false)) {
-        return this.translate('rpc.deletewallet-error') as string;
+        return read().translate('rpc.deletewallet-error') as string;
       }
     } else {
-      return this.translate('rpc.walletnotfound-error') as string;
+      return read().translate('rpc.walletnotfound-error') as string;
     }
     return '';
   }
@@ -2343,10 +2345,10 @@ export default class WalletService {
         await this.pauseSyncProcess();
         await RPCModule.restoreExistingWalletBackup();
       } else {
-        return this.translate('rpc.walletnotfound-error') as string;
+        return read().translate('rpc.walletnotfound-error') as string;
       }
     } else {
-      return this.translate('rpc.backupnotfound-error') as string;
+      return read().translate('rpc.backupnotfound-error') as string;
     }
     return '';
   }

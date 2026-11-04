@@ -29,7 +29,7 @@ import AlSummaryLine from './components/AlSummaryLine';
 import {
   useFeedback,
   useWalletData,
-} from '../../app/context';
+} from '../../app/store';
 import { Header } from '../Header';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faAngleUp } from '@fortawesome/free-solid-svg-icons';

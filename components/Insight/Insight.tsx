@@ -21,7 +21,7 @@ import {
   useFeedback,
   useSettings,
   useWalletData,
-} from '../../app/context';
+} from '../../app/store';
 import Utils from '../../app/utils';
 import WalletService from '../../app/wallet';
 import FadeText from '../Components/FadeText';

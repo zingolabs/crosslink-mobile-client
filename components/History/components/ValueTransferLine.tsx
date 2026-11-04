@@ -26,7 +26,7 @@ import {
   useFeedback,
   useSettings,
   useWalletData,
-} from '../../../app/context';
+} from '../../../app/store';
 import { ValueTransferStatusEnum } from '../../../app/wallet/enums';
 import Utils from '../../../app/utils';
 import RegText from '../../Components/RegText';

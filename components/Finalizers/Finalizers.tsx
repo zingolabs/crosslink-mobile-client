@@ -13,7 +13,7 @@ import { Search, X } from 'lucide-react-native';
 
 import { RouteEnum, StakeType } from '../../app/AppState';
 import { WalletBondsStatusEnum } from '../../app/AppState/enums/WalletBondsStatusEnum';
-import { useSettings, useWalletData } from '../../app/context';
+import { useSettings, useWalletData } from '../../app/store';
 import { SessionStackParamList } from '../../app/types';
 import { radiusPill, space, text, useTheme } from '../../app/theme';
 import { HeaderTitle } from '../Header';

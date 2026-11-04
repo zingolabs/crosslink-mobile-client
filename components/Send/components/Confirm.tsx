@@ -12,7 +12,7 @@ import {
   useSettings,
   useStatus,
   useWalletData,
-} from '../../../app/context';
+} from '../../../app/store';
 import AddressItem from '../../Components/AddressItem';
 import simpleBiometrics from '../../../app/simpleBiometrics';
 

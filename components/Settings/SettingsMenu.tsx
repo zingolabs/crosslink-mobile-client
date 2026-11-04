@@ -6,7 +6,7 @@ import Animated, {
   useReducedMotion,
 } from 'react-native-reanimated';
 
-import { useFeedback } from '../../app/context';
+import { useFeedback } from '../../app/store';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { RouteEnum } from '../../app/AppState';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';

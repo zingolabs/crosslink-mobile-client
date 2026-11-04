@@ -12,7 +12,7 @@ import {
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 
 import { ScreenEnum } from '../../AppState';
-import { useFeedback } from '../../context';
+import { useFeedback } from '../../store';
 import BoldText from '../../../components/Components/BoldText';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import Snackbars from '../../../components/Components/Snackbars';

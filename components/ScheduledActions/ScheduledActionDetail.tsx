@@ -13,7 +13,7 @@ import {
   Alert,
   Dimensions,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
@@ -30,8 +30,9 @@ import { SessionStackParamList } from '../../app/types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   useSession,
+  useStakingDayCountdown,
   useWalletData,
-} from '../../app/context';
+} from '../../app/store';
 import { HeaderTitle } from '../Header';
 import RegText from '../Components/RegText';
 import ZecAmount from '../Components/ZecAmount';
@@ -95,7 +96,10 @@ const ScheduledActionDetail: React.FC<ScheduledActionDetailProps> = ({
   const modalVisible = modalState !== 'idle';
 
   const { setScheduledActions } = useSession();
-  const { valueTransfers, stakingDay, info, walletBonds, timeToStakingDaySeconds: timeToStakingDay, scheduledActions } = useWalletData();
+  const { valueTransfers, info, walletBonds, scheduledActions } =
+    useWalletData();
+  const { stakingDay, timeToStakingDaySeconds: timeToStakingDay } =
+    useStakingDayCountdown(useIsFocused());
 
   useEffect(() => {
     const s1 = Keyboard.addListener('keyboardDidShow', () => setKbOpen(true));

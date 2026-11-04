@@ -17,7 +17,7 @@ import { SessionStackParamList } from '../../app/types';
 import {
   useFeedback,
   useWalletData,
-} from '../../app/context';
+} from '../../app/store';
 import { Header } from '../Header';
 import { GlobalConst, RouteEnum, ScreenEnum } from '../../app/AppState';
 import FadeText from '../Components/FadeText';

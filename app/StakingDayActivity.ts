@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { NativeModules, Platform } from 'react-native';
 
-import { useWalletData } from './context';
+import { useWalletData } from './store';
 
 export type StakingDayActivityPayload = {
   stakingDay: boolean;

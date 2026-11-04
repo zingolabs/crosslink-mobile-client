@@ -7,10 +7,7 @@ import React from 'react';
 
 import { render, RenderResult } from '@testing-library/react-native';
 import Info from '../components/Info';
-import {
-  SessionDomainsProvider,
-  defaultLoadedDomains,
-} from '../app/context';
+import { appStore, defaultLoadedDomains } from '../app/store';
 import { mockInfo } from '../__mocks__/dataMocks/mockInfo';
 import { mockTranslate } from '../__mocks__/dataMocks/mockTranslate';
 import { mockTotalBalance } from '../__mocks__/dataMocks/mockTotalBalance';
@@ -43,11 +40,8 @@ describe('Component Info - test', () => {
     state.translate = mockTranslate;
     state.totalBalance = mockTotalBalance;
     const props = makeDrawerProps();
-    const info: RenderResult = render(
-      <SessionDomainsProvider value={state}>
-        <Info {...props} />
-      </SessionDomainsProvider>,
-    );
+    appStore.setState(state);
+    const info: RenderResult = render(<Info {...props} />);
     expect(info.toJSON()).toMatchSnapshot();
   });
 });

@@ -26,7 +26,7 @@ import {
   useSettings,
   useStatus,
   useWalletData,
-} from '../../app/context';
+} from '../../app/store';
 import { recipientNames } from './data';
 
 export const gold = '#F2CC50';

@@ -10,7 +10,7 @@ import {
   useSettings,
   useStatus,
   useWalletData,
-} from '../../app/context';
+} from '../../app/store';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import FadeText from '../Components/FadeText';
 import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
-import { useFeedback } from '../../../app/context';
+import { useFeedback } from '../../../app/store';
 import {
   AddressKindEnum,
   ScreenEnum,

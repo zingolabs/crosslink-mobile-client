@@ -17,7 +17,7 @@ import {
   SnackbarDurationEnum,
 } from '../../../app/AppState';
 import RegText from '../../Components/RegText';
-import { useFeedback } from '../../../app/context';
+import { useFeedback } from '../../../app/store';
 import { useToast } from 'react-native-toastier';
 import { AddressUnifiedTypeEnum } from '../../../app/AppState';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';

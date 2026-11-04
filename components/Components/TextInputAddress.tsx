@@ -7,7 +7,7 @@ import { faCheck, faQrcode, faXmark } from '@fortawesome/free-solid-svg-icons';
 import {
   useFeedback,
   useSettings,
-} from '../../app/context';
+} from '../../app/store';
 import ErrorText from './ErrorText';
 import RegText from './RegText';
 import Utils from '../../app/utils';

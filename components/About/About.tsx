@@ -6,7 +6,7 @@ import { SessionStackParamList } from '../../app/types';
 import {
   useFeedback,
   useStatus,
-} from '../../app/context';
+} from '../../app/store';
 import DetailLine from '../Components/DetailLine';
 import Snackbars from '../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';

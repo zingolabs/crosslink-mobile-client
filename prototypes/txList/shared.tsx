@@ -30,7 +30,7 @@ import {
   ValueTransferType,
 } from '../../app/AppState';
 import { useTheme } from '../../app/theme';
-import { useSettings } from '../../app/context';
+import { useSettings } from '../../app/store';
 import JellyLoader from '../../components/Components/Icons/JellyLoader';
 import { FeedItem, isPending } from './feed';
 

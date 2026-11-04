@@ -11,7 +11,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 
 import RegText from '../../../components/Components/RegText';
 import FadeText from '../../../components/Components/FadeText';
-import { useFeedback, useSettings, useStatus } from '../../context';
+import { useFeedback, useSettings, useStatus } from '../../store';
 import { SnackbarDurationEnum, ScreenEnum } from '../../AppState';
 import { Header } from '../../../components/Header';
 import Utils from '../../utils';

@@ -5,7 +5,7 @@ import moment from 'moment';
 import { Eye, EyeOff, QrCode, Send } from 'lucide-react-native';
 
 import { ValueTransferType } from '../../app/AppState';
-import { useWalletData } from '../../app/context';
+import { useWalletData } from '../../app/store';
 import { useTheme } from '../../app/theme';
 import { Sparkline } from './charts';
 import {

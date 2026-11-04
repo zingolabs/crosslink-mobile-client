@@ -8,7 +8,7 @@ import {
   useSettings,
   useStatus,
   useWalletData,
-} from '../../../app/context';
+} from '../../../app/store';
 import { RouteEnum, SelectServerEnum } from '../../../app/AppState';
 import { SyncStatusType } from '../../../app/wallet/types';
 import ZecAmount from '../../Components/ZecAmount';

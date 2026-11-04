@@ -7,10 +7,7 @@ import React from 'react';
 
 import { render } from '@testing-library/react-native';
 import Insight from '../components/Insight';
-import {
-  SessionDomainsProvider,
-  defaultLoadedDomains,
-} from '../app/context';
+import { appStore, defaultLoadedDomains } from '../app/store';
 import { mockTranslate } from '../__mocks__/dataMocks/mockTranslate';
 import { mockInfo } from '../__mocks__/dataMocks/mockInfo';
 import { mockTotalBalance } from '../__mocks__/dataMocks/mockTotalBalance';
@@ -41,11 +38,8 @@ describe('Component Insight - test', () => {
     state.info = mockInfo;
     state.totalBalance = mockTotalBalance;
     const props = makeDrawerProps();
-    const insight = render(
-      <SessionDomainsProvider value={state}>
-        <Insight {...props} />
-      </SessionDomainsProvider>,
-    );
+    appStore.setState(state);
+    const insight = render(<Insight {...props} />);
     expect(insight.toJSON()).toMatchSnapshot();
   });
 });

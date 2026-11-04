@@ -7,10 +7,7 @@ import React from 'react';
 
 import { render } from '@testing-library/react-native';
 import Rescan from '../components/Rescan';
-import {
-  SessionDomainsProvider,
-  defaultLoadedDomains,
-} from '../app/context';
+import { appStore, defaultLoadedDomains } from '../app/store';
 import { mockTranslate } from '../__mocks__/dataMocks/mockTranslate';
 import { mockInfo } from '../__mocks__/dataMocks/mockInfo';
 import { mockTotalBalance } from '../__mocks__/dataMocks/mockTotalBalance';
@@ -44,11 +41,8 @@ describe('Component Rescan - test', () => {
   const onRescan = jest.fn();
   const props = makeDrawerProps();
   test('Rescan - snapshot', () => {
-    const rescan = render(
-      <SessionDomainsProvider value={state}>
-        <Rescan {...props} doRescan={onRescan} />
-      </SessionDomainsProvider>,
-    );
+    appStore.setState(state);
+    const rescan = render(<Rescan {...props} doRescan={onRescan} />);
     expect(rescan.toJSON()).toMatchSnapshot();
   });
 });

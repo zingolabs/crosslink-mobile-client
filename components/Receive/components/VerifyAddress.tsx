@@ -9,7 +9,7 @@ import {
 import {
   useFeedback,
   useSettings,
-} from '../../../app/context';
+} from '../../../app/store';
 import { useToast } from 'react-native-toastier';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';

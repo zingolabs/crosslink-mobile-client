@@ -7,10 +7,7 @@ import React from 'react';
 
 import { render } from '@testing-library/react-native';
 import Import from '../app/setup/components/Import';
-import {
-  SessionDomainsProvider,
-  defaultLoadedDomains,
-} from '../app/context';
+import { appStore, defaultLoadedDomains } from '../app/store';
 import { mockTranslate } from '../__mocks__/dataMocks/mockTranslate';
 import { mockInfo } from '../__mocks__/dataMocks/mockInfo';
 import { mockTotalBalance } from '../__mocks__/dataMocks/mockTotalBalance';
@@ -25,14 +22,13 @@ describe('Component Import - test', () => {
     state.totalBalance = mockTotalBalance;
     const onCancel = jest.fn();
     const onOK = jest.fn();
+    appStore.setState(state);
     const importSeed = render(
-      <SessionDomainsProvider value={state}>
-        <Import
-          actionButtonsDisabled={false}
-          onClickCancel={onCancel}
-          onClickOK={onOK}
-        />
-      </SessionDomainsProvider>,
+      <Import
+        actionButtonsDisabled={false}
+        onClickCancel={onCancel}
+        onClickOK={onOK}
+      />,
     );
     expect(importSeed.toJSON()).toMatchSnapshot();
   });

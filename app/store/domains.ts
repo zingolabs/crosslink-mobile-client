@@ -125,6 +125,7 @@ export interface WalletDataValue {
   blocksToStakingDay: number;
   blocksLeftStakingDay: number;
   blocksTotalStakingDay: number;
+  stakingDayComputedAt: number;
   scheduledActions: ScheduledActionType[];
 }
 
@@ -149,6 +150,7 @@ export const defaultWalletData: WalletDataValue = {
   blocksToStakingDay: 0,
   blocksLeftStakingDay: 0,
   blocksTotalStakingDay: 0,
+  stakingDayComputedAt: 0,
   scheduledActions: [],
 };
 

@@ -14,7 +14,7 @@ import {
   useSettings,
   useStatus,
   useWalletData,
-} from '../../app/context';
+} from '../../app/store';
 import moment from 'moment';
 
 import { Header } from '../Header';

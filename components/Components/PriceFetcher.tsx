@@ -14,7 +14,7 @@ import {
   useFeedback,
   useSettings,
   useStatus,
-} from '../../app/context';
+} from '../../app/store';
 import moment from 'moment';
 import WalletService from '../../app/wallet';
 import RegText from './RegText';

@@ -7,7 +7,7 @@ import {
   useFeedback,
   useSettings,
   useStatus,
-} from '../../app/context';
+} from '../../app/store';
 import {
   RouteEnum,
   ScreenEnum,

@@ -9,7 +9,7 @@ import {
   useSettings,
   useStatus,
   useWalletData,
-} from '../../app/context';
+} from '../../app/store';
 import PriceFetcher from '../Components/PriceFetcher';
 import CurrencyAmount from '../Components/CurrencyAmount';
 import RegText from '../Components/RegText';

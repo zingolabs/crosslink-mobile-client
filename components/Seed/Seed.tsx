@@ -19,7 +19,7 @@ import {
   useSession,
   useSettings,
   useStatus,
-} from '../../app/context';
+} from '../../app/store';
 import {
   SnackbarDurationEnum,
   ScreenEnum,

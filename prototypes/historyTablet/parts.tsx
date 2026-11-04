@@ -22,7 +22,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import { Check, Copy, Eye, X } from 'lucide-react-native';
 
 import { ValueTransferType } from '../../app/AppState';
-import { useWalletData } from '../../app/context';
+import { useWalletData } from '../../app/store';
 import { fontFamily, useTheme } from '../../app/theme';
 import {
   Flow,

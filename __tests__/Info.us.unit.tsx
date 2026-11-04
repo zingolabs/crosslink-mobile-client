@@ -7,10 +7,7 @@ import React from 'react';
 
 import { render, screen } from '@testing-library/react-native';
 import Info from '../components/Info';
-import {
-  SessionDomainsProvider,
-  defaultLoadedDomains,
-} from '../app/context';
+import { appStore, defaultLoadedDomains } from '../app/store';
 import { CurrencyEnum, RouteEnum } from '../app/AppState';
 import { mockInfo } from '../__mocks__/dataMocks/mockInfo';
 import { mockZecPrice } from '../__mocks__/dataMocks/mockZecPrice';
@@ -40,11 +37,8 @@ describe('Component Info - test', () => {
     state.zecPrice = mockZecPrice;
     state.currency = CurrencyEnum.USDCurrency;
     const props = makeDrawerProps();
-    render(
-      <SessionDomainsProvider value={state}>
-        <Info {...props} />
-      </SessionDomainsProvider>,
-    );
+    appStore.setState(state);
+    render(<Info {...props} />);
     screen.getByText('$ 33.33');
   });
 });

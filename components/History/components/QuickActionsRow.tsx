@@ -10,7 +10,7 @@ import FaucetIcon from '../../../assets/icons/faucet.svg';
 import {
   useSession,
   useWalletData,
-} from '../../../app/context';
+} from '../../../app/store';
 import { space, useTheme } from '../../../app/theme';
 
 const ActionButton = ({

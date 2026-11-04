@@ -6,11 +6,11 @@ import {
   SelectServerEnum,
   TranslateType,
 } from '../app/AppState';
-import { LoadedDomains, SetupDomains } from '../app/context/domains';
+import { LoadedDomains, SetupDomains } from '../app/store/domains';
 import {
   defaultLoadedDomains,
   defaultSetupDomains,
-} from '../app/context';
+} from '../app/store';
 
 import { mockInfo } from '../__mocks__/dataMocks/mockInfo';
 import { mockBackground } from '../__mocks__/dataMocks/mockBackground';

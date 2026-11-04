@@ -8,7 +8,7 @@ import {
   useFeedback,
   useSettings,
   useWalletData,
-} from '../../../app/context';
+} from '../../../app/store';
 import Snackbars from '../../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { ChainNameEnum, RouteEnum, ScreenEnum } from '../../../app/AppState';

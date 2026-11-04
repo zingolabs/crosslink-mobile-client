@@ -49,7 +49,7 @@ import {
   useSettings,
   useStatus,
   useWalletData,
-} from '../../app/context';
+} from '../../app/store';
 import { createAlert } from '../../app/createAlert';
 import { SendProposeType } from '../../app/wallet/types';
 import { SpendablebalanceType } from '../../app/wallet/types';
