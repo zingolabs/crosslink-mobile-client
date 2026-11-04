@@ -6,7 +6,7 @@ import { Droplet, Lock, QrCode, Send } from 'lucide-react-native';
 import {
   useStatus,
   useWalletData,
-} from '../../app/context';
+} from '../../app/store';
 import { useTheme } from '../../app/theme';
 import {
   MASK,

@@ -7,30 +7,13 @@ import { PerformanceLevelEnum } from '../app/wallet/enums';
 
 jest.mock('../app/RPCModule/RPCModule', () => ({}));
 
-const noop = () => undefined;
-const noopTranslate = () => '' as any;
-
 const buildService = (): WalletService =>
-  new WalletService(
-    noop,
-    noop,
-    noop,
-    noop,
-    noop,
-    noop,
-    noop,
-    noop,
-    noop,
-    noopTranslate,
-    noop,
-    noop,
-    noop,
-    noop,
-    jest.fn(),
-    false,
-    { uri: 'http://localhost', chainName: 'test' } as any,
-    PerformanceLevelEnum.Medium,
-  );
+  new WalletService({
+    readOnly: false,
+    indexerServer: { uri: 'http://localhost', chainName: 'test' } as any,
+    performanceLevel: PerformanceLevelEnum.Medium,
+    recoverWallet: jest.fn(),
+  });
 
 const never = (): Promise<never> => new Promise(() => undefined);
 
@@ -52,7 +35,6 @@ describe('WalletService.configure', () => {
     jest.spyOn(service, 'fetchStaked').mockImplementation(never);
     jest.spyOn(service, 'fetchInfoAndServerHeight').mockImplementation(never);
     jest.spyOn(service, 'fetchZingolibVersion').mockImplementation(never);
-    jest.spyOn(service, 'fetchTandZandOMessages').mockImplementation(never);
     jest.spyOn(service, 'fetchWalletHeight').mockImplementation(never);
     jest
       .spyOn(service, 'fetchWalletBirthdaySeedUfvk')
@@ -83,7 +65,6 @@ describe('WalletService.configure', () => {
       'fetchStaked',
       'fetchInfoAndServerHeight',
       'fetchZingolibVersion',
-      'fetchTandZandOMessages',
       'fetchWalletHeight',
       'fetchWalletBirthdaySeedUfvk',
     ] as const) {

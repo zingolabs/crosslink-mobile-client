@@ -3,7 +3,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Lock, QrCode, Send } from 'lucide-react-native';
 
-import { useWalletData } from '../../app/context';
+import { useWalletData } from '../../app/store';
 import { useTheme } from '../../app/theme';
 import {
   MASK,

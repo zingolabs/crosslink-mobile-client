@@ -16,6 +16,7 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import {
@@ -27,7 +28,12 @@ import {
 import { WalletBondsStatusEnum } from '../../app/AppState/enums/WalletBondsStatusEnum';
 import StakingSummary from './components/StakingSummary';
 import EmptyState from '../Components/EmptyState';
-import { useFeedback, useSettings, useWalletData } from '../../app/context';
+import {
+  useFeedback,
+  useSettings,
+  useStakingDayCountdown,
+  useWalletData,
+} from '../../app/store';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faAngleUp } from '@fortawesome/free-solid-svg-icons';
 import Snackbars from '../Components/Snackbars';
@@ -80,14 +86,16 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
     staked,
     globalStaked,
     info,
-    stakingDay,
-    timeToStakingDaySeconds: timeToStakingDay,
-    timeLeftStakingDaySeconds: timeLeftStakingDay,
     scheduledActions,
     walletBonds,
     blocksToStakingDay,
     blocksTotalStakingDay,
   } = useWalletData();
+  const {
+    stakingDay,
+    timeToStakingDaySeconds: timeToStakingDay,
+    timeLeftStakingDaySeconds: timeLeftStakingDay,
+  } = useStakingDayCountdown(useIsFocused());
   const { snackbars } = useFeedback();
 
   const screenName = ScreenEnum.StakingHome;

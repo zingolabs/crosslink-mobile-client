@@ -10,7 +10,7 @@ import {
 import { ToastProvider, useToast } from 'react-native-toastier';
 
 import { RouteEnum, ScreenEnum, IndexerNetworkEnum } from '../../AppState';
-import { useFeedback } from '../../context';
+import { useFeedback } from '../../store';
 import { SetupStackParamList } from '../../types';
 import { Discover } from '../../indexers';
 import { useIndexerDiscovery } from '../hooks/useIndexerDiscovery';

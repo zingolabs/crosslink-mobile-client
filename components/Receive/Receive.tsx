@@ -26,7 +26,7 @@ import { SessionStackParamList } from '../../app/types';
 import {
   useFeedback,
   useWalletData,
-} from '../../app/context';
+} from '../../app/store';
 
 import {
   AddressKindEnum,

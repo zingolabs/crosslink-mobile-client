@@ -7,10 +7,7 @@ import React from 'react';
 
 import { render } from '@testing-library/react-native';
 import SyncReport from '../components/SyncReport';
-import {
-  SessionDomainsProvider,
-  defaultLoadedDomains,
-} from '../app/context';
+import { appStore, defaultLoadedDomains } from '../app/store';
 import { mockWallet } from '../__mocks__/dataMocks/mockWallet';
 import { mockTranslate } from '../__mocks__/dataMocks/mockTranslate';
 import { mockInfo } from '../__mocks__/dataMocks/mockInfo';
@@ -47,11 +44,8 @@ describe('Component SyncReport - test', () => {
   state.netInfo = mockNetInfo;
   const props = makeDrawerProps();
   test('SyncReport - snapshot', () => {
-    const sync = render(
-      <SessionDomainsProvider value={state}>
-        <SyncReport {...props} />
-      </SessionDomainsProvider>,
-    );
+    appStore.setState(state);
+    const sync = render(<SyncReport {...props} />);
     expect(sync.toJSON()).toMatchSnapshot();
   });
 });

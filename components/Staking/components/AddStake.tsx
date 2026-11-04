@@ -32,7 +32,7 @@ import {
 import {
   useSettings,
   useWalletData,
-} from '../../../app/context';
+} from '../../../app/store';
 import Utils from '../../../app/utils';
 import FadeText from '../../Components/FadeText';
 import ZecAmount from '../../Components/ZecAmount';

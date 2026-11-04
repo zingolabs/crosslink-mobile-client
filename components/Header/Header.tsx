@@ -22,7 +22,7 @@ import {
   useSettings,
   useStatus,
   useWalletData,
-} from '../../app/context';
+} from '../../app/store';
 import ZecAmount from '../Components/ZecAmount';
 import FadeText from '../Components/FadeText';
 import simpleBiometrics from '../../app/simpleBiometrics';
@@ -448,10 +448,10 @@ const Header: React.FunctionComponent<HeaderProps> = ({
               const parentNav = navigation.getParent();
 
               if (parentNav) {
-                parentNav.navigate(RouteEnum.Settings);
+                parentNav.navigate(RouteEnum.SettingsStack);
               } else {
                 // Fallback if for some reason there is no parent
-                navigation.navigate(RouteEnum.Settings);
+                navigation.navigate(RouteEnum.SettingsStack);
               }
             }}
           >

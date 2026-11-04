@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { useEffect, useRef, useState } from 'react';
 
-import { useFeedback } from '../../../app/context';
+import { useFeedback } from '../../../app/store';
 import Scanner from '../../Scanner';
 import { GlobalConst, RouteEnum, ScreenEnum } from '../../../app/AppState';
 import { SessionStackParamList } from '../../../app/types';

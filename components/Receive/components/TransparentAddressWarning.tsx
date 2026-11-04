@@ -6,7 +6,7 @@ import Animated, {
   useReducedMotion,
 } from 'react-native-reanimated';
 
-import { useFeedback } from '../../../app/context';
+import { useFeedback } from '../../../app/store';
 import { TriangleAlert } from '../../Components/Icons/TriangleAlert';
 import { ShieldIcon } from '../../Components/Icons/ShieldIcon';
 import RegText from '../../Components/RegText';

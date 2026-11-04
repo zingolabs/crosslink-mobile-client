@@ -8,7 +8,6 @@ import 'moment/locale/tr';
 import { ZecAmountSplitType } from './types/ZecAmountSplitType';
 import {
   ChainNameEnum,
-  ContactType,
   GlobalConst,
   LanguageEnum,
   SendJsonToTypeType,
@@ -363,15 +362,9 @@ export default class Utils {
       isFullUA =
         resultJSON.address_kind === WalletAddressKindEnum.unifiedAddressKind &&
         !!resultJSON.receivers_available &&
-        resultJSON.receivers_available.includes(
-          ReceiversEnum.orchard,
-        ) &&
-        resultJSON.receivers_available.includes(
-          ReceiversEnum.sapling,
-        ) &&
-        resultJSON.receivers_available.includes(
-          ReceiversEnum.transparent,
-        );
+        resultJSON.receivers_available.includes(ReceiversEnum.orchard) &&
+        resultJSON.receivers_available.includes(ReceiversEnum.sapling) &&
+        resultJSON.receivers_available.includes(ReceiversEnum.transparent);
       if (isFullUA) {
         // the only use case for this is: if the UA is full (3 receivers)
         onlyOrchardUA = resultJSON.only_orchard_ua
@@ -409,41 +402,12 @@ export default class Utils {
 
     return (
       resultJSON.status === ParseAddressStatusEnum.successAddressParse &&
-      resultJSON.address_kind !== WalletAddressKindEnum.transparentAddressKind &&
+      resultJSON.address_kind !==
+        WalletAddressKindEnum.transparentAddressKind &&
       resultJSON.address_kind !== WalletAddressKindEnum.texAddressKind &&
       resultJSON.chain_name === serverChainName
     );
   }
-
-  static isMessagesAddress(vt: ValueTransferType | ContactType): boolean {
-    // we can't check here in this VT if the memo is empty
-    // because this address/contact could have memos in another
-    // VT in the list.
-    // only for orchard or sapling
-    if (vt.address) {
-      // the performance in the list is really bad if here I asked properly
-      // to zingolib (parse_address command) about the type of the address.
-      return !vt.address.startsWith('t');
-    } else {
-      const { memoUA } = Utils.splitMemo(vt.memos);
-      return !!memoUA;
-    }
-  }
-
-  static messagesAddress = (vt: ValueTransferType | ContactType): string => {
-    // we can't check here in this VT if the memo is empty
-    // because this address/contact could have memos in another
-    // VT in the list.
-    // only for orchard or sapling
-    if (vt.address) {
-      // the performance in the list is really bad if here I asked properly
-      // to zingolib (parse_address command) about the type of the address.
-      return !vt.address.startsWith('t') ? vt.address : '';
-    } else {
-      const { memoUA } = Utils.splitMemo(vt.memos);
-      return memoUA ? memoUA : '';
-    }
-  };
 
   static splitMemo = (
     memos: string[] | undefined,

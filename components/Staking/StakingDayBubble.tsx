@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -6,16 +6,17 @@ import {
   Pressable,
   StyleSheet,
   View,
+  useAnimatedValue,
 } from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
 
 import ClockActiveWithCheck from '../../assets/icons/clock-active-with-check.svg';
 import TriangleYellow from '../../assets/icons/triangle-yellow.svg';
-import { useWalletData } from '../../app/context';
-import RegText from '../Components/RegText';
-import { formatSeconds } from '../../app/utils/Utils';
+import { useWalletData } from '../../app/store';
+import StakingDayCountdownText from './components/StakingDayCountdownText';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { duration, radiusPill, text, useTheme } from '../../app/theme';
+import { duration, radiusPill, useTheme } from '../../app/theme';
 
 const TAG_HEIGHT = 50;
 const COLLAPSED_SIZE = 52;
@@ -25,16 +26,17 @@ const CENTER_LEFT = (SCREEN_WIDTH - EXPANDED_WIDTH) / 2;
 
 const StakingDayBubble: React.FC = () => {
   const { colors } = useTheme();
-  const { stakingDay, timeToStakingDaySeconds: timeToStakingDay, timeLeftStakingDaySeconds: timeLeftStakingDay } = useWalletData();
+  const { stakingDay } = useWalletData();
+  const focused = useIsFocused();
 
   const [expanded, setExpanded] = useState(false);
   const [anchorX, setAnchorX] = useState(0);
 
-  const rightAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.25)).current;
-  const opacityAnim = useRef(new Animated.Value(0)).current;
-  const contentOpacity = useRef(new Animated.Value(0)).current;
-  const contentTranslate = useRef(new Animated.Value(-8)).current;
+  const rightAnim = useAnimatedValue(0);
+  const scaleAnim = useAnimatedValue(0.25);
+  const opacityAnim = useAnimatedValue(0);
+  const contentOpacity = useAnimatedValue(0);
+  const contentTranslate = useAnimatedValue(-8);
 
   const anchorCenterX = anchorX + COLLAPSED_SIZE / 2;
   const expandedStartLeft = anchorCenterX - EXPANDED_WIDTH / 2;
@@ -115,15 +117,6 @@ const StakingDayBubble: React.FC = () => {
     contentTranslate,
   ]);
 
-  const isCalculating = useMemo(() => {
-    const value = stakingDay ? timeLeftStakingDay : timeToStakingDay;
-    return value === 0;
-  }, [stakingDay, timeLeftStakingDay, timeToStakingDay]);
-
-  const mainValue = stakingDay
-    ? formatSeconds(timeLeftStakingDay)
-    : formatSeconds(timeToStakingDay);
-  const title = stakingDay ? 'Staking day active' : 'Staking day inactive';
   // Status as a flat tint: DESIGN.md forbids gradients.
   const bubbleTint = stakingDay ? colors.bgSuccessTint : colors.bgWarningTint;
 
@@ -181,20 +174,7 @@ const StakingDayBubble: React.FC = () => {
               },
             ]}
           >
-            <RegText
-              numberOfLines={1}
-              ellipsizeMode="clip"
-              style={isCalculating ? text.caption2 : text.subheadline}
-            >
-              {isCalculating ? 'calculating...' : mainValue}
-            </RegText>
-
-            <RegText
-              numberOfLines={1}
-              style={[text.caption1, { color: colors.fgMuted }]}
-            >
-              {title}
-            </RegText>
+            <StakingDayCountdownText active={expanded && focused} />
           </Animated.View>
         </View>
       </Animated.View>

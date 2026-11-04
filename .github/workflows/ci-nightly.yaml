@@ -6,6 +6,9 @@ on:
   workflow_dispatch:
 
 jobs:
+  lint:
+    uses: ./.github/workflows/lint.yaml
+
   jest-test:
     uses: ./.github/workflows/jest-test.yaml
 

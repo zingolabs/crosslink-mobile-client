@@ -1,5 +1,5 @@
 import React from 'react';
-import { useFeedback } from '../../context';
+import { useFeedback } from '../../store';
 import Scanner from '../../../components/Scanner';
 import { Header } from '../../../components/Header';
 

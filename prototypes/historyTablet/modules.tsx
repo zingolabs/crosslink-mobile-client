@@ -16,7 +16,7 @@ import {
   useSettings,
   useStatus,
   useWalletData,
-} from '../../app/context';
+} from '../../app/store';
 import { useTheme } from '../../app/theme';
 import { Bars, BarDatum, Gauge, Sparkline, StackBar } from './charts';
 import {

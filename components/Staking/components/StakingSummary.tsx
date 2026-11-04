@@ -8,7 +8,7 @@ import {
   useSettings,
   useStatus,
   useWalletData,
-} from '../../../app/context';
+} from '../../../app/store';
 import { useTheme } from '../../../app/theme';
 import { HeaderIconButton } from '../../Header';
 import SummaryPanel, { IconAction } from '../../Components/SummaryPanel';

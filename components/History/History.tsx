@@ -35,7 +35,7 @@ import {
   useSession,
   useSettings,
   useWalletData,
-} from '../../app/context';
+} from '../../app/store';
 import Utils from '../../app/utils';
 import { ValueTransferStatusEnum } from '../../app/wallet/enums';
 import { MainTabParamList } from '../../app/types/NavigationTypes';

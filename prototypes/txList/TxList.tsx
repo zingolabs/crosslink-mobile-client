@@ -39,7 +39,7 @@ import { text, useTheme } from '../../app/theme';
 import {
   useSettings,
   useWalletData,
-} from '../../app/context';
+} from '../../app/store';
 import { Feed, FeedItem, isPending, useFeed } from './feed';
 import ArtLoop from './ArtLoop';
 import { Incoming } from './data';

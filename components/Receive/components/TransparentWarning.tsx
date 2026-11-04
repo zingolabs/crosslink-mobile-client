@@ -12,7 +12,7 @@ import Animated, {
   useReducedMotion,
 } from 'react-native-reanimated';
 
-import { useFeedback } from '../../../app/context';
+import { useFeedback } from '../../../app/store';
 import { TriangleAlert } from '../../Components/Icons/TriangleAlert';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';

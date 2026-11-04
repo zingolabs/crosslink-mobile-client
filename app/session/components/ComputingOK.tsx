@@ -6,7 +6,7 @@ import RegText from '../../../components/Components/RegText';
 import { SessionStackParamList } from '../../types';
 import { RouteEnum, ValueTransferType } from '../../AppState';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useWalletData } from '../../context';
+import { useWalletData } from '../../store';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import Button from '../../../components/Components/Button';

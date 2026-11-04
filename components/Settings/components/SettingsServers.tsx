@@ -1,14 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import {
-  SessionStackParamList,
-} from '../../../app/types';
-import {
-  useFeedback,
-  useSettings,
-  useWalletData,
-} from '../../../app/context';
+import { SettingsStackParamList } from '../../../app/types';
+import { useFeedback, useSettings, useWalletData } from '../../../app/store';
 import Snackbars from '../../Components/Snackbars';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { ChainNameEnum, RouteEnum, ScreenEnum } from '../../../app/AppState';
@@ -22,7 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { radiusCard, space, text, useTheme } from '../../../app/theme';
 
 type SettingsServersProps = NativeStackScreenProps<
-  SessionStackParamList,
+  SettingsStackParamList,
   RouteEnum.SettingsServers
 > & {
   leaveSession: () => Promise<void>;

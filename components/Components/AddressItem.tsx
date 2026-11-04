@@ -10,7 +10,7 @@ import {
   useFeedback,
   useSettings,
   useStatus,
-} from '../../app/context';
+} from '../../app/store';
 import RegText from './RegText';
 import Utils from '../../app/utils';
 import {

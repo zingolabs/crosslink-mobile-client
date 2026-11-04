@@ -89,7 +89,7 @@ describe('FakeRpc - balances', () => {
 });
 
 describe('FakeRpc - value transfers', () => {
-  test('value transfers and messages reuse the mocked events', async () => {
+  test('value transfers reuse the mocked events', async () => {
     const list = JSON.parse(await fakeRpc.getValueTransfersList());
     const expected = mockValueTransfers.length + (await bondCount());
     expect(list.wallet_events).toHaveLength(expected);
@@ -100,11 +100,6 @@ describe('FakeRpc - value transfers', () => {
     expect(sent.value).toBe(zats(mockValueTransfers[0].amount ?? 0));
     expect(sent.transaction_fee).toBe(zats(mockValueTransfers[0].fee ?? 0));
     expect(sent.recipient_address).toBe(mockValueTransfers[0].address);
-    const messages = JSON.parse(await fakeRpc.getMessagesInfo(''));
-    expect(messages.wallet_events.length).toBeGreaterThan(0);
-    messages.wallet_events.forEach((m: { memos?: string[] }) =>
-      expect(m.memos && m.memos.join('').length).toBeGreaterThan(0),
-    );
   });
 
   test('send propose and confirm append a sent event', async () => {

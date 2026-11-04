@@ -35,7 +35,7 @@ import {
   useFeedback,
   useSettings,
   useWalletData,
-} from '../../../app/context';
+} from '../../../app/store';
 import { KindIcon, isIncoming } from './TxRow';
 import { Copy as CopyIcon } from 'lucide-react-native';
 import { ValueTransferStatusEnum } from '../../../app/wallet/enums';

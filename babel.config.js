@@ -1,4 +1,5 @@
 const { inlined } = require('./scripts/build-env.cjs');
+const reactCompiler = require('./scripts/react-compiler.cjs');
 
 const inlineBuildEnv = ({ types: t }) => ({
   name: 'inline-build-env',
@@ -17,6 +18,7 @@ const inlineBuildEnv = ({ types: t }) => ({
 module.exports = {
   presets: ['module:@react-native/babel-preset'],
   plugins: [
+    reactCompiler.plugin(),
     inlineBuildEnv,
     'dynamic-import-node',
     'react-native-worklets/plugin',

@@ -11,7 +11,7 @@ import Animated, {
 import { ToastProvider, useToast } from 'react-native-toastier';
 
 import { ChainNameEnum, ScreenEnum } from '../../AppState';
-import { useFeedback } from '../../context';
+import { useFeedback } from '../../store';
 import { SetupStackParamList } from '../../types';
 import { Probe, probeIndexer } from '../../indexers';
 import {

@@ -7,10 +7,7 @@ import React from 'react';
 
 import { render } from '@testing-library/react-native';
 import Send from '../components/Send';
-import {
-  SessionDomainsProvider,
-  defaultLoadedDomains,
-} from '../app/context';
+import { appStore, defaultLoadedDomains } from '../app/store';
 import { CurrencyEnum, RouteEnum } from '../app/AppState';
 import { mockValueTransfers } from '../__mocks__/dataMocks/mockValueTransfers';
 import { mockAddresses } from '../__mocks__/dataMocks/mockAddresses';
@@ -54,18 +51,17 @@ describe('Component Send - test', () => {
     // privacy normal
     state.privacy = false;
     const props = makeDrawerProps();
+    appStore.setState(state);
     const send = render(
-      <SessionDomainsProvider value={state}>
-        <Send
-          {...props}
-          sendTransaction={onFunction}
-          setShieldingAmount={onFunction}
-          setScrollToTop={onFunction}
-          setScrollToBottom={onFunction}
-          setServerOption={onFunction}
-          setSecurityOption={onFunction}
-        />
-      </SessionDomainsProvider>,
+      <Send
+        {...props}
+        sendTransaction={onFunction}
+        setShieldingAmount={onFunction}
+        setScrollToTop={onFunction}
+        setScrollToBottom={onFunction}
+        setServerOption={onFunction}
+        setSecurityOption={onFunction}
+      />,
     );
     expect(send.toJSON()).toMatchSnapshot();
   });
@@ -76,18 +72,17 @@ describe('Component Send - test', () => {
     // privacy normal
     state.privacy = true;
     const props = makeDrawerProps();
+    appStore.setState(state);
     const send = render(
-      <SessionDomainsProvider value={state}>
-        <Send
-          {...props}
-          sendTransaction={onFunction}
-          setShieldingAmount={onFunction}
-          setScrollToTop={onFunction}
-          setScrollToBottom={onFunction}
-          setServerOption={onFunction}
-          setSecurityOption={onFunction}
-        />
-      </SessionDomainsProvider>,
+      <Send
+        {...props}
+        sendTransaction={onFunction}
+        setShieldingAmount={onFunction}
+        setScrollToTop={onFunction}
+        setScrollToBottom={onFunction}
+        setServerOption={onFunction}
+        setSecurityOption={onFunction}
+      />,
     );
     expect(send.toJSON()).toMatchSnapshot();
   });

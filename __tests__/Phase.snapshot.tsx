@@ -9,10 +9,7 @@ import { render } from '@testing-library/react-native';
 import Session from '../app/session/Session';
 import Setup from '../app/setup/Setup';
 import { LifecycleProvider } from '../app/lifecycle';
-import {
-  lifecycle,
-  BootInfo,
-} from '../app/lifecycle/phase';
+import { lifecycle, BootInfo } from '../app/lifecycle/phase';
 import { LaunchingModeEnum } from '../app/AppState';
 import { IndexerNetworkEnum } from '../app/AppState/enums/IndexerNetworkEnum';
 import { fallbackSettings } from '../app/settingsBootstrap';
@@ -25,7 +22,8 @@ jest.mock('react-native-localize', () => ({
 
 jest.mock('i18n-js');
 
-const boot: BootInfo = {  settings: fallbackSettings,
+const boot: BootInfo = {
+  settings: fallbackSettings,
   launching: LaunchingModeEnum.opening,
   indexerNetwork: IndexerNetworkEnum.stable,
   indexerServerPinned: false,
@@ -33,15 +31,17 @@ const boot: BootInfo = {  settings: fallbackSettings,
 
 function SessionAtActive() {
   return (
-    <LifecycleProvider initial={lifecycle.active(boot, {
-      walletKind: {
-        readOnly: false,
-        orchardPool: true,
-        saplingPool: true,
-        transparentPool: true,
-      },
-      launching: LaunchingModeEnum.opening,
-    })}>
+    <LifecycleProvider
+      initial={lifecycle.active(boot, {
+        walletKind: {
+          readOnly: false,
+          orchardPool: true,
+          saplingPool: true,
+          transparentPool: true,
+        },
+        launching: LaunchingModeEnum.opening,
+      })}
+    >
       <Session />
     </LifecycleProvider>
   );

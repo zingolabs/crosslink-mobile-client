@@ -16,7 +16,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useFeedback, useSettings, useStatus } from '../../context';
+import { useFeedback, useSettings, useStatus } from '../../store';
 import { ScreenEnum, SelectServerEnum } from '../../AppState';
 import Snackbars from '../../../components/Components/Snackbars';
 import { HeaderTitle } from '../../../components/Header';

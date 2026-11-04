@@ -7,7 +7,7 @@ import { RouteEnum, emptySendPageState } from '../../AppState';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Utils from '../../utils';
 import ZecAmount from '../../../components/Components/ZecAmount';
-import { useSettings, useWalletData } from '../../context';
+import { useSettings, useWalletData } from '../../store';
 import { faPaperPlane } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { radiusCard, radiusPill, space, text, useTheme } from '../../theme';
