@@ -40,7 +40,8 @@ import { createAlert } from '../createAlert';
 import { reportFailure } from '../reporting';
 import { keepAwake } from '../keepAwake';
 import ShowAddressAlertAsync from '../../components/Send/components/ShowAddressAlertAsync';
-import { SeedType, SyncStatusType, UfvkType } from '../wallet/types';
+import * as rpc from '../wallet/rpc';
+import type { SyncStatus } from '../wallet/generated/SyncStatus';
 import {
   setLastError,
   setScheduledActions,
@@ -168,7 +169,7 @@ class SessionController {
     this.gated = gated;
     if (gated) {
       await this.walletService.clearTimers();
-      setSyncingStatus({} as SyncStatusType);
+      setSyncingStatus({} as SyncStatus);
       return;
     }
     await fetchBackgroundSyncing();
@@ -239,7 +240,7 @@ class SessionController {
     sameServerChainName: boolean,
   ): Promise<void> => {
     await this.walletService.clearTimers();
-    setSyncingStatus({} as SyncStatusType);
+    setSyncingStatus({} as SyncStatus);
     keepAwake(false);
     const translate = read().translate;
     if (sameServerChainName && (await this.openWalletOn(value))) {
@@ -349,27 +350,19 @@ class SessionController {
   };
 
   private openWalletOn = async (server: ServerType): Promise<boolean> => {
-    const result = await WalletService.loadExistingWallet(
+    const result = await rpc.loadExistingWallet(
       server.uri,
       server.chainName,
       read().performanceLevel,
       GlobalConst.minConfirmations.toString(),
     );
-    if (!result || result.toLowerCase().startsWith(GlobalConst.error)) {
-      return false;
-    }
-    try {
-      const resultJson: SeedType & UfvkType = await JSON.parse(result);
-      return !resultJson.error;
-    } catch {
-      return false;
-    }
+    return result.ok;
   };
 
   private enterBackground = async () => {
     await markBackground(true);
     await this.walletService.clearTimers();
-    setSyncingStatus({} as SyncStatusType);
+    setSyncingStatus({} as SyncStatus);
     await WalletService.doSave();
   };
 

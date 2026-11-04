@@ -13,6 +13,7 @@ use zingolib::lightclient::crosslink::{
 use zingolib::perspective::sync_progress::{SessionReport, SyncProgress};
 use zingolib::wallet::RecoveryInfo;
 use zingolib::wallet::balance::AccountBalance;
+use zingolib::wallet::disk::WalletFileRecoveryInfo as ZingoWalletFileRecoveryInfo;
 use zingolib::wallet::keys::WalletAddressRef;
 use zingolib::wallet::summary::data::{
     SelfSendWalletEvent, SentWalletEvent, WalletEvent, WalletEventKind, WalletEvents,
@@ -565,6 +566,28 @@ impl From<RecoveryInfo> for Seed {
             seed_phrase: info.seed_phrase,
             birthday: info.birthday,
             no_of_accounts: info.no_of_accounts,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct WalletFileRecoveryInfo {
+    pub seed_phrase: Option<String>,
+    pub ufvk: Option<String>,
+    pub birthday: u32,
+    pub chain_name: String,
+    pub format_version: u64,
+}
+
+impl From<ZingoWalletFileRecoveryInfo> for WalletFileRecoveryInfo {
+    fn from(info: ZingoWalletFileRecoveryInfo) -> Self {
+        Self {
+            seed_phrase: info.seed_phrase,
+            ufvk: info.unified_full_viewing_key,
+            birthday: info.birthday,
+            chain_name: info.chain_name,
+            format_version: info.version,
         }
     }
 }

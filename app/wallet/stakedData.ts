@@ -1,5 +1,6 @@
 import { StakeType, WalletBondsType } from '../AppState';
-import WalletBondsInfoType, { StakedType } from './types';
+import type { RosterMember } from './generated/RosterMember';
+import type { WalletBond } from './generated/WalletBond';
 import { WalletBondsStatusEnum } from '../AppState/enums/WalletBondsStatusEnum';
 
 export type StakedData = {
@@ -9,8 +10,8 @@ export type StakedData = {
 };
 
 export const buildStakedData = (
-  rosterMembers: Array<StakedType>,
-  bonds: Array<WalletBondsInfoType>,
+  rosterMembers: Array<RosterMember>,
+  bonds: Array<WalletBond>,
 ): StakedData => {
   const globalStaked = rosterMembers.map(m => ({
     finalizer: m.pubkey,

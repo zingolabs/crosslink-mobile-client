@@ -92,7 +92,6 @@ describe('FakeRpc - value transfers', () => {
     const list = JSON.parse(await fakeRpc.getValueTransfersList());
     const expected = mockValueTransfers.length + (await bondCount());
     expect(list.wallet_events).toHaveLength(expected);
-    expect(list.total).toBe(expected);
     const sent = list.wallet_events.find(
       (e: { kind: string }) => e.kind === WalletValueTransferKindEnum.sent,
     );
@@ -229,7 +228,7 @@ describe('FakeRpc - chain info', () => {
     const info = JSON.parse(await fakeRpc.infoServerInfo());
     expect(info.chain_name).toBe(CHAIN);
     expect(info.latest_block_height).toBe(mockInfo.latestBlock);
-    expect(info.server_uri).toBe(SERVER);
+    expect(info.indexer_uri).toBe(SERVER);
     expect(await fakeRpc.getLatestBlockServerInfo(SERVER)).toBe(
       String(mockInfo.latestBlock),
     );

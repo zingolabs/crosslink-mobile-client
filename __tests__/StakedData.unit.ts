@@ -5,22 +5,22 @@
 import 'react-native';
 
 import { WalletBondsStatusEnum } from '../app/AppState/enums/WalletBondsStatusEnum';
-import WalletBondsInfoType, {
-  StakedType,
-} from '../app/wallet/types';
+import type { RosterMember } from '../app/wallet/generated/RosterMember';
+import type { WalletBond } from '../app/wallet/generated/WalletBond';
 import { buildStakedData } from '../app/wallet/stakedData';
 
 const rosterMember = (
   pubkey: string,
   votingPowerZats = 0,
   finalizerAddress: string | null = null,
-): StakedType => ({
+): RosterMember => ({
   pubkey,
   finalizer_address: finalizerAddress,
   voting_power: votingPowerZats,
+  txids: [],
 });
 
-const bond = (overrides: Partial<WalletBondsInfoType>): WalletBondsInfoType => ({
+const bond = (overrides: Partial<WalletBond>): WalletBond => ({
   created_in_txid: 'txid',
   bond_key: 'key',
   amount_zats: 100_000_000,
@@ -36,10 +36,7 @@ const bond = (overrides: Partial<WalletBondsInfoType>): WalletBondsInfoType => (
 describe('buildStakedData', () => {
   it('maps the roster to globalStaked with voting power in zec', () => {
     const { globalStaked } = buildStakedData(
-      [
-        rosterMember('fin-a', 150_000_000, 'zfinv1aaa'),
-        rosterMember('fin-b'),
-      ],
+      [rosterMember('fin-a', 150_000_000, 'zfinv1aaa'), rosterMember('fin-b')],
       [],
     );
 

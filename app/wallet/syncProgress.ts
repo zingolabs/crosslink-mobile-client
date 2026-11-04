@@ -1,16 +1,16 @@
 import isEqual from 'lodash/isEqual';
-import { SyncStatusType } from './types';
+import type { SyncStatus } from './generated/SyncStatus';
 
 export type SyncProgress = { percentage: number; inProgress: boolean };
 
-export const syncProgress = (syncingStatus: SyncStatusType): SyncProgress => {
+export const syncProgress = (syncingStatus: SyncStatus): SyncProgress => {
   const raw: number =
     syncingStatus?.percentage_total_outputs_scanned ||
     syncingStatus?.percentage_total_blocks_scanned ||
     0;
   if (
     !syncingStatus ||
-    isEqual(syncingStatus, {} as SyncStatusType) ||
+    isEqual(syncingStatus, {} as SyncStatus) ||
     (!!syncingStatus.scan_ranges && syncingStatus.scan_ranges.length === 0) ||
     raw === 0
   ) {

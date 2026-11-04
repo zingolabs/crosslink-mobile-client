@@ -56,8 +56,9 @@ mod payloads;
 use payloads::{
     AddressKind, Balance, ChainName, CheckAddress, ConfigWalletPerformance, Confirm, ParseAddress,
     Propose, Receiver, Roster, Seed, SpendableBalance, SyncPoll, SyncStatus, TransparentAddress,
-    Ufvk, UnifiedAddress, ValueTransfers, WalletBonds, WalletHeight, WalletInfo, WalletKeyKind,
-    WalletKind, WalletSaveRequired, WalletVersion, WithdrawStake, ZecPrice, to_json,
+    Ufvk, UnifiedAddress, ValueTransfers, WalletBonds, WalletFileRecoveryInfo, WalletHeight,
+    WalletInfo, WalletKeyKind, WalletKind, WalletSaveRequired, WalletVersion, WithdrawStake,
+    ZecPrice, to_json,
 };
 
 #[derive(Debug, thiserror::Error, uniffi::Error)]
@@ -560,14 +561,7 @@ pub fn read_wallet_recovery_info(
         let path = wallet_file_config(&wallet_dir).get_wallet_pathbuf();
         Ok(
             match LightWallet::read_recovery_info_from_path(&path, chain) {
-                Ok(info) => object! {
-                    "seed_phrase" => info.seed_phrase.map_or(json::JsonValue::Null, json::JsonValue::from),
-                    "ufvk" => info.unified_full_viewing_key.map_or(json::JsonValue::Null, json::JsonValue::from),
-                    "birthday" => info.birthday,
-                    "chain_name" => info.chain_name,
-                    "format_version" => info.version,
-                }
-                .dump(),
+                Ok(info) => to_json(&WalletFileRecoveryInfo::from(info)),
                 Err(e) => format!("Error: {e}"),
             },
         )

@@ -67,7 +67,6 @@ rusqlite = { version = "0.37.0", features = ["bundled"] }
 [dev-dependencies]
 base64 = { workspace = true }
 libc = "0.2"
-serde = { version = "1", features = ["derive"] }
 tempfile = "3"
 
 [build-dependencies]
