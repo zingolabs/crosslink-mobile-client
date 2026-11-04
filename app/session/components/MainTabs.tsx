@@ -28,6 +28,7 @@ export const MainTabs: React.FunctionComponent<MainTabsProps> = ({
     <Tab.Navigator
       screenOptions={{
         tabBarActiveTintColor: colors.fgMuted,
+        sceneStyle: { backgroundColor: colors.bgCanvas },
       }}
       tabBarStyle={{
         backgroundColor: colors.bgCanvas,
@@ -62,6 +63,7 @@ export const MainTabs: React.FunctionComponent<MainTabsProps> = ({
         name={RouteEnum.StakingHome}
         options={{
           title: 'Staking',
+          lazy: false,
           tabBarIcon: () =>
             Platform.select({
               ios: { sfSymbol: 'square.stack.3d.up.fill' },

@@ -83,6 +83,7 @@ import Send from '../../components/Send';
 import Receive from '../../components/Receive';
 import Faucet from '../../components/Faucet';
 import { MainTabs } from './components/MainTabs';
+import { navigationTheme, useTheme } from '../theme';
 import Computing from './components/Computing';
 import ValueTransferDetail from '../../components/History/components/ValueTransferDetail';
 import ScannerAddress from '../../components/Send/components/ScannerAddress';
@@ -300,6 +301,7 @@ export default function Session() {
 }
 
 export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
+  const { colors } = useTheme();
   const screenName = ScreenEnum.Session;
 
   const blockTimesRef = useRef<number[]>([
@@ -1598,7 +1600,10 @@ export const SessionLoaded: React.FC<SessionLoadedProps> = props => {
       <SessionDomainsProvider value={context}>
         <StakingDayActivitySync />
         <GestureHandlerRootView>
-          <NavigationContainer ref={navigationRef}>
+          <NavigationContainer
+            ref={navigationRef}
+            theme={navigationTheme(colors)}
+          >
             <SessionStack.Navigator
               screenOptions={{
                 headerShown: false,
