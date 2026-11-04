@@ -231,14 +231,8 @@ const ChalkBackground: React.FC<ChalkBackgroundProps> = ({
   const surfacePixelRatio = pixelRatio * scale;
   const surfaceWidth = Math.round(width * scale);
   const surfaceHeight = Math.round(height * scale);
-  const [frozen, setFrozen] = useState(reveal.frozen);
+  const frozen = reveal.frozen;
   const [still, setStill] = useState<SkImage | null>(null);
-
-  useEffect(() => {
-    if (reveal.frozen) {
-      setFrozen(true);
-    }
-  }, [reveal.frozen]);
 
   useEffect(() => {
     if (!frozen || !effect || surfaceWidth === 0 || surfaceHeight === 0) {
