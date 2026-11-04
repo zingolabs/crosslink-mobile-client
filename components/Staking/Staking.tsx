@@ -172,14 +172,8 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
     [isScrollingToTop],
   );
 
-  console.log('scheduled actions', scheduledActions);
-
-  console.log(
-    'render staking',
-    stakingDay,
-    timeToStakingDay,
-    timeLeftStakingDay,
-  );
+  const pane = (name: StakingTab) =>
+    tab === name ? styles.pane : styles.paneHidden;
 
   return (
     <ToastProvider>
@@ -220,65 +214,68 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
               </View>
             )}
 
-            {/* TODO: Use Router */}
-            {!loading && !hasScheduledActions && tab === 'scheduled' && (
-              <EmptyState
-                art="pair"
-                title="No scheduled actions yet."
-                style={styles.emptyState}
-              />
-            )}
+            {!loading && (
+              <>
+                <View style={pane('scheduled')}>
+                  {hasScheduledActions ? (
+                    <ScheduledActionsList
+                      scheduledActions={scheduledActions}
+                      walletBonds={walletBonds}
+                      stakingDay={stakingDay}
+                      blocksToStakingDay={blocksToStakingDay}
+                      blocksTotalStakingDay={blocksTotalStakingDay}
+                      timeToStakingDaySeconds={timeToStakingDay}
+                      timeLeftStakingDaySeconds={timeLeftStakingDay}
+                      currencyName={info.currencyName}
+                      privacy={privacy}
+                      dimensionsWidth={dimensions.width}
+                      onScroll={handleScroll}
+                      scrollToTopSignal={scrollToTopSignal}
+                    />
+                  ) : (
+                    <EmptyState
+                      art="pair"
+                      title="No scheduled actions yet."
+                      style={styles.emptyState}
+                    />
+                  )}
+                </View>
 
-            {!loading && !hasMovements && tab === 'active' && (
-              <EmptyState
-                art="pair"
-                title="No staking positions yet."
-                style={styles.emptyState}
-              />
-            )}
+                <View style={pane('active')}>
+                  {hasMovements ? (
+                    <StakingPositionsList
+                      walletBonds={walletBonds}
+                      privacy={privacy}
+                      onScroll={handleScroll}
+                      scrollToTopSignal={scrollToTopSignal}
+                    />
+                  ) : (
+                    <EmptyState
+                      art="pair"
+                      title="No staking positions yet."
+                      style={styles.emptyState}
+                    />
+                  )}
+                </View>
 
-            {!loading && !hasStaked && tab === 'my' && (
-              <EmptyState
-                art="pair"
-                title="No active finalizers yet."
-                style={styles.emptyState}
-              />
-            )}
-
-            {!loading && hasScheduledActions && tab === 'scheduled' && (
-              <ScheduledActionsList
-                scheduledActions={scheduledActions}
-                walletBonds={walletBonds}
-                stakingDay={stakingDay}
-                blocksToStakingDay={blocksToStakingDay}
-                blocksTotalStakingDay={blocksTotalStakingDay}
-                timeToStakingDaySeconds={timeToStakingDay}
-                timeLeftStakingDaySeconds={timeLeftStakingDay}
-                currencyName={info.currencyName}
-                privacy={privacy}
-                dimensionsWidth={dimensions.width}
-                onScroll={handleScroll}
-                scrollToTopSignal={scrollToTopSignal}
-              />
-            )}
-
-            {!loading && hasMovements && tab === 'active' && (
-              <StakingPositionsList
-                walletBonds={walletBonds}
-                privacy={privacy}
-                onScroll={handleScroll}
-                scrollToTopSignal={scrollToTopSignal}
-              />
-            )}
-
-            {!loading && hasStaked && tab === 'my' && (
-              <FinalizersList
-                staked={staked}
-                walletBonds={walletBonds}
-                privacy={privacy}
-                onScroll={handleScroll}
-                scrollToTopSignal={scrollToTopSignal}
-              />
+                <View style={pane('my')}>
+                  {hasStaked ? (
+                    <FinalizersList
+                      staked={staked}
+                      walletBonds={walletBonds}
+                      privacy={privacy}
+                      onScroll={handleScroll}
+                      scrollToTopSignal={scrollToTopSignal}
+                    />
+                  ) : (
+                    <EmptyState
+                      art="pair"
+                      title="No active finalizers yet."
+                      style={styles.emptyState}
+                    />
+                  )}
+                </View>
+              </>
             )}
 
             {!isAtTop && (
@@ -333,6 +330,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  pane: {
+    flex: 1,
+  },
+  paneHidden: {
+    display: 'none',
   },
   emptyState: {
     paddingBottom: 96,
