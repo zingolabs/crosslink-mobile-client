@@ -27,7 +27,7 @@ import { removeScheduledAction } from '../storage/scheduledActionsFile';
 import { patch, read } from '../store/appStore';
 import { addLastSnackbar, setBackgroundError } from '../store/feedback';
 import { fetchBackgroundSyncing } from '../store/platform';
-import { SyncStatusType } from './types';
+import type { SyncStatus } from './generated/SyncStatus';
 
 const screenName = ScreenEnum.Session;
 
@@ -63,7 +63,7 @@ export const setWalletBonds = (walletBonds: WalletBondsType[]): void => {
   }
 };
 
-export const setSyncingStatus = (syncingStatus: SyncStatusType): void => {
+export const setSyncingStatus = (syncingStatus: SyncStatus): void => {
   fetchBackgroundSyncing();
   if (!isEqual(read().syncingStatus, syncingStatus)) {
     patch({ syncingStatus });

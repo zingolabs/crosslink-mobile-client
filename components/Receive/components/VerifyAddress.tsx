@@ -6,19 +6,15 @@ import {
   ScreenEnum,
   SnackbarDurationEnum,
 } from '../../../app/AppState';
-import {
-  useFeedback,
-  useSettings,
-} from '../../../app/store';
+import { useFeedback, useSettings } from '../../../app/store';
 import { useToast } from 'react-native-toastier';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
-import WalletService from '../../../app/wallet';
 import { parseZcashURI } from '../../../app/uris';
 import TextInputAddress from '../../Components/TextInputAddress';
 import FadeText from '../../Components/FadeText';
 import RegText from '../../Components/RegText';
-import { CheckAddressType } from '../../../app/wallet/types';
+import * as rpc from '../../../app/wallet/rpc';
 import { VerifyCheckIcon } from '../../Components/Icons/VerifyCheckIcon';
 import { VerifyXIcon } from '../../Components/Icons/VerifyXIcon';
 import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
@@ -45,27 +41,18 @@ const VerifyAddress: React.FunctionComponent<VerifyAddressProps> = ({
 
   const verifyAddress = async () => {
     try {
-      const verifyAddressStr = await WalletService.checkMyAddressInfo(address);
-      //console.log(verifyAddressStr);
-      if (verifyAddressStr) {
-        if (verifyAddressStr.toLowerCase().startsWith(GlobalConst.error)) {
-          console.log(`Error new address ${verifyAddressStr}`);
-          addLastSnackbar({
-            message: verifyAddressStr,
-            duration: SnackbarDurationEnum.short,
-            screenName: [screenName],
-          });
-          setErrorAddress(verifyAddressStr);
-        }
+      const verified = await rpc.checkMyAddress(address);
+      if (!verified.ok) {
+        console.log(`Error new address ${verified.error}`);
+        addLastSnackbar({
+          message: verified.error,
+          duration: SnackbarDurationEnum.short,
+          screenName: [screenName],
+        });
+        setErrorAddress(verified.error);
       } else {
-        console.log('Internal Error new address ');
+        setVerifyOK(verified.value.is_wallet_address);
       }
-
-      const verifyAddressJSON: CheckAddressType =
-        await JSON.parse(verifyAddressStr);
-      setVerifyOK(verifyAddressJSON.is_wallet_address);
-
-      //return newAddressStr;
     } catch (error) {
       console.log(`Critical Error new address ${error}`);
       //return `Error: ${error}`;

@@ -40,7 +40,6 @@ import {
   ScreenEnum,
 } from '../../app/AppState';
 import { parseZcashURI } from '../../app/uris';
-import WalletService from '../../app/wallet';
 import Utils from '../../app/utils';
 import { SessionStackParamList } from '../../app/types';
 import {
@@ -51,8 +50,8 @@ import {
   useWalletData,
 } from '../../app/store';
 import { createAlert } from '../../app/createAlert';
-import { SendProposeType } from '../../app/wallet/types';
-import { SpendablebalanceType } from '../../app/wallet/types';
+import * as rpc from '../../app/wallet/rpc';
+import type { Propose } from '../../app/wallet/generated/Propose';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import Snackbars from '../Components/Snackbars';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -190,23 +189,18 @@ const Send: React.FunctionComponent<SendProps> = ({
     setProposeSendLastError('');
   }, []);
 
-  const runSendPropose = async (proposeJSON: string): Promise<string> => {
+  const runSendPropose = async (
+    proposeJSON: string,
+  ): Promise<rpc.RpcResult<Propose>> => {
     try {
-      const proposeStr: string = await WalletService.sendProcess(proposeJSON);
-      if (proposeStr) {
-        if (proposeStr.toLowerCase().startsWith(GlobalConst.error)) {
-          console.log(`Error propose ${proposeStr}`);
-          return proposeStr;
-        }
-      } else {
-        console.log('Internal Error propose');
-        return 'Error: Internal RPC Error: propose';
+      const propose = await rpc.proposeSend(proposeJSON);
+      if (!propose.ok) {
+        console.log(`Error propose ${propose.error}`);
       }
-
-      return proposeStr;
+      return propose;
     } catch (error) {
       console.log(`Critical Error propose ${error}`);
-      return `Error: ${error}`;
+      return { ok: false, error: `Error: ${error}` };
     }
   };
 
@@ -263,67 +257,30 @@ const Send: React.FunctionComponent<SendProps> = ({
         donation,
       );
 
-      const runProposeStr = await runSendPropose(JSON.stringify(sendJson));
+      const runPropose = await runSendPropose(JSON.stringify(sendJson));
 
       if (reqId !== feeReqIdRef.current) {
         return;
       }
 
-      if (
-        runProposeStr &&
-        runProposeStr.toLowerCase().startsWith(GlobalConst.error)
-      ) {
-        setProposeSendLastError(runProposeStr);
+      if (!runPropose.ok) {
+        setProposeSendLastError(runPropose.error);
         setFee(0);
         return;
       }
 
-      try {
-        const runProposeJson: SendProposeType = JSON.parse(runProposeStr);
-
-        if (runProposeJson.error) {
-          setProposeSendLastError(runProposeJson.error);
-          setFee(0);
-          return;
-        }
-
-        setProposeSendLastError('');
-        setFee(
-          runProposeJson.fee !== undefined ? runProposeJson.fee / 10 ** 8 : 0,
-        );
-
-        if (runProposeJson.amount !== undefined) {
-          const newAmount =
-            runProposeJson.amount / 10 ** 8 -
-            (donation &&
-            indexerServer.chainName === ChainNameEnum.mainChainName &&
-            !donationAddress
-              ? Utils.parseStringLocaleToNumberFloat(
-                  Utils.getZenniesDonationAmount(),
-                )
-              : 0);
-
-          updateToField(
-            null,
-            Utils.parseNumberFloatToStringLocale(newAmount, 8),
-            null,
-            null,
-            null,
-          );
-        }
-      } catch {
-        setProposeSendLastError(runProposeStr);
+      if (runPropose.value.error) {
+        setProposeSendLastError(runPropose.value.error);
         setFee(0);
+        return;
       }
+
+      setProposeSendLastError('');
+      setFee(
+        runPropose.value.fee !== undefined ? runPropose.value.fee / 10 ** 8 : 0,
+      );
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      defaultUnifiedAddress,
-      defaultValueFee,
-      donation,
-      donationAddress,
-      indexerServer,
-    ],
+    [defaultUnifiedAddress, defaultValueFee, donation, indexerServer],
   );
 
   const calculateSpendableBalance = useCallback(
@@ -347,11 +304,10 @@ const Send: React.FunctionComponent<SendProps> = ({
       const zenniesForZingo = donationAddress ? false : donation;
 
       const start = Date.now();
-      const runSpendableBalanceStr =
-        await WalletService.getSpendableBalanceWithAddressInfo(
-          addressPar,
-          zenniesForZingo ? 'true' : 'false',
-        );
+      const runSpendable = await rpc.getSpendableBalanceWithAddress(
+        addressPar,
+        zenniesForZingo,
+      );
 
       if (Date.now() - start > 4000) {
         console.log(
@@ -364,45 +320,28 @@ const Send: React.FunctionComponent<SendProps> = ({
         return;
       }
 
-      if (
-        runSpendableBalanceStr &&
-        runSpendableBalanceStr.toLowerCase().startsWith(GlobalConst.error)
-      ) {
+      if (!runSpendable.ok) {
         setSendability(prev => ({
           ...prev,
           loading: false,
-          error: runSpendableBalanceStr,
+          error: runSpendable.error,
         }));
         return;
       }
 
-      try {
-        const runSpendableBalanceJson: SpendablebalanceType = JSON.parse(
-          runSpendableBalanceStr,
-        );
-
-        if (runSpendableBalanceJson.spendable_balance !== undefined) {
-          spendable = runSpendableBalanceJson.spendable_balance / 10 ** 8;
-        }
-
-        const maxAmount = spendable > 0 ? spendable : 0;
-
-        setSendability({
-          spendable,
-          maxAmount,
-          loading: false,
-          error: '',
-        });
-        setNegativeMaxAmount(maxAmount <= 0);
-      } catch (e) {
-        setSendability(prev => ({
-          ...prev,
-          loading: false,
-          error: `${runSpendableBalanceStr} ${
-            e instanceof Error ? e.message : String(e)
-          }`,
-        }));
+      if (runSpendable.value.spendable_balance !== undefined) {
+        spendable = runSpendable.value.spendable_balance / 10 ** 8;
       }
+
+      const maxAmount = spendable > 0 ? spendable : 0;
+
+      setSendability({
+        spendable,
+        maxAmount,
+        loading: false,
+        error: '',
+      });
+      setNegativeMaxAmount(maxAmount <= 0);
     },
     [donation, donationAddress, getBaseSpendable, syncSendabilityFromGlobal],
   );

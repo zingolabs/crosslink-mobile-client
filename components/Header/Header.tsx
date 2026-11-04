@@ -26,7 +26,7 @@ import {
 import ZecAmount from '../Components/ZecAmount';
 import FadeText from '../Components/FadeText';
 import simpleBiometrics from '../../app/simpleBiometrics';
-import { SyncStatusType } from '../../app/wallet/types';
+import type { SyncStatus } from '../../app/wallet/generated/SyncStatus';
 import { isEqual } from 'lodash';
 import SettingsIcon from '../../assets/icons/settings.svg';
 import { radiusPill, space, text, useTheme } from '../../app/theme';
@@ -73,7 +73,11 @@ const Header: React.FunctionComponent<HeaderProps> = ({
 }) => {
   const navigation: any = useNavigation();
   const { translate: translateContext } = useFeedback();
-  const { security, selectIndexerServer, privacy: privacyContext } = useSettings();
+  const {
+    security,
+    selectIndexerServer,
+    privacy: privacyContext,
+  } = useSettings();
   const { totalBalance, info, syncingStatus } = useWalletData();
   const { netInfo: netInfoContext } = useStatus();
 
@@ -97,7 +101,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
       0;
     if (
       !syncingStatus ||
-      isEqual(syncingStatus, {} as SyncStatusType) ||
+      isEqual(syncingStatus, {} as SyncStatus) ||
       (!!syncingStatus.scan_ranges && syncingStatus.scan_ranges.length === 0) ||
       percentage === 0
     ) {

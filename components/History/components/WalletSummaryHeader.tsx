@@ -10,7 +10,7 @@ import {
   useWalletData,
 } from '../../../app/store';
 import { RouteEnum, SelectServerEnum } from '../../../app/AppState';
-import { SyncStatusType } from '../../../app/wallet/types';
+import type { SyncStatus } from '../../../app/wallet/generated/SyncStatus';
 import ZecAmount from '../../Components/ZecAmount';
 import FadeText from '../../Components/FadeText';
 import { space, text, useTheme } from '../../../app/theme';
@@ -45,7 +45,7 @@ const WalletSummaryHeader: React.FC<WalletSummaryHeaderProps> = ({
       0;
     if (
       !syncingStatus ||
-      isEqual(syncingStatus, {} as SyncStatusType) ||
+      isEqual(syncingStatus, {} as SyncStatus) ||
       (!!syncingStatus.scan_ranges && syncingStatus.scan_ranges.length === 0) ||
       percentage === 0
     ) {
