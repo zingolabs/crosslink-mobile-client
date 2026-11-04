@@ -1,18 +1,12 @@
 import React, { useState } from 'react';
-import {
-  LayoutChangeEvent,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { LayoutChangeEvent, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   CSSTransitionProperties,
   cubicBezier,
   useReducedMotion,
 } from 'react-native-reanimated';
 
-import { text, useTheme } from '../../app/theme';
+import { text, useTheme, curve, duration } from '../../app/theme';
 
 type SegmentedProps<T extends string> = {
   options: { value: T; label: string }[];
@@ -20,7 +14,7 @@ type SegmentedProps<T extends string> = {
   onChange: (v: T) => void;
 };
 
-const EASE_OUT = cubicBezier(0.23, 1, 0.32, 1);
+const EASE_OUT = cubicBezier(curve[0], curve[1], curve[2], curve[3]);
 
 function Segmented<T extends string>({
   options,
@@ -38,14 +32,19 @@ function Segmented<T extends string>({
 
   const slide: CSSTransitionProperties = {
     transitionProperty: 'transform',
-    transitionDuration: reducedMotion ? '0ms' : '250ms',
+    transitionDuration: reducedMotion ? '0ms' : `${duration.tab}ms`,
+    transitionTimingFunction: EASE_OUT,
+  };
+  const tint: CSSTransitionProperties = {
+    transitionProperty: 'color',
+    transitionDuration: `${duration.tab}ms`,
     transitionTimingFunction: EASE_OUT,
   };
 
   return (
     <View
       accessibilityRole="tablist"
-      style={[styles.track, { backgroundColor: colors.bgSurface }]}
+      style={styles.track}
       onLayout={(e: LayoutChangeEvent) =>
         setWidth(e.nativeEvent.layout.width - 4)
       }
@@ -54,7 +53,7 @@ function Segmented<T extends string>({
         <Animated.View
           style={[
             styles.thumb,
-            { width: segment, backgroundColor: colors.bgFaint },
+            { width: segment, backgroundColor: colors.bgSurfaceRaised },
             slide,
             { transform: [{ translateX: index * segment }] },
           ]}
@@ -68,9 +67,10 @@ function Segmented<T extends string>({
           onPress={() => onChange(o.value)}
           style={styles.segment}
         >
-          <Text
+          <Animated.Text
             style={[
               styles.label,
+              tint,
               {
                 color: o.value === value ? colors.fgDefault : colors.fgSubtle,
               },
@@ -78,7 +78,7 @@ function Segmented<T extends string>({
             maxFontSizeMultiplier={1.4}
           >
             {o.label}
-          </Text>
+          </Animated.Text>
         </Pressable>
       ))}
     </View>

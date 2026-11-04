@@ -10,6 +10,8 @@ export const duration = {
   enter: 280,
   /** Layout changes in a visible list. */
   list: 260,
+  /** The segmented thumb sliding to the chosen tab. */
+  tab: 200,
   /** The brief tint on a freshly arrived transaction. */
   highlight: 1600,
 } as const;

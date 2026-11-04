@@ -1,162 +1,207 @@
-/* eslint-disable react-native/no-inline-styles */
-import React, { useEffect, useState } from 'react';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  Text,
-  View,
-  Modal,
-  Keyboard,
-  FlatList,
-  ActivityIndicator,
-  StyleSheet,
-} from 'react-native';
-
+import React, { useCallback, useMemo, useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, {
+  CSSTransitionProperties,
+  Easing,
+  LinearTransition,
+  cubicBezier,
+  useReducedMotion,
+} from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
-
-import { SessionStackParamList } from '../../../app/types';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { HeaderTitle } from '../../Header';
-import { FinalizerCard } from './FinalizerCard';
-import LiquidPrimaryButton from '../../Components/LiquidButton/LiquidPrimaryButton';
-import { RouteEnum, WalletBondsType } from '../../../app/AppState';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
-import { WalletBondsStatusEnum } from '../../../app/AppState/enums/WalletBondsStatusEnum';
-import { useWalletData } from '../../../app/context';
-import { FinalizerPosition } from './FinalizerPosition';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import StakingDayBubble from '../StakingDayBubble';
-import { useTheme, text, space } from '../../../app/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Clipboard from '@react-native-clipboard/clipboard';
 
-type ModalState = 'idle' | 'sending' | 'success';
+import {
+  RouteEnum,
+  ScreenEnum,
+  SnackbarDurationEnum,
+  WalletBondsType,
+} from '../../../app/AppState';
+import { WalletBondsStatusEnum } from '../../../app/AppState/enums/WalletBondsStatusEnum';
+import { useFeedback, useSettings, useWalletData } from '../../../app/context';
+import { SessionStackParamList } from '../../../app/types';
+import {
+  curve,
+  duration,
+  mono,
+  radiusCard,
+  space,
+  text,
+  useTheme,
+} from '../../../app/theme';
+import Utils from '../../../app/utils';
+import { HeaderTitle } from '../../Header';
+import LifehashDisc from '../../Components/LifehashDisc';
+import { formatBalance } from '../../Components/SummaryPanel';
+import StakingDayBubble from '../StakingDayBubble';
+import StakingPositionRow, {
+  PositionAction,
+} from '../components/StakingPositionRow';
+
+const MASK = '••••';
+const CSS_EASE_OUT = cubicBezier(curve[0], curve[1], curve[2], curve[3]);
+const ROWS_LAYOUT = LinearTransition.duration(duration.list).easing(
+  Easing.bezier(curve[0], curve[1], curve[2], curve[3]),
+);
 
 type FinalizerDetailProps = NativeStackScreenProps<
   SessionStackParamList,
   RouteEnum.FinalizerDetail
 >;
 
+const PressFeedback: React.FC<{
+  accessibilityLabel: string;
+  onPress: () => void;
+  children: React.ReactNode;
+}> = ({ accessibilityLabel, onPress, children }) => {
+  const { colors } = useTheme();
+  const reduced = useReducedMotion();
+  const [pressed, setPressed] = useState(false);
+  const press: CSSTransitionProperties = {
+    transitionProperty: ['backgroundColor'],
+    transitionDuration: reduced ? '0ms' : `${duration.press}ms`,
+    transitionTimingFunction: CSS_EASE_OUT,
+  };
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      onPress={onPress}
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
+      pressRetentionOffset={16}
+    >
+      <Animated.View
+        style={[
+          styles.pressIdle,
+          pressed && { backgroundColor: colors.bgPress },
+          press,
+        ]}
+      >
+        {children}
+      </Animated.View>
+    </Pressable>
+  );
+};
+
 export function FinalizerDetail({ route }: FinalizerDetailProps) {
-  const finalizer =
-    !!route.params && route.params.finalizer !== undefined
-      ? route.params.finalizer
-      : null;
-
-  const lifehash =
-    !!route.params && route.params.lifehash !== undefined
-      ? route.params.lifehash
-      : null;
-
+  const finalizer = route.params?.finalizer ?? '';
   const navigation: any = useNavigation();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+  const { privacy } = useSettings();
+  const { addLastSnackbar, translate } = useFeedback();
+  const { walletBonds, globalStaked, info } = useWalletData();
 
-  const [finalizerFromText] = useState<string | null>(finalizer);
-  const [, setStakedFromNumber] = useState<number>(1);
+  const positions: WalletBondsType[] = useMemo(
+    () =>
+      walletBonds
+        .filter(
+          b =>
+            b.finalizer === finalizer &&
+            b.status !== WalletBondsStatusEnum.Withdrawn,
+        )
+        .sort((a, b) => b.amount - a.amount),
+    [walletBonds, finalizer],
+  );
 
-  const [modalState, setModalState] = useState<ModalState>('idle');
-  const [kbOpen, setKbOpen] = useState(false);
+  const yourStake = positions.reduce((sum, b) => sum + b.amount, 0);
+  const totalStake =
+    globalStaked.find(g => g.finalizer === finalizer)?.votingPower ?? 0;
+  const show = (n: number) =>
+    privacy ? MASK : `${formatBalance(n)} ${info.currencyName}`;
 
-  const modalVisible = modalState !== 'idle';
+  const copyId = () => {
+    Clipboard.setString(finalizer);
+    addLastSnackbar({
+      message: translate('txtcopied') as string,
+      duration: SnackbarDurationEnum.short,
+      screenName: [ScreenEnum.FinalizerDetail],
+    });
+  };
 
-  const { walletBonds, staked, globalStaked } = useWalletData();
-
-  console.log('FINALIZER', finalizer);
-
-  const movements = walletBonds
-    .filter(b => {
-      if (b.status === WalletBondsStatusEnum.Withdrawn) return false;
-      if (!!finalizerFromText && b.finalizer === finalizerFromText) return true;
-      // no finalizer selected, all bonds visible. Impossible case for now.
-      if (!finalizerFromText) return false;
-    })
-    .sort((a, b) => b.amount - a.amount);
-
-  const totalStakedFinalizer =
-    globalStaked.filter(g => g.finalizer === finalizerFromText).length > 0
-      ? globalStaked.filter(g => g.finalizer === finalizerFromText)[0]
-          .votingPower
-      : 0;
-
-  const totalUserStaked = walletBonds
-    .filter(wb => wb.finalizer === finalizerFromText)
-    .map(b => {
-      return b.amount;
-    })
-    .reduce((a, b) => a + b, 0);
-
-  useEffect(() => {
-    const s1 = Keyboard.addListener('keyboardDidShow', () => setKbOpen(true));
-    const s2 = Keyboard.addListener('keyboardDidHide', () => setKbOpen(false));
-    return () => {
-      s1.remove();
-      s2.remove();
-    };
-  }, []);
-
-  useEffect(() => {
-    // looking for the voting power of the finalizer
-    if (staked.filter(g => g.finalizer === finalizerFromText).length === 1) {
-      setStakedFromNumber(
-        staked.filter(g => g.finalizer === finalizerFromText)[0].votingPower,
+  const onAction = useCallback(
+    (action: PositionAction, bond: WalletBondsType) => {
+      navigation.navigate(
+        action === 'redelegate' ? RouteEnum.Redelegate : RouteEnum.Unstake,
+        { finalizer: bond.finalizer, txid: bond.txid, staked: bond.amount },
       );
-    } else {
-      setStakedFromNumber(0);
-    }
-  }, [finalizerFromText, staked]);
+    },
+    [navigation],
+  );
 
-  const handleViewMovements = () => {
-    setModalState('idle');
-    if (navigation.canGoBack()) {
-      navigation.goBack();
-    }
-  };
-
-  const renderSeparator = () => <View style={{ height: space.sm }} />;
-
-  const renderStakedTxItem = ({ item }: { item: WalletBondsType }) => {
-    return (
-      <FinalizerPosition
+  const renderItem = useCallback(
+    ({ item, index }: { item: WalletBondsType; index: number }) => (
+      <StakingPositionRow
+        testID={`finalizer-position-${index + 1}`}
         bond={item}
-        onPresWithdraw={() => {
-          navigation.navigate(RouteEnum.Unstake, {
-            finalizer: item.finalizer,
-            txid: item.txid,
-            staked: item.amount,
-          });
-        }}
-        onPressRedelegate={() => {
-          navigation.navigate(RouteEnum.Redelegate, {
-            finalizer: item.finalizer,
-            txid: item.txid,
-            staked: item.amount,
-          });
-        }}
-        onPressUnstake={() => {
-          navigation.navigate(RouteEnum.Unstake, {
-            finalizer: item.finalizer,
-            txid: item.txid,
-            staked: item.amount,
-          });
-        }}
+        privacy={privacy}
+        last={index === positions.length - 1}
+        onAction={onAction}
       />
-    );
-  };
+    ),
+    [privacy, positions.length, onAction],
+  );
+
+  const header = (
+    <View style={styles.header}>
+      <View style={styles.hero}>
+        <LifehashDisc finalizer={finalizer} size={64} />
+        <Text style={[text.title3, { color: colors.fgDefault }]}>
+          {Utils.trimToSmall(finalizer, 8)}
+        </Text>
+        <Text style={[text.footnote, { color: colors.fgSubtle }]}>
+          Finalizer
+        </Text>
+      </View>
+
+      <View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
+        <View style={styles.row}>
+          <Text style={[styles.rowLabel, { color: colors.fgMuted }]}>
+            Your stake
+          </Text>
+          <Text style={[styles.value, { color: colors.fgDefault }]}>
+            {show(yourStake)}
+          </Text>
+        </View>
+        <View
+          style={[styles.hairline, { backgroundColor: colors.borderFaint }]}
+        />
+        <View style={styles.row}>
+          <Text style={[styles.rowLabel, { color: colors.fgMuted }]}>
+            Total staked
+          </Text>
+          <Text style={[styles.value, { color: colors.fgDefault }]}>
+            {show(totalStake)}
+          </Text>
+        </View>
+        <View
+          style={[styles.hairline, { backgroundColor: colors.borderFaint }]}
+        />
+        <PressFeedback accessibilityLabel="Copy finalizer id" onPress={copyId}>
+          <View style={styles.row}>
+            <Text style={[styles.rowLabel, { color: colors.fgMuted }]}>Id</Text>
+            <Text
+              numberOfLines={1}
+              style={[styles.monoValue, { color: colors.fgDefault }]}
+            >
+              {Utils.trimToSmall(finalizer, 10)}
+            </Text>
+          </View>
+        </PressFeedback>
+      </View>
+
+      <Text style={[text.footnote, styles.section, { color: colors.fgSubtle }]}>
+        Positions
+      </Text>
+    </View>
+  );
 
   return (
-    <KeyboardAvoidingView
-      style={{
-        flex: 1,
-        backgroundColor: colors.bgCanvas,
-        gap: space.xl,
-      }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={
-        Platform.OS === 'ios' ? 0 : kbOpen ? insets.top : 0
-      }
-    >
+    <View style={[styles.screen, { backgroundColor: colors.bgCanvas }]}>
       <HeaderTitle
-        title="Finalizer Details"
+        title="Finalizer"
         goBack={() => {
           if (navigation.canGoBack()) {
             navigation.goBack();
@@ -164,153 +209,90 @@ export function FinalizerDetail({ route }: FinalizerDetailProps) {
         }}
         ExtraComponent={<StakingDayBubble />}
       />
-
-      <FinalizerCard
-        containerStyle={{
-          marginHorizontal: space.xl,
-        }}
-        lifehash={lifehash || ''}
-        finalizerId={finalizer || ''}
-        userStake={totalUserStaked}
-        totalStake={totalStakedFinalizer}
-      />
-
-      {/* Content */}
-      <View
-        style={{
-          flex: 1,
-          paddingHorizontal: space.xxl,
-        }}
-      >
-        {/* Staked TX list */}
-        <Text
-          style={[
-            text.headline,
-            { color: colors.fgDefault, marginBottom: space.sm },
-          ]}
-        >
-          Staking positions
-        </Text>
-
-        <View
-          style={{
-            flex: 1,
-            marginBottom: space.lg,
-          }}
-        >
-          <FlatList
-            data={movements}
-            keyExtractor={item => item.txid}
-            renderItem={renderStakedTxItem}
-            ItemSeparatorComponent={renderSeparator}
-            ListEmptyComponent={
-              <Text
-                style={[
-                  text.footnote,
-                  {
-                    color: colors.fgSubtle,
-                    textAlign: 'center',
-                    marginTop: space.lg,
-                  },
-                ]}
-              >
-                You don&apos;t have any staking positions that match the
-                currently selected filters.
-              </Text>
-            }
-          />
-        </View>
-      </View>
-
-      {/* Modal */}
-      <Modal
-        visible={modalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => {
-          if (modalState === 'success') {
-            setModalState('idle');
-          }
-        }}
-      >
-        <View style={styles.modalBackdrop}>
-          <View
-            style={[
-              styles.modalCard,
-              {
-                backgroundColor: colors.bgCanvas,
-                borderColor: colors.borderFaint,
-              },
-            ]}
+      <Animated.FlatList
+        data={positions}
+        keyExtractor={item => item.txid}
+        renderItem={renderItem}
+        itemLayoutAnimation={ROWS_LAYOUT}
+        ListHeaderComponent={header}
+        ListEmptyComponent={
+          <Text
+            style={[text.footnote, styles.empty, { color: colors.fgSubtle }]}
           >
-            {modalState === 'sending' && (
-              <>
-                <ActivityIndicator size="large" color={colors.fgDefault} />
-                <Text
-                  style={[
-                    text.callout,
-                    {
-                      marginTop: space.lg,
-                      color: colors.fgDefault,
-                      textAlign: 'center',
-                    },
-                  ]}
-                >
-                  Sending unstaking transaction…
-                </Text>
-              </>
-            )}
-
-            {modalState === 'success' && (
-              <>
-                <FontAwesomeIcon
-                  icon={faCheckCircle}
-                  size={40}
-                  color={colors.fgAccent}
-                />
-                <Text
-                  style={[
-                    text.headline,
-                    {
-                      marginTop: space.lg,
-                      color: colors.fgDefault,
-                      textAlign: 'center',
-                    },
-                  ]}
-                >
-                  Unstaking request transaction sent!
-                </Text>
-
-                <View style={{ marginTop: space.xxl, alignSelf: 'stretch' }}>
-                  <LiquidPrimaryButton
-                    title="View movements"
-                    onPress={handleViewMovements}
-                    style={{ alignSelf: 'stretch' }}
-                  />
-                </View>
-              </>
-            )}
-          </View>
-        </View>
-      </Modal>
-    </KeyboardAvoidingView>
+            No positions with this finalizer.
+          </Text>
+        }
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: insets.bottom + space.xl },
+        ]}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  modalBackdrop: {
+  screen: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
-  modalCard: {
-    width: '80%',
-    maxWidth: 320,
-    borderRadius: 18,
-    paddingHorizontal: space.xl,
-    paddingVertical: space.xxl,
+  content: {
+    flexGrow: 1,
+    paddingHorizontal: 10,
+  },
+  header: {
+    paddingHorizontal: 10,
+  },
+  hero: {
     alignItems: 'center',
-    borderWidth: StyleSheet.hairlineWidth,
+    paddingTop: space.lg,
+    paddingBottom: space.xl,
+    gap: space.sm,
+  },
+  card: {
+    borderRadius: radiusCard,
+    borderCurve: 'continuous',
+    paddingVertical: space.xs,
+    overflow: 'hidden',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: space.md,
+    paddingHorizontal: space.lg,
+    paddingVertical: space.md,
+  },
+  rowLabel: {
+    ...text.caption,
+    flexShrink: 0,
+  },
+  value: {
+    ...text.body,
+    textAlign: 'right',
+  },
+  monoValue: {
+    ...mono,
+    fontSize: 14,
+    lineHeight: 18,
+    flexShrink: 1,
+    textAlign: 'right',
+  },
+  hairline: {
+    height: StyleSheet.hairlineWidth,
+    marginLeft: space.lg,
+  },
+  pressIdle: {
+    backgroundColor: 'transparent',
+  },
+  section: {
+    fontWeight: '600',
+    paddingHorizontal: 10,
+    paddingTop: space.xxl,
+    paddingBottom: space.xs,
+  },
+  empty: {
+    textAlign: 'center',
+    paddingVertical: space.lg,
   },
 });

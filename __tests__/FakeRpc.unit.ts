@@ -24,6 +24,9 @@ const CHAIN = mockInfo.chainName;
 const TXID = /^[0-9a-f]{64}$/;
 const zats = (amount: number) => Math.round(amount * ZATS);
 
+const bondCount = async () =>
+  JSON.parse(await fakeRpc.getWalletBondsInfo()).bonds.length as number;
+
 describe('FakeRpc - bridge selection', () => {
   test('keeps the native bridge when the flag is off', () => {
     const { NativeModules } = jest.requireActual('react-native');
@@ -88,8 +91,9 @@ describe('FakeRpc - balances', () => {
 describe('FakeRpc - value transfers', () => {
   test('value transfers and messages reuse the mocked events', async () => {
     const list = JSON.parse(await fakeRpc.getValueTransfersList());
-    expect(list.wallet_events).toHaveLength(mockValueTransfers.length);
-    expect(list.total).toBe(mockValueTransfers.length);
+    const expected = mockValueTransfers.length + (await bondCount());
+    expect(list.wallet_events).toHaveLength(expected);
+    expect(list.total).toBe(expected);
     const sent = list.wallet_events.find(
       (e: { kind: string }) => e.kind === WalletValueTransferKindEnum.sent,
     );
@@ -116,8 +120,9 @@ describe('FakeRpc - value transfers', () => {
     expect(confirmed.txids).toHaveLength(1);
     expect(confirmed.txids[0]).toMatch(TXID);
     const list = JSON.parse(await fakeRpc.getValueTransfersList());
-    expect(list.wallet_events).toHaveLength(mockValueTransfers.length + 1);
-    const last = list.wallet_events[mockValueTransfers.length];
+    const before = mockValueTransfers.length + (await bondCount());
+    expect(list.wallet_events).toHaveLength(before + 1);
+    const last = list.wallet_events[before];
     expect(last.kind).toBe(WalletValueTransferKindEnum.sent);
     expect(last.value).toBe(ZATS);
     await expect(fakeRpc.confirmProcess()).resolves.toMatch(/^error/i);
@@ -203,10 +208,25 @@ describe('FakeRpc - addresses, roster and bonds', () => {
     expect(roster.roster_members.length).toBeGreaterThan(0);
     expect(roster.roster_members[0].voting_power).toBeGreaterThan(0);
     const bonds = JSON.parse(await fakeRpc.getWalletBondsInfo());
-    expect(bonds.bonds).toHaveLength(1);
-    expect(bonds.bonds[0].amount_zats).toBe(
-      zats(mockTotalBalance.stakedAmount),
+    expect(bonds.bonds.length).toBeGreaterThan(1);
+    const staked = bonds.bonds.reduce(
+      (sum: number, b: { amount_zats: number }) => sum + b.amount_zats,
+      0,
     );
+    expect(staked).toBe(zats(mockTotalBalance.stakedAmount));
+    const finalizers = new Set(
+      bonds.bonds.map((b: { finalizer: string }) => b.finalizer),
+    );
+    expect(finalizers.size).toBeGreaterThan(1);
+    expect(roster.roster_members.length).toBeGreaterThan(finalizers.size);
+    const list = JSON.parse(await fakeRpc.getValueTransfersList());
+    bonds.bonds.forEach((b: { created_in_txid: string }) => {
+      const event = list.wallet_events.find(
+        (e: { txid: string }) => e.txid === b.created_in_txid,
+      );
+      expect(event.kind).toBe(WalletValueTransferKindEnum.createBond);
+      expect(event.blockheight).toBeLessThan(mockInfo.latestBlock);
+    });
   });
 });
 
