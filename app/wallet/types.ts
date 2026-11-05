@@ -218,6 +218,7 @@ export type OutgoingMetadataType = {
 
 export type StakedType = {
   pubkey: string; // finalizer
+  finalizer_address?: string | null;
   voting_power: number;
   txids?: any[];
 };

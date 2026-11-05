@@ -27,14 +27,21 @@ const ZATS = 10 ** 8;
 const FEE_ZATS = 10000;
 const HEIGHT = mockInfo.latestBlock;
 const VERSION = 'zingo-fake-1.0.0';
-const FINALIZER_A = 'f'.repeat(64);
-const FINALIZER_B = 'a'.repeat(64);
-const FINALIZER_C = 'c'.repeat(64);
-const FINALIZER_D = 'd'.repeat(64);
-const BOND_TXID_A = 'b'.repeat(64);
-const BOND_TXID_B = 'e'.repeat(64);
-const BOND_TXID_C = '9'.repeat(64);
 const BOND_HEIGHT = HEIGHT - 10;
+
+const fakeHexKey = (seed: number): string => {
+  let x = (seed + 0x9e3779b9) >>> 0;
+  let out = '';
+  for (let k = 0; k < 8; k++) {
+    x ^= x << 13;
+    x >>>= 0;
+    x ^= x >>> 17;
+    x ^= x << 5;
+    x >>>= 0;
+    out += x.toString(16).padStart(8, '0');
+  }
+  return out;
+};
 
 const err = (message: string) => `${GlobalConst.error}: ${message}`;
 
@@ -76,17 +83,34 @@ type FakeBond = {
   status: 0 | 1;
 };
 
+const BASE64URL =
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+
+const bondRosterIndex = (i: number) => (i * 3 + 11) % 100;
+
+const fakeFinalizerAddress = (rosterIndex: number): string => {
+  const key = fakeHexKey(rosterIndex);
+  let out = 'zfinv1';
+  for (let k = 0; k < 128; k++) {
+    out += BASE64URL[(key.charCodeAt(k % 64) * 31 + k * 7 + rosterIndex) % 64];
+  }
+  return out;
+};
+
 const BONDS: FakeBond[] = [
-  { txid: BOND_TXID_A, finalizer: FINALIZER_A, amount: 0.07, status: 0 },
-  { txid: BOND_TXID_B, finalizer: FINALIZER_B, amount: 0.03, status: 0 },
-  { txid: BOND_TXID_C, finalizer: FINALIZER_C, amount: 0.02, status: 1 },
+  ...Array.from({ length: 50 }, (_, i) => ({
+    txid: fakeHexKey(100000 + i),
+    finalizer: fakeHexKey(bondRosterIndex(i)),
+    amount: i % 2 ? 0.0026 : 0.0022,
+    status: ((i % 5 === 0 ? 1 : 0) as 0 | 1),
+  })),
 ];
 
 const ROSTER = [
-  { pubkey: FINALIZER_A, voting_power: zats(1000) },
-  { pubkey: FINALIZER_B, voting_power: zats(4200) },
-  { pubkey: FINALIZER_C, voting_power: zats(860) },
-  { pubkey: FINALIZER_D, voting_power: zats(15000) },
+  ...Array.from({ length: 100 }, (_, i) => ({
+    pubkey: fakeHexKey(i),
+    voting_power: zats(100 + ((i * 37) % 900)),
+  })),
 ];
 
 const bondEvents = (): WalletValueTransferType[] =>
@@ -470,21 +494,29 @@ const fakeRpc = {
 
   getRosterInfo: async () =>
     JSON.stringify({
-      roster_members: ROSTER.map(m => ({ ...m, txids: [] })),
+      roster_members: ROSTER.map((m, i) => ({
+        pubkey: m.pubkey,
+        finalizer_address: fakeFinalizerAddress(i),
+        voting_power: m.voting_power,
+        txids: BONDS.filter(b => b.finalizer === m.pubkey).map(b => ({
+          txid: b.txid,
+          accumulated_zats: zats(b.amount),
+        })),
+      })),
     }),
 
   getWalletBondsInfo: async () =>
     JSON.stringify({
-      bonds: BONDS.map(b => ({
+      bonds: BONDS.map((b, i) => ({
         created_in_txid: b.txid,
-        bond_key: b.finalizer,
+        bond_key: fakeHexKey(50000 + i),
         amount_zats: zats(b.amount),
         status: b.status,
-        status_name: b.status === 0 ? 'Active' : 'Unbonding',
+        status_name: b.status === 0 ? 'active' : 'unbonding',
         last_action_height: BOND_HEIGHT,
         next_action_height: b.status === 1 ? HEIGHT + 100 : null,
         finalizer: b.finalizer,
-        finalizer_address: null,
+        finalizer_address: fakeFinalizerAddress(bondRosterIndex(i)),
       })),
     }),
 

@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import {
   Image,
-  ImageStyle,
   StyleProp,
   StyleSheet,
   View,
@@ -17,10 +16,9 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useTheme } from '../../app/theme';
-import {
-  lifehashDefaultDataUrl,
-  useLifehash,
-} from '../../app/utils/lifehash';
+import { useLifehash } from '../../app/utils/lifehash';
+
+const PLACEHOLDER = require('../../assets/images/default-lifehash.png');
 
 type LifehashDiscProps = {
   finalizer: string;
@@ -40,7 +38,6 @@ const LifehashDisc: React.FC<LifehashDiscProps> = ({
   const uri = useLifehash(finalizer);
   const progress = useSharedValue(0);
   const loaded = !!uri;
-  const placeholder = finalizer ? lifehashDefaultDataUrl() : null;
 
   useEffect(() => {
     if (!loaded) {
@@ -76,26 +73,11 @@ const LifehashDisc: React.FC<LifehashDiscProps> = ({
         style,
       ]}
     >
-      {!!placeholder && (
-        <Image
-          source={{ uri: placeholder }}
-          resizeMode="cover"
-          style={[
-            StyleSheet.absoluteFill,
-            {
-              filter: [{ blur: Math.ceil(size / 5) }],
-            } as StyleProp<ImageStyle>,
-          ]}
-        />
-      )}
-      {!!placeholder && (
-        <View
-          style={[
-            StyleSheet.absoluteFill,
-            { backgroundColor: colors.bgSurfaceRaised, opacity: GREY_OPACITY },
-          ]}
-        />
-      )}
+      <Image
+        source={PLACEHOLDER}
+        resizeMode="cover"
+        style={StyleSheet.absoluteFill}
+      />
       {loaded && (
         <Animated.Image
           source={{ uri }}

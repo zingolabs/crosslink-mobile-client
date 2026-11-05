@@ -10,8 +10,13 @@ import WalletBondsInfoType, {
 } from '../app/wallet/types';
 import { buildStakedData } from '../app/wallet/stakedData';
 
-const rosterMember = (pubkey: string, votingPowerZats = 0): StakedType => ({
+const rosterMember = (
+  pubkey: string,
+  votingPowerZats = 0,
+  finalizerAddress: string | null = null,
+): StakedType => ({
   pubkey,
+  finalizer_address: finalizerAddress,
   voting_power: votingPowerZats,
 });
 
@@ -31,13 +36,16 @@ const bond = (overrides: Partial<WalletBondsInfoType>): WalletBondsInfoType => (
 describe('buildStakedData', () => {
   it('maps the roster to globalStaked with voting power in zec', () => {
     const { globalStaked } = buildStakedData(
-      [rosterMember('fin-a', 150_000_000), rosterMember('fin-b')],
+      [
+        rosterMember('fin-a', 150_000_000, 'zfinv1aaa'),
+        rosterMember('fin-b'),
+      ],
       [],
     );
 
     expect(globalStaked).toEqual([
-      { finalizer: 'fin-a', votingPower: 1.5 },
-      { finalizer: 'fin-b', votingPower: 0 },
+      { finalizer: 'fin-a', address: 'zfinv1aaa', votingPower: 1.5 },
+      { finalizer: 'fin-b', address: null, votingPower: 0 },
     ]);
   });
 
@@ -68,7 +76,7 @@ describe('buildStakedData', () => {
   it('aggregates active and unbonding bonds per finalizer and skips withdrawn ones', () => {
     const { staked } = buildStakedData(
       [
-        rosterMember('fin-a'),
+        rosterMember('fin-a', 0, 'zfinv1aaa'),
         rosterMember('fin-b'),
         rosterMember('fin-c'),
         rosterMember('fin-d'),
@@ -83,9 +91,9 @@ describe('buildStakedData', () => {
     );
 
     expect(staked).toEqual([
-      { finalizer: 'fin-a', votingPower: 6 },
-      { finalizer: 'fin-b', votingPower: 1 },
-      { finalizer: 'fin-d', votingPower: 0 },
+      { finalizer: 'fin-a', address: 'zfinv1aaa', votingPower: 6 },
+      { finalizer: 'fin-b', address: null, votingPower: 1 },
+      { finalizer: 'fin-d', address: null, votingPower: 0 },
     ]);
   });
 
@@ -111,7 +119,15 @@ describe('buildStakedData', () => {
     const { staked } = buildStakedData(roster, bonds);
 
     expect(staked).toHaveLength(10_000);
-    expect(staked[0]).toEqual({ finalizer: 'fin-0', votingPower: 1 });
-    expect(staked[1]).toEqual({ finalizer: 'fin-5', votingPower: 1 });
+    expect(staked[0]).toEqual({
+      finalizer: 'fin-0',
+      address: null,
+      votingPower: 1,
+    });
+    expect(staked[1]).toEqual({
+      finalizer: 'fin-5',
+      address: null,
+      votingPower: 1,
+    });
   });
 });

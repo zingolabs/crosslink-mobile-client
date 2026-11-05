@@ -20,7 +20,6 @@ import { WalletBondsType } from '../../../app/AppState';
 import { WalletBondsStatusEnum } from '../../../app/AppState/enums/WalletBondsStatusEnum';
 import { curve, duration, text, useTheme } from '../../../app/theme';
 import Utils from '../../../app/utils';
-import LifehashDisc from '../../Components/LifehashDisc';
 import { formatBalance } from '../../Components/SummaryPanel';
 
 export const POSITION_ROW_HEIGHT = 60;
@@ -95,7 +94,6 @@ const StakingPositionRow: React.FC<StakingPositionRowProps> = ({
         press,
       ]}
     >
-      <LifehashDisc finalizer={bond.finalizer} size={36} />
       <View style={styles.body}>
         <Text
           numberOfLines={1}
@@ -197,7 +195,7 @@ const styles = StyleSheet.create({
   },
   hairline: {
     height: StyleSheet.hairlineWidth,
-    marginLeft: 58,
+    marginLeft: 10,
   },
 });
 

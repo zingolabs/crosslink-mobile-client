@@ -14,6 +14,7 @@ export const buildStakedData = (
 ): StakedData => {
   const globalStaked = rosterMembers.map(m => ({
     finalizer: m.pubkey,
+    address: m.finalizer_address ?? null,
     votingPower: (m.voting_power || 0) / 10 ** 8,
   }));
 
@@ -49,6 +50,7 @@ export const buildStakedData = (
     .filter(m => stakableAmounts.has(m.pubkey))
     .map(m => ({
       finalizer: m.pubkey,
+      address: m.finalizer_address ?? null,
       votingPower: stakableAmounts.get(m.pubkey) || 0,
     }));
 

@@ -45,6 +45,7 @@ type DataType = {
   value: number;
   key: string;
   finalizer: string;
+  address: string | null;
   tag: string;
 } & pieDataItem;
 
@@ -74,10 +75,13 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
   const { clear } = useToast();
   const screenName = ScreenEnum.Insight;
 
-  const rc = Utils.generateColorList(50);
+  const TOP_SLICES = 20;
 
   const [pieAmounts, setPieAmounts] = useState<DataType[]>([]);
-  const [randomColors, setRandomColors] = useState<string[]>(rc);
+  const [chartData, setChartData] = useState<DataType[]>([]);
+  const [randomColors, setRandomColors] = useState<string[]>(() =>
+    Utils.generateColorList(50),
+  );
   const [expandAddress, setExpandAddress] = useState<boolean[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [tab, setTab] = useState<'my' | 'network'>('my');
@@ -100,7 +104,6 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
         default:
           break;
       }
-      console.log(resultJSON);
       if (randomColors.length < resultJSON.length) {
         const rc2 = Utils.generateColorList(resultJSON.length + 10);
         setRandomColors(rc2);
@@ -112,6 +115,7 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
           return {
             value: item.votingPower,
             finalizer: item.finalizer,
+            address: item.address ?? null,
             tag: '',
             svg: { fill: randomColors[index] },
             color: randomColors[index],
@@ -121,8 +125,23 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
             key: `pie-${index}`,
           };
         });
-      console.log(newPieAmounts);
       setPieAmounts(newPieAmounts);
+      setChartData(
+        newPieAmounts.length > TOP_SLICES
+          ? [
+              ...newPieAmounts.slice(0, TOP_SLICES),
+              {
+                ...newPieAmounts[TOP_SLICES],
+                value: newPieAmounts
+                  .slice(TOP_SLICES)
+                  .reduce((sum, item) => sum + item.value, 0),
+                key: 'pie-other',
+                svg: { fill: colors.bgMuted },
+                color: colors.bgMuted,
+              },
+            ]
+          : newPieAmounts,
+      );
       const newExpandAddress = Array(newPieAmounts.length).fill(false);
       setExpandAddress(newExpandAddress);
       setLoading(false);
@@ -147,11 +166,12 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
       ? pieAmounts.reduce((acc, curr) => acc + curr.value, 0)
       : 0;
     const percent = (100 * item.value) / totalValue;
+    const address = item.address || item.finalizer;
     // 30 characters per line
     const numLines =
-      item.finalizer.length < 40
+      address.length < 40
         ? 2
-        : item.finalizer.length / (dimensions.width < 500 ? 21 : 30);
+        : address.length / (dimensions.width < 500 ? 21 : 30);
     return (
       <View style={styles.row} key={`tag-${index}`}>
         <View style={rowStyle(last)}>
@@ -167,7 +187,7 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
             )}
             <TouchableOpacity
               onPress={() => {
-                Clipboard.setString(item.finalizer);
+                Clipboard.setString(address);
                 addLastSnackbar({
                   message: translate('history.addresscopied') as string,
                   duration: SnackbarDurationEnum.short,
@@ -178,26 +198,26 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
             >
               <View style={styles.addressCol}>
                 <AddressItem
-                  address={item.finalizer}
+                  address={address}
                   screenName={screenName}
                   oneLine={true}
                   onlyContact={true}
                   withIcon={true}
                 />
-                {!expandAddress[index] && !!item.finalizer && (
+                {!expandAddress[index] && !!address && (
                   <RegText>
-                    {item.finalizer.length > (dimensions.width < 500 ? 10 : 20)
+                    {address.length > (dimensions.width < 500 ? 10 : 20)
                       ? Utils.trimToSmall(
-                          item.finalizer,
+                          address,
                           dimensions.width < 500 ? 5 : 10,
                         )
-                      : item.finalizer}
+                      : address}
                   </RegText>
                 )}
                 {expandAddress[index] &&
-                  !!item.finalizer &&
+                  !!address &&
                   Utils.splitStringIntoChunks(
-                    item.finalizer,
+                    address,
                     Number(numLines.toFixed(0)),
                   ).map((c: string, idx: number) => (
                     <RegText key={idx}>{c}</RegText>
@@ -218,11 +238,12 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
       ? pieAmounts.reduce((acc, curr) => acc + curr.value, 0)
       : 0;
     const percent = (100 * item.value) / totalValue;
+    const address = item.address || item.finalizer;
     // 30 characters per line
     const numLines =
-      item.finalizer.length < 40
+      address.length < 40
         ? 2
-        : item.finalizer.length / (dimensions.width < 500 ? 21 : 30);
+        : address.length / (dimensions.width < 500 ? 21 : 30);
     return (
       <View style={styles.row} key={`tag-${index}`}>
         <View style={rowStyle(last)}>
@@ -235,7 +256,7 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
             )}
             <TouchableOpacity
               onPress={() => {
-                Clipboard.setString(item.finalizer);
+                Clipboard.setString(address);
                 addLastSnackbar({
                   message: translate('history.addresscopied') as string,
                   duration: SnackbarDurationEnum.short,
@@ -246,26 +267,26 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
             >
               <View style={styles.addressCol}>
                 <AddressItem
-                  address={item.finalizer}
+                  address={address}
                   screenName={screenName}
                   oneLine={true}
                   onlyContact={true}
                   withIcon={true}
                 />
-                {!expandAddress[index] && !!item.finalizer && (
+                {!expandAddress[index] && !!address && (
                   <RegText>
-                    {item.finalizer.length > (dimensions.width < 500 ? 10 : 20)
+                    {address.length > (dimensions.width < 500 ? 10 : 20)
                       ? Utils.trimToSmall(
-                          item.finalizer,
+                          address,
                           dimensions.width < 500 ? 5 : 10,
                         )
-                      : item.finalizer}
+                      : address}
                   </RegText>
                 )}
                 {expandAddress[index] &&
-                  !!item.finalizer &&
+                  !!address &&
                   Utils.splitStringIntoChunks(
-                    item.finalizer,
+                    address,
                     Number(numLines.toFixed(0)),
                   ).map((c: string, idx: number) => (
                     <RegText key={idx}>{c}</RegText>
@@ -402,7 +423,9 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
                 {!!pieAmounts && !!pieAmounts.length && (
                   <>
                     <PieChart
-                      showExternalLabels={true}
+                      data={chartData}
+                      isAnimated={false}
+                      showExternalLabels={chartData.length <= 25}
                       labelLineConfig={{
                         thickness: 1,
                         avoidOverlappingOfLabels: true,
@@ -417,7 +440,6 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
                       showText
                       externalLabelComponent={renderExternalLabel}
                       textBackgroundColor={colors.bgCanvas}
-                      data={pieAmounts}
                       innerRadius={dimensions.width * 0.14}
                     />
                     <View style={styles.totalRow}>
