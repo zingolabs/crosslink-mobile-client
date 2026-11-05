@@ -243,9 +243,14 @@ extension AppDelegate {
     }
     
     func scheduleBackgroundTask() {
-        // This method can be called as many times as needed, the previously submitted
-        // request will be overridden by the new one.
-        NSLog("BGTask scheduleBackgroundTask called")
+    guard UIApplication.shared.applicationState == .active else {
+      NSLog("BGTask scheduleBackgroundTask skipped: app not foreground")
+      return
+    }
+
+    // This method can be called as many times as needed, the previously submitted
+    // request will be overridden by the new one.
+    NSLog("BGTask scheduleBackgroundTask called")
         
         let request = BGProcessingTaskRequest(identifier: bcgTaskId)
         
@@ -278,9 +283,14 @@ extension AppDelegate {
     }
     
     func scheduleSchedulerBackgroundTask() {
-        // This method can be called as many times as needed, the previously submitted
-        // request will be overridden by the new one.
-        NSLog("BGTask scheduleSchedulerBackgroundTask called")
+    guard UIApplication.shared.applicationState == .active else {
+      NSLog("BGTask scheduleSchedulerBackgroundTask skipped: app not foreground")
+      return
+    }
+
+    // This method can be called as many times as needed, the previously submitted
+    // request will be overridden by the new one.
+    NSLog("BGTask scheduleSchedulerBackgroundTask called")
         
         let request = BGProcessingTaskRequest(identifier: bcgSchedulerTaskId)
         

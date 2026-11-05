@@ -84,7 +84,6 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
   const { privacy } = useSettings();
   const {
     staked,
-    globalStaked,
     info,
     scheduledActions,
     walletBonds,
@@ -120,8 +119,8 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
   }, [route.params, route.params?.tab]);
 
   useEffect(() => {
-    warmLifehashes([...staked, ...globalStaked].map(s => s.finalizer));
-  }, [staked, globalStaked]);
+    warmLifehashes(staked.map(s => s.finalizer));
+  }, [staked]);
 
   const hasMovements: boolean = useMemo(() => {
     if (!walletBonds) {

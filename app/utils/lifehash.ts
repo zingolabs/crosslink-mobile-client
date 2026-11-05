@@ -34,16 +34,21 @@ export function lifehashDataUrlFromStringSync(input: string) {
 
 export const lifehashCached = (input: string) => cache.get(input);
 
+const STEP_BUDGET_MS = 6;
+
 const step = () => {
-  const next = queue.shift();
-  if (next === undefined) {
-    draining = false;
-    return;
+  const started = Date.now();
+  while (queue.length > 0) {
+    const next = queue.shift() as string;
+    const url = lifehashDataUrlFromStringSync(next);
+    listeners.get(next)?.forEach(cb => cb(url));
+    listeners.delete(next);
+    if (Date.now() - started >= STEP_BUDGET_MS) {
+      setTimeout(step, 0);
+      return;
+    }
   }
-  const url = lifehashDataUrlFromStringSync(next);
-  listeners.get(next)?.forEach(cb => cb(url));
-  listeners.delete(next);
-  setTimeout(step, 0);
+  draining = false;
 };
 
 const drain = () => {
