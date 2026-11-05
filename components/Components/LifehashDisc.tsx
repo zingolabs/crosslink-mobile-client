@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import {
   Image,
+  ImageStyle,
   StyleProp,
   StyleSheet,
   View,
@@ -79,8 +80,12 @@ const LifehashDisc: React.FC<LifehashDiscProps> = ({
         <Image
           source={{ uri: placeholder }}
           resizeMode="cover"
-          blurRadius={Math.ceil(size / 3)}
-          style={StyleSheet.absoluteFill}
+          style={[
+            StyleSheet.absoluteFill,
+            {
+              filter: [{ blur: Math.ceil(size / 5) }],
+            } as StyleProp<ImageStyle>,
+          ]}
         />
       )}
       {!!placeholder && (
