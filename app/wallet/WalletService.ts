@@ -12,9 +12,7 @@ import {
   TransparentAddressClass,
   ValueTransferKindEnum,
   ServerType,
-  StakeType,
   StakingActionType,
-  WalletBondsType,
   StakingActionKindEnum,
   IndexerNetworkEnum,
 } from '../AppState';
@@ -45,9 +43,9 @@ import {
 } from './enums';
 import { StakeJsonToTypeType } from '../AppState/types/ValueTransferType';
 import { reverseHex32Bytes } from '../utils/hex';
-import { WalletBondsStatusEnum } from '../AppState/enums/WalletBondsStatusEnum';
 import { keepAwake } from '../keepAwake';
 import { read } from '../store/appStore';
+import { buildStakedData } from './stakedData';
 import {
   setAllAddresses,
   setGlobalStaked,
@@ -88,6 +86,8 @@ export default class WalletService {
   fetchTandZandOValueTransfersLock: boolean;
   fetchTotalBalanceLock: boolean;
   fetchStakedLock: boolean;
+  lastStakedRosterStr: string;
+  lastStakedBondsStr: string;
   fetchAddressesLock: boolean;
   refreshSyncLock: boolean;
   fetchSyncStatusLock: boolean;
@@ -135,6 +135,8 @@ export default class WalletService {
     this.fetchTandZandOValueTransfersLock = false;
     this.fetchTotalBalanceLock = false;
     this.fetchStakedLock = false;
+    this.lastStakedRosterStr = '';
+    this.lastStakedBondsStr = '';
     this.fetchAddressesLock = false;
     this.refreshSyncLock = false;
     this.fetchSyncStatusLock = false;
@@ -1215,21 +1217,8 @@ export default class WalletService {
         return;
       }
 
-      const rosterInfo = JSON.parse(rosterInfoStr) as {
-        roster_members: Array<StakedType>;
-      };
-
-      const start3 = Date.now();
       const walletBondsStr: string = await RPCModule.getWalletBondsInfo();
 
-      if (Date.now() - start3 > 4000) {
-        console.log(
-          '=========================================== > wallet bonds - ',
-          Date.now() - start3,
-        );
-      }
-
-      //console.log(valueTransfersStr);
       if (walletBondsStr) {
         if (walletBondsStr.toLowerCase().startsWith(GlobalConst.error)) {
           console.log(`Error wallet bonds ${walletBondsStr}`);
@@ -1242,67 +1231,32 @@ export default class WalletService {
         this.fetchStakedLock = false;
         return;
       }
+
+      if (
+        rosterInfoStr === this.lastStakedRosterStr &&
+        walletBondsStr === this.lastStakedBondsStr
+      ) {
+        this.fetchStakedLock = false;
+        return;
+      }
+      this.lastStakedRosterStr = rosterInfoStr;
+      this.lastStakedBondsStr = walletBondsStr;
+
+      const rosterInfo = JSON.parse(rosterInfoStr) as {
+        roster_members: Array<StakedType>;
+      };
       const walletBondsJSON = JSON.parse(walletBondsStr) as {
         bonds: Array<WalletBondsInfoType>;
       };
 
-      const globalStakedList: StakeType[] = (
-        rosterInfo.roster_members ?? []
-      ).map(m => ({
-        finalizer: m.pubkey, // TODO: RENAME PLS
-        votingPower: (m.voting_power || 0) / 10 ** 8,
-      }));
+      const { globalStaked, walletBonds, staked } = buildStakedData(
+        rosterInfo.roster_members ?? [],
+        walletBondsJSON.bonds ?? [],
+      );
 
-      const walletBondsList: WalletBondsType[] = (
-        walletBondsJSON.bonds ?? []
-      ).map(m => ({
-        txid: m.created_in_txid,
-        pubKey: m.bond_key,
-        amount: (m.amount_zats || 0) / 10 ** 8,
-        status:
-          m.status === 0
-            ? WalletBondsStatusEnum.Active
-            : m.status === 1
-              ? WalletBondsStatusEnum.Unbonding
-              : m.status === 2
-                ? WalletBondsStatusEnum.Withdrawn
-                : WalletBondsStatusEnum.Active, // can be an error here
-        finalizer: m.finalizer,
-      }));
-
-      const stakedList: StakeType[] = (rosterInfo.roster_members ?? [])
-        .filter(
-          m =>
-            walletBondsList.filter(
-              b =>
-                m.pubkey === b.finalizer &&
-                (b.status === WalletBondsStatusEnum.Active ||
-                  b.status === WalletBondsStatusEnum.Unbonding),
-            ).length > 0,
-        )
-        .map(m => {
-          const amount = walletBondsList
-            .filter(
-              b =>
-                m.pubkey === b.finalizer &&
-                (b.status === WalletBondsStatusEnum.Active ||
-                  b.status === WalletBondsStatusEnum.Unbonding),
-            )
-            .reduce((acc, curr) => acc + curr.amount, 0);
-          return {
-            finalizer: m.pubkey,
-            votingPower: amount || 0,
-          };
-        });
-
-      //console.log('GLOBAL STAKED', globalStakedList);
-      //console.log('STAKED', stakedList);
-      //console.log('BONDS', walletBondsList);
-      //console.log('ROSTER', rosterInfo);
-
-      setStaked(stakedList);
-      setGlobalStaked(globalStakedList);
-      setWalletBonds(walletBondsList);
+      setStaked(staked);
+      setGlobalStaked(globalStaked);
+      setWalletBonds(walletBonds);
 
       this.fetchStakedLock = false;
     } catch (error) {
