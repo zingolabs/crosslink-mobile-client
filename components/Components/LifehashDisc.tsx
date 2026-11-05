@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   Image,
   StyleProp,
@@ -6,11 +6,17 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import Animated, { FadeIn, useReducedMotion } from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  useReducedMotion,
+  withTiming,
+} from 'react-native-reanimated';
 
-import { duration, useTheme } from '../../app/theme';
+import { useTheme } from '../../app/theme';
 import {
-  lifehashCached,
   lifehashDefaultDataUrl,
   useLifehash,
 } from '../../app/utils/lifehash';
@@ -21,6 +27,8 @@ type LifehashDiscProps = {
   style?: StyleProp<ViewStyle>;
 };
 
+const GREY_OPACITY = 0.4;
+
 const LifehashDisc: React.FC<LifehashDiscProps> = ({
   finalizer,
   size,
@@ -29,8 +37,30 @@ const LifehashDisc: React.FC<LifehashDiscProps> = ({
   const { colors } = useTheme();
   const reduced = useReducedMotion();
   const uri = useLifehash(finalizer);
-  const [late] = useState(() => !!finalizer && !lifehashCached(finalizer));
+  const progress = useSharedValue(0);
+  const loaded = !!uri;
   const placeholder = finalizer ? lifehashDefaultDataUrl() : null;
+
+  useEffect(() => {
+    if (!loaded) {
+      return;
+    }
+    if (reduced) {
+      progress.set(1);
+      return;
+    }
+    progress.set(
+      withTiming(1, { duration: 200, easing: Easing.bezier(0.23, 1, 0.32, 1) }),
+    );
+  }, [loaded, progress, reduced]);
+
+  const imageStyle = useAnimatedStyle(() => ({
+    opacity: progress.get(),
+  }));
+
+  const recoveryStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(progress.get(), [0, 1], [GREY_OPACITY, 0]),
+  }));
 
   return (
     <View
@@ -45,22 +75,36 @@ const LifehashDisc: React.FC<LifehashDiscProps> = ({
         style,
       ]}
     >
-      {!!placeholder && !uri && (
+      {!!placeholder && (
         <Image
           source={{ uri: placeholder }}
           resizeMode="cover"
           blurRadius={Math.ceil(size / 3)}
-          style={styles.placeholder}
+          style={StyleSheet.absoluteFill}
         />
       )}
-      {!!uri && (
+      {!!placeholder && (
+        <View
+          style={[
+            StyleSheet.absoluteFill,
+            { backgroundColor: colors.bgSurfaceRaised, opacity: GREY_OPACITY },
+          ]}
+        />
+      )}
+      {loaded && (
         <Animated.Image
-          entering={
-            late && !reduced ? FadeIn.duration(duration.press) : undefined
-          }
           source={{ uri }}
           resizeMode="cover"
-          style={{ width: size, height: size }}
+          style={[StyleSheet.absoluteFill, imageStyle]}
+        />
+      )}
+      {loaded && (
+        <Animated.View
+          style={[
+            StyleSheet.absoluteFill,
+            { backgroundColor: colors.bgSurfaceRaised },
+            recoveryStyle,
+          ]}
         />
       )}
     </View>
@@ -70,10 +114,6 @@ const LifehashDisc: React.FC<LifehashDiscProps> = ({
 const styles = StyleSheet.create({
   disc: {
     overflow: 'hidden',
-  },
-  placeholder: {
-    ...StyleSheet.absoluteFillObject,
-    transform: [{ scale: 1.15 }],
   },
 });
 
