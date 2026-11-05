@@ -22,6 +22,15 @@ const render = (input: string) => {
   return img.toDataUrl();
 };
 
+let defaultDataUrl: string | null = null;
+
+export const lifehashDefaultDataUrl = (): string => {
+  if (!defaultDataUrl) {
+    defaultDataUrl = render('delegator-placeholder');
+  }
+  return defaultDataUrl;
+};
+
 export function lifehashDataUrlFromStringSync(input: string) {
   const hit = cache.get(input);
   if (hit) {

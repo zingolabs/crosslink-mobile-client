@@ -1,9 +1,19 @@
 import React, { useState } from 'react';
-import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import {
+  Image,
+  StyleProp,
+  StyleSheet,
+  View,
+  ViewStyle,
+} from 'react-native';
 import Animated, { FadeIn, useReducedMotion } from 'react-native-reanimated';
 
 import { duration, useTheme } from '../../app/theme';
-import { lifehashCached, useLifehash } from '../../app/utils/lifehash';
+import {
+  lifehashCached,
+  lifehashDefaultDataUrl,
+  useLifehash,
+} from '../../app/utils/lifehash';
 
 type LifehashDiscProps = {
   finalizer: string;
@@ -20,6 +30,7 @@ const LifehashDisc: React.FC<LifehashDiscProps> = ({
   const reduced = useReducedMotion();
   const uri = useLifehash(finalizer);
   const [late] = useState(() => !!finalizer && !lifehashCached(finalizer));
+  const placeholder = finalizer ? lifehashDefaultDataUrl() : null;
 
   return (
     <View
@@ -34,6 +45,14 @@ const LifehashDisc: React.FC<LifehashDiscProps> = ({
         style,
       ]}
     >
+      {!!placeholder && !uri && (
+        <Image
+          source={{ uri: placeholder }}
+          resizeMode="cover"
+          blurRadius={Math.ceil(size / 3)}
+          style={styles.placeholder}
+        />
+      )}
       {!!uri && (
         <Animated.Image
           entering={
@@ -51,6 +70,10 @@ const LifehashDisc: React.FC<LifehashDiscProps> = ({
 const styles = StyleSheet.create({
   disc: {
     overflow: 'hidden',
+  },
+  placeholder: {
+    ...StyleSheet.absoluteFillObject,
+    transform: [{ scale: 1.15 }],
   },
 });
 
