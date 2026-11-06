@@ -115,8 +115,8 @@ android {
         applicationId 'org.ZingoLabs.ZingoDelegator' // Real
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode = Integer.parseInt(project.findProperty("appVersionCode") ?: "41")
-        versionName = project.findProperty("appVersionName") ?: "zingodelegator-0.0.4"
+        versionCode = Integer.parseInt(project.findProperty("appVersionCode") ?: "42")
+        versionName = project.findProperty("appVersionName") ?: "zingodelegator-0.0.5"
         testBuildType System.getProperty('testBuildType', 'debug')
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         externalNativeBuild {
