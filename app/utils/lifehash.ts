@@ -73,25 +73,24 @@ export function warmLifehashes(inputs: string[]) {
 }
 
 export function useLifehash(input: string): string {
-  const [url, setUrl] = useState(() => (input && cache.get(input)) || '');
+  const [rendered, setRendered] = useState<{ input: string; url: string }>(
+    () => ({ input, url: (input && cache.get(input)) || '' }),
+  );
+  const cached = input ? cache.get(input) : undefined;
+  const url = cached ?? (rendered.input === input ? rendered.url : '');
 
   useEffect(() => {
-    if (!input) {
-      setUrl('');
+    if (!input || cache.has(input)) {
       return;
     }
-    const hit = cache.get(input);
-    if (hit) {
-      setUrl(hit);
-      return;
-    }
+    const listener: Listener = next => setRendered({ input, url: next });
     const set = listeners.get(input) ?? new Set<Listener>();
-    set.add(setUrl);
+    set.add(listener);
     listeners.set(input, set);
     queue.unshift(input);
     drain();
     return () => {
-      set.delete(setUrl);
+      set.delete(listener);
     };
   }, [input]);
 

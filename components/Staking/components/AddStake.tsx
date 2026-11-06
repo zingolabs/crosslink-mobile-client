@@ -29,10 +29,7 @@ import {
   emptySendPageState,
   StakingActionKindEnum,
 } from '../../../app/AppState';
-import {
-  useSettings,
-  useWalletData,
-} from '../../../app/store';
+import { useSettings, useWalletData } from '../../../app/store';
 import Utils from '../../../app/utils';
 import FadeText from '../../Components/FadeText';
 import ZecAmount from '../../Components/ZecAmount';
@@ -56,14 +53,19 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { privacy } = useSettings();
-  const { totalBalance, info, globalStaked, stakingDay, scheduledActions } = useWalletData();
+  const { totalBalance, info, globalStaked, stakingDay, scheduledActions } =
+    useWalletData();
 
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [modalState, setModalState] = useState<ModalState>('idle');
   const [finalizerText, setFinalizerText] = useState<string>('');
-  const [stakedNumber, setStakedNumber] = useState<number>(0);
   const [kbOpen, setKbOpen] = useState<boolean>(false);
-  const [spendable, setSpendable] = useState<number>(0);
+  const spendable: number =
+    totalBalance && typeof totalBalance.totalSpendableBalance === 'number'
+      ? totalBalance.totalSpendableBalance
+      : 0;
+  const stakedNumber: number =
+    globalStaked.find(g => g.finalizer === finalizerText)?.votingPower ?? 0;
 
   const hasSelection = selectedAmount !== null;
 
@@ -77,26 +79,6 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
       s2.remove();
     };
   }, []);
-
-  useEffect(() => {
-    // Balance check (in cTAZ / ZEC units)
-    const _spendable =
-      totalBalance && typeof totalBalance.totalSpendableBalance === 'number'
-        ? totalBalance.totalSpendableBalance
-        : 0;
-    setSpendable(_spendable);
-  }, [totalBalance, totalBalance?.totalSpendableBalance]);
-
-  useEffect(() => {
-    // looking for the voting power of the finalizer.
-    if (globalStaked.filter(g => g.finalizer === finalizerText).length === 1) {
-      setStakedNumber(
-        globalStaked.filter(g => g.finalizer === finalizerText)[0].votingPower,
-      );
-    } else {
-      setStakedNumber(0);
-    }
-  }, [finalizerText, globalStaked]);
 
   const handleConfirmStake = async () => {
     if (!hasSelection) {
@@ -275,7 +257,6 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
                     style={{ marginLeft: 5 }}
                     onPress={() => {
                       setFinalizerText('');
-                      setStakedNumber(0);
                     }}
                   >
                     <View
@@ -308,9 +289,8 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
           <ChevronDown
             onPress={() =>
               navigation.navigate(RouteEnum.Finalizers, {
-                setFinalizer: (f: string, s: number) => {
+                setFinalizer: (f: string) => {
                   setFinalizerText(f);
-                  setStakedNumber(s);
                 },
                 scope: 'network',
                 exclude: '',

@@ -26,10 +26,8 @@ const DEFAULT_ROOTS = [
   'index.js',
   'app',
   'components',
-  'prototypes',
   '__tests__',
   '__mocks__',
-  '.storybook',
   '.rnstorybook',
 ];
 const SKIP_DIRS = new Set(['node_modules']);

@@ -101,6 +101,13 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
 
   const [loading] = useState(false);
   const [tab, setTab] = useState<StakingTab>(tabParam);
+  const [seenParams, setSeenParams] = useState(route.params);
+  if (route.params !== seenParams) {
+    setSeenParams(route.params);
+    if (route.params?.tab) {
+      setTab(route.params.tab);
+    }
+  }
   const [isAtTop, setIsAtTop] = useState<boolean>(true);
   const [isScrollingToTop, setIsScrollingToTop] = useState<boolean>(false);
   const [scrollToTopSignal, setScrollToTopSignal] = useState<number>(0);
@@ -111,12 +118,6 @@ const Staking: React.FC<StakingProps> = ({ route }) => {
     width: Dimensions.get('window').width,
     height: Dimensions.get('window').height,
   };
-
-  useEffect(() => {
-    if (route.params && route.params.tab) {
-      setTab(route.params.tab);
-    }
-  }, [route.params, route.params?.tab]);
 
   useEffect(() => {
     warmLifehashes(staked.map(s => s.finalizer));

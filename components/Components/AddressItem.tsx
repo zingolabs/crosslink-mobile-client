@@ -1,16 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
-import {
-  useFeedback,
-  useSettings,
-  useStatus,
-} from '../../app/store';
+import { useFeedback, useSettings, useStatus } from '../../app/store';
 import RegText from './RegText';
 import Utils from '../../app/utils';
 import {
@@ -52,36 +43,25 @@ const AddressItem: React.FunctionComponent<AddressItemProps> = ({
   const { colors } = useTheme();
 
   const [expandAddress, setExpandAddress] = useState<boolean>(false);
-  const [numLinesAddress, setNumLinesAddress] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [seenPrivacy, setSeenPrivacy] = useState<boolean>(privacy);
+  const numLinesAddress = address
+    ? address.length < 50
+      ? 2
+      : address.length / 30
+    : 0;
 
-  useEffect(() => {
-    const numLinesAdd = address
-      ? address.length < 50
-        ? 2
-        : address.length / 30
-      : 0;
-    setNumLinesAddress(numLinesAdd);
-    setLoading(false);
-    // the address prop make no sense that it is going to change,
-    // but the address book can change in any moment.
-  }, [address]);
-
-  useEffect(() => {
-    if (!oneLine) {
-      if (privacy) {
-        setExpandAddress(false);
-      }
+  if (privacy !== seenPrivacy) {
+    setSeenPrivacy(privacy);
+    if (privacy && !oneLine) {
+      setExpandAddress(false);
     }
-  }, [oneLine, privacy]);
+  }
 
   //console.log('addressItem - render');
 
   return (
     <>
-      {loading ? (
-        <ActivityIndicator size="small" color={colors.fgAccent} />
-      ) : (
+      {
         <View style={styles.row}>
           <View
             style={[styles.addressCol, onlyContact && styles.addressColTight]}
@@ -146,7 +126,7 @@ const AddressItem: React.FunctionComponent<AddressItemProps> = ({
               </TouchableOpacity>
             )}
         </View>
-      )}
+      }
     </>
   );
 };

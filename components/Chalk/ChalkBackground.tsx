@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   PixelRatio,
   Platform,
@@ -169,14 +169,10 @@ const ChalkShader: React.FC<ChalkShaderProps> = ({
   style,
 }) => {
   const clock = useSharedValue(0);
-  const tick = useCallback(
-    (info: FrameInfo) => {
-      'worklet';
-      clock.value = info.timeSinceFirstFrame;
-    },
-    [clock],
-  );
-  const frame = useFrameCallback(tick, !frozen);
+  const frame = useFrameCallback((info: FrameInfo) => {
+    'worklet';
+    clock.set(info.timeSinceFirstFrame);
+  }, !frozen);
 
   useEffect(() => {
     frame.setActive(!frozen);
@@ -232,20 +228,16 @@ const ChalkBackground: React.FC<ChalkBackgroundProps> = ({
   const surfaceWidth = Math.round(width * scale);
   const surfaceHeight = Math.round(height * scale);
   const frozen = reveal.frozen;
-  const [still, setStill] = useState<SkImage | null>(null);
-
-  useEffect(() => {
+  const still = useMemo<SkImage | null>(() => {
     if (!frozen || !effect || surfaceWidth === 0 || surfaceHeight === 0) {
-      return;
+      return null;
     }
-    setStill(
-      renderStill(
-        effect,
-        surfaceWidth,
-        surfaceHeight,
-        pixelRatio,
-        stillUniforms(surfaceWidth, surfaceHeight, surfacePixelRatio, baseline),
-      ),
+    return renderStill(
+      effect,
+      surfaceWidth,
+      surfaceHeight,
+      pixelRatio,
+      stillUniforms(surfaceWidth, surfaceHeight, surfacePixelRatio, baseline),
     );
   }, [
     frozen,

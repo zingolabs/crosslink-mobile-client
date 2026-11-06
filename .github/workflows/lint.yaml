@@ -7,8 +7,6 @@ jobs:
   eslint:
     name: ESLint
     runs-on: ubuntu-24.04
-    # Non-blocking until the pre-existing React Compiler rule violations are fixed.
-    continue-on-error: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -25,8 +23,6 @@ jobs:
   react-compiler:
     name: React Compiler
     runs-on: ubuntu-24.04
-    # Non-blocking until the pre-existing compiler bailouts are fixed.
-    continue-on-error: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5

@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   ScrollView,
@@ -31,11 +31,7 @@ import {
 import Utils from '../../../app/utils';
 import ZecAmount from '../../Components/ZecAmount';
 import { SessionStackParamList } from '../../../app/types';
-import {
-  useFeedback,
-  useSettings,
-  useWalletData,
-} from '../../../app/store';
+import { useFeedback, useSettings, useWalletData } from '../../../app/store';
 import { KindIcon, isIncoming } from './TxRow';
 import { Copy as CopyIcon } from 'lucide-react-native';
 import { ValueTransferStatusEnum } from '../../../app/wallet/enums';
@@ -139,18 +135,21 @@ const ValueTransferDetail: React.FunctionComponent<
 
   const insets = useSafeAreaInsets();
 
-  const [valueTransfer, setValueTransfer] = useState<ValueTransferType>(
-    !!route.params && route.params.vt !== undefined
-      ? route.params.vt
-      : ({} as ValueTransferType),
+  const routeVt = route.params?.vt;
+  const valueTransfer: ValueTransferType = useMemo(
+    () => routeVt ?? ({} as ValueTransferType),
+    [routeVt],
   );
-  const [totalLength, setTotalLength] = useState<number>(
+  const totalLength: number =
     !!route.params && route.params.totalLength !== undefined
       ? route.params.totalLength
-      : 0,
-  );
-  const [showNavigator, setShowNavigator] = useState<boolean>(true); // by default
-  const isTheFirstMount = useRef(true);
+      : 0;
+  const [openedWith] = useState<number>(totalLength);
+  const [showNavigator, setShowNavigator] = useState<boolean>(true);
+
+  if (showNavigator && totalLength !== openedWith) {
+    setShowNavigator(false);
+  }
 
   const memo = valueTransfer.memos;
 
@@ -164,33 +163,6 @@ const ValueTransferDetail: React.FunctionComponent<
   useEffect(() => {
     Utils.setMomentLocale(language);
   }, [language]);
-
-  useEffect(() => {
-    const _vt =
-      !!route.params && route.params.vt !== undefined
-        ? route.params.vt
-        : ({} as ValueTransferType);
-    const _totalLength =
-      !!route.params && route.params.totalLength !== undefined
-        ? route.params.totalLength
-        : 0;
-    setValueTransfer(_vt);
-    setTotalLength(_totalLength);
-  }, [route, route.params, route.params?.vt, route.params?.totalLength]);
-
-  // if the App is syncing, the VT list will change (new items).
-  // Hide the navigator is the solution because the current index
-  // will be associated to other item.
-  useEffect(() => {
-    if (isTheFirstMount.current) {
-      isTheFirstMount.current = false;
-      return;
-    }
-    if (showNavigator) {
-      setShowNavigator(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [totalLength]);
 
   const copy = (value: string, message: string) => {
     Clipboard.setString(value);

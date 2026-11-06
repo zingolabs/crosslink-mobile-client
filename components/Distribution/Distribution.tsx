@@ -17,11 +17,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import RegText from '../Components/RegText';
 import ZecAmount from '../Components/ZecAmount';
 import { SessionStackParamList } from '../../app/types';
-import {
-  useFeedback,
-  useSettings,
-  useWalletData,
-} from '../../app/store';
+import { useFeedback, useSettings, useWalletData } from '../../app/store';
 import Utils from '../../app/utils';
 import FadeText from '../Components/FadeText';
 import { HeaderTitle } from '../Header';
@@ -146,8 +142,7 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
       setExpandAddress(newExpandAddress);
       setLoading(false);
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [colors.fgMuted, globalStaked, staked, tab]);
+  }, [colors.bgMuted, globalStaked, randomColors, staked, tab]);
 
   const selectExpandAddress = (index: number) => {
     let newExpandAddress = Array(expandAddress.length).fill(false);

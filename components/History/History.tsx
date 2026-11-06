@@ -180,10 +180,10 @@ const History: React.FunctionComponent<HistoryProps> = ({
 
   useEffect(() => {
     if (scrollToTop) {
-      handleScrollToTop();
+      listRef.current?.scrollToOffset({ offset: 0, animated: true });
       setScrollToTop(false);
     }
-  }, [scrollToTop, handleScrollToTop, setScrollToTop]);
+  }, [scrollToTop, setScrollToTop]);
 
   const handleScroll = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
