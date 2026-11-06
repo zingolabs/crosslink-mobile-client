@@ -60,13 +60,18 @@ const CustomIndexer: React.FC<CustomIndexerProps> = ({
   const screenName = ScreenEnum.Servers;
 
   const [value, setValue] = useState('');
-  const [status, setStatus] = useState<Status>({ state: 'idle' });
+  const [probed, setProbed] = useState<{ key: string; status: Status }>({
+    key: '',
+    status: { state: 'idle' },
+  });
   const [connecting, setConnecting] = useState(false);
   const runRef = useRef(0);
 
   const endpoint = parseEndpoint(value);
   const complete = isCompleteEndpoint(endpoint);
   const key = formatEndpoint(endpoint);
+  const status: Status =
+    probed.key === key ? probed.status : { state: 'idle' };
 
   const check = useCallback(async () => {
     const e = parseEndpoint(value);
@@ -74,24 +79,27 @@ const CustomIndexer: React.FC<CustomIndexerProps> = ({
       return;
     }
     const run = ++runRef.current;
-    setStatus({ state: 'checking' });
+    const k = formatEndpoint(e);
+    setProbed({ key: k, status: { state: 'checking' } });
     const found = await probe(endpointUri(e));
     if (run !== runRef.current) {
       return;
     }
-    setStatus(
-      found
+    setProbed({
+      key: k,
+      status: found
         ? { state: 'online', latencyMs: found.latencyMs }
         : { state: 'offline' },
-    );
+    });
   }, [value, probe]);
 
   const checkRef = useRef(check);
-  checkRef.current = check;
+  useEffect(() => {
+    checkRef.current = check;
+  }, [check]);
 
   useEffect(() => {
     runRef.current++;
-    setStatus({ state: 'idle' });
     if (!complete) {
       return;
     }

@@ -30,7 +30,8 @@ export type ChalkReveal = {
 export const useChalkIntro = (ready = true, still = false): ChalkReveal => {
   const reducedMotion = useReducedMotion();
   const skip = reducedMotion || still;
-  const [frozen, setFrozen] = useState<boolean>(skip);
+  const [settled, setSettled] = useState<boolean>(false);
+  const frozen = skip || settled;
   const lights = useSharedValue(skip ? 1 : 0);
   const columns = useSharedValue(skip ? 1 : 0);
   const line = useSharedValue(skip ? 1 : 0);
@@ -48,7 +49,6 @@ export const useChalkIntro = (ready = true, still = false): ChalkReveal => {
       title.value = 1;
       ui.value = 1;
       secondary.value = 1;
-      setFrozen(true);
       return;
     }
     if (!ready) {
@@ -85,7 +85,7 @@ export const useChalkIntro = (ready = true, still = false): ChalkReveal => {
       START + 3400 + UI_DELAY + SECONDARY_DELAY,
       withTiming(1, { duration: 650, easing: EASE_OUT }),
     );
-    const t = setTimeout(() => setFrozen(true), SETTLE_MS);
+    const t = setTimeout(() => setSettled(true), SETTLE_MS);
     return () => clearTimeout(t);
   }, [skip, ready, lights, columns, line, flash, title, ui, secondary]);
 

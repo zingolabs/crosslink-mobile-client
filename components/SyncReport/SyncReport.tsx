@@ -81,15 +81,33 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
   const [maxBlocks, setMaxBlocks] = useState<number>(0);
   const [points, setPoints] = useState<number[]>([]);
   const [labels, setLabels] = useState<string[]>([]);
-  const [serverServer, setServerServer] = useState<number>(0);
-  const [serverWallet, setServerWallet] = useState<number>(0);
-  const [server1Percent, setServer1Percent] = useState<number>(0);
-  const [server2Percent, setServer2Percent] = useState<number>(0);
-  const [server3Percent, setServer3Percent] = useState<number>(0);
+  const serv1: number = wallet.birthday || 0;
+  const serv2: number =
+    info.latestBlock && wallet.birthday ? info.latestBlock - wallet.birthday : 0;
+  const serv3: number = maxBlocks ? maxBlocks - serv1 - serv2 : 0;
+  const server1Percent: number = (serv1 * 100) / maxBlocks;
+  const server2Percent: number = (serv2 * 100) / maxBlocks;
+  const server3Percent: number = (serv3 * 100) / maxBlocks;
+  const serverServer: number = info.latestBlock || 0;
+  const serverWallet: number = serv2;
 
-  const [percentageOutputsScanned, setPercentageOutputsScanned] =
-    useState<number>(0);
-  const [syncInProgress, setSyncInProgress] = useState<boolean>(true);
+  const outputsScanned: number =
+    syncingStatus?.percentage_total_outputs_scanned ?? 0;
+  const waitingForSync =
+    !syncingStatus ||
+    isEqual(syncingStatus, {} as SyncStatusType) ||
+    (!!syncingStatus.scan_ranges && syncingStatus.scan_ranges.length === 0) ||
+    outputsScanned === 0;
+  const percentageOutputsScanned: number = waitingForSync
+    ? 0
+    : outputsScanned < 0.01
+      ? 0.01
+      : Number(outputsScanned.toFixed(2).replace(/\.?0+$/, ''));
+  const syncInProgress: boolean = waitingForSync
+    ? true
+    : !!syncingStatus.scan_ranges &&
+      syncingStatus.scan_ranges.length > 0 &&
+      outputsScanned < 100;
 
   useEffect(() => {
     Utils.setMomentLocale(language);
@@ -137,77 +155,6 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
       })();
     }
   }, [info.latestBlock]);
-
-  useEffect(() => {
-    if (
-      !syncingStatus ||
-      isEqual(syncingStatus, {} as SyncStatusType) ||
-      (!!syncingStatus.scan_ranges && syncingStatus.scan_ranges.length === 0) ||
-      syncingStatus.percentage_total_outputs_scanned === 0
-    ) {
-      // if the App is waiting for the first fetching, let's put 0.
-      setPercentageOutputsScanned(0);
-      setSyncInProgress(true);
-    } else {
-      setPercentageOutputsScanned(
-        syncingStatus.percentage_total_outputs_scanned &&
-          syncingStatus.percentage_total_outputs_scanned < 0.01
-          ? 0.01
-          : Number(
-              syncingStatus.percentage_total_outputs_scanned
-                ?.toFixed(2)
-                .replace(/\.?0+$/, ''),
-            ),
-      );
-      setSyncInProgress(
-        !!syncingStatus.scan_ranges &&
-          syncingStatus.scan_ranges.length > 0 &&
-          !!syncingStatus.percentage_total_outputs_scanned &&
-          syncingStatus.percentage_total_outputs_scanned < 100,
-      );
-    }
-  }, [
-    syncingStatus,
-    syncingStatus.percentage_total_outputs_scanned,
-    syncingStatus.scan_ranges,
-  ]);
-
-  useEffect(() => {
-    /*
-    SERVER points:
-    - server0 : first block of the server -> 0
-    - server1 : wallet's birthday
-    - server2 : server last block
-    - server3 : empty part of the server bar
-    */
-
-    const serv1: number = wallet.birthday || 0;
-    const serv2: number =
-      info.latestBlock && wallet.birthday
-        ? info.latestBlock - wallet.birthday
-        : 0;
-    const serv3: number = maxBlocks ? maxBlocks - serv1 - serv2 : 0;
-    const serv1Percent: number = (serv1 * 100) / maxBlocks;
-    const serv2Percent: number = (serv2 * 100) / maxBlocks;
-    const serv3Percent: number = (serv3 * 100) / maxBlocks;
-
-    /*
-      serverServer : blocks of the server
-      serverWallet : blocks of the wallet
-    */
-
-    const servServer: number = info.latestBlock || 0;
-    const servWallet: number =
-      info.latestBlock && wallet.birthday
-        ? info.latestBlock - wallet.birthday
-        : 0;
-
-    setServerServer(servServer);
-    setServerWallet(servWallet);
-    setServer1Percent(serv1Percent);
-    setServer2Percent(serv2Percent);
-    setServer3Percent(serv3Percent);
-  }, [maxBlocks, info.latestBlock, wallet.birthday]);
 
   const reportError = (error: string) => {
     createAlert(

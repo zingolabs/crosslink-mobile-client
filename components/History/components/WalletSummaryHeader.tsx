@@ -1,7 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import {
+  Animated,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  useAnimatedValue,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { isEqual } from 'lodash';
 
 import {
   useFeedback,
@@ -10,7 +15,7 @@ import {
   useWalletData,
 } from '../../../app/store';
 import { RouteEnum, SelectServerEnum } from '../../../app/AppState';
-import { SyncStatusType } from '../../../app/wallet/types';
+import { syncProgress } from '../../../app/wallet/syncProgress';
 import ZecAmount from '../../Components/ZecAmount';
 import FadeText from '../../Components/FadeText';
 import { space, text, useTheme } from '../../../app/theme';
@@ -30,44 +35,11 @@ const WalletSummaryHeader: React.FC<WalletSummaryHeaderProps> = ({
   const { totalBalance, info, syncingStatus } = useWalletData();
   const { netInfo } = useStatus();
 
-  const [percentageOutputsScanned, setPercentageOutputsScanned] =
-    useState<number>(0);
-  const [syncInProgress, setSyncInProgress] = useState<boolean>(true);
+  const { percentage: percentageOutputsScanned, inProgress: syncInProgress } =
+    syncProgress(syncingStatus);
 
-  const opacityValue = useRef(new Animated.Value(1)).current;
+  const opacityValue = useAnimatedValue(1);
   const animationRef = useRef<Animated.CompositeAnimation | null>(null);
-
-  // Compute sync percentage
-  useEffect(() => {
-    const percentage: number =
-      syncingStatus.percentage_total_outputs_scanned ||
-      syncingStatus.percentage_total_blocks_scanned ||
-      0;
-    if (
-      !syncingStatus ||
-      isEqual(syncingStatus, {} as SyncStatusType) ||
-      (!!syncingStatus.scan_ranges && syncingStatus.scan_ranges.length === 0) ||
-      percentage === 0
-    ) {
-      setPercentageOutputsScanned(0);
-      setSyncInProgress(true);
-    } else {
-      const raw = percentage ?? 0;
-      const clamped =
-        raw < 0.01
-          ? 0.01
-          : raw > 99.99
-            ? 99.99
-            : Number(raw.toFixed(2).replace(/\.?0+$/, ''));
-
-      setPercentageOutputsScanned(clamped);
-      setSyncInProgress(
-        !!syncingStatus.scan_ranges &&
-          syncingStatus.scan_ranges.length > 0 &&
-          raw < 100,
-      );
-    }
-  }, [syncingStatus]);
 
   // Blinking animation when syncing
   useEffect(() => {

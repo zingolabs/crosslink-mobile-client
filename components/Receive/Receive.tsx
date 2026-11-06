@@ -36,7 +36,6 @@ import {
   ScreenEnum,
   RouteEnum,
 } from '../../app/AppState';
-import { AddressScopeEnum } from '../../app/wallet/enums';
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
@@ -77,15 +76,23 @@ const Receive: React.FunctionComponent<ReceiveProps> = (
   const screenName = ScreenEnum.Receive;
 
   const [index, setIndex] = useState<number>(0);
-  const [routes, setRoutes] = useState<{ key: string; title: string }[]>([]);
+  const routes = useMemo(
+    () => [{ key: 'uaddr', title: translate('receive.u-title') as string }],
+    [translate],
+  );
   const [sheetType, setSheetType] = useState<'NA' | 'VA' | 'TW' | 'EA' | null>(
     null,
   );
 
-  const [uAddr, setUAddr] = useState<UnifiedAddressClass[]>([]);
-  const [, setTAddr] = useState<TransparentAddressClass[]>([]);
-  const [uAddrIndex, setUAddrIndex] = useState<number | null>(null);
-  const [, setTAddrIndex] = useState<number | null>(null);
+  const uAddr = useMemo(
+    () =>
+      (addresses ?? []).filter(
+        (a: UnifiedAddressClass | TransparentAddressClass) =>
+          a.addressKind === AddressKindEnum.u,
+      ) as UnifiedAddressClass[],
+    [addresses],
+  );
+  const uAddrIndex: number | null = uAddr.length > 0 ? 0 : null;
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [indexBottomSheet, setIndexBottomSheet] = useState<number>(-1);
@@ -144,40 +151,6 @@ const Receive: React.FunctionComponent<ReceiveProps> = (
       !!keyboardDidHideListener && keyboardDidHideListener.remove();
     };
   }, [indexBottomSheet]);
-
-  useEffect(() => {
-    if (addresses && addresses.length > 0) {
-      console.log('addresses', addresses);
-
-      // we offering now two types:
-      // 1. UA
-      // 2. T
-      const uAdd =
-        addresses.filter(
-          (a: UnifiedAddressClass | TransparentAddressClass) =>
-            a.addressKind === AddressKindEnum.u,
-        ) || [];
-      // we are filtering only the `external` addresses... for now.
-      const tAdd =
-        addresses.filter(
-          (a: UnifiedAddressClass | TransparentAddressClass) =>
-            a.addressKind === AddressKindEnum.t &&
-            a.scope === AddressScopeEnum.external,
-        ) || [];
-      setUAddr(uAdd as UnifiedAddressClass[]);
-      setTAddr(tAdd as TransparentAddressClass[]);
-      // the first address of the list
-      setUAddrIndex(0);
-      setTAddrIndex(0);
-    }
-  }, [addresses]);
-
-  useEffect(() => {
-    const advancedModeRoutes = [
-      { key: 'uaddr', title: translate('receive.u-title') as string },
-    ];
-    setRoutes(advancedModeRoutes);
-  }, [translate]);
 
   const renderScene: (
     props: SceneRendererProps & {

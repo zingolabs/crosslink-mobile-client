@@ -36,25 +36,34 @@ const TextInputAddress: React.FunctionComponent<TextInputAddressProps> = ({
   const { indexerServer } = useSettings();
   const { colors } = useTheme();
 
-  const [validAddress, setValidAddress] = useState<number>(0); // 1 - OK, 0 - Empty, -1 - KO
+  const [checked, setChecked] = useState<{
+    address: string;
+    valid: boolean;
+  } | null>(null);
+  const validAddress: number = !address
+    ? 0
+    : checked?.address === address
+      ? checked.valid
+        ? 1
+        : -1
+      : 0;
 
   useEffect(() => {
-    const parseAddress = async (
-      addr: string,
-    ): Promise<{ isValid: boolean; onlyOrchardUA: string }> => {
-      return await Utils.isValidAddress(addr, indexerServer.chainName);
-    };
-
-    if (address) {
-      parseAddress(address).then(r => {
-        //console.log(r);
-        setValidAddress(r.isValid ? 1 : -1);
-        setError(r.isValid ? '' : (translate('send.invalidaddress') as string));
-      });
-    } else {
-      setValidAddress(0);
+    if (!address) {
       setError('');
+      return;
     }
+    let cancelled = false;
+    Utils.isValidAddress(address, indexerServer.chainName).then(r => {
+      if (cancelled) {
+        return;
+      }
+      setChecked({ address, valid: r.isValid });
+      setError(r.isValid ? '' : (translate('send.invalidaddress') as string));
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [address, indexerServer.chainName, setError, translate]);
 
   const setQrcodeModalShow = () => {

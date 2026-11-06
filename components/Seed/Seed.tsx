@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   ScrollView,
@@ -60,12 +60,11 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
 
   const SEED_LENGTH = 24;
 
-  const [rows, setRows] = useState<string[][]>([]);
 
   const insets = useSafeAreaInsets();
 
-  const [expandSeed, setExpandSeed] = useState<boolean>(true);
-  const [expandBirthday, setExpandBithday] = useState<boolean>(true);
+  const [birthdayShown, setBirthdayShown] = useState<boolean>(false);
+  const expandBirthday = !privacy || birthdayShown;
   const [seedBlurred, setSeedBlurred] = useState<boolean>(true);
   const reducedMotion = useReducedMotion();
 
@@ -100,42 +99,14 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
     loadUfvk();
   }, [getUfvk]);
 
-  useEffect(() => {
-    const seedTextArray: string[] = seedPhrase.split(' ');
-
-    //console.log(seedTextArray);
-    const _words = seedTextArray.slice(0, SEED_LENGTH);
-
-    if (_words.length > 0) {
-      const _rows: string[][] = [];
-      for (let i = 0; i < SEED_LENGTH; i += 3) {
-        _rows.push(_words.slice(i, i + 3));
-      }
-      setRows(_rows);
+  const rows = useMemo<string[][]>(() => {
+    const words = seedPhrase.split(' ').slice(0, SEED_LENGTH);
+    const out: string[][] = [];
+    for (let i = 0; i < SEED_LENGTH; i += 3) {
+      out.push(words.slice(i, i + 3));
     }
+    return out;
   }, [seedPhrase]);
-
-  useEffect(() => {
-    if (privacy) {
-      setExpandSeed(false);
-      setExpandBithday(false);
-    } else {
-      setExpandSeed(true);
-      setExpandBithday(true);
-    }
-  }, [privacy]);
-
-  useEffect(() => {
-    if (!expandSeed && !privacy) {
-      setExpandSeed(true);
-    }
-  }, [expandSeed, privacy]);
-
-  useEffect(() => {
-    if (!expandBirthday && !privacy) {
-      setExpandBithday(true);
-    }
-  }, [expandBirthday, privacy]);
 
   const onClickCancelHide = () => {
     clear();
@@ -326,12 +297,6 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                       screenName: [screenName],
                     });
                   }
-                  setExpandSeed(true);
-                  if (privacy) {
-                    setTimeout(() => {
-                      setExpandSeed(false);
-                    }, 5 * 1000);
-                  }
                 }
               }}
             >
@@ -412,10 +377,10 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                         screenName: [screenName],
                       });
                     }
-                    setExpandBithday(true);
+                    setBirthdayShown(true);
                     if (privacy) {
                       setTimeout(() => {
-                        setExpandBithday(false);
+                        setBirthdayShown(false);
                       }, 5 * 1000);
                     }
                   }

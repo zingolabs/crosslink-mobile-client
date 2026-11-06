@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
@@ -158,16 +158,14 @@ const ListedIndexers: React.FC<ListedIndexersProps> = ({
     discoverOnNetwork,
     route.params?.report,
   );
-  const [selectedUri, setSelectedUri] = useState<string | null>(null);
+  const [chosenUri, setSelectedUri] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
-
-  useEffect(() => {
-    if (selectedUri && indexers.some(i => i.uri === selectedUri)) {
-      return;
-    }
-    const previous = indexers.find(i => i.uri === previousServer);
-    setSelectedUri(previous?.uri ?? indexers[0]?.uri ?? null);
-  }, [indexers, previousServer, selectedUri]);
+  const selectedUri =
+    chosenUri && indexers.some(i => i.uri === chosenUri)
+      ? chosenUri
+      : (indexers.find(i => i.uri === previousServer)?.uri ??
+        indexers[0]?.uri ??
+        null);
 
   const goBack = () => {
     clear();

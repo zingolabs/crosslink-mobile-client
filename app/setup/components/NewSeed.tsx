@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View,
   ScrollView,
@@ -42,42 +42,19 @@ const NewSeed: React.FunctionComponent<NewSeedProps> = ({ onClickOK }) => {
   const { clear } = useToast();
   const screenName = ScreenEnum.Seed;
 
-  const [texts, setTexts] = useState<TextsType>({} as TextsType);
-  const [expandSeed, setExpandSeed] = useState<boolean>(true);
-  const [expandBirthday, setExpandBithday] = useState<boolean>(true);
+  const [seedShown, setSeedShown] = useState<boolean>(false);
+  const [birthdayShown, setBirthdayShown] = useState<boolean>(false);
+  const expandSeed = !privacy || seedShown;
+  const expandBirthday = !privacy || birthdayShown;
 
   const seedPhrase = wallet.seed || '';
   const birthdayNumber = (wallet.birthday && wallet.birthday.toString()) || '';
 
-  useEffect(() => {
-    if (privacy) {
-      setExpandSeed(false);
-      setExpandBithday(false);
-    } else {
-      setExpandSeed(true);
-      setExpandBithday(true);
-    }
-  }, [privacy]);
-
-  useEffect(() => {
-    if (!expandSeed && !privacy) {
-      setExpandSeed(true);
-    }
-  }, [expandSeed, privacy]);
-
-  useEffect(() => {
-    if (!expandBirthday && !privacy) {
-      setExpandBithday(true);
-    }
-  }, [expandBirthday, privacy]);
-
-  useEffect(() => {
+  const texts = useMemo<TextsType>(() => {
     const buttonTextsArray = translate('seed.buttontexts');
-    let buttonTexts = {} as TextsType;
-    if (typeof buttonTextsArray === 'object') {
-      buttonTexts = buttonTextsArray as TextsType;
-      setTexts(buttonTexts);
-    }
+    return typeof buttonTextsArray === 'object'
+      ? (buttonTextsArray as TextsType)
+      : ({} as TextsType);
   }, [translate]);
 
   const onClickOKHide = () => {
@@ -132,10 +109,10 @@ const NewSeed: React.FunctionComponent<NewSeedProps> = ({ onClickOK }) => {
                       screenName: [screenName],
                     });
                   }
-                  setExpandSeed(true);
+                  setSeedShown(true);
                   if (privacy) {
                     setTimeout(() => {
-                      setExpandSeed(false);
+                      setSeedShown(false);
                     }, 5 * 1000);
                   }
                 }
@@ -188,10 +165,10 @@ const NewSeed: React.FunctionComponent<NewSeedProps> = ({ onClickOK }) => {
                       screenName: [screenName],
                     });
                   }
-                  setExpandBithday(true);
+                  setBirthdayShown(true);
                   if (privacy) {
                     setTimeout(() => {
-                      setExpandBithday(false);
+                      setBirthdayShown(false);
                     }, 5 * 1000);
                   }
                 }

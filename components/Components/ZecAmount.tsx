@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Text,
   View,
@@ -37,20 +37,11 @@ const ZecAmount: React.FunctionComponent<ZecAmountProps> = ({
   testID,
   prefix,
 }) => {
-  const [privacyHigh, setPrivacyHigh] = useState<boolean>(privacy || false);
+  const [revealed, setRevealed] = useState<boolean>(false);
+  const privacyHigh = !!privacy && !revealed;
   const splits = Utils.splitZecAmountIntoBigSmall(amtZec);
   const { colors } = useTheme();
   const { decimalSeparator } = getNumberFormatSettings();
-
-  useEffect(() => {
-    setPrivacyHigh(privacy || false);
-  }, [privacy]);
-
-  useEffect(() => {
-    if (privacyHigh && !privacy) {
-      setPrivacyHigh(false);
-    }
-  }, [privacyHigh, privacy]);
 
   if (!size) {
     size = 24;
@@ -65,8 +56,8 @@ const ZecAmount: React.FunctionComponent<ZecAmountProps> = ({
   }
 
   const onPress = () => {
-    setPrivacyHigh(false);
-    setTimeout(() => setPrivacyHigh(true), 5 * 1000);
+    setRevealed(true);
+    setTimeout(() => setRevealed(false), 5 * 1000);
   };
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

@@ -6,8 +6,14 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useRef, useState } from 'react';
-import { TouchableOpacity, View, StyleSheet, Animated } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import {
+  TouchableOpacity,
+  View,
+  StyleSheet,
+  Animated,
+  useAnimatedValue,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   NetInfoType,
@@ -26,8 +32,7 @@ import {
 import ZecAmount from '../Components/ZecAmount';
 import FadeText from '../Components/FadeText';
 import simpleBiometrics from '../../app/simpleBiometrics';
-import { SyncStatusType } from '../../app/wallet/types';
-import { isEqual } from 'lodash';
+import { syncProgress } from '../../app/wallet/syncProgress';
 import SettingsIcon from '../../assets/icons/settings.svg';
 import { radiusPill, space, text, useTheme } from '../../app/theme';
 
@@ -84,47 +89,10 @@ const Header: React.FunctionComponent<HeaderProps> = ({
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
-  const opacityValue = useRef(new Animated.Value(1)).current;
+  const opacityValue = useAnimatedValue(1);
   const animationRef = useRef<Animated.CompositeAnimation | null>(null);
-  const [percentageOutputsScanned, setPercentageOutputsScanned] =
-    useState<number>(0);
-  const [syncInProgress, setSyncInProgress] = useState<boolean>(true);
-
-  useEffect(() => {
-    const percentage: number =
-      syncingStatus.percentage_total_outputs_scanned ||
-      syncingStatus.percentage_total_blocks_scanned ||
-      0;
-    if (
-      !syncingStatus ||
-      isEqual(syncingStatus, {} as SyncStatusType) ||
-      (!!syncingStatus.scan_ranges && syncingStatus.scan_ranges.length === 0) ||
-      percentage === 0
-    ) {
-      // if the App is waiting for the first fetching, let's put 0.
-      setPercentageOutputsScanned(0);
-      setSyncInProgress(true);
-    } else {
-      // avoiding 0.00 or 100%, minimum 0.01, maximun 99.99
-      setPercentageOutputsScanned(
-        percentage && percentage < 0.01
-          ? 0.01
-          : percentage && percentage > 99.99
-            ? 99.99
-            : Number(percentage?.toFixed(2).replace(/\.?0+$/, '')),
-      );
-      setSyncInProgress(
-        !!syncingStatus.scan_ranges &&
-          syncingStatus.scan_ranges.length > 0 &&
-          percentage < 100,
-      );
-    }
-  }, [
-    syncingStatus,
-    syncingStatus.percentage_total_outputs_scanned,
-    syncingStatus.percentage_total_blocks_scanned,
-    syncingStatus.scan_ranges,
-  ]);
+  const { percentage: percentageOutputsScanned, inProgress: syncInProgress } =
+    syncProgress(syncingStatus);
 
   useEffect(() => {
     // Inicializa la animación solo una vez
@@ -162,8 +130,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
       animationRef.current?.stop();
       opacityValue.setValue(1);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [syncInProgress, noSyncingStatus]);
+  }, [syncInProgress, noSyncingStatus, opacityValue]);
 
   const statusChip = {
     alignItems: 'center' as const,

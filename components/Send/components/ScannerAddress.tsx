@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { useFeedback } from '../../../app/store';
 import Scanner from '../../Scanner';
@@ -34,19 +34,11 @@ const ScannerAddress: React.FunctionComponent<ScannerAddressProps> = ({
 
   const goBackExecutedAlready = useRef<boolean>(false);
 
-  const [active, setActive] = useState<boolean>(
-    !!route.params && route.params.active !== undefined
+  const [closed, setClosed] = useState<boolean>(false);
+  const active: boolean =
+    !closed && !!route.params && route.params.active !== undefined
       ? route.params.active
-      : false,
-  );
-
-  useEffect(() => {
-    const _active =
-      !!route.params && route.params.active !== undefined
-        ? route.params.active
-        : false;
-    setActive(_active);
-  }, [route, route.params, route.params?.active]);
+      : false;
 
   const validateAddress = (scannedAddress: string) => {
     if (scannedAddress.toLowerCase().startsWith(GlobalConst.zcash)) {
@@ -71,7 +63,7 @@ const ScannerAddress: React.FunctionComponent<ScannerAddressProps> = ({
 
   const onCloseScreen = () => {
     clear();
-    setActive(false);
+    setClosed(true);
     // in iOS this is execute twice
     // ...avoiding that...
     if (navigation.canGoBack() && !goBackExecutedAlready.current) {

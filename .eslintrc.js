@@ -7,6 +7,15 @@ module.exports = {
   },
   overrides: [
     {
+      files: ['prototypes/**', '.storybook/**'],
+      rules: {
+        'react-hooks/immutability': 'off',
+        'react-hooks/purity': 'off',
+        'react-hooks/refs': 'off',
+        'react-hooks/set-state-in-effect': 'off',
+      },
+    },
+    {
       files: ['*.mts'],
       parser: '@typescript-eslint/parser',
       plugins: ['@typescript-eslint'],

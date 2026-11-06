@@ -146,8 +146,7 @@ const Distribution: React.FunctionComponent<DistributionProps> = ({
       setExpandAddress(newExpandAddress);
       setLoading(false);
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [colors.fgMuted, globalStaked, staked, tab]);
+  }, [colors.bgMuted, globalStaked, randomColors, staked, tab]);
 
   const selectExpandAddress = (index: number) => {
     let newExpandAddress = Array(expandAddress.length).fill(false);
