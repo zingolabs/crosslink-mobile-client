@@ -31,11 +31,7 @@ import {
 import Utils from '../../../app/utils';
 import ZecAmount from '../../Components/ZecAmount';
 import { SessionStackParamList } from '../../../app/types';
-import {
-  useFeedback,
-  useSettings,
-  useWalletData,
-} from '../../../app/store';
+import { useFeedback, useSettings, useWalletData } from '../../../app/store';
 import { KindIcon, isIncoming } from './TxRow';
 import { Copy as CopyIcon } from 'lucide-react-native';
 import { ValueTransferStatusEnum } from '../../../app/wallet/enums';

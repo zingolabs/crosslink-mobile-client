@@ -29,10 +29,7 @@ import {
   emptySendPageState,
   StakingActionKindEnum,
 } from '../../../app/AppState';
-import {
-  useSettings,
-  useWalletData,
-} from '../../../app/store';
+import { useSettings, useWalletData } from '../../../app/store';
 import Utils from '../../../app/utils';
 import FadeText from '../../Components/FadeText';
 import ZecAmount from '../../Components/ZecAmount';
@@ -56,7 +53,8 @@ const AddStakeScreen: React.FC<AddStakeScreenProps> = () => {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { privacy } = useSettings();
-  const { totalBalance, info, globalStaked, stakingDay, scheduledActions } = useWalletData();
+  const { totalBalance, info, globalStaked, stakingDay, scheduledActions } =
+    useWalletData();
 
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [modalState, setModalState] = useState<ModalState>('idle');

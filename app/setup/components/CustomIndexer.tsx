@@ -70,8 +70,7 @@ const CustomIndexer: React.FC<CustomIndexerProps> = ({
   const endpoint = parseEndpoint(value);
   const complete = isCompleteEndpoint(endpoint);
   const key = formatEndpoint(endpoint);
-  const status: Status =
-    probed.key === key ? probed.status : { state: 'idle' };
+  const status: Status = probed.key === key ? probed.status : { state: 'idle' };
 
   const check = useCallback(async () => {
     const e = parseEndpoint(value);

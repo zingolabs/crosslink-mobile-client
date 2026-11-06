@@ -60,7 +60,6 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
 
   const SEED_LENGTH = 24;
 
-
   const insets = useSafeAreaInsets();
 
   const [birthdayShown, setBirthdayShown] = useState<boolean>(false);

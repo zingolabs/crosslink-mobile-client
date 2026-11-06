@@ -23,10 +23,7 @@ import { useNavigation } from '@react-navigation/native';
 
 import ReceiveAddressCard from './components/ReceiveAddressCard';
 import { SessionStackParamList } from '../../app/types';
-import {
-  useFeedback,
-  useWalletData,
-} from '../../app/store';
+import { useFeedback, useWalletData } from '../../app/store';
 
 import {
   AddressKindEnum,

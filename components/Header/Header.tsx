@@ -32,7 +32,7 @@ import {
 import ZecAmount from '../Components/ZecAmount';
 import FadeText from '../Components/FadeText';
 import simpleBiometrics from '../../app/simpleBiometrics';
-import { syncProgress } from '../../app/wallet/syncProgress';
+import { SyncProgress, syncProgress } from '../../app/wallet/syncProgress';
 import SettingsIcon from '../../assets/icons/settings.svg';
 import { radiusPill, space, text, useTheme } from '../../app/theme';
 
@@ -78,7 +78,11 @@ const Header: React.FunctionComponent<HeaderProps> = ({
 }) => {
   const navigation: any = useNavigation();
   const { translate: translateContext } = useFeedback();
-  const { security, selectIndexerServer, privacy: privacyContext } = useSettings();
+  const {
+    security,
+    selectIndexerServer,
+    privacy: privacyContext,
+  } = useSettings();
   const { totalBalance, info, syncingStatus } = useWalletData();
   const { netInfo: netInfoContext } = useStatus();
 
@@ -91,8 +95,9 @@ const Header: React.FunctionComponent<HeaderProps> = ({
 
   const opacityValue = useAnimatedValue(1);
   const animationRef = useRef<Animated.CompositeAnimation | null>(null);
-  const { percentage: percentageOutputsScanned, inProgress: syncInProgress } =
-    syncProgress(syncingStatus);
+  const progress: SyncProgress = syncProgress(syncingStatus);
+  const percentageOutputsScanned: number = progress.percentage;
+  const syncInProgress: boolean = progress.inProgress;
 
   useEffect(() => {
     // Inicializa la animación solo una vez
@@ -220,7 +225,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
                           </View>
                         </View>
                       )}
-                      {syncInProgress && (
+                      {syncInProgress ? (
                         <View style={statusChip}>
                           <Animated.View
                             style={[
@@ -251,7 +256,7 @@ const Header: React.FunctionComponent<HeaderProps> = ({
                             </View>
                           </Animated.View>
                         </View>
-                      )}
+                      ) : null}
                     </>
                   ) : (
                     <>

@@ -68,7 +68,12 @@ const rangeColor = (
 const SyncReport: React.FunctionComponent<SyncReportProps> = ({
   navigation,
 }) => {
-  const { translate, removeFirstSnackbar, setBackgroundError, addLastSnackbar } = useFeedback();
+  const {
+    translate,
+    removeFirstSnackbar,
+    setBackgroundError,
+    addLastSnackbar,
+  } = useFeedback();
   const { language } = useSettings();
   const { wallet } = useStatus();
   const { syncingStatus, info } = useWalletData();
@@ -83,7 +88,9 @@ const SyncReport: React.FunctionComponent<SyncReportProps> = ({
   const [labels, setLabels] = useState<string[]>([]);
   const serv1: number = wallet.birthday || 0;
   const serv2: number =
-    info.latestBlock && wallet.birthday ? info.latestBlock - wallet.birthday : 0;
+    info.latestBlock && wallet.birthday
+      ? info.latestBlock - wallet.birthday
+      : 0;
   const serv3: number = maxBlocks ? maxBlocks - serv1 - serv2 : 0;
   const server1Percent: number = (serv1 * 100) / maxBlocks;
   const server2Percent: number = (serv2 * 100) / maxBlocks;

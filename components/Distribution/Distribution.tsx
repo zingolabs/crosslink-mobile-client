@@ -17,11 +17,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import RegText from '../Components/RegText';
 import ZecAmount from '../Components/ZecAmount';
 import { SessionStackParamList } from '../../app/types';
-import {
-  useFeedback,
-  useSettings,
-  useWalletData,
-} from '../../app/store';
+import { useFeedback, useSettings, useWalletData } from '../../app/store';
 import Utils from '../../app/utils';
 import FadeText from '../Components/FadeText';
 import { HeaderTitle } from '../Header';

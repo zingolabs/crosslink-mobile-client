@@ -1,15 +1,7 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
-import {
-  useFeedback,
-  useSettings,
-  useStatus,
-} from '../../app/store';
+import { useFeedback, useSettings, useStatus } from '../../app/store';
 import RegText from './RegText';
 import Utils from '../../app/utils';
 import {

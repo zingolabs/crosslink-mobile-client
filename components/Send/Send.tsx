@@ -113,12 +113,8 @@ const Send: React.FunctionComponent<SendProps> = ({
   const { privacy, indexerServer, donation, selectIndexerServer } =
     useSettings();
   const { zenniesDonationAddress } = useSession();
-  const {
-    info,
-    totalBalance,
-    somePending,
-    defaultUnifiedAddress,
-  } = useWalletData();
+  const { info, totalBalance, somePending, defaultUnifiedAddress } =
+    useWalletData();
   const { zecPrice, netInfo } = useStatus();
   const draft = route.params?.toaddr;
   const { snackbars } = useFeedback();
@@ -393,12 +389,7 @@ const Send: React.FunctionComponent<SendProps> = ({
         return { fee: 0, error: runProposeStr };
       }
     },
-    [
-      defaultUnifiedAddress,
-      donation,
-      donationAddress,
-      indexerServer,
-    ],
+    [defaultUnifiedAddress, donation, donationAddress, indexerServer],
   );
 
   const updateToField = async (

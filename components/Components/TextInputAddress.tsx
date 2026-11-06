@@ -4,10 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCheck, faQrcode, faXmark } from '@fortawesome/free-solid-svg-icons';
 
-import {
-  useFeedback,
-  useSettings,
-} from '../../app/store';
+import { useFeedback, useSettings } from '../../app/store';
 import ErrorText from './ErrorText';
 import RegText from './RegText';
 import Utils from '../../app/utils';

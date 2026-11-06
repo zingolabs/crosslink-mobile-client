@@ -15,7 +15,7 @@ import {
   useWalletData,
 } from '../../../app/store';
 import { RouteEnum, SelectServerEnum } from '../../../app/AppState';
-import { syncProgress } from '../../../app/wallet/syncProgress';
+import { SyncProgress, syncProgress } from '../../../app/wallet/syncProgress';
 import ZecAmount from '../../Components/ZecAmount';
 import FadeText from '../../Components/FadeText';
 import { space, text, useTheme } from '../../../app/theme';
@@ -35,8 +35,9 @@ const WalletSummaryHeader: React.FC<WalletSummaryHeaderProps> = ({
   const { totalBalance, info, syncingStatus } = useWalletData();
   const { netInfo } = useStatus();
 
-  const { percentage: percentageOutputsScanned, inProgress: syncInProgress } =
-    syncProgress(syncingStatus);
+  const progress: SyncProgress = syncProgress(syncingStatus);
+  const percentageOutputsScanned: number = progress.percentage;
+  const syncInProgress: boolean = progress.inProgress;
 
   const opacityValue = useAnimatedValue(1);
   const animationRef = useRef<Animated.CompositeAnimation | null>(null);
