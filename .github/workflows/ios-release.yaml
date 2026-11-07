@@ -84,13 +84,9 @@ jobs:
           tar -xzf "${RUNNER_TEMP}/hermes-dsym.tgz" -C "${DEST}"
           test -d "${DEST}/iphoneos/hermes.framework.dSYM"
 
-      - name: Version from tag
+      - name: Version from package.json
         run: |
-          if [[ "${GITHUB_REF}" == refs/tags/release-* ]]; then
-            echo "MARKETING_VERSION=${GITHUB_REF_NAME#release-}" >> "$GITHUB_ENV"
-          else
-            echo "MARKETING_VERSION=$(node -p "require('./package.json').version")" >> "$GITHUB_ENV"
-          fi
+          echo "MARKETING_VERSION=$(node -p "require('./package.json').version")" >> "$GITHUB_ENV"
 
       - name: Apple credentials
         env:
