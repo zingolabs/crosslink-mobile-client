@@ -23,17 +23,6 @@ class RPCModule internal constructor(private val reactContext: ReactApplicationC
         return applicationContext.filesDir.absolutePath
     }
 
-    fun fileExists(fileName: String): Boolean {
-        val file = File(applicationContext.filesDir, fileName)
-        return if (file.exists()) {
-            Log.i("MAIN", "File $fileName exists")
-            true
-        } else {
-            Log.i("MAIN", "File $fileName DOES NOT exist")
-            false
-        }
-    }
-
     private fun writeFile(fileName: String, fileBytes: ByteArray) {
         val file = applicationContext.openFileOutput(fileName, Context.MODE_PRIVATE)
         file?.write(fileBytes)

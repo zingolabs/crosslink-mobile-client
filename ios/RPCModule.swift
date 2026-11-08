@@ -41,17 +41,6 @@ class RPCModule: NSObject {
     return fileName
   }
   
-  func fileExists(_ fileName: String) throws -> String {
-    let fileExists = try FileManager.default.fileExists(atPath: getFileName(fileName))
-    if fileExists {
-      NSLog("[Native] File exists \(fileName)")
-      return "true"
-    } else {
-      NSLog("[Native] File DOES not exists \(fileName)")
-      return "false"
-    }
-  }
-
   func walletFileExists() throws -> String {
     return try walletFileExistsAt(getDocumentsDirectory()) ? "true" : "false"
   }
