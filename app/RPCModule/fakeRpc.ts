@@ -29,6 +29,7 @@ const HEIGHT = mockInfo.latestBlock;
 const VERSION = 'zingo-fake-1.0.0';
 const BOND_HEIGHT = HEIGHT - 10;
 
+/* eslint-disable no-bitwise */
 const fakeHexKey = (seed: number): string => {
   let x = (seed + 0x9e3779b9) >>> 0;
   let out = '';
@@ -42,6 +43,7 @@ const fakeHexKey = (seed: number): string => {
   }
   return out;
 };
+/* eslint-enable no-bitwise */
 
 const err = (message: string) => `${GlobalConst.error}: ${message}`;
 
