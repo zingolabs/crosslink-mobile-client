@@ -1,0 +1,107 @@
+name: Android offline instrumented tests
+
+on:
+  workflow_call:
+    inputs:
+      timestamp:
+        required: true
+        type: string
+      cache-key:
+        required: true
+        type: string
+
+env:
+  ABI: x86_64
+  API_LEVEL: 30
+  TARGET: default
+  SUITE: org.ZingoLabs.ZingoDelegator.OfflineTestSuite
+
+jobs:
+  android-instrumented-test:
+    name: Android offline instrumented tests
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Gradle setup cache
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: wrapper
+
+      - name: Native rust cache
+        uses: actions/cache/restore@v4
+        with:
+          path: android/app/src/main/jniLibs/${{ env.ABI }}
+          key: native-android-uniffi-${{ env.ABI }}-${{ inputs.cache-key }}
+          fail-on-cache-miss: true
+
+      - name: Kotlin uniffi cache
+        uses: actions/cache/restore@v4
+        with:
+          path: android/app/build/generated/source/uniffi/release/java/uniffi/zingo
+          key: kotlin-android-uniffi-${{ env.ABI }}-${{ inputs.cache-key }}
+          fail-on-cache-miss: true
+
+      - name: Kotlin uniffi for the debug variant
+        run: |
+          mkdir -p android/app/build/generated/source/uniffi/debug/java/uniffi
+          cp -R android/app/build/generated/source/uniffi/release/java/uniffi/zingo \
+            android/app/build/generated/source/uniffi/debug/java/uniffi/
+
+      - name: Yarn install
+        run: yarn
+
+      - name: AVD cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ env.ABI }}-api-${{ env.API_LEVEL }}-offline
+
+      - name: Create AVD and generate snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ env.API_LEVEL }}
+          arch: ${{ env.ABI }}
+          target: ${{ env.TARGET }}
+          force-avd-creation: true
+          emulator-options: -no-snapshot-load -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          script: echo "Generated AVD snapshot for caching."
+
+      - name: Run offline instrumented tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ env.API_LEVEL }}
+          arch: ${{ env.ABI }}
+          target: ${{ env.TARGET }}
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          working-directory: ./android
+          script: ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=${{ env.SUITE }}
+
+      - name: Upload test reports
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-offline-instrumented-reports-${{ env.ABI }}-${{ inputs.timestamp }}
+          path: |
+            android/app/build/reports/androidTests/connected
+            android/app/build/outputs/androidTest-results/connected

@@ -48,6 +48,8 @@ cd android && ./gradlew :app:connectedDebugAndroidTest \
   -Pandroid.testInstrumentationRunnerArguments.class=org.ZingoLabs.ZingoDelegator.RPCModuleBridgeTest
 ```
 
+CI runs the whole `OfflineTestSuite` on an x86_64 API 30 emulator for every pull request through `android-instrumented-test.yaml`.
+
 ## Crash triage
 
 Crash reports from the app land in the delegator-report Worker. The `crash-triage` CLI reads its queue and marks rows triaged.
