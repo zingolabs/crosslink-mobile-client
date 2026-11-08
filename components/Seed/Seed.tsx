@@ -27,17 +27,29 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../Header';
 import { BlurView } from '@react-native-community/blur';
+import { Copy as CopyIcon } from 'lucide-react-native';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
 import Animated, {
   cubicBezier,
   useReducedMotion,
 } from 'react-native-reanimated';
 import type { CSSTransitionProperties } from 'react-native-reanimated';
-import { curve, duration as motionDuration, useTheme } from '../../app/theme';
+import {
+  curve,
+  duration as motionDuration,
+  space,
+  useTheme,
+} from '../../app/theme';
 
 type SeedProps = NativeStackScreenProps<SettingsStackParamList, RouteEnum.Seed>;
 
 const EASE_OUT = cubicBezier(curve[0], curve[1], curve[2], curve[3]);
+
+const copyRow = {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: space.xs,
+} as const;
 
 const Seed: React.FunctionComponent<SeedProps> = ({}) => {
   const navigation: any = useNavigation();
@@ -403,14 +415,17 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                   }
                 }}
               >
-                <RegText
-                  color={colors.fgDefault}
-                  style={{ textAlign: 'center' }}
-                >
-                  {!expandBirthday
-                    ? Utils.trimToSmall(birthdayNumber, 1)
-                    : birthdayNumber}
-                </RegText>
+                <View style={copyRow}>
+                  <RegText
+                    color={colors.fgDefault}
+                    style={{ textAlign: 'center' }}
+                  >
+                    {!expandBirthday
+                      ? Utils.trimToSmall(birthdayNumber, 1)
+                      : birthdayNumber}
+                  </RegText>
+                  <CopyIcon size={14} strokeWidth={2} color={colors.fgSubtle} />
+                </View>
               </TouchableOpacity>
             </View>
           )}
@@ -455,12 +470,15 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                   }
                 }}
               >
-                <RegText
-                  color={colors.fgDefault}
-                  style={{ textAlign: 'center' }}
-                >
-                  {Utils.trimToSmall(ufvk, 12)}
-                </RegText>
+                <View style={copyRow}>
+                  <RegText
+                    color={colors.fgDefault}
+                    style={{ textAlign: 'center' }}
+                  >
+                    {Utils.trimToSmall(ufvk, 12)}
+                  </RegText>
+                  <CopyIcon size={14} strokeWidth={2} color={colors.fgSubtle} />
+                </View>
               </TouchableOpacity>
             </View>
           ) : (
