@@ -68,6 +68,28 @@ platform :ios do
       changelog: "release-#{marketing_version}"
     )
   end
+  desc "CI: send an uploaded TestFlight build to the external tester group"
+  lane :distribute do
+    key_id = ENV.fetch("APP_STORE_CONNECT_API_KEY_ID")
+    issuer_id = ENV.fetch("APP_STORE_CONNECT_API_ISSUER_ID")
+    key_path = File.expand_path(ENV.fetch("APP_STORE_CONNECT_API_KEY_PATH"))
+
+    api_key = app_store_connect_api_key(
+      key_id: key_id,
+      issuer_id: issuer_id,
+      key_filepath: key_path
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      app_identifier: "org.ZingoLabs.ZingoDelegator",
+      app_version: ENV.fetch("MARKETING_VERSION"),
+      build_number: ENV.fetch("BUILD_NUMBER"),
+      distribute_only: true,
+      distribute_external: true,
+      groups: ["Apr 2026 - CrossLink Workshop"]
+    )
+  end
 end
 
 platform :android do
