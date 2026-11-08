@@ -144,6 +144,12 @@ private func isError(_ s: String) -> Bool {
     return s.lowercased().hasPrefix("error")
 }
 
+private func testWalletDir() -> String {
+    let dir = NSTemporaryDirectory() + "ZingoDelegatorTests-" + UUID().uuidString
+    try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+    return dir
+}
+
 private func setCryptoProvider() {
   do {
     _ = try setCryptoDefaultProviderToRing()
@@ -185,11 +191,11 @@ final class OfflineTestSuite: XCTestCase {
         let seed = Seeds.ABANDON
 
         do {
-            let initJson = try initFromSeed(seed: seed, birthday:UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
+            let initJson = try initFromSeed(walletDir: testWalletDir(), seed: seed, birthday: UInt32(419200), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
             print("\nInit from seed:\n\(initJson)")
             let initRes: InitFromSeed = try decodeJSON(initJson)
             XCTAssertEqual(initRes.seed_phrase, seed)
-            XCTAssertEqual(initRes.birthday, 1)
+            XCTAssertEqual(initRes.birthday, 419200)
         } catch {
           XCTFail("\nInit from seed error:\n\(error.localizedDescription)")
           return
@@ -220,61 +226,6 @@ final class OfflineTestSuite: XCTestCase {
         }
     }
 
-    func executeAddressFromUfvk() throws {
-        setCryptoProvider()
-
-        let serveruri = "http://10.0.2.2:20000"
-        let chainhint = "main"
-        let ufvk = UfvkConst.ABANDON
-
-        do {
-          let initJson = try initFromUfvk(ufvk: ufvk, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
-          print("\nInit From UFVK:\n\(initJson)")
-          let initRes: InitFromUfvk = try decodeJSON(initJson)
-          XCTAssertEqual(initRes.ufvk, ufvk)
-          XCTAssertEqual(initRes.birthday, 1)
-        } catch {
-          XCTFail("\nInit from UFVK error:\n\(error.localizedDescription)")
-          return
-        }
-
-        do {
-          let exportJson = try getUfvk()
-          print("\nExport Ufvk:\n\(exportJson)")
-          let exportRes: ExportUfvk = try decodeJSON(exportJson)
-          XCTAssertEqual(exportRes.ufvk, ufvk)
-          XCTAssertEqual(exportRes.birthday, 1)
-        } catch {
-          XCTFail("\nInit from UFVK error:\n\(error.localizedDescription)")
-          return
-        }
-
-        do {
-            let addrsJson = try getUnifiedAddresses()
-            print("\nAddresses:\n\(addrsJson)")
-            let addrs: [UnifiedAddress] = try decodeJSON(addrsJson)
-            XCTAssertEqual(addrs[0].encoded_address, "u1gsqvqxx6lmmqg05uvx57gjdg5j3a54nxw09z4vq4z0yp7dfdcjrqk5wq64quwzrufmujd5e8xu5jn7cyewjaptxc8lsqwa2lk559u4cd")
-            XCTAssertEqual(addrs[0].has_orchard, true)
-            XCTAssertEqual(addrs[0].has_sapling, false)
-            XCTAssertEqual(addrs[0].has_transparent, false)
-        } catch {
-          XCTFail("\nAddresses error:\n\(error.localizedDescription)")
-          return
-        }
-
-        do {
-            let tAddrsJson = try getTransparentAddresses()
-            print("\nT Addresses:\n\(tAddrsJson)")
-            let tAddrs: [TransparentAddress] = try decodeJSON(tAddrsJson)
-            XCTAssertEqual(tAddrs[0].encoded_address, "t1dUDJ62ANtmebE8drFg7g2MWYwXHQ6Xu3F")
-            XCTAssertEqual(tAddrs[0].scope, "external")
-        } catch {
-          XCTFail("\nT Addresses error:\n\(error.localizedDescription)")
-          return
-        }
-
-    }
-
     func executeVersionFromSeed() throws {
         setCryptoProvider()
         let serveruri = "http://10.0.2.2:20000"
@@ -282,11 +233,11 @@ final class OfflineTestSuite: XCTestCase {
         let seed = Seeds.ABANDON
 
         do {
-          let initJson = try initFromSeed(seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
+          let initJson = try initFromSeed(walletDir: testWalletDir(), seed: seed, birthday: UInt32(419200), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
           print("\nInit from seed:\n\(initJson)")
           let initRes: InitFromSeed = try decodeJSON(initJson)
           XCTAssertEqual(initRes.seed_phrase, seed)
-          XCTAssertEqual(initRes.birthday, 1)
+          XCTAssertEqual(initRes.birthday, 419200)
         } catch {
           XCTFail("\nInit from seed error:\n\(error.localizedDescription)")
           return
@@ -311,7 +262,7 @@ final class ExecuteSyncFromSeed: XCTestCase {
         let seed = Seeds.ABANDON
 
         do {
-          let initJson = try initFromSeed(seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
+          let initJson = try initFromSeed(walletDir: testWalletDir(), seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
           print("\nInit from seed:\n\(initJson)")
           let initRes: InitFromSeed = try decodeJSON(initJson)
           XCTAssertEqual(initRes.seed_phrase, seed)
@@ -373,7 +324,7 @@ final class ExecuteSendFromOrchard: XCTestCase {
         let seed = Seeds.HOSPITAL
 
         do {
-          let initJson = try initFromSeed(seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
+          let initJson = try initFromSeed(walletDir: testWalletDir(), seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
           print("\nInit from seed:\n\(initJson)")
           let initRes: InitFromSeed = try decodeJSON(initJson)
           XCTAssertEqual(initRes.seed_phrase, seed)
@@ -473,7 +424,7 @@ final class UpdateCurrentPriceAndValueTransfersFromSeed: XCTestCase {
         let tor = "false"
 
         do {
-          let initJson = try initFromSeed(seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
+          let initJson = try initFromSeed(walletDir: testWalletDir(), seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
           print("\nInit from seed:\n\(initJson)")
           let initRes: InitFromSeed = try decodeJSON(initJson)
           XCTAssertEqual(initRes.seed_phrase, seed)
@@ -540,7 +491,7 @@ final class ExecuteSaplingBalanceFromSeed: XCTestCase {
         let seed = Seeds.HOSPITAL
 
         do {
-          let initJson = try initFromSeed(seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
+          let initJson = try initFromSeed(walletDir: testWalletDir(), seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
           print("\nInit from seed:\n\(initJson)")
           let initRes: InitFromSeed = try decodeJSON(initJson)
           XCTAssertEqual(initRes.seed_phrase, seed)
@@ -607,7 +558,7 @@ final class ExecuteParseAddresses: XCTestCase {
         let seed = Seeds.HOSPITAL
 
         do {
-          let initJson = try initFromSeed(seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
+          let initJson = try initFromSeed(walletDir: testWalletDir(), seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
           print("\nInit from seed:\n\(initJson)")
           let initRes: InitFromSeed = try decodeJSON(initJson)
           XCTAssertEqual(initRes.seed_phrase, seed)
@@ -638,7 +589,7 @@ final class ExecuteParseAddresses: XCTestCase {
         let seed = Seeds.HOSPITAL
 
         do {
-          let initJson = try initFromSeed(seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
+          let initJson = try initFromSeed(walletDir: testWalletDir(), seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
           print("\nInit from seed:\n\(initJson)")
           let initRes: InitFromSeed = try decodeJSON(initJson)
           XCTAssertEqual(initRes.seed_phrase, seed)
@@ -659,5 +610,66 @@ final class ExecuteParseAddresses: XCTestCase {
           XCTFail("\nWrong address error:\n\(error.localizedDescription)")
           return
         }
+    }
+}
+
+final class WalletFileRoundTrip: XCTestCase {
+    func testRoundTripThroughTheFile() throws {
+        setCryptoProvider()
+        let walletDir = testWalletDir()
+        let seed = Seeds.HOSPITAL
+
+        let created: InitFromSeed = try decodeJSON(
+          try initFromSeed(walletDir: walletDir, seed: seed, birthday: UInt32(1), serverUri: "", chainHint: "regtest", performanceLevel: "Medium", minConfirmations: UInt32(1))
+        )
+        XCTAssertEqual(created.seed_phrase, seed)
+        XCTAssertTrue(try walletExists(walletDir: walletDir))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: walletDir + "/wallet.dat"))
+        XCTAssertEqual(try saveWallet(), "false")
+        let addressesBefore = try getUnifiedAddresses()
+
+        let opened: InitFromSeed = try decodeJSON(
+          try initFromFile(walletDir: walletDir, serverUri: "", chainHint: "regtest", performanceLevel: "Medium", minConfirmations: UInt32(1))
+        )
+        XCTAssertEqual(opened.seed_phrase, seed)
+        XCTAssertEqual(try getUnifiedAddresses(), addressesBefore)
+        XCTAssertEqual(try saveWallet(), "false")
+
+        let recovery = try JSONSerialization.jsonObject(with: Data(try readWalletRecoveryInfo(walletDir: walletDir, chainHint: "regtest").utf8)) as? [String: Any]
+        XCTAssertEqual(recovery?["seed_phrase"] as? String, seed)
+        XCTAssertEqual(recovery?["birthday"] as? Int, 1)
+
+        XCTAssertEqual(try deleteWallet(walletDir: walletDir), "true")
+        XCTAssertFalse(try walletExists(walletDir: walletDir))
+        XCTAssertEqual(try deleteWallet(walletDir: walletDir), "Error: wallet file not found")
+        XCTAssertEqual(try readWalletRecoveryInfo(walletDir: walletDir, chainHint: "regtest"), "Error: wallet file not found")
+        XCTAssertEqual(try initFromFile(walletDir: walletDir, serverUri: "", chainHint: "regtest", performanceLevel: "Medium", minConfirmations: UInt32(1)), "Error: wallet file not found")
+
+        try? FileManager.default.removeItem(atPath: walletDir)
+    }
+
+    func testLegacyBase64TextFileOpensAndIsRewrittenRaw() throws {
+        setCryptoProvider()
+        let sourceDir = testWalletDir()
+        let seed = Seeds.HOSPITAL
+        _ = try initFromSeed(walletDir: sourceDir, seed: seed, birthday: UInt32(1), serverUri: "", chainHint: "regtest", performanceLevel: "Medium", minConfirmations: UInt32(1))
+        let raw = try Data(contentsOf: URL(fileURLWithPath: sourceDir + "/wallet.dat"))
+
+        let legacyDir = testWalletDir()
+        try raw.base64EncodedString().write(toFile: legacyDir + "/wallet.dat.txt", atomically: true, encoding: .utf8)
+
+        XCTAssertTrue(try walletExists(walletDir: legacyDir))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: legacyDir + "/wallet.dat.txt"))
+        let opened: InitFromSeed = try decodeJSON(
+          try initFromFile(walletDir: legacyDir, serverUri: "", chainHint: "regtest", performanceLevel: "Medium", minConfirmations: UInt32(1))
+        )
+        XCTAssertEqual(opened.seed_phrase, seed)
+        XCTAssertEqual(try saveWallet(), "true")
+        let rewritten = try Data(contentsOf: URL(fileURLWithPath: legacyDir + "/wallet.dat"))
+        XCTAssertEqual(rewritten.prefix(8), Data([40, 0, 0, 0, 0, 0, 0, 0]))
+        XCTAssertEqual(try saveWallet(), "false")
+
+        try? FileManager.default.removeItem(atPath: sourceDir)
+        try? FileManager.default.removeItem(atPath: legacyDir)
     }
 }

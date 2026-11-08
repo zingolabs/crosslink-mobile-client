@@ -6,9 +6,9 @@ export default interface SecurityType {
   rescanScreen: boolean;
   settingsScreen: boolean;
   changeWalletScreen: boolean;
-  restoreWalletBackupScreen: boolean;
 
   // obsolete options
+  restoreWalletBackupScreen?: boolean;
   seedScreen?: boolean;
   ufvkScreen?: boolean;
 }

@@ -5,6 +5,7 @@ import org.junit.Test
 import org.junit.experimental.categories.Category
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import org.json.JSONObject
 
 object Seeds {
     const val ABANDON = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art"
@@ -139,13 +140,13 @@ class ExecuteAddressesFromSeed {
         val setCrytoProvider = uniffi.zingo.setCryptoDefaultProviderToRing()
         println(setCrytoProvider)
 
-        val initFromSeedJson: String = uniffi.zingo.initFromSeed(seed, 1u, serveruri, chainhint, "Medium", 1u)
+        val initFromSeedJson: String = uniffi.zingo.initFromSeed(context.filesDir.absolutePath, seed, 419200u, serveruri, chainhint, "Medium", 1u)
         println("\nInit from seed:")
         println(initFromSeedJson)
         val initFromSeed: InitFromSeed = mapper.readValue(initFromSeedJson)
 
         assertThat(initFromSeed.seed_phrase).isEqualTo(seed)
-        assertThat(initFromSeed.birthday).isEqualTo(1)
+        assertThat(initFromSeed.birthday).isEqualTo(419200)
 
         val addressesJson: String = uniffi.zingo.getUnifiedAddresses()
         println("\nAddresses:")
@@ -179,13 +180,13 @@ class ExecuteVersionFromSeed {
         val setCrytoProvider = uniffi.zingo.setCryptoDefaultProviderToRing()
         println(setCrytoProvider)
 
-        val initFromSeedJson: String = uniffi.zingo.initFromSeed(seed, 1u, serveruri, chainhint, "Medium", 1u)
+        val initFromSeedJson: String = uniffi.zingo.initFromSeed(context.filesDir.absolutePath, seed, 419200u, serveruri, chainhint, "Medium", 1u)
         println("\nInit from seed:")
         println(initFromSeedJson)
         val initFromSeed: InitFromSeed = mapper.readValue(initFromSeedJson)
 
         assertThat(initFromSeed.seed_phrase).isEqualTo(seed)
-        assertThat(initFromSeed.birthday).isEqualTo(1)
+        assertThat(initFromSeed.birthday).isEqualTo(419200)
 
         val version: String = uniffi.zingo.getVersion()
         println("\nVersion:")
@@ -208,7 +209,7 @@ class ExecuteSyncFromSeed {
         val setCrytoProvider = uniffi.zingo.setCryptoDefaultProviderToRing()
         println(setCrytoProvider)
 
-        val initFromSeedJson: String = uniffi.zingo.initFromSeed(seed, 1u, serveruri, chainhint, "Medium", 1u)
+        val initFromSeedJson: String = uniffi.zingo.initFromSeed(context.filesDir.absolutePath, seed, 1u, serveruri, chainhint, "Medium", 1u)
         println("\nInit from seed:")
         println(initFromSeedJson)
         val initFromSeed: InitFromSeed = mapper.readValue(initFromSeedJson)
@@ -271,7 +272,7 @@ class ExecuteSendFromOrchard {
         val setCrytoProvider = uniffi.zingo.setCryptoDefaultProviderToRing()
         println(setCrytoProvider)
 
-        val initFromSeedJson: String = uniffi.zingo.initFromSeed(seed, 1u, serveruri, chainhint, "Medium", 1u)
+        val initFromSeedJson: String = uniffi.zingo.initFromSeed(context.filesDir.absolutePath, seed, 1u, serveruri, chainhint, "Medium", 1u)
         println("\nInit from seed:")
         println(initFromSeedJson)
         val initFromSeed: InitFromSeed = mapper.readValue(initFromSeedJson)
@@ -371,7 +372,7 @@ class UpdateCurrentPriceAndValueTransfersFromSeed {
         val setCrytoProvider = uniffi.zingo.setCryptoDefaultProviderToRing()
         println(setCrytoProvider)
 
-        val initFromSeedJson: String = uniffi.zingo.initFromSeed(seed, 1u, serveruri, chainhint, "Medium", 1u)
+        val initFromSeedJson: String = uniffi.zingo.initFromSeed(context.filesDir.absolutePath, seed, 1u, serveruri, chainhint, "Medium", 1u)
         println("\nInit from seed:")
         println(initFromSeedJson)
         val initFromSeed: InitFromSeed = mapper.readValue(initFromSeedJson)
@@ -450,7 +451,7 @@ class ExecuteSaplingBalanceFromSeed {
         val setCrytoProvider = uniffi.zingo.setCryptoDefaultProviderToRing()
         println(setCrytoProvider)
 
-        val initFromSeedJson: String = uniffi.zingo.initFromSeed(seed, 1u, serveruri, chainhint, "Medium", 1u)
+        val initFromSeedJson: String = uniffi.zingo.initFromSeed(context.filesDir.absolutePath, seed, 1u, serveruri, chainhint, "Medium", 1u)
         println("\nInit from seed:")
         println(initFromSeedJson)
         val initFromSeed: InitFromSeed = mapper.readValue(initFromSeedJson)
@@ -539,7 +540,7 @@ class ExecuteParseAddresses {
         val setCrytoProvider = uniffi.zingo.setCryptoDefaultProviderToRing()
         println(setCrytoProvider)
 
-        val initFromSeedJson: String = uniffi.zingo.initFromSeed(seed, 1u, serveruri, chainhint, "Medium", 1u)
+        val initFromSeedJson: String = uniffi.zingo.initFromSeed(context.filesDir.absolutePath, seed, 1u, serveruri, chainhint, "Medium", 1u)
         println("\nInit from seed:")
         println(initFromSeedJson)
         val initFromSeed: InitFromSeed = mapper.readValue(initFromSeedJson)
@@ -577,7 +578,7 @@ class ExecuteParseAddresses {
         val setCrytoProvider = uniffi.zingo.setCryptoDefaultProviderToRing()
         println(setCrytoProvider)
 
-        val initFromSeedJson: String = uniffi.zingo.initFromSeed(seed, 1u, serveruri, chainhint, "Medium", 1u)
+        val initFromSeedJson: String = uniffi.zingo.initFromSeed(context.filesDir.absolutePath, seed, 1u, serveruri, chainhint, "Medium", 1u)
         println("\nInit from seed:")
         println(initFromSeedJson)
         val initFromSeed: InitFromSeed = mapper.readValue(initFromSeedJson)
@@ -602,5 +603,46 @@ class ExecuteParseAddresses {
         )
 
         assertThat(wrongResult).isEqualTo(expectedWrongResult)
+    }
+}
+@Category(OfflineTest::class)
+class WalletFileRoundTrip {
+    @Test
+    fun roundTripThroughTheFile() {
+        val mapper = jacksonObjectMapper()
+        val dir = java.io.File(context.filesDir, "wallet-round-trip-${System.nanoTime()}")
+        dir.mkdirs()
+        val walletDir = dir.absolutePath
+        val seed = Seeds.HOSPITAL
+
+        println(uniffi.zingo.setCryptoDefaultProviderToRing())
+
+        val created: InitFromSeed = mapper.readValue(
+            uniffi.zingo.initFromSeed(walletDir, seed, 1u, "", "regtest", "Medium", 1u)
+        )
+        assertThat(created.seed_phrase).isEqualTo(seed)
+        assertThat(uniffi.zingo.walletExists(walletDir)).isTrue()
+        assertThat(java.io.File(dir, "wallet.dat").exists()).isTrue()
+        assertThat(uniffi.zingo.saveWallet()).isEqualTo("false")
+        val addressesBefore: String = uniffi.zingo.getUnifiedAddresses()
+
+        val opened: InitFromSeed = mapper.readValue(
+            uniffi.zingo.initFromFile(walletDir, "", "regtest", "Medium", 1u)
+        )
+        assertThat(opened.seed_phrase).isEqualTo(seed)
+        assertThat(uniffi.zingo.getUnifiedAddresses()).isEqualTo(addressesBefore)
+        assertThat(uniffi.zingo.saveWallet()).isEqualTo("false")
+
+        val recovery = JSONObject(uniffi.zingo.readWalletRecoveryInfo(walletDir, "regtest"))
+        assertThat(recovery.getString("seed_phrase")).isEqualTo(seed)
+        assertThat(recovery.getInt("birthday")).isEqualTo(1)
+
+        assertThat(uniffi.zingo.deleteWallet(walletDir)).isEqualTo("true")
+        assertThat(uniffi.zingo.walletExists(walletDir)).isFalse()
+        assertThat(uniffi.zingo.deleteWallet(walletDir)).isEqualTo("Error: wallet file not found")
+        assertThat(uniffi.zingo.readWalletRecoveryInfo(walletDir, "regtest")).isEqualTo("Error: wallet file not found")
+        assertThat(uniffi.zingo.initFromFile(walletDir, "", "regtest", "Medium", 1u)).isEqualTo("Error: wallet file not found")
+
+        dir.deleteRecursively()
     }
 }

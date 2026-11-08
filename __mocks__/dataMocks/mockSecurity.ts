@@ -8,5 +8,4 @@ export const mockSecurity: SecurityType = {
   rescanScreen: true,
   settingsScreen: true,
   changeWalletScreen: true,
-  restoreWalletBackupScreen: true,
 };

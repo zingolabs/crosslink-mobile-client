@@ -163,7 +163,6 @@ const indexerReport = (uri: string) =>
   });
 
 let wallet: FakeWallet | null = null;
-let backup: FakeWallet | null = null;
 let propose: Propose | null = null;
 let events: WalletValueTransferType[] = baseEvents();
 let syncLaunched = false;
@@ -177,9 +176,6 @@ const txid = () => (txCounter++).toString(16).padStart(64, '0');
 
 const fakeRpc = {
   walletExists: async () => (wallet ? GlobalConst.true : GlobalConst.false),
-
-  walletBackupExists: async () =>
-    backup ? GlobalConst.true : GlobalConst.false,
 
   loadExistingWallet: async (
     uri: string,
@@ -617,16 +613,6 @@ const fakeRpc = {
 
   getZenniesDonationAddress: async () => mockAddresses[1].address,
 
-  inspectWallet: async (_data: string, _serverUri: string, _platform: string) =>
-    JSON.stringify({
-      readable: true,
-      format_version: 2,
-      newest_height: HEIGHT,
-      chain_match: true,
-      normalize_to: null,
-      reason: '',
-    }),
-
   discoverIndexers: async (_network: string) => indexerReport(serverUri),
 
   probeIndexer: async (uri: string, _network: string) => indexerReport(uri),
@@ -654,11 +640,17 @@ const fakeRpc = {
 
   doSave: async () => 'ok',
 
-  doSaveBackup: async () => {
-    if (wallet) {
-      backup = wallet;
+  readWalletRecoveryInfo: async (_chainName: string) => {
+    if (!wallet) {
+      return err('wallet file not found');
     }
-    return 'ok';
+    return JSON.stringify({
+      seed_phrase: wallet.seed ?? null,
+      ufvk: wallet.ufvk ?? null,
+      birthday: wallet.birthday,
+      chain_name: chainName,
+      format_version: 40,
+    });
   },
 
   deleteExistingWallet: async () => {
@@ -670,14 +662,6 @@ const fakeRpc = {
     events = baseEvents();
     syncLaunched = false;
     syncComplete = false;
-    return GlobalConst.true;
-  },
-
-  restoreExistingWalletBackup: async () => {
-    if (!backup) {
-      return GlobalConst.false;
-    }
-    wallet = backup;
     return GlobalConst.true;
   },
 };

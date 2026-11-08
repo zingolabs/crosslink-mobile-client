@@ -149,6 +149,9 @@ exports[`Setup - snapshot Setup - menu 1`] = `
         name="Import"
       />
       <MockedScreen
+        name="RecoveredSeed"
+      />
+      <MockedScreen
         name="ChooseIndexer"
       />
       <MockedScreen

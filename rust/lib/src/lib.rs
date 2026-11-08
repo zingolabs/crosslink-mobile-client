@@ -1,7 +1,5 @@
 uniffi::setup_scaffolding!();
 
-#[warn(unused)]
-#[warn(missing_docs)]
 #[macro_use]
 extern crate lazy_static;
 extern crate android_logger;
@@ -20,13 +18,12 @@ use std::any::Any;
 use std::backtrace::Backtrace;
 use std::num::NonZeroU32;
 use std::panic::{self, PanicHookInfo, UnwindSafe};
+use std::path::PathBuf;
 use std::str::FromStr;
 use std::sync::Mutex;
 use std::sync::Once;
 use std::sync::RwLock;
 
-use base64::Engine;
-use base64::engine::general_purpose::STANDARD;
 use bip0039::Mnemonic;
 use json::{JsonValue, object};
 use once_cell::sync::Lazy;
@@ -128,6 +125,9 @@ fn install_panic_hook_once() {
                 .unwrap_or((None, None, None));
 
             let bt = Backtrace::force_capture().to_string();
+
+            #[cfg(test)]
+            eprintln!("panic: {payload} at {file:?}:{line:?}:{col:?}");
 
             set_last_panic(PanicReport {
                 msg: payload,
@@ -277,7 +277,53 @@ fn store_client(lightclient: LightClient) -> Result<(), ZingolibError> {
     Ok(())
 }
 
+const WALLET_FILE_NAME: &str = "wallet.dat";
+const IOS_WALLET_FILE_NAME: &str = "wallet.dat.txt";
+
+fn chain_from_hint(chain_hint: &str) -> Result<ChainType, String> {
+    match chain_hint {
+        "main" => chain_from_str("mainnet"),
+        "test" => chain_from_str("testnet"),
+        "regtest" => chain_from_str("regtest"),
+        _ => return Err("Error: Not a valid chain hint!".to_string()),
+    }
+    .map_err(|e| format!("Error: {e}"))
+}
+
+/// Renames the file name the iOS app used to write, once, so zingolib only ever sees
+/// `wallet.dat`. The content is left as it is; the reader sniffs it.
+fn migrate_legacy_file_name(config: &ZingoConfig) -> std::io::Result<()> {
+    let legacy = config.get_zingo_wallet_dir().join(IOS_WALLET_FILE_NAME);
+    let current = config.get_wallet_pathbuf();
+    if legacy.exists() && !current.exists() {
+        std::fs::rename(&legacy, &current)?;
+    }
+    Ok(())
+}
+
+/// A config that only knows where the wallet files live, for the file operations that
+/// need no client.
+fn wallet_file_config(wallet_dir: &str) -> ZingoConfig {
+    let mut config = ZingoConfig::build(stable_chain())
+        .set_wallet_dir(PathBuf::from(wallet_dir))
+        .create();
+    config.wallet_name = PathBuf::from(WALLET_FILE_NAME);
+    if let Err(e) = migrate_legacy_file_name(&config) {
+        log::warn!("legacy wallet file rename failed: {e}");
+    }
+    config
+}
+
+fn file_operation_result(result: std::io::Result<()>, missing: &str) -> String {
+    match result {
+        Ok(()) => "true".to_string(),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => format!("Error: {missing}"),
+        Err(e) => format!("Error: {e}"),
+    }
+}
+
 fn construct_uri_load_config(
+    wallet_dir: String,
     uri: String,
     chain_hint: String,
     performance_level: String,
@@ -286,13 +332,7 @@ fn construct_uri_load_config(
     // if uri is empty -> Offline Mode.
     let lightwalletd_uri = construct_lightwalletd_uri(Some(uri));
 
-    let chaintype = match chain_hint.as_str() {
-        "main" => chain_from_str("mainnet"),
-        "test" => chain_from_str("testnet"),
-        "regtest" => chain_from_str("regtest"),
-        _ => return Err("Error: Not a valid chain hint!".to_string()),
-    }
-    .map_err(|e| format!("Error: {e}"))?;
+    let chaintype = chain_from_hint(&chain_hint)?;
     let performancetype = match performance_level.as_str() {
         "Maximum" => PerformanceLevel::Maximum,
         "High" => PerformanceLevel::High,
@@ -302,7 +342,7 @@ fn construct_uri_load_config(
     };
     let config = match zingolib::config::load_clientconfig(
         lightwalletd_uri.clone(),
-        None,
+        Some(PathBuf::from(wallet_dir)),
         chaintype,
         WalletSettings {
             sync_config: SyncConfig {
@@ -312,7 +352,7 @@ fn construct_uri_load_config(
             min_confirmations: NonZeroU32::try_from(min_confirmations).unwrap(),
         },
         NonZeroU32::try_from(1).expect("hard-coded integer"),
-        String::new(),
+        WALLET_FILE_NAME.to_string(),
     ) {
         Ok(c) => c,
         Err(e) => {
@@ -321,6 +361,15 @@ fn construct_uri_load_config(
     };
 
     Ok((config, lightwalletd_uri))
+}
+
+fn store_saved_client(lightclient: LightClient) -> Result<(), String> {
+    match RT.block_on(lightclient.save_to_disk()) {
+        Ok(_) => {}
+        Err(e) => return Err(format!("Error: {e}")),
+    }
+    let _ = store_client(lightclient);
+    Ok(())
 }
 
 #[uniffi::export]
@@ -341,6 +390,7 @@ pub fn init_logging() -> Result<String, ZingolibError> {
 
 #[uniffi::export]
 pub fn init_new(
+    wallet_dir: String,
     server_uri: String,
     chain_hint: String,
     performance_level: String,
@@ -349,24 +399,27 @@ pub fn init_new(
     with_panic_guard(|| {
         reset_lightclient();
         let (config, _lightwalletd_uri) = match construct_uri_load_config(
+            wallet_dir,
             server_uri,
             chain_hint,
             performance_level,
             min_confirmations,
         ) {
             Ok(c) => c,
-            Err(e) => return Ok(format!("Error: {e}")),
+            Err(e) => return Ok(e),
         };
         // Offline: a fresh wallet needs no indexer contact. Its birthday is the
         // chain's Sapling activation height, so the first online sync scans the
         // whole shielded history but the wallet is correct regardless of which
         // note commitment tree state the indexer later serves.
         let lightclient =
-            match LightClient::new_offline(config, false, SeedDerivation::Zip32Standard) {
+            match LightClient::new_offline(config, true, SeedDerivation::Zip32Standard) {
                 Ok(l) => l,
                 Err(e) => return Ok(format!("Error: {e}")),
             };
-        let _ = store_client(lightclient);
+        if let Err(e) = store_saved_client(lightclient) {
+            return Ok(e);
+        }
 
         get_seed()
     })
@@ -375,6 +428,7 @@ pub fn init_new(
 // TODO: change `seed` to `seed_phrase` or `mnemonic_phrase`
 #[uniffi::export]
 pub fn init_from_seed(
+    wallet_dir: String,
     seed: String,
     birthday: u32,
     server_uri: String,
@@ -385,13 +439,14 @@ pub fn init_from_seed(
     with_panic_guard(|| {
         reset_lightclient();
         let (config, _lightwalletd_uri) = match construct_uri_load_config(
+            wallet_dir,
             server_uri,
             chain_hint,
             performance_level,
             min_confirmations,
         ) {
             Ok(c) => c,
-            Err(e) => return Ok(format!("Error: {e}")),
+            Err(e) => return Ok(e),
         };
         let mnemonic = match Mnemonic::from_phrase(seed) {
             Ok(m) => m,
@@ -410,19 +465,23 @@ pub fn init_from_seed(
             Ok(w) => w,
             Err(e) => return Ok(format!("Error: {e}")),
         };
-        let lightclient = match LightClient::create_from_wallet(wallet, config, false) {
+        let lightclient = match LightClient::create_from_wallet(wallet, config, true) {
             Ok(l) => l,
             Err(e) => return Ok(format!("Error: {e}")),
         };
-        let _ = store_client(lightclient);
+        if let Err(e) = store_saved_client(lightclient) {
+            return Ok(e);
+        }
 
         get_seed()
     })
 }
 
+/// Opens `wallet.dat` inside `wallet_dir`. A file in the legacy iOS shape (base64 text,
+/// possibly still named `wallet.dat.txt`) opens as well and is rewritten raw on the next save.
 #[uniffi::export]
-pub fn init_from_b64(
-    base64_data: String,
+pub fn init_from_file(
+    wallet_dir: String,
     server_uri: String,
     chain_hint: String,
     performance_level: String,
@@ -431,72 +490,92 @@ pub fn init_from_b64(
     with_panic_guard(|| {
         reset_lightclient();
         let (config, _lightwalletd_uri) = match construct_uri_load_config(
+            wallet_dir,
             server_uri,
             chain_hint,
             performance_level,
             min_confirmations,
         ) {
             Ok(c) => c,
+            Err(e) => return Ok(e),
+        };
+        if let Err(e) = migrate_legacy_file_name(&config) {
+            return Ok(format!("Error: {e}"));
+        }
+        let (wallet, _shape) = match LightWallet::open_file(&config.get_wallet_path(), config.chain)
+        {
+            Ok(opened) => opened,
             Err(e) => return Ok(format!("Error: {e}")),
         };
-        let decoded_bytes = match STANDARD.decode(&base64_data) {
-            Ok(b) => b,
-            Err(e) => {
-                return Ok(format!(
-                    "Error: Decoding Base64: {}, Size: {}, Content: {}",
-                    e,
-                    base64_data.len(),
-                    base64_data
-                ));
-            }
-        };
-
-        let wallet = match LightWallet::read(&decoded_bytes[..], config.chain) {
-            Ok(w) => w,
-            Err(e) => return Ok(format!("Error: {e}")),
-        };
-        let has_seed = wallet.mnemonic().is_some();
-        let lightclient = match LightClient::create_from_wallet(wallet, config, false) {
+        let lightclient = match LightClient::create_from_wallet(wallet, config, true) {
             Ok(l) => l,
             Err(e) => return Ok(format!("Error: {e}")),
         };
+        let has_seed = RT.block_on(async { lightclient.wallet.read().await.mnemonic().is_some() });
         let _ = store_client(lightclient);
 
         if has_seed { get_seed() } else { get_ufvk() }
     })
 }
 
+/// Writes the wallet to its file when something changed. Answers `"true"` when a file was
+/// written, `"false"` when nothing needed saving.
 #[uniffi::export]
-pub fn save_to_b64() -> Result<String, ZingolibError> {
+pub fn save_wallet() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
-        // Return the wallet as a base64 encoded string
-        let mut guard = LIGHTCLIENT
-            .write()
-            .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
-        if let Some(lightclient) = &mut *guard {
-            // we need to use STANDARD because swift is expecting the encoded String with padding
-            // I tried with STANDARD_NO_PAD and the decoding return `nil`.
-            Ok(RT.block_on(async move {
-                let mut wallet = lightclient.wallet.write().await;
-                match wallet.save() {
-                    Ok(Some(wallet_bytes)) => STANDARD.encode(wallet_bytes),
-                    // TODO: check this is better than a custom error when save is not required (empty buffer)
-                    Ok(None) => "".to_string(),
-                    Err(e) => format!("Error: {e}"),
-                }
-            }))
-        } else {
-            Err(ZingolibError::LightclientNotInitialized)
-        }
+        with_lightclient_read(|lightclient| {
+            Ok(match RT.block_on(lightclient.save_to_disk()) {
+                Ok(true) => "true".to_string(),
+                Ok(false) => "false".to_string(),
+                Err(e) => format!("Error: {e}"),
+            })
+        })
     })
 }
 
 #[uniffi::export]
-pub fn check_b64(base64_data: String) -> String {
-    match STANDARD.decode(&base64_data) {
-        Ok(_) => "true".to_string(),
-        Err(_) => "false".to_string(),
-    }
+pub fn wallet_exists(wallet_dir: String) -> Result<bool, ZingolibError> {
+    with_panic_guard(|| Ok(wallet_file_config(&wallet_dir).wallet_path_exists()))
+}
+
+/// Reads the seed phrase (or the viewing key of a seedless wallet) and the birthday from the
+/// front of the wallet file, so a user can restore even when the rest of the file is damaged
+/// or belongs to another chain. Answers JSON or `"Error: wallet file ..."`.
+#[uniffi::export]
+pub fn read_wallet_recovery_info(
+    wallet_dir: String,
+    chain_hint: String,
+) -> Result<String, ZingolibError> {
+    with_panic_guard(|| {
+        let chain = match chain_from_hint(&chain_hint) {
+            Ok(chain) => chain,
+            Err(e) => return Ok(e),
+        };
+        let path = wallet_file_config(&wallet_dir).get_wallet_pathbuf();
+        Ok(
+            match LightWallet::read_recovery_info_from_path(&path, chain) {
+                Ok(info) => object! {
+                    "seed_phrase" => info.seed_phrase.map_or(json::JsonValue::Null, json::JsonValue::from),
+                    "ufvk" => info.unified_full_viewing_key.map_or(json::JsonValue::Null, json::JsonValue::from),
+                    "birthday" => info.birthday,
+                    "chain_name" => info.chain_name,
+                    "format_version" => info.version,
+                }
+                .dump(),
+                Err(e) => format!("Error: {e}"),
+            },
+        )
+    })
+}
+
+#[uniffi::export]
+pub fn delete_wallet(wallet_dir: String) -> Result<String, ZingolibError> {
+    with_panic_guard(|| {
+        Ok(file_operation_result(
+            wallet_file_config(&wallet_dir).remove_wallet_file(),
+            "wallet file not found",
+        ))
+    })
 }
 
 #[uniffi::export]
@@ -702,178 +781,6 @@ pub fn select_best_indexer(network: String) -> Result<String, ZingolibError> {
             }
             Ok(uri.to_string())
         })
-    })
-}
-
-/// Reads the wallet file format version from the raw wallet bytes.
-fn wallet_format_version(decoded: &[u8]) -> u64 {
-    if decoded.len() >= 8 {
-        u64::from_le_bytes(decoded[0..8].try_into().expect("8 bytes into u64"))
-    } else {
-        0
-    }
-}
-
-/// The wallet bytes behind a file's bytes, and whether an extra base64 layer
-/// was needed: Android stores the decoded wallet binary; iOS stores its
-/// base64 text — try both, one layer apart.
-fn wallet_bytes(file_bytes: &[u8]) -> Option<(Vec<u8>, bool)> {
-    let version = wallet_format_version(file_bytes);
-    if (1..=40).contains(&version) {
-        return Some((file_bytes.to_vec(), false));
-    }
-    let decoded = STANDARD.decode(file_bytes).ok()?;
-    let version = wallet_format_version(&decoded);
-    if (1..=40).contains(&version) {
-        return Some((decoded, true));
-    }
-    None
-}
-
-/// Whether the indexer's chain contains the block at `height` and its hash matches.
-///
-/// A wallet claiming a block beyond the served tip is on another chain. Unreachable
-/// indexers answer `None` — unknown, not mismatched.
-async fn indexer_has_block(server_uri: http::Uri, height: u32, hash: [u8; 32]) -> Option<bool> {
-    use zcash_client_backend::proto::service::BlockId;
-
-    let tip = match tokio::time::timeout(
-        std::time::Duration::from_secs(20),
-        zingolib::grpc_connector::get_latest_block(server_uri.clone()),
-    )
-    .await
-    {
-        Ok(Ok(tip)) => u32::try_from(tip.height).ok()?,
-        _ => return None,
-    };
-    if height > tip {
-        return Some(false);
-    }
-    let mut client = match tokio::time::timeout(
-        std::time::Duration::from_secs(20),
-        get_client(server_uri),
-    )
-    .await
-    {
-        Ok(Ok(client)) => client,
-        _ => return None,
-    };
-    let answer = match tokio::time::timeout(
-        std::time::Duration::from_secs(20),
-        client.get_block(BlockId {
-            height: u64::from(height),
-            hash: Vec::new(),
-        }),
-    )
-    .await
-    {
-        Ok(Ok(answer)) => answer.into_inner(),
-        Ok(Err(status)) => {
-            let message = status.message().to_ascii_lowercase();
-            return if message.contains("not found") {
-                Some(false)
-            } else {
-                None
-            };
-        }
-        Err(_) => return None,
-    };
-    Some(answer.hash.as_slice() == hash.as_slice())
-}
-
-/// Classifies a wallet file without touching the stored one: whether the current reader can
-/// parse it, and — when it can and the wallet has synced blocks — whether those blocks belong
-/// to the chain the indexer serves. A wallet from the previous network reads fine (the chain
-/// names coincide) but its blocks do not, so the hash comparison is the only real test.
-///
-/// The platforms keep the file in different shapes: Android stores the decoded binary, iOS
-/// its base64 text. When the file is in the other platform's shape but is otherwise a valid
-/// wallet, `normalize_to` carries the wallet bytes base64-encoded, ready for the caller to
-/// write back in its own platform's shape.
-#[uniffi::export]
-pub fn inspect_wallet(
-    base64_data: String,
-    server_uri: String,
-    platform: String,
-) -> Result<String, ZingolibError> {
-    with_panic_guard(|| {
-        let file_bytes = match STANDARD.decode(&base64_data) {
-            Ok(file_bytes) => file_bytes,
-            Err(e) => {
-                return Ok(object! {
-                    "readable" => false,
-                    "format_version" => 0,
-                    "chain_match" => json::JsonValue::Null,
-                    "normalize_to" => json::JsonValue::Null,
-                    "reason" => format!("base64 decode: {e}"),
-                }
-                .dump());
-            }
-        };
-        let (wallet_bytes, needs_normalizing) = match wallet_bytes(&file_bytes) {
-            Some(pair) => pair,
-            None => {
-                return Ok(object! {
-                    "readable" => false,
-                    "format_version" => wallet_format_version(&file_bytes),
-                    "chain_match" => json::JsonValue::Null,
-                    "normalize_to" => json::JsonValue::Null,
-                    "reason" => "not a wallet file in any known encoding",
-                }
-                .dump());
-            }
-        };
-        let format_version = wallet_format_version(&wallet_bytes);
-        let platform_wants_binary = platform == "android";
-        let normalize_to = if needs_normalizing != platform_wants_binary {
-            json::JsonValue::Null
-        } else {
-            json::JsonValue::from(STANDARD.encode(&wallet_bytes))
-        };
-        let wallet = match LightWallet::read(&wallet_bytes[..], stable_chain()) {
-            Ok(wallet) => wallet,
-            Err(e) => {
-                return Ok(object! {
-                    "readable" => false,
-                    "format_version" => format_version,
-                    "chain_match" => json::JsonValue::Null,
-                    "normalize_to" => normalize_to,
-                    "reason" => e.to_string(),
-                }
-                .dump());
-            }
-        };
-        let newest = wallet
-            .wallet_blocks
-            .iter()
-            .next_back()
-            .map(|(height, block)| (u32::from(*height), block.block_hash().0));
-        let (newest_height, chain_match) = match newest {
-            None => (json::JsonValue::Null, json::JsonValue::Null),
-            Some((height, hash)) => {
-                let answer = if server_uri.is_empty() {
-                    None
-                } else {
-                    match server_uri.parse::<http::Uri>() {
-                        Ok(uri) => RT.block_on(indexer_has_block(uri, height, hash)),
-                        Err(_) => None,
-                    }
-                };
-                let chain_match = match answer {
-                    Some(m) => json::JsonValue::from(m),
-                    None => json::JsonValue::Null,
-                };
-                (json::JsonValue::from(height), chain_match)
-            }
-        };
-        Ok(object! {
-            "readable" => true,
-            "format_version" => format_version,
-            "newest_height" => newest_height,
-            "chain_match" => chain_match,
-            "normalize_to" => normalize_to,
-        }
-        .dump())
     })
 }
 
@@ -2075,6 +1982,29 @@ pub fn get_wallet_bonds() -> Result<String, ZingolibError> {
 }
 
 #[cfg(test)]
+static GLOBAL_CLIENT_TEST_LOCK: Mutex<()> = Mutex::new(());
+
+#[cfg(test)]
+fn global_client_test_lock() -> std::sync::MutexGuard<'static, ()> {
+    GLOBAL_CLIENT_TEST_LOCK
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
+}
+
+#[cfg(test)]
+fn temp_wallet_dir(tag: &str) -> tempfile::TempDir {
+    tempfile::Builder::new()
+        .prefix(&format!("delegator-{tag}-"))
+        .tempdir()
+        .expect("temp dir")
+}
+
+#[cfg(test)]
+fn dir_string(dir: &tempfile::TempDir) -> String {
+    dir.path().to_string_lossy().into_owned()
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
 
@@ -2192,8 +2122,11 @@ mod tests {
     #[test]
     #[ignore = "needs the network"]
     fn select_best_indexer_moves_to_the_highest_tip_on_the_wallets_chain() {
+        let _guard = global_client_test_lock();
         let _ = set_crypto_default_provider_to_ring();
+        let dir = temp_wallet_dir("select");
         let init = init_from_seed(
+            dir_string(&dir),
             "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
                 .to_string(),
             1,
@@ -2247,62 +2180,8 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "needs the network"]
-    fn inspect_wallet_tells_the_chains_apart() {
-        let _ = set_crypto_default_provider_to_ring();
-        let seed = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about".to_string();
-        init_from_seed(
-            seed.clone(),
-            1,
-            "http://88.198.67.189:18234".to_string(),
-            "test".to_string(),
-            "Medium".to_string(),
-            1,
-        )
-        .unwrap();
-        run_sync().unwrap();
-        for _ in 0..60 {
-            let status = status_sync().unwrap();
-            let json = json::parse(&status).unwrap_or(json::JsonValue::Null);
-            let scanned = json["percentage_total_blocks_scanned"]
-                .as_f64()
-                .unwrap_or(0.0);
-            if scanned > 0.0 {
-                break;
-            }
-            std::thread::sleep(std::time::Duration::from_secs(5));
-        }
-        let b64 = save_to_b64().unwrap();
-        let stable = json::parse(
-            &inspect_wallet(
-                b64.clone(),
-                "http://88.198.67.189:18234".to_string(),
-                "android".to_string(),
-            )
-            .unwrap(),
-        )
-        .unwrap();
-        let nightly = json::parse(
-            &inspect_wallet(
-                b64,
-                "http://45.32.186.234:18234".to_string(),
-                "android".to_string(),
-            )
-            .unwrap(),
-        )
-        .unwrap();
-        println!("stable: {stable}");
-        println!("nightly: {nightly}");
-        assert_eq!(stable["readable"], true);
-        assert_ne!(stable["chain_match"], false, "stable blocks must match");
-        assert_eq!(
-            nightly["chain_match"], false,
-            "stable blocks must not be on nightly"
-        );
-    }
-
-    #[test]
     fn select_best_indexer_needs_a_wallet_and_reports_a_dead_network_as_error() {
+        let _guard = global_client_test_lock();
         reset_lightclient();
         let no_wallet = select_best_indexer("stable".to_string()).unwrap_err();
         assert!(
@@ -2312,24 +2191,13 @@ mod tests {
     }
 
     #[test]
-    fn wallet_bytes_takes_both_platform_encodings() {
-        let mut binary = vec![];
-        binary.extend_from_slice(&40u64.to_le_bytes());
-        binary.extend_from_slice(b"wallet bytes go here");
-        assert!(wallet_bytes(&binary).is_some());
-        let as_text = STANDARD.encode(&binary);
-        assert!(wallet_bytes(as_text.as_bytes()).is_some());
-        let garbage = b"this is not a wallet file at all";
-        assert!(wallet_bytes(garbage).is_none());
-    }
-
-    #[test]
     #[ignore = "needs the network"]
     fn a_fresh_wallet_syncs_on_the_live_featurenet() {
-        let dir = std::env::temp_dir().join(format!("delegator-sync-{}", std::process::id()));
-        std::fs::create_dir_all(&dir).unwrap();
+        let _guard = global_client_test_lock();
+        let dir = temp_wallet_dir("sync");
         let _ = set_crypto_default_provider_to_ring();
         let seed = init_new(
+            dir_string(&dir),
             "http://88.198.67.189:18234".to_string(),
             "test".to_string(),
             "Medium".to_string(),
@@ -2352,11 +2220,11 @@ mod tests {
             );
         }
         println!("{}", get_latest_block_wallet().unwrap());
-        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]
     fn panic_in_one_ffi_call_leaks_into_the_next_call() {
+        let _guard = global_client_test_lock();
         reset_lightclient();
 
         let first = with_panic_guard(|| {
@@ -2380,6 +2248,7 @@ mod tests {
 
     #[test]
     fn panic_while_holding_lightclient_lock_turns_future_calls_into_lock_poison_errors() {
+        let _guard = global_client_test_lock();
         reset_lightclient();
 
         let first = with_panic_guard(|| {
@@ -2409,6 +2278,7 @@ mod tests {
 
     #[test]
     fn poisoned_outer_lock_can_be_recovered_without_reinitializing_wallet() {
+        let _guard = global_client_test_lock();
         reset_lightclient();
 
         let first = with_panic_guard(|| {
@@ -2436,10 +2306,13 @@ mod tests {
 
     #[test]
     fn outer_lock_poison_does_not_require_wallet_reinit_for_read_calls() {
+        let _guard = global_client_test_lock();
         reset_lightclient();
 
         // Real client init, no reload after this.
+        let dir = temp_wallet_dir("poison");
         let init = init_from_seed(
+            dir_string(&dir),
             "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
                 .to_string(),
             1,
@@ -2494,8 +2367,12 @@ mod nightly_wallet_maker {
     #[test]
     #[ignore = "needs the network"]
     fn make_a_nightly_wallet_file() {
+        let _guard = global_client_test_lock();
         let _ = set_crypto_default_provider_to_ring();
+        let dir = std::env::temp_dir().join("nightly_wallet");
+        std::fs::create_dir_all(&dir).unwrap();
         init_from_seed(
+            dir.to_string_lossy().into_owned(),
             "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
                 .to_string(),
             9700,
@@ -2518,9 +2395,8 @@ mod nightly_wallet_maker {
             }
             std::thread::sleep(std::time::Duration::from_secs(5));
         }
-        let b64 = save_to_b64().unwrap();
-        std::fs::write("/tmp/nightly_wallet.b64", &b64).unwrap();
-        println!("nightly wallet written: {} bytes", b64.len());
+        println!("save: {}", save_wallet().unwrap());
+        println!("nightly wallet written under {}", dir.display());
     }
 }
 #[cfg(test)]
@@ -2530,6 +2406,7 @@ mod old_chain_probe {
     #[test]
     #[ignore = "needs the network"]
     fn old_testnet_indexer_is_alive() {
+        let _guard = global_client_test_lock();
         let _ = set_crypto_default_provider_to_ring();
         let uri: http::Uri = "https://testnet.zec.rocks:443".parse().unwrap();
         let tip = RT
@@ -2537,7 +2414,10 @@ mod old_chain_probe {
             .expect("tip");
         let height = u32::try_from(tip.height).unwrap();
         let birthday = height.saturating_sub(100);
+        let dir = std::env::temp_dir().join("oldtestnet_wallet");
+        std::fs::create_dir_all(&dir).unwrap();
         init_from_seed(
+            dir.to_string_lossy().into_owned(),
             "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
                 .to_string(),
             birthday,
@@ -2560,37 +2440,412 @@ mod old_chain_probe {
             }
             std::thread::sleep(std::time::Duration::from_secs(5));
         }
-        let b64 = save_to_b64().unwrap();
-        std::fs::write("/tmp/oldtestnet_wallet.b64", &b64).unwrap();
+        println!("save: {}", save_wallet().unwrap());
         println!(
-            "legacy wallet written: {} bytes, birthday {birthday}, tip {height}",
-            b64.len()
+            "legacy wallet written under {}, birthday {birthday}, tip {height}",
+            dir.display()
         );
-        let inspect = inspect_wallet(
-            b64,
-            "http://88.198.67.189:18234".to_string(),
-            "android".to_string(),
-        )
-        .unwrap();
-        println!("inspect vs stable: {inspect}");
     }
 }
 
 #[cfg(test)]
-mod inspect_probe {
+mod wallet_file_tests {
+    use base64::Engine as _;
+    use base64::engine::general_purpose::STANDARD;
+
     use super::*;
 
-    #[test]
-    #[ignore = "needs the network"]
-    fn inspect_the_planted_wallet() {
-        let _ = set_crypto_default_provider_to_ring();
-        let data = std::fs::read_to_string("/tmp/ios_wallet.dat").unwrap();
-        let out = inspect_wallet(
-            data,
-            "http://88.198.67.189:18234".to_string(),
-            "ios".to_string(),
+    const SEED_A: &str = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
+    const SEED_B: &str = "hospital museum valve antique skate museum unfold vocal weird milk scale social vessel identify crowd hospital control album rib bulb path oven civil tank";
+
+    fn open_offline(dir: &str) -> String {
+        let out = init_from_file(
+            dir.to_string(),
+            String::new(),
+            "regtest".to_string(),
+            "Medium".to_string(),
+            1,
         )
         .unwrap();
-        println!("inspect: {out}");
+        assert!(!out.starts_with("Error:"), "{out}");
+        out
+    }
+
+    fn create_offline(dir: &str, seed: &str) -> String {
+        let out = init_from_seed(
+            dir.to_string(),
+            seed.to_string(),
+            1,
+            String::new(),
+            "regtest".to_string(),
+            "Medium".to_string(),
+            1,
+        )
+        .unwrap();
+        assert!(!out.starts_with("Error:"), "{out}");
+        out
+    }
+
+    fn seed_phrase(seed_json: &str) -> String {
+        json::parse(seed_json).unwrap()["seed_phrase"]
+            .as_str()
+            .unwrap()
+            .to_string()
+    }
+
+    fn addresses() -> (String, String) {
+        (
+            get_unified_addresses().unwrap(),
+            get_transparent_addresses().unwrap(),
+        )
+    }
+
+    fn mark_wallet_dirty() {
+        with_lightclient_read(|lightclient| {
+            RT.block_on(async { lightclient.wallet.write().await.save_required = true });
+            Ok(())
+        })
+        .unwrap();
+    }
+
+    fn raw_wallet_fixture() -> Vec<u8> {
+        let dir = temp_wallet_dir("fixture");
+        create_offline(&dir_string(&dir), SEED_A);
+        reset_lightclient();
+        std::fs::read(dir.path().join(WALLET_FILE_NAME)).unwrap()
+    }
+
+    fn is_raw_wallet(bytes: &[u8]) -> bool {
+        bytes.len() > 8 && bytes[..8] == LightWallet::serialized_version().to_le_bytes()
+    }
+
+    #[test]
+    fn round_trip_through_the_file_keeps_seed_and_addresses() {
+        let _guard = global_client_test_lock();
+        let dir = temp_wallet_dir("roundtrip");
+        let dir_str = dir_string(&dir);
+
+        let created = create_offline(&dir_str, SEED_A);
+        assert!(dir.path().join(WALLET_FILE_NAME).exists());
+        assert_eq!(wallet_exists(dir_str.clone()).unwrap(), true);
+        assert_eq!(save_wallet().unwrap(), "false");
+
+        let new_address = create_new_unified_address("oz".to_string()).unwrap();
+        assert!(!new_address.starts_with("Error:"), "{new_address}");
+        mark_wallet_dirty();
+        assert_eq!(save_wallet().unwrap(), "true");
+        let before = addresses();
+
+        reset_lightclient();
+        let opened = open_offline(&dir_str);
+        assert_eq!(seed_phrase(&opened), seed_phrase(&created));
+        assert_eq!(seed_phrase(&opened), SEED_A);
+        assert_eq!(addresses(), before);
+        assert_eq!(json::parse(&before.0).unwrap().len(), 2);
+        assert_eq!(save_wallet().unwrap(), "false");
+        assert!(is_raw_wallet(
+            &std::fs::read(dir.path().join(WALLET_FILE_NAME)).unwrap()
+        ));
+    }
+
+    #[test]
+    fn legacy_ios_shape_is_renamed_opened_and_rewritten_raw() {
+        let _guard = global_client_test_lock();
+        let fixture = raw_wallet_fixture();
+        let dir = temp_wallet_dir("ios");
+        let dir_str = dir_string(&dir);
+        let text = STANDARD.encode(&fixture);
+        std::fs::write(dir.path().join(IOS_WALLET_FILE_NAME), text.as_bytes()).unwrap();
+
+        assert_eq!(wallet_exists(dir_str.clone()).unwrap(), true);
+        assert!(dir.path().join(WALLET_FILE_NAME).exists());
+        assert!(!dir.path().join(IOS_WALLET_FILE_NAME).exists());
+        assert_eq!(
+            std::fs::read(dir.path().join(WALLET_FILE_NAME)).unwrap(),
+            text.as_bytes()
+        );
+
+        let opened = open_offline(&dir_str);
+        assert_eq!(seed_phrase(&opened), SEED_A);
+        assert_eq!(save_wallet().unwrap(), "true");
+        let rewritten = std::fs::read(dir.path().join(WALLET_FILE_NAME)).unwrap();
+        assert!(is_raw_wallet(&rewritten));
+        assert!(rewritten.len() < text.len());
+        assert_eq!(save_wallet().unwrap(), "false");
+        let (_, shape) = LightWallet::read_from_path(
+            &dir.path().join(WALLET_FILE_NAME),
+            chain_from_hint("regtest").unwrap(),
+        )
+        .unwrap();
+        assert_eq!(shape, zingolib::wallet::disk::WalletFileShape::Raw);
+    }
+
+    #[test]
+    fn legacy_ios_shape_already_named_wallet_dat_opens_too() {
+        let _guard = global_client_test_lock();
+        let fixture = raw_wallet_fixture();
+        let dir = temp_wallet_dir("ios-named");
+        std::fs::write(dir.path().join(WALLET_FILE_NAME), STANDARD.encode(&fixture)).unwrap();
+
+        let opened = open_offline(&dir_string(&dir));
+        assert_eq!(seed_phrase(&opened), SEED_A);
+        assert_eq!(save_wallet().unwrap(), "true");
+        assert!(is_raw_wallet(
+            &std::fs::read(dir.path().join(WALLET_FILE_NAME)).unwrap()
+        ));
+    }
+
+    #[test]
+    fn legacy_android_shape_opens_with_no_rewrite() {
+        let _guard = global_client_test_lock();
+        let fixture = raw_wallet_fixture();
+        let dir = temp_wallet_dir("android");
+        let path = dir.path().join(WALLET_FILE_NAME);
+        std::fs::write(&path, &fixture).unwrap();
+        let modified_before = std::fs::metadata(&path).unwrap().modified().unwrap();
+
+        let opened = open_offline(&dir_string(&dir));
+        assert_eq!(seed_phrase(&opened), SEED_A);
+        assert_eq!(save_wallet().unwrap(), "false");
+        assert_eq!(std::fs::read(&path).unwrap(), fixture);
+        assert_eq!(
+            std::fs::metadata(&path).unwrap().modified().unwrap(),
+            modified_before
+        );
+        assert!(!dir.path().join("wallet.dat.tmp").exists());
+    }
+
+    #[test]
+    fn delete_removes_the_file_and_missing_files_are_stable_errors() {
+        let _guard = global_client_test_lock();
+        let dir = temp_wallet_dir("delete");
+        let dir_str = dir_string(&dir);
+        let wallet_path = dir.path().join(WALLET_FILE_NAME);
+
+        assert_eq!(
+            delete_wallet(dir_str.clone()).unwrap(),
+            "Error: wallet file not found"
+        );
+
+        create_offline(&dir_str, SEED_A);
+        assert!(wallet_path.exists());
+        assert_eq!(delete_wallet(dir_str.clone()).unwrap(), "true");
+        assert!(!wallet_path.exists());
+        assert_eq!(wallet_exists(dir_str.clone()).unwrap(), false);
+        assert_eq!(
+            delete_wallet(dir_str.clone()).unwrap(),
+            "Error: wallet file not found"
+        );
+    }
+
+    const V39_TESTNET_WALLET: &[u8] = include_bytes!("test_binaries/wallet_v39_testnet.dat");
+
+    fn open_testnet_offline(dir: &str) -> String {
+        init_from_file(
+            dir.to_string(),
+            String::new(),
+            "test".to_string(),
+            "Medium".to_string(),
+            1,
+        )
+        .unwrap()
+    }
+
+    #[test]
+    fn a_wallet_written_by_the_april_release_opens_and_is_kept_as_is() {
+        let _guard = global_client_test_lock();
+        assert_eq!(&V39_TESTNET_WALLET[..8], 39u64.to_le_bytes());
+        let dir = temp_wallet_dir("v39-android");
+        let path = dir.path().join(WALLET_FILE_NAME);
+        std::fs::write(&path, V39_TESTNET_WALLET).unwrap();
+
+        let opened = open_testnet_offline(&dir_string(&dir));
+        assert_eq!(seed_phrase(&opened), SEED_A);
+        assert_eq!(save_wallet().unwrap(), "false");
+        assert_eq!(std::fs::read(&path).unwrap(), V39_TESTNET_WALLET);
+
+        mark_wallet_dirty();
+        assert_eq!(save_wallet().unwrap(), "true");
+        let rewritten = std::fs::read(&path).unwrap();
+        assert!(is_raw_wallet(&rewritten));
+        reset_lightclient();
+        assert_eq!(
+            seed_phrase(&open_testnet_offline(&dir_string(&dir))),
+            SEED_A
+        );
+    }
+
+    #[test]
+    fn a_wallet_written_by_the_april_release_on_ios_opens_and_is_rewritten() {
+        let _guard = global_client_test_lock();
+        let dir = temp_wallet_dir("v39-ios");
+        let text = STANDARD.encode(V39_TESTNET_WALLET);
+        std::fs::write(dir.path().join(IOS_WALLET_FILE_NAME), text.as_bytes()).unwrap();
+
+        assert_eq!(wallet_exists(dir_string(&dir)).unwrap(), true);
+        assert!(!dir.path().join(IOS_WALLET_FILE_NAME).exists());
+
+        let opened = open_testnet_offline(&dir_string(&dir));
+        assert_eq!(seed_phrase(&opened), SEED_A);
+        assert_eq!(save_wallet().unwrap(), "true");
+        assert!(is_raw_wallet(
+            &std::fs::read(dir.path().join(WALLET_FILE_NAME)).unwrap()
+        ));
+    }
+
+    #[test]
+    fn a_wallet_from_another_chain_does_not_open_and_is_left_in_place() {
+        let _guard = global_client_test_lock();
+        let dir = temp_wallet_dir("v39-chain");
+        std::fs::write(dir.path().join(WALLET_FILE_NAME), V39_TESTNET_WALLET).unwrap();
+
+        let opened = init_from_file(
+            dir_string(&dir),
+            String::new(),
+            "regtest".to_string(),
+            "Medium".to_string(),
+            1,
+        )
+        .unwrap();
+        assert!(opened.starts_with("Error:"), "{opened}");
+        assert_eq!(
+            std::fs::read(dir.path().join(WALLET_FILE_NAME)).unwrap(),
+            V39_TESTNET_WALLET
+        );
+    }
+
+    #[test]
+    fn both_file_names_present_keeps_the_current_one() {
+        let _guard = global_client_test_lock();
+        let fixture = raw_wallet_fixture();
+        let dir = temp_wallet_dir("both");
+        std::fs::write(dir.path().join(WALLET_FILE_NAME), &fixture).unwrap();
+        std::fs::write(dir.path().join(IOS_WALLET_FILE_NAME), b"stale").unwrap();
+
+        let opened = open_offline(&dir_string(&dir));
+        assert_eq!(seed_phrase(&opened), SEED_A);
+        assert_eq!(
+            std::fs::read(dir.path().join(WALLET_FILE_NAME)).unwrap(),
+            fixture
+        );
+        assert_eq!(
+            std::fs::read(dir.path().join(IOS_WALLET_FILE_NAME)).unwrap(),
+            b"stale"
+        );
+    }
+
+    fn recovery(dir: &str, chain: &str) -> json::JsonValue {
+        let out = read_wallet_recovery_info(dir.to_string(), chain.to_string()).unwrap();
+        json::parse(&out).unwrap_or_else(|_| json::JsonValue::String(out))
+    }
+
+    #[test]
+    fn open_errors_name_the_problem_and_recovery_still_answers() {
+        let _guard = global_client_test_lock();
+        let dir = temp_wallet_dir("precise");
+        let dir_str = dir_string(&dir);
+        let path = dir.path().join(WALLET_FILE_NAME);
+        let open = |chain: &str| {
+            init_from_file(
+                dir_str.clone(),
+                String::new(),
+                chain.to_string(),
+                "Medium".to_string(),
+                1,
+            )
+            .unwrap()
+        };
+
+        assert_eq!(open("regtest"), "Error: wallet file not found");
+        assert_eq!(
+            recovery(&dir_str, "regtest"),
+            "Error: wallet file not found"
+        );
+
+        std::fs::write(&path, b"").unwrap();
+        assert_eq!(open("regtest"), "Error: wallet file is empty");
+
+        std::fs::write(&path, b"this is not a wallet file at all").unwrap();
+        assert_eq!(
+            open("regtest"),
+            "Error: wallet file holds neither wallet bytes nor base64 text of wallet bytes"
+        );
+
+        std::fs::write(&path, V39_TESTNET_WALLET).unwrap();
+        assert_eq!(
+            open("regtest"),
+            "Error: wallet file belongs to chain test, this build expected regtest"
+        );
+        let info = recovery(&dir_str, "regtest");
+        assert_eq!(info["seed_phrase"], SEED_A);
+        assert_eq!(info["birthday"], 1);
+        assert_eq!(info["chain_name"], "test");
+        assert_eq!(info["format_version"], 39);
+        assert!(info["ufvk"].is_null());
+
+        std::fs::write(&path, &V39_TESTNET_WALLET[..60]).unwrap();
+        assert_eq!(
+            open("test"),
+            "Error: wallet file ends early while reading the wallet data"
+        );
+        let info = recovery(&dir_str, "test");
+        assert_eq!(info["seed_phrase"], SEED_A);
+        assert_eq!(info["birthday"], 1);
+
+        std::fs::write(&path, &V39_TESTNET_WALLET[..20]).unwrap();
+        assert_eq!(
+            open("test"),
+            "Error: wallet file ends early while reading the seed"
+        );
+        assert_eq!(
+            recovery(&dir_str, "test"),
+            "Error: wallet file ends early while reading the seed"
+        );
+
+        let mut newer = V39_TESTNET_WALLET.to_vec();
+        newer[..8].copy_from_slice(&77u64.to_le_bytes());
+        std::fs::write(&path, &newer).unwrap();
+        assert_eq!(
+            open("test"),
+            "Error: wallet file version 77 is not supported, this build reads versions 1 to 40"
+        );
+    }
+
+    #[test]
+    fn recovery_info_reads_the_ios_shape_and_a_bad_chain_hint_is_an_error() {
+        let _guard = global_client_test_lock();
+        let dir = temp_wallet_dir("recover-ios");
+        let dir_str = dir_string(&dir);
+        std::fs::write(
+            dir.path().join(IOS_WALLET_FILE_NAME),
+            STANDARD.encode(V39_TESTNET_WALLET),
+        )
+        .unwrap();
+
+        let info = recovery(&dir_str, "test");
+        assert_eq!(info["seed_phrase"], SEED_A);
+        assert_eq!(info["birthday"], 1);
+        assert!(dir.path().join(WALLET_FILE_NAME).exists());
+        assert_eq!(recovery(&dir_str, "moon"), "Error: Not a valid chain hint!");
+    }
+
+    #[test]
+    fn errors_never_carry_the_wallet_payload() {
+        let _guard = global_client_test_lock();
+        let dir = temp_wallet_dir("payload");
+        let secret = STANDARD.encode(b"seed entropy lives here and must not be echoed");
+        std::fs::write(dir.path().join(WALLET_FILE_NAME), secret.as_bytes()).unwrap();
+
+        let out = init_from_file(
+            dir_string(&dir),
+            String::new(),
+            "regtest".to_string(),
+            "Medium".to_string(),
+            1,
+        )
+        .unwrap();
+        assert!(out.starts_with("Error:"), "{out}");
+        assert!(!out.contains(&secret));
+        assert!(!out.contains("seed entropy"));
     }
 }

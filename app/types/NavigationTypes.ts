@@ -18,6 +18,7 @@ export type SetupStackParamList = {
     | undefined;
   [RouteEnum.CustomIndexer]: undefined;
   [RouteEnum.Import]: undefined;
+  [RouteEnum.RecoveredSeed]: undefined;
 };
 
 export type SendNavigationState = {

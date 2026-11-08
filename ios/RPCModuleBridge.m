@@ -12,8 +12,9 @@
 RCT_EXTERN_METHOD(walletExists: 
     (RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
-RCT_EXTERN_METHOD(walletBackupExists:
-    (RCTPromiseResolveBlock)resolve 
+RCT_EXTERN_METHOD(readWalletRecoveryInfo:
+    (NSString)chainhint
+                  resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(deleteExistingWallet:
     (RCTPromiseResolveBlock)resolve 
@@ -41,13 +42,7 @@ RCT_EXTERN_METHOD(loadExistingWallet:
                   minconfirmations:(NSString)minconfirmations
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
-RCT_EXTERN_METHOD(restoreExistingWalletBackup:
-    (RCTPromiseResolveBlock)resolve 
-                  reject:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(doSave:
-    (RCTPromiseResolveBlock)resolve 
-                  reject:(RCTPromiseRejectBlock)reject)
-RCT_EXTERN_METHOD(doSaveBackup:
     (RCTPromiseResolveBlock)resolve 
                   reject:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(getLatestBlockServerInfo:
@@ -66,12 +61,6 @@ RCT_EXTERN_METHOD(probeIndexer:
 RCT_EXTERN_METHOD(selectBestIndexer:
     (NSString)network
                   network:(RCTPromiseResolveBlock)resolve
-                  reject:(RCTPromiseRejectBlock)reject)
-RCT_EXTERN_METHOD(inspectWallet:
-    (NSString)walletb64
-                  serveruri:(NSString)serveruri
-                  platform:(NSString)platform
-                  resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(getLatestBlockWalletInfo:
     (RCTPromiseResolveBlock)resolve

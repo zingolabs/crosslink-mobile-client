@@ -26,13 +26,16 @@ type TextsType = {
   server: string[];
   view: string[];
   restore: string[];
-  backup: string[];
 };
 
 type NewSeedProps = {
   onClickOK: () => void;
+  variant?: 'new' | 'recovered';
 };
-const NewSeed: React.FunctionComponent<NewSeedProps> = ({ onClickOK }) => {
+const NewSeed: React.FunctionComponent<NewSeedProps> = ({
+  onClickOK,
+  variant = 'new',
+}) => {
   const { wallet, netInfo } = useStatus();
   const { translate, setPrivacyOption, addLastSnackbar, removeFirstSnackbar } =
     useFeedback();
@@ -47,7 +50,7 @@ const NewSeed: React.FunctionComponent<NewSeedProps> = ({ onClickOK }) => {
   const expandSeed = !privacy || seedShown;
   const expandBirthday = !privacy || birthdayShown;
 
-  const seedPhrase = wallet.seed || '';
+  const seedPhrase = wallet.seed || wallet.ufvk || '';
   const birthdayNumber = (wallet.birthday && wallet.birthday.toString()) || '';
 
   const texts = useMemo<TextsType>(() => {
@@ -76,7 +79,12 @@ const NewSeed: React.FunctionComponent<NewSeedProps> = ({ onClickOK }) => {
 
       <View style={[styles.screen, { backgroundColor: colors.bgCanvas }]}>
         <Header
-          title={translate('seed.title') + ' (' + translate(`seed.new`) + ')'}
+          title={
+            translate('seed.title') +
+            ' (' +
+            translate(variant === 'recovered' ? 'seed.recovered' : 'seed.new') +
+            ')'
+          }
           screenName={screenName}
           noBalance={true}
           noSyncingStatus={true}
@@ -95,7 +103,13 @@ const NewSeed: React.FunctionComponent<NewSeedProps> = ({ onClickOK }) => {
           contentContainerStyle={styles.scrollContent}
         >
           <RegText style={styles.warning}>
-            {translate('seed.text-readonly') as string}
+            {
+              translate(
+                variant === 'recovered'
+                  ? 'seed.text-readonly-recovered'
+                  : 'seed.text-readonly',
+              ) as string
+            }
           </RegText>
           <View style={[styles.seedBox, { borderColor: colors.fgDefault }]}>
             <TouchableOpacity

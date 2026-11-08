@@ -53,7 +53,6 @@ export const fallbackSettings: BootstrappedSettings = {
     rescanScreen: false,
     settingsScreen: false,
     changeWalletScreen: false,
-    restoreWalletBackupScreen: false,
   },
   rescanMenu: true,
   recoveryWalletInfoOnDevice: false,

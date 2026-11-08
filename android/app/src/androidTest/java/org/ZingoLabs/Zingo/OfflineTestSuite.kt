@@ -7,6 +7,6 @@ import org.junit.runners.Suite.SuiteClasses
 
 @RunWith(Categories::class)
 @IncludeCategory(OfflineTest::class)
-@SuiteClasses(ExecuteAddressesFromSeed::class, ExecuteVersionFromSeed::class, RPCModuleBridgeTest::class)
+@SuiteClasses(ExecuteAddressesFromSeed::class, ExecuteVersionFromSeed::class, RPCModuleBridgeTest::class, WalletFileRoundTrip::class)
 class OfflineTestSuite {
 }

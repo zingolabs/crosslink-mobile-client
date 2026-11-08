@@ -425,12 +425,8 @@ export default class WalletService {
     return RPCModule.selectBestIndexer(network);
   }
 
-  static async inspectWallet(
-    data: string,
-    serverUri: string,
-    platform: string,
-  ): Promise<string> {
-    return RPCModule.inspectWallet(data, serverUri, platform);
+  static async readWalletRecoveryInfo(chainName: string): Promise<string> {
+    return RPCModule.readWalletRecoveryInfo(chainName);
   }
 
   static async getTotalValueToAddressInfo(): Promise<string> {
@@ -2109,7 +2105,6 @@ export default class WalletService {
     //console.log('jc change wallet', exists);
     if (exists && exists !== GlobalConst.false) {
       await this.pauseSyncProcess();
-      await RPCModule.doSaveBackup();
       const result = await RPCModule.deleteExistingWallet();
 
       if (!(result && result !== GlobalConst.false)) {
@@ -2117,43 +2112,6 @@ export default class WalletService {
       }
     } else {
       return read().translate('rpc.walletnotfound-error') as string;
-    }
-    return '';
-  }
-
-  async changeWalletNoBackup() {
-    const exists = await RPCModule.walletExists();
-
-    //console.log('jc change wallet', exists);
-    if (exists && exists !== GlobalConst.false) {
-      await this.pauseSyncProcess();
-      const result = await RPCModule.deleteExistingWallet();
-
-      if (!(result && result !== GlobalConst.false)) {
-        return read().translate('rpc.deletewallet-error') as string;
-      }
-    } else {
-      return read().translate('rpc.walletnotfound-error') as string;
-    }
-    return '';
-  }
-
-  async restoreBackup() {
-    const existsBackup = await RPCModule.walletBackupExists();
-
-    //console.log('jc restore backup', existsBackup);
-    if (existsBackup && existsBackup !== GlobalConst.false) {
-      const existsWallet = await RPCModule.walletExists();
-
-      //console.log('jc restore wallet', existsWallet);
-      if (existsWallet && existsWallet !== GlobalConst.false) {
-        await this.pauseSyncProcess();
-        await RPCModule.restoreExistingWalletBackup();
-      } else {
-        return read().translate('rpc.walletnotfound-error') as string;
-      }
-    } else {
-      return read().translate('rpc.backupnotfound-error') as string;
     }
     return '';
   }

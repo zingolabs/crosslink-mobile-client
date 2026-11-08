@@ -283,11 +283,8 @@ class SessionController {
   };
 
   changeWallet = async (request?: OpenRequest): Promise<void> => {
-    const { indexerServer, translate } = read();
-    const result =
-      indexerServer.chainName === ChainNameEnum.mainChainName
-        ? await this.walletService.changeWallet()
-        : await this.walletService.changeWalletNoBackup();
+    const { translate } = read();
+    const result = await this.walletService.changeWallet();
     if (result && result.toLowerCase().startsWith(GlobalConst.error)) {
       const title = translate('loadedapp.changingwallet-label') as string;
       reportFailure(title, result);

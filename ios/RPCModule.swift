@@ -8,6 +8,10 @@
 import Foundation
 import React
 
+private func walletFileExistsAt(_ walletDir: String) throws -> Bool {
+  return try walletExists(walletDir: walletDir)
+}
+
 @objc(RPCModule)
 class RPCModule: NSObject {
   
@@ -18,10 +22,9 @@ class RPCModule: NSObject {
   
   enum FileError: Error {
     case documentsDirectoryNotFoundError(String)
-    case readWalletError(String)
     case saveFileError(String)
     case writeFileError(String)
-    case deleteFileError(String)
+    case walletFileError(String)
   }
   
   func getDocumentsDirectory() throws -> String {
@@ -38,33 +41,22 @@ class RPCModule: NSObject {
     return fileName
   }
   
-  func fileExists(_ fileName: String) throws -> String {
-    let fileExists = try FileManager.default.fileExists(atPath: getFileName(fileName))
-    if fileExists {
-      NSLog("[Native] File exists \(fileName)")
-      return "true"
-    } else {
-      NSLog("[Native] File DOES not exists \(fileName)")
-      return "false"
+  func walletFileExists() throws -> String {
+    return try walletFileExistsAt(getDocumentsDirectory()) ? "true" : "false"
+  }
+
+  func checkWalletFileResult(_ result: String, _ what: String) throws {
+    if result.lowercased().hasPrefix(Constants.ErrorPrefix.rawValue) {
+      let err = "Error: [Native] \(what). \(result)"
+      NSLog(err)
+      throw FileError.walletFileError(err)
     }
-  }
-  
-  func readFile(_ fileName: String) throws -> String {
-    return try String(contentsOfFile: getFileName(fileName), encoding: .utf8)
-  }
-
-  func writeFile(_ fileName: String, fileBase64EncodedString: String) throws {
-    try fileBase64EncodedString.write(toFile: getFileName(fileName), atomically: true, encoding: .utf8)
-  }
-
-  func deleteFile(_ fileName: String) throws {
-    try FileManager.default.removeItem(atPath: getFileName(fileName))
   }
   
   @objc(walletExists:reject:)
   func walletExists(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
     do {
-      let result = try fileExists(Constants.WalletFileName.rawValue)
+      let result = try walletFileExists()
       DispatchQueue.main.async {
         resolve(result)
       }
@@ -73,37 +65,6 @@ class RPCModule: NSObject {
       DispatchQueue.main.async {
         resolve("false")
       }
-    }
-  }
-
-  @objc(walletBackupExists:reject:)
-  func walletBackupExists(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-    do {
-      let result = try fileExists(Constants.WalletBackupFileName.rawValue)
-      DispatchQueue.main.async {
-        resolve(result)
-      }
-    } catch {
-      NSLog("Error: [Native] wallet backup exists error: \(error.localizedDescription)")
-      DispatchQueue.main.async {
-        resolve("false")
-      }
-    }
-  }
-
-  func saveWalletFile(_ base64EncodedString: String) throws {
-    do {
-      try writeFile(Constants.WalletFileName.rawValue, fileBase64EncodedString: base64EncodedString)
-    } catch {
-      throw FileError.writeFileError("Error: [Native] writting wallet file error: \(error.localizedDescription)")
-    }
-  }
-  
-  func saveWalletBackupFile(_ base64EncodedString: String) throws {
-    do {
-      try writeFile(Constants.WalletBackupFileName.rawValue, fileBase64EncodedString: base64EncodedString)
-    } catch {
-      throw FileError.writeFileError("Error: [Native] writting wallet backup file error: \(error.localizedDescription)")
     }
   }
 
@@ -116,42 +77,30 @@ class RPCModule: NSObject {
     }
   }
 
-  func readWalletUtf8String() throws -> String {
-    do {
-      return try readFile(Constants.WalletFileName.rawValue)
-    } catch {
-      throw FileError.readWalletError("Error: [Native] reading wallet format error: \(error.localizedDescription)")
-    }
-  }
-
-  func readWalletBackup() throws -> String {
-    do {
-      return try readFile(Constants.WalletBackupFileName.rawValue)
-    } catch {
-      throw FileError.readWalletError("Error: [Native] reading wallet backup format error: \(error.localizedDescription)")
-    }
-  }
-
-  func fnDeleteExistingWallet() throws {
-    do {
-      try deleteFile(Constants.WalletFileName.rawValue)
-    } catch {
-      throw FileError.deleteFileError("Error: [Native] deleting wallet error: \(error.localizedDescription)")
+  @objc(readWalletRecoveryInfo:resolve:reject:)
+  func readWalletRecoveryInfoFromFile(_ chainhint: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    DispatchQueue.global(qos: .userInitiated).async {
+      do {
+        let resp = try readWalletRecoveryInfo(walletDir: try self.getDocumentsDirectory(), chainHint: chainhint)
+        DispatchQueue.main.async {
+          resolve(resp)
+        }
+      } catch {
+        let err = "Error: [Native] Read wallet recovery info. \(error.localizedDescription)"
+        NSLog(err)
+        DispatchQueue.main.async {
+          resolve(err)
+        }
+      }
     }
   }
 
   @objc(deleteExistingWallet:reject:)
   func deleteExistingWallet(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
     do {
-      if try fileExists(Constants.WalletFileName.rawValue) == "true" {
-        try self.fnDeleteExistingWallet()
-        DispatchQueue.main.async {
-          resolve("true")
-        }
-      } else {
-        DispatchQueue.main.async {
-          resolve("false")
-        }
+      try checkWalletFileResult(try deleteWallet(walletDir: getDocumentsDirectory()), "deleting wallet")
+      DispatchQueue.main.async {
+        resolve("true")
       }
     } catch {
       NSLog("Error: [Native] deleting wallet \(error.localizedDescription)")
@@ -160,41 +109,18 @@ class RPCModule: NSObject {
       }
     }
   }
+
   
   func saveWalletInternal() throws {
     do {
-      let walletEncodedString = try saveToB64()
-      if !walletEncodedString.lowercased().hasPrefix(Constants.ErrorPrefix.rawValue) {
-        let size = (walletEncodedString.count * 3) / 4
-        NSLog("[Native] file size: \(size) bytes")
-        if size > 0 {
-          // check if the content is correct. Stored Encoded.
-          let correct = checkB64(base64Data: walletEncodedString)
-          if correct == "true" {
-            try self.saveWalletFile(walletEncodedString)
-          } else {
-            let err = "Error: [Native] Couldn't save the wallet. The Encoded content is incorrect: \(walletEncodedString)"
-            NSLog(err)
-            throw FileError.saveFileError(err)
-          }
-        } else {
-          NSLog("[Native] No need to save the wallet.")
-        }
-      } else {
-        let err = "Error: [Native] Couldn't save the wallet. \(walletEncodedString)"
-        NSLog(err)
-        throw FileError.saveFileError(err)
-      }
+      let written = try saveWallet()
+      try checkWalletFileResult(written, "Couldn't save the wallet")
+      NSLog("[Native] wallet file written: \(written)")
     } catch {
       let err = "Error: [Native] Couldn't save the wallet. \(error.localizedDescription)"
       NSLog(err)
       throw FileError.saveFileError(err)
     }
-  }
-
-  func saveWalletBackupInternal() throws {
-    let walletString = try readWalletUtf8String()
-    try self.saveWalletBackupFile(walletString)
   }
 
   func fnCreateNewWallet(
@@ -203,12 +129,8 @@ class RPCModule: NSObject {
     performancelevel: String, 
     minconfirmations: String
   ) throws -> String {
-    let seed = try initNew(serverUri: serveruri, chainHint: chainhint, performanceLevel: performancelevel, minConfirmations: UInt32(minconfirmations) ?? 0)
-    let seedStr = String(seed)
-    if !seedStr.lowercased().hasPrefix(Constants.ErrorPrefix.rawValue) {
-      try self.saveWalletInternal()
-    }
-    return seedStr
+    let seed = try initNew(walletDir: getDocumentsDirectory(), serverUri: serveruri, chainHint: chainhint, performanceLevel: performancelevel, minConfirmations: UInt32(minconfirmations) ?? 0)
+    return String(seed)
   }
 
   @objc(createNewWallet:chainhint:performancelevel:minconfirmations:resolve:reject:)
@@ -242,12 +164,8 @@ class RPCModule: NSObject {
     performancelevel: String, 
     minconfirmations: String
   ) throws -> String {
-    let seed = try initFromSeed(seed: restoreSeed, birthday: UInt32(birthday) ?? 0, serverUri: serveruri, chainHint: chainhint, performanceLevel: performancelevel, minConfirmations: UInt32(minconfirmations) ?? 0)
-    let seedStr = String(seed)
-    if !seedStr.lowercased().hasPrefix(Constants.ErrorPrefix.rawValue) {
-      try self.saveWalletInternal()
-    }
-    return seedStr
+    let seed = try initFromSeed(walletDir: getDocumentsDirectory(), seed: restoreSeed, birthday: UInt32(birthday) ?? 0, serverUri: serveruri, chainHint: chainhint, performanceLevel: performancelevel, minConfirmations: UInt32(minconfirmations) ?? 0)
+    return String(seed)
   }
 
   @objc(restoreWalletFromSeed:birthday:serveruri:chainhint:performancelevel:minconfirmations:resolve:reject:)
@@ -282,7 +200,7 @@ class RPCModule: NSObject {
     minconfirmations: String
   ) throws -> String {
     NSLog("[Native] loadExistingWallet: opening wallet against \(serveruri) (\(chainhint))")
-    let seed = try initFromB64(base64Data: try self.readWalletUtf8String(), serverUri: serveruri, chainHint: chainhint, performanceLevel: performancelevel, minConfirmations: UInt32(minconfirmations) ?? 0)
+    let seed = try initFromFile(walletDir: getDocumentsDirectory(), serverUri: serveruri, chainHint: chainhint, performanceLevel: performancelevel, minConfirmations: UInt32(minconfirmations) ?? 0)
     let seedStr = String(seed)
     NSLog("[Native] loadExistingWallet: opened OK")
     return seedStr
@@ -307,33 +225,6 @@ class RPCModule: NSObject {
       NSLog(err)
       DispatchQueue.main.async {
         resolve(err)
-      }
-    }
-  }
-
-  @objc(restoreExistingWalletBackup:reject:)
-  func restoreExistingWalletBackup(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-    do {
-      let backupEncodedData = try self.readWalletBackup()
-      let walletEncodedData = try self.readWalletUtf8String()
-      // check if the content is correct. Stored Encoded.
-      let correct = checkB64(base64Data: backupEncodedData)
-      if correct == "true" {
-        try self.saveWalletFile(backupEncodedData)
-        try self.saveWalletBackupFile(walletEncodedData)
-        DispatchQueue.main.async {
-          resolve("true")
-        }
-      } else {
-        NSLog("Error: [Native] Couldn't save the wallet backup. The Encoded content is incorrect: \(backupEncodedData)")
-        DispatchQueue.main.async {
-          resolve("false")
-        }
-      }
-    } catch {
-      NSLog("Error: [Native] Restoring existing wallet backup error: \(error.localizedDescription)")
-      DispatchQueue.main.async {
-        resolve("false")
       }
     }
   }
@@ -363,35 +254,6 @@ class RPCModule: NSObject {
     DispatchQueue.global(qos: .userInitiated).async { [weak self] in
         if let self = self {
             self.fnDoSave(dict)
-        }
-    }
-  }
-
-  func fndoSaveBackup(_ dict: [AnyHashable: Any]) {
-    if let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
-      do {
-        try self.saveWalletBackupInternal()
-        DispatchQueue.main.async {
-          resolve("true")
-        }
-      } catch {
-        NSLog("Error: [Native] Saving wallet backup error: \(error.localizedDescription)")
-        DispatchQueue.main.async {
-          resolve("false")
-        }
-      }
-    } else {
-      let err = "Error: [Native] Save wallet backup. Argument problem."
-      NSLog(err)
-    }
-  }
-
-  @objc(doSaveBackup:reject:)
-  func doSaveBackup(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-    let dict: [String: Any] = ["resolve": resolve]
-    DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-        if let self = self {
-            self.fndoSaveBackup(dict)
         }
     }
   }
@@ -536,45 +398,6 @@ class RPCModule: NSObject {
       DispatchQueue.global(qos: .userInitiated).async { [weak self] in
           if let self = self {
               self.fnSelectBestIndexer(dict)
-          }
-      }
-  }
-
-  func fnInspectWallet(_ dict: [AnyHashable: Any]) {
-    if let walletb64 = dict["walletb64"] as? String,
-       let serveruri = dict["serveruri"] as? String,
-       let platform = dict["platform"] as? String,
-       let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
-      do {
-        let resp = try inspectWallet(base64Data: walletb64, serverUri: serveruri, platform: platform)
-        let respStr = String(resp)
-        DispatchQueue.main.async {
-          resolve(respStr)
-        }
-      } catch {
-        let err = "Error: [Native] Inspect wallet. \(error.localizedDescription)"
-        NSLog(err)
-        DispatchQueue.main.async {
-          resolve(err)
-        }
-      }
-    } else {
-      let err = "Error: [Native] Inspect wallet. Argument problem."
-      NSLog(err)
-      if let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
-          DispatchQueue.main.async {
-            resolve(err)
-          }
-      }
-    }
-  }
-
-  @objc(inspectWallet:serveruri:platform:resolve:reject:)
-  func inspectWalletInfo(_ walletb64: String, serveruri: String, platform: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-      let dict: [String: Any] = ["walletb64": walletb64, "serveruri": serveruri, "platform": platform, "resolve": resolve]
-      DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-          if let self = self {
-              self.fnInspectWallet(dict)
           }
       }
   }
