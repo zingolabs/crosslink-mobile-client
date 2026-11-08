@@ -604,3 +604,42 @@ class ExecuteParseAddresses {
         assertThat(wrongResult).isEqualTo(expectedWrongResult)
     }
 }
+@Category(OfflineTest::class)
+class WalletFileRoundTrip {
+    @Test
+    fun roundTripThroughTheFile() {
+        val mapper = jacksonObjectMapper()
+        val dir = java.io.File(context.filesDir, "wallet-round-trip-${System.nanoTime()}")
+        dir.mkdirs()
+        val walletDir = dir.absolutePath
+        val seed = Seeds.HOSPITAL
+
+        println(uniffi.zingo.setCryptoDefaultProviderToRing())
+
+        val created: InitFromSeed = mapper.readValue(
+            uniffi.zingo.initFromSeed(walletDir, seed, 1u, "", "regtest", "Medium", 1u)
+        )
+        assertThat(created.seed_phrase).isEqualTo(seed)
+        assertThat(uniffi.zingo.walletExists(walletDir)).isTrue()
+        assertThat(java.io.File(dir, "wallet.dat").exists()).isTrue()
+        assertThat(uniffi.zingo.saveWallet()).isEqualTo("false")
+        val addressesBefore: String = uniffi.zingo.getUnifiedAddresses()
+
+        val opened: InitFromSeed = mapper.readValue(
+            uniffi.zingo.initFromFile(walletDir, "", "regtest", "Medium", 1u)
+        )
+        assertThat(opened.seed_phrase).isEqualTo(seed)
+        assertThat(uniffi.zingo.getUnifiedAddresses()).isEqualTo(addressesBefore)
+        assertThat(uniffi.zingo.saveWallet()).isEqualTo("false")
+
+        assertThat(uniffi.zingo.backupWallet(walletDir)).isEqualTo("true")
+        assertThat(uniffi.zingo.walletBackupExists(walletDir)).isTrue()
+        assertThat(uniffi.zingo.restoreWalletBackup(walletDir)).isEqualTo("true")
+        assertThat(uniffi.zingo.quarantineWallet(walletDir)).isEqualTo("true")
+        assertThat(java.io.File(dir, "wallet.legacy.dat").exists()).isTrue()
+        assertThat(uniffi.zingo.walletExists(walletDir)).isFalse()
+        assertThat(uniffi.zingo.deleteWallet(walletDir)).isEqualTo("Error: wallet file not found")
+
+        dir.deleteRecursively()
+    }
+}

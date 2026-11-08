@@ -667,3 +667,62 @@ final class ExecuteParseAddresses: XCTestCase {
         }
     }
 }
+
+final class WalletFileRoundTrip: XCTestCase {
+    func testRoundTripThroughTheFile() throws {
+        setCryptoProvider()
+        let walletDir = testWalletDir()
+        let seed = Seeds.HOSPITAL
+
+        let created: InitFromSeed = try decodeJSON(
+          try initFromSeed(walletDir: walletDir, seed: seed, birthday: UInt32(1), serverUri: "", chainHint: "regtest", performanceLevel: "Medium", minConfirmations: UInt32(1))
+        )
+        XCTAssertEqual(created.seed_phrase, seed)
+        XCTAssertTrue(try walletExists(walletDir: walletDir))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: walletDir + "/wallet.dat"))
+        XCTAssertEqual(try saveWallet(), "false")
+        let addressesBefore = try getUnifiedAddresses()
+
+        let opened: InitFromSeed = try decodeJSON(
+          try initFromFile(walletDir: walletDir, serverUri: "", chainHint: "regtest", performanceLevel: "Medium", minConfirmations: UInt32(1))
+        )
+        XCTAssertEqual(opened.seed_phrase, seed)
+        XCTAssertEqual(try getUnifiedAddresses(), addressesBefore)
+        XCTAssertEqual(try saveWallet(), "false")
+
+        XCTAssertEqual(try backupWallet(walletDir: walletDir), "true")
+        XCTAssertTrue(try walletBackupExists(walletDir: walletDir))
+        XCTAssertEqual(try restoreWalletBackup(walletDir: walletDir), "true")
+        XCTAssertEqual(try quarantineWallet(walletDir: walletDir), "true")
+        XCTAssertTrue(FileManager.default.fileExists(atPath: walletDir + "/wallet.legacy.dat"))
+        XCTAssertFalse(try walletExists(walletDir: walletDir))
+        XCTAssertEqual(try deleteWallet(walletDir: walletDir), "Error: wallet file not found")
+
+        try? FileManager.default.removeItem(atPath: walletDir)
+    }
+
+    func testLegacyBase64TextFileOpensAndIsRewrittenRaw() throws {
+        setCryptoProvider()
+        let sourceDir = testWalletDir()
+        let seed = Seeds.HOSPITAL
+        _ = try initFromSeed(walletDir: sourceDir, seed: seed, birthday: UInt32(1), serverUri: "", chainHint: "regtest", performanceLevel: "Medium", minConfirmations: UInt32(1))
+        let raw = try Data(contentsOf: URL(fileURLWithPath: sourceDir + "/wallet.dat"))
+
+        let legacyDir = testWalletDir()
+        try raw.base64EncodedString().write(toFile: legacyDir + "/wallet.dat.txt", atomically: true, encoding: .utf8)
+
+        XCTAssertTrue(try walletExists(walletDir: legacyDir))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: legacyDir + "/wallet.dat.txt"))
+        let opened: InitFromSeed = try decodeJSON(
+          try initFromFile(walletDir: legacyDir, serverUri: "", chainHint: "regtest", performanceLevel: "Medium", minConfirmations: UInt32(1))
+        )
+        XCTAssertEqual(opened.seed_phrase, seed)
+        XCTAssertEqual(try saveWallet(), "true")
+        let rewritten = try Data(contentsOf: URL(fileURLWithPath: legacyDir + "/wallet.dat"))
+        XCTAssertEqual(rewritten.prefix(8), Data([40, 0, 0, 0, 0, 0, 0, 0]))
+        XCTAssertEqual(try saveWallet(), "false")
+
+        try? FileManager.default.removeItem(atPath: sourceDir)
+        try? FileManager.default.removeItem(atPath: legacyDir)
+    }
+}
