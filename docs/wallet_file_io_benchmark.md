@@ -125,4 +125,4 @@ New path on iOS: Swift passes the Documents path. Rust allocates `W` and the par
 
 ## Emulator and device verification
 
-No Android emulator image and no iOS device were available on the machine that produced this document, so the break points above are derived from the allocation sequence and the published limits. The XCTest `WalletFileRoundTrip` ran on an iOS 26.5 simulator and passed. The Android instrumented test `WalletFileRoundTrip` exercises the same path through the Kotlin module once an emulator is attached.
+No physical device was available on the machine that produced this document, so the break points above are derived from the allocation sequence and the published limits. The XCTest `WalletFileRoundTrip` ran on an iOS 26.5 simulator and passed. The Android offline instrumented suite, including `WalletFileRoundTrip` and the bridge round trip, ran on an API 37 arm64 emulator and passed.

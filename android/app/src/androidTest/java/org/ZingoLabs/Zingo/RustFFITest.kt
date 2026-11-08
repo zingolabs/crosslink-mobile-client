@@ -140,13 +140,13 @@ class ExecuteAddressesFromSeed {
         val setCrytoProvider = uniffi.zingo.setCryptoDefaultProviderToRing()
         println(setCrytoProvider)
 
-        val initFromSeedJson: String = uniffi.zingo.initFromSeed(context.filesDir.absolutePath, seed, 1u, serveruri, chainhint, "Medium", 1u)
+        val initFromSeedJson: String = uniffi.zingo.initFromSeed(context.filesDir.absolutePath, seed, 419200u, serveruri, chainhint, "Medium", 1u)
         println("\nInit from seed:")
         println(initFromSeedJson)
         val initFromSeed: InitFromSeed = mapper.readValue(initFromSeedJson)
 
         assertThat(initFromSeed.seed_phrase).isEqualTo(seed)
-        assertThat(initFromSeed.birthday).isEqualTo(1)
+        assertThat(initFromSeed.birthday).isEqualTo(419200)
 
         val addressesJson: String = uniffi.zingo.getUnifiedAddresses()
         println("\nAddresses:")
@@ -180,13 +180,13 @@ class ExecuteVersionFromSeed {
         val setCrytoProvider = uniffi.zingo.setCryptoDefaultProviderToRing()
         println(setCrytoProvider)
 
-        val initFromSeedJson: String = uniffi.zingo.initFromSeed(context.filesDir.absolutePath, seed, 1u, serveruri, chainhint, "Medium", 1u)
+        val initFromSeedJson: String = uniffi.zingo.initFromSeed(context.filesDir.absolutePath, seed, 419200u, serveruri, chainhint, "Medium", 1u)
         println("\nInit from seed:")
         println(initFromSeedJson)
         val initFromSeed: InitFromSeed = mapper.readValue(initFromSeedJson)
 
         assertThat(initFromSeed.seed_phrase).isEqualTo(seed)
-        assertThat(initFromSeed.birthday).isEqualTo(1)
+        assertThat(initFromSeed.birthday).isEqualTo(419200)
 
         val version: String = uniffi.zingo.getVersion()
         println("\nVersion:")

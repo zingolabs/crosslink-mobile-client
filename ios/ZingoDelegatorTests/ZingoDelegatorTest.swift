@@ -191,11 +191,11 @@ final class OfflineTestSuite: XCTestCase {
         let seed = Seeds.ABANDON
 
         do {
-            let initJson = try initFromSeed(walletDir: testWalletDir(), seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
+            let initJson = try initFromSeed(walletDir: testWalletDir(), seed: seed, birthday: UInt32(419200), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
             print("\nInit from seed:\n\(initJson)")
             let initRes: InitFromSeed = try decodeJSON(initJson)
             XCTAssertEqual(initRes.seed_phrase, seed)
-            XCTAssertEqual(initRes.birthday, 1)
+            XCTAssertEqual(initRes.birthday, 419200)
         } catch {
           XCTFail("\nInit from seed error:\n\(error.localizedDescription)")
           return
@@ -233,11 +233,11 @@ final class OfflineTestSuite: XCTestCase {
         let seed = Seeds.ABANDON
 
         do {
-          let initJson = try initFromSeed(walletDir: testWalletDir(), seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
+          let initJson = try initFromSeed(walletDir: testWalletDir(), seed: seed, birthday: UInt32(419200), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
           print("\nInit from seed:\n\(initJson)")
           let initRes: InitFromSeed = try decodeJSON(initJson)
           XCTAssertEqual(initRes.seed_phrase, seed)
-          XCTAssertEqual(initRes.birthday, 1)
+          XCTAssertEqual(initRes.birthday, 419200)
         } catch {
           XCTFail("\nInit from seed error:\n\(error.localizedDescription)")
           return
