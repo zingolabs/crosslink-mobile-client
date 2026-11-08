@@ -593,12 +593,20 @@ pub fn delete_wallet(wallet_dir: String) -> Result<String, ZingolibError> {
     })
 }
 
-/// Moves `wallet.dat` aside as `wallet.legacy.dat`, keeping it for a later seed export.
+/// Moves `wallet.dat` aside as `wallet.legacy.dat`, keeping it for a later seed export. An
+/// earlier quarantined file is never overwritten; the new one gets a timestamp in its name.
 #[uniffi::export]
 pub fn quarantine_wallet(wallet_dir: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         let config = wallet_file_config(&wallet_dir);
-        let legacy = config.get_zingo_wallet_dir().join(LEGACY_WALLET_FILE_NAME);
+        let dir = config.get_zingo_wallet_dir();
+        let mut legacy = dir.join(LEGACY_WALLET_FILE_NAME);
+        if legacy.exists() {
+            let stamp = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map_or(0, |d| d.as_secs());
+            legacy = dir.join(format!("wallet.legacy.{stamp}.dat"));
+        }
         Ok(file_operation_result(
             std::fs::rename(config.get_wallet_path(), legacy),
             "wallet file not found",
@@ -2923,6 +2931,18 @@ mod wallet_file_tests {
         assert!(!wallet_path.exists());
         assert_eq!(std::fs::read(&legacy_path).unwrap(), bytes);
         assert_eq!(wallet_exists(dir_str.clone()).unwrap(), false);
+
+        create_offline(&dir_str, SEED_B);
+        let second = std::fs::read(&wallet_path).unwrap();
+        assert_eq!(quarantine_wallet(dir_str.clone()).unwrap(), "true");
+        assert_eq!(std::fs::read(&legacy_path).unwrap(), bytes);
+        let stamped: Vec<_> = std::fs::read_dir(dir.path())
+            .unwrap()
+            .map(|entry| entry.unwrap().file_name().into_string().unwrap())
+            .filter(|name| name.starts_with("wallet.legacy.") && name != LEGACY_WALLET_FILE_NAME)
+            .collect();
+        assert_eq!(stamped.len(), 1);
+        assert_eq!(std::fs::read(dir.path().join(&stamped[0])).unwrap(), second);
     }
 
     #[test]
@@ -2971,6 +2991,142 @@ mod wallet_file_tests {
             json::parse(&inspect_wallet(dir_str, String::new(), "moon".to_string()).unwrap())
                 .unwrap();
         assert_eq!(bad_hint["readable"], false);
+    }
+
+    const V39_TESTNET_WALLET: &[u8] = include_bytes!("test_binaries/wallet_v39_testnet.dat");
+
+    fn open_testnet_offline(dir: &str) -> String {
+        init_from_file(
+            dir.to_string(),
+            String::new(),
+            "test".to_string(),
+            "Medium".to_string(),
+            1,
+        )
+        .unwrap()
+    }
+
+    #[test]
+    fn a_wallet_written_by_the_april_release_opens_and_is_kept_as_is() {
+        let _guard = global_client_test_lock();
+        assert_eq!(&V39_TESTNET_WALLET[..8], 39u64.to_le_bytes());
+        let dir = temp_wallet_dir("v39-android");
+        let path = dir.path().join(WALLET_FILE_NAME);
+        std::fs::write(&path, V39_TESTNET_WALLET).unwrap();
+
+        let inspected = json::parse(
+            &inspect_wallet(dir_string(&dir), String::new(), "test".to_string()).unwrap(),
+        )
+        .unwrap();
+        assert_eq!(inspected["readable"], true);
+        assert_eq!(inspected["format_version"], 39);
+        assert!(inspected["chain_match"].is_null());
+
+        let opened = open_testnet_offline(&dir_string(&dir));
+        assert_eq!(seed_phrase(&opened), SEED_A);
+        assert_eq!(save_wallet().unwrap(), "false");
+        assert_eq!(std::fs::read(&path).unwrap(), V39_TESTNET_WALLET);
+
+        mark_wallet_dirty();
+        assert_eq!(save_wallet().unwrap(), "true");
+        let rewritten = std::fs::read(&path).unwrap();
+        assert!(is_raw_wallet(&rewritten));
+        reset_lightclient();
+        assert_eq!(
+            seed_phrase(&open_testnet_offline(&dir_string(&dir))),
+            SEED_A
+        );
+    }
+
+    #[test]
+    fn a_wallet_written_by_the_april_release_on_ios_opens_and_is_rewritten() {
+        let _guard = global_client_test_lock();
+        let dir = temp_wallet_dir("v39-ios");
+        let text = STANDARD.encode(V39_TESTNET_WALLET);
+        std::fs::write(dir.path().join(IOS_WALLET_FILE_NAME), text.as_bytes()).unwrap();
+        std::fs::write(
+            dir.path().join(IOS_WALLET_BACKUP_FILE_NAME),
+            text.as_bytes(),
+        )
+        .unwrap();
+
+        let inspected = json::parse(
+            &inspect_wallet(dir_string(&dir), String::new(), "test".to_string()).unwrap(),
+        )
+        .unwrap();
+        assert_eq!(inspected["readable"], true);
+        assert_eq!(inspected["format_version"], 39);
+        assert!(!dir.path().join(IOS_WALLET_FILE_NAME).exists());
+
+        let opened = open_testnet_offline(&dir_string(&dir));
+        assert_eq!(seed_phrase(&opened), SEED_A);
+        assert_eq!(save_wallet().unwrap(), "true");
+        assert!(is_raw_wallet(
+            &std::fs::read(dir.path().join(WALLET_FILE_NAME)).unwrap()
+        ));
+
+        assert_eq!(restore_wallet_backup(dir_string(&dir)).unwrap(), "true");
+        assert_eq!(
+            std::fs::read(dir.path().join(WALLET_FILE_NAME)).unwrap(),
+            text.as_bytes()
+        );
+        reset_lightclient();
+        assert_eq!(
+            seed_phrase(&open_testnet_offline(&dir_string(&dir))),
+            SEED_A
+        );
+        assert_eq!(save_wallet().unwrap(), "true");
+        assert!(is_raw_wallet(
+            &std::fs::read(dir.path().join(WALLET_FILE_NAME)).unwrap()
+        ));
+    }
+
+    #[test]
+    fn a_wallet_from_another_chain_is_reported_unreadable_and_can_be_quarantined() {
+        let _guard = global_client_test_lock();
+        let dir = temp_wallet_dir("v39-chain");
+        std::fs::write(dir.path().join(WALLET_FILE_NAME), V39_TESTNET_WALLET).unwrap();
+
+        let inspected = json::parse(
+            &inspect_wallet(dir_string(&dir), String::new(), "regtest".to_string()).unwrap(),
+        )
+        .unwrap();
+        assert_eq!(inspected["readable"], false);
+        assert_eq!(inspected["format_version"], 39);
+        let opened = init_from_file(
+            dir_string(&dir),
+            String::new(),
+            "regtest".to_string(),
+            "Medium".to_string(),
+            1,
+        )
+        .unwrap();
+        assert!(opened.starts_with("Error:"), "{opened}");
+        assert_eq!(quarantine_wallet(dir_string(&dir)).unwrap(), "true");
+        assert_eq!(
+            std::fs::read(dir.path().join(LEGACY_WALLET_FILE_NAME)).unwrap(),
+            V39_TESTNET_WALLET
+        );
+    }
+
+    #[test]
+    fn both_file_names_present_keeps_the_current_one() {
+        let _guard = global_client_test_lock();
+        let fixture = raw_wallet_fixture();
+        let dir = temp_wallet_dir("both");
+        std::fs::write(dir.path().join(WALLET_FILE_NAME), &fixture).unwrap();
+        std::fs::write(dir.path().join(IOS_WALLET_FILE_NAME), b"stale").unwrap();
+
+        let opened = open_offline(&dir_string(&dir));
+        assert_eq!(seed_phrase(&opened), SEED_A);
+        assert_eq!(
+            std::fs::read(dir.path().join(WALLET_FILE_NAME)).unwrap(),
+            fixture
+        );
+        assert_eq!(
+            std::fs::read(dir.path().join(IOS_WALLET_FILE_NAME)).unwrap(),
+            b"stale"
+        );
     }
 
     #[test]
