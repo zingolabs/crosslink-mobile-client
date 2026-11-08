@@ -92,13 +92,11 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
 
   useEffect(() => {
     const loadUfvk = async () => {
-      try {
-        const value = await getUfvk();
-        setUfvk(value || '');
-      } catch (e) {
+      const value = await getUfvk().catch((e: unknown) => {
         console.error('Failed to load ufvk', e);
-        setUfvk('');
-      }
+        return '';
+      });
+      setUfvk(value || '');
     };
 
     loadUfvk();
