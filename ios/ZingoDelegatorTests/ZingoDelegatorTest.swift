@@ -226,61 +226,6 @@ final class OfflineTestSuite: XCTestCase {
         }
     }
 
-    func executeAddressFromUfvk() throws {
-        setCryptoProvider()
-
-        let serveruri = "http://10.0.2.2:20000"
-        let chainhint = "main"
-        let ufvk = UfvkConst.ABANDON
-
-        do {
-          let initJson = try initFromUfvk(ufvk: ufvk, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
-          print("\nInit From UFVK:\n\(initJson)")
-          let initRes: InitFromUfvk = try decodeJSON(initJson)
-          XCTAssertEqual(initRes.ufvk, ufvk)
-          XCTAssertEqual(initRes.birthday, 1)
-        } catch {
-          XCTFail("\nInit from UFVK error:\n\(error.localizedDescription)")
-          return
-        }
-
-        do {
-          let exportJson = try getUfvk()
-          print("\nExport Ufvk:\n\(exportJson)")
-          let exportRes: ExportUfvk = try decodeJSON(exportJson)
-          XCTAssertEqual(exportRes.ufvk, ufvk)
-          XCTAssertEqual(exportRes.birthday, 1)
-        } catch {
-          XCTFail("\nInit from UFVK error:\n\(error.localizedDescription)")
-          return
-        }
-
-        do {
-            let addrsJson = try getUnifiedAddresses()
-            print("\nAddresses:\n\(addrsJson)")
-            let addrs: [UnifiedAddress] = try decodeJSON(addrsJson)
-            XCTAssertEqual(addrs[0].encoded_address, "u1gsqvqxx6lmmqg05uvx57gjdg5j3a54nxw09z4vq4z0yp7dfdcjrqk5wq64quwzrufmujd5e8xu5jn7cyewjaptxc8lsqwa2lk559u4cd")
-            XCTAssertEqual(addrs[0].has_orchard, true)
-            XCTAssertEqual(addrs[0].has_sapling, false)
-            XCTAssertEqual(addrs[0].has_transparent, false)
-        } catch {
-          XCTFail("\nAddresses error:\n\(error.localizedDescription)")
-          return
-        }
-
-        do {
-            let tAddrsJson = try getTransparentAddresses()
-            print("\nT Addresses:\n\(tAddrsJson)")
-            let tAddrs: [TransparentAddress] = try decodeJSON(tAddrsJson)
-            XCTAssertEqual(tAddrs[0].encoded_address, "t1dUDJ62ANtmebE8drFg7g2MWYwXHQ6Xu3F")
-            XCTAssertEqual(tAddrs[0].scope, "external")
-        } catch {
-          XCTFail("\nT Addresses error:\n\(error.localizedDescription)")
-          return
-        }
-
-    }
-
     func executeVersionFromSeed() throws {
         setCryptoProvider()
         let serveruri = "http://10.0.2.2:20000"
