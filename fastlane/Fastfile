@@ -63,7 +63,9 @@ platform :ios do
     upload_to_testflight(
       api_key: api_key,
       ipa: "build/ZingoDelegator.ipa",
-      skip_waiting_for_build_processing: true
+      distribute_external: true,
+      groups: ["Apr 2026 - CrossLink Workshop", "Internal"],
+      changelog: ENV.fetch("GITHUB_REF_NAME", marketing_version)
     )
   end
 end
