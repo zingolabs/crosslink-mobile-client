@@ -25,6 +25,7 @@ import { WalletKindEnum } from '../wallet/enums';
 import { resetScheduledActions } from '../storage/scheduledActionsFile';
 import { discoverIndexers, probeIndexer, selectBestIndexer } from '../indexers';
 import { reportFailure } from '../reporting';
+import { isWalletFileError } from '../walletFile';
 import { BootInfo, OpenRequest, SessionHandle } from '../lifecycle/phase';
 import { patch, read } from '../store/appStore';
 import { addLastSnackbar, setBackgroundError } from '../store/feedback';
@@ -255,6 +256,11 @@ export const runOpening = (input: OpeningInput): void => {
     );
     const title = t('loadingapp.readingwallet-label');
     if (isError(result)) {
+      if (isWalletFileError(result)) {
+        reportFailure(title, result);
+        fail(title, result);
+        return;
+      }
       await walletErrorHandle(result, title, true);
       return;
     }

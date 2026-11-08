@@ -425,6 +425,10 @@ export default class WalletService {
     return RPCModule.selectBestIndexer(network);
   }
 
+  static async readWalletRecoveryInfo(chainName: string): Promise<string> {
+    return RPCModule.readWalletRecoveryInfo(chainName);
+  }
+
   static async getTotalValueToAddressInfo(): Promise<string> {
     return RPCModule.getTotalValueToAddressInfo();
   }

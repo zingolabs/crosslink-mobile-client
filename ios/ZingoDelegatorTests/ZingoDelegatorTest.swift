@@ -635,9 +635,15 @@ final class WalletFileRoundTrip: XCTestCase {
         XCTAssertEqual(try getUnifiedAddresses(), addressesBefore)
         XCTAssertEqual(try saveWallet(), "false")
 
+        let recovery = try JSONSerialization.jsonObject(with: Data(try readWalletRecoveryInfo(walletDir: walletDir, chainHint: "regtest").utf8)) as? [String: Any]
+        XCTAssertEqual(recovery?["seed_phrase"] as? String, seed)
+        XCTAssertEqual(recovery?["birthday"] as? Int, 1)
+
         XCTAssertEqual(try deleteWallet(walletDir: walletDir), "true")
         XCTAssertFalse(try walletExists(walletDir: walletDir))
         XCTAssertEqual(try deleteWallet(walletDir: walletDir), "Error: wallet file not found")
+        XCTAssertEqual(try readWalletRecoveryInfo(walletDir: walletDir, chainHint: "regtest"), "Error: wallet file not found")
+        XCTAssertEqual(try initFromFile(walletDir: walletDir, serverUri: "", chainHint: "regtest", performanceLevel: "Medium", minConfirmations: UInt32(1)), "Error: wallet file not found")
 
         try? FileManager.default.removeItem(atPath: walletDir)
     }

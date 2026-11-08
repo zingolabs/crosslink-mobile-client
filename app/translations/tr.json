@@ -103,7 +103,8 @@
     "alert-donation-body": "ZingoLabs’in Zcash’i daha faydalı hale getirmesine yardımcı olmak ister misiniz? Her işlemde ZingoLabs’e bir Zenny (0.01 ZEC) bağışlamak için katılın! Katılmak istiyorsanız Onayla’ya, istemiyorsanız İptal’e basın.",
     "recoverkeys": "Son anahtarları geri yükle",
     "recoverkeysinstall": "Bu cihazda kullanılan son anahtarlar kurtarıldı:",
-    "noservers": "Listedeki sunucuların hiçbiri kullanılabilir değil, muhtemelen bir bağlantı hatası var."
+    "noservers": "Listedeki sunucuların hiçbiri kullanılabilir değil, muhtemelen bir bağlantı hatası var.",
+    "recoverfromfile": "Tohum ifadesini cüzdan dosyasından kurtar"
   },
   "loadedapp": {
     "about": "Zingo Delegator hakkında",
@@ -452,7 +453,9 @@
     "tapreveal": "Görüntülemek için dokunun",
     "showtransactions": "İşlemleri Göster",
     "youreceived": "Aldınız",
-    "tapcopy-ufvk-message": "Görüntüleme Anahtarı panoya kopyalandı"
+    "tapcopy-ufvk-message": "Görüntüleme Anahtarı panoya kopyalandı",
+    "recovered": "Kurtarıldı",
+    "text-readonly-recovered": "Bu tohum ifadesi ve doğum günü, açılamayan cüzdan dosyasından okundu. Dikkatle not alın. Bu cüzdanı geri yüklemenin tek yolu budur."
   },
   "send": {
     "Broadcast": "Yayınlandı ve onay bekliyor: İşlem (Tx)",

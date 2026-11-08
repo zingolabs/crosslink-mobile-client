@@ -30,6 +30,7 @@ type StartMenuProps = {
   actionButtonsDisabled: boolean;
   walletExists: boolean;
   openWalletFailed?: boolean;
+  recoverFromFile?: () => void;
   playIntro: boolean;
   openCurrentWallet: () => void;
   createNewWallet: () => void;
@@ -43,6 +44,7 @@ const StartMenu: React.FunctionComponent<StartMenuProps> = ({
   actionButtonsDisabled,
   walletExists,
   openWalletFailed = false,
+  recoverFromFile,
   playIntro,
   openCurrentWallet,
   createNewWallet,
@@ -173,6 +175,15 @@ const StartMenu: React.FunctionComponent<StartMenuProps> = ({
                   >
                     {translate('loadingapp.noopenwallet-message') as string}
                   </BoldText>
+                  {recoverFromFile && (
+                    <Button
+                      testID="loadingapp.recoverfromfile"
+                      variant="ghost"
+                      title={translate('loadingapp.recoverfromfile') as string}
+                      disabled={actionButtonsDisabled}
+                      onPress={() => recoverFromFile()}
+                    />
+                  )}
                 </View>
               )}
               <Button

@@ -640,6 +640,19 @@ const fakeRpc = {
 
   doSave: async () => 'ok',
 
+  readWalletRecoveryInfo: async (_chainName: string) => {
+    if (!wallet) {
+      return err('wallet file not found');
+    }
+    return JSON.stringify({
+      seed_phrase: wallet.seed ?? null,
+      ufvk: wallet.ufvk ?? null,
+      birthday: wallet.birthday,
+      chain_name: chainName,
+      format_version: 40,
+    });
+  },
+
   deleteExistingWallet: async () => {
     if (!wallet) {
       return GlobalConst.false;
@@ -651,7 +664,6 @@ const fakeRpc = {
     syncComplete = false;
     return GlobalConst.true;
   },
-
 };
 
 export default fakeRpc;

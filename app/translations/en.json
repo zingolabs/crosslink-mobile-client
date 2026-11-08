@@ -103,7 +103,8 @@
     "alert-donation-body": "Do you want to help ZingoLabs make Zcash more useful? Opt in to tip one Zenny (0.01 ZEC) to ZingoLabs with each transaction! If so, press confirm, otherwise press Cancel.",
     "recoverkeys": "Recover last Keys used",
     "recoverkeysinstall": "Recovered the last Keys used in this device:",
-    "noservers": "None of the servers on the list are available, it is probably a connection error."
+    "noservers": "None of the servers on the list are available, it is probably a connection error.",
+    "recoverfromfile": "Recover seed phrase from the wallet file"
   },
   "loadedapp": {
     "about": "About Zingo Delegator",
@@ -452,7 +453,9 @@
     "tapreveal": "Tap to reveal",
     "showtransactions": "Show Transactions",
     "youreceived": "You received",
-    "tapcopy-ufvk-message": "Viewing Key copied to Clipboard"
+    "tapcopy-ufvk-message": "Viewing Key copied to Clipboard",
+    "recovered": "Recovered",
+    "text-readonly-recovered": "This seed phrase and birthday were read from the wallet file that could not be opened. Write them down carefully. They are the only way to restore this wallet."
   },
   "send": {
     "Broadcast": "Broadcasted and awaiting confirmation Tx:",

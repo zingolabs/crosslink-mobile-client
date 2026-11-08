@@ -125,6 +125,17 @@ class RPCModule internal constructor(private val reactContext: ReactApplicationC
     }
 
     @ReactMethod
+    fun readWalletRecoveryInfo(chainhint: String, promise: Promise) {
+        try {
+            promise.resolve(uniffi.zingo.readWalletRecoveryInfo(getDocumentDirectory(), chainhint))
+        } catch (e: Exception) {
+            val errorMessage = "Error: [Native] read wallet recovery info: ${e.localizedMessage}"
+            Log.e("MAIN", errorMessage, e)
+            promise.resolve(errorMessage)
+        }
+    }
+
+    @ReactMethod
     fun deleteExistingWallet(promise: Promise) {
         try {
             val resp = uniffi.zingo.deleteWallet(getDocumentDirectory())

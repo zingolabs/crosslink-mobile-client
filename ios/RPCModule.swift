@@ -88,6 +88,24 @@ class RPCModule: NSObject {
     }
   }
 
+  @objc(readWalletRecoveryInfo:resolve:reject:)
+  func readWalletRecoveryInfoFromFile(_ chainhint: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    DispatchQueue.global(qos: .userInitiated).async {
+      do {
+        let resp = try readWalletRecoveryInfo(walletDir: try self.getDocumentsDirectory(), chainHint: chainhint)
+        DispatchQueue.main.async {
+          resolve(resp)
+        }
+      } catch {
+        let err = "Error: [Native] Read wallet recovery info. \(error.localizedDescription)"
+        NSLog(err)
+        DispatchQueue.main.async {
+          resolve(err)
+        }
+      }
+    }
+  }
+
   @objc(deleteExistingWallet:reject:)
   func deleteExistingWallet(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
     do {

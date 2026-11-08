@@ -9,6 +9,7 @@ export enum RouteEnum {
   ListedIndexers = 'ListedIndexers',
   CustomIndexer = 'CustomIndexer',
   Import = 'Import',
+  RecoveredSeed = 'RecoveredSeed',
 
   MainTabs = 'MainTabs',
 

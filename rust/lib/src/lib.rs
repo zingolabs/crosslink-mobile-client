@@ -516,8 +516,13 @@ pub fn init_from_file(
         if let Err(e) = migrate_legacy_file_name(&config) {
             return Ok(format!("Error: {e}"));
         }
-        let (lightclient, _shape) = match LightClient::open_from_wallet_path(config) {
+        let (wallet, _shape) = match LightWallet::open_file(&config.get_wallet_path(), config.chain)
+        {
             Ok(opened) => opened,
+            Err(e) => return Ok(format!("Error: {e}")),
+        };
+        let lightclient = match LightClient::create_from_wallet(wallet, config, true) {
+            Ok(l) => l,
             Err(e) => return Ok(format!("Error: {e}")),
         };
         let has_seed = RT.block_on(async { lightclient.wallet.read().await.mnemonic().is_some() });
@@ -545,6 +550,36 @@ pub fn save_wallet() -> Result<String, ZingolibError> {
 #[uniffi::export]
 pub fn wallet_exists(wallet_dir: String) -> Result<bool, ZingolibError> {
     with_panic_guard(|| Ok(wallet_file_config(&wallet_dir).wallet_path_exists()))
+}
+
+/// Reads the seed phrase (or the viewing key of a seedless wallet) and the birthday from the
+/// front of the wallet file, so a user can restore even when the rest of the file is damaged
+/// or belongs to another chain. Answers JSON or `"Error: wallet file ..."`.
+#[uniffi::export]
+pub fn read_wallet_recovery_info(
+    wallet_dir: String,
+    chain_hint: String,
+) -> Result<String, ZingolibError> {
+    with_panic_guard(|| {
+        let chain = match chain_from_hint(&chain_hint) {
+            Ok(chain) => chain,
+            Err(e) => return Ok(e),
+        };
+        let path = wallet_file_config(&wallet_dir).get_wallet_pathbuf();
+        Ok(
+            match LightWallet::read_recovery_info_from_path(&path, chain) {
+                Ok(info) => object! {
+                    "seed_phrase" => info.seed_phrase.map_or(json::JsonValue::Null, json::JsonValue::from),
+                    "ufvk" => info.unified_full_viewing_key.map_or(json::JsonValue::Null, json::JsonValue::from),
+                    "birthday" => info.birthday,
+                    "chain_name" => info.chain_name,
+                    "format_version" => info.version,
+                }
+                .dump(),
+                Err(e) => format!("Error: {e}"),
+            },
+        )
+    })
 }
 
 #[uniffi::export]
@@ -840,10 +875,7 @@ pub fn inspect_wallet(
             Err(e) => return Ok(unreadable(0, e)),
         };
         let path = wallet_file_config(&wallet_dir).get_wallet_pathbuf();
-        if !path.exists() {
-            return Ok(unreadable(0, "wallet file not found".to_string()));
-        }
-        let (wallet, _shape) = match LightWallet::read_from_path(&path, chain) {
+        let (wallet, _shape) = match LightWallet::open_file(&path, chain) {
             Ok(read) => read,
             Err(e) => return Ok(unreadable(file_format_version(&path), e.to_string())),
         };
@@ -2978,6 +3010,111 @@ mod wallet_file_tests {
             std::fs::read(dir.path().join(IOS_WALLET_FILE_NAME)).unwrap(),
             b"stale"
         );
+    }
+
+    fn recovery(dir: &str, chain: &str) -> json::JsonValue {
+        let out = read_wallet_recovery_info(dir.to_string(), chain.to_string()).unwrap();
+        json::parse(&out).unwrap_or_else(|_| json::JsonValue::String(out))
+    }
+
+    #[test]
+    fn open_errors_name_the_problem_and_recovery_still_answers() {
+        let _guard = global_client_test_lock();
+        let dir = temp_wallet_dir("precise");
+        let dir_str = dir_string(&dir);
+        let path = dir.path().join(WALLET_FILE_NAME);
+        let open = |chain: &str| {
+            init_from_file(
+                dir_str.clone(),
+                String::new(),
+                chain.to_string(),
+                "Medium".to_string(),
+                1,
+            )
+            .unwrap()
+        };
+
+        assert_eq!(open("regtest"), "Error: wallet file not found");
+        assert_eq!(
+            recovery(&dir_str, "regtest"),
+            "Error: wallet file not found"
+        );
+
+        std::fs::write(&path, b"").unwrap();
+        assert_eq!(open("regtest"), "Error: wallet file is empty");
+
+        std::fs::write(&path, b"this is not a wallet file at all").unwrap();
+        assert_eq!(
+            open("regtest"),
+            "Error: wallet file holds neither wallet bytes nor base64 text of wallet bytes"
+        );
+
+        std::fs::write(&path, V39_TESTNET_WALLET).unwrap();
+        assert_eq!(
+            open("regtest"),
+            "Error: wallet file belongs to chain test, this build expected regtest"
+        );
+        let info = recovery(&dir_str, "regtest");
+        assert_eq!(info["seed_phrase"], SEED_A);
+        assert_eq!(info["birthday"], 1);
+        assert_eq!(info["chain_name"], "test");
+        assert_eq!(info["format_version"], 39);
+        assert!(info["ufvk"].is_null());
+
+        std::fs::write(&path, &V39_TESTNET_WALLET[..60]).unwrap();
+        assert_eq!(
+            open("test"),
+            "Error: wallet file ends early while reading the wallet data"
+        );
+        let info = recovery(&dir_str, "test");
+        assert_eq!(info["seed_phrase"], SEED_A);
+        assert_eq!(info["birthday"], 1);
+
+        std::fs::write(&path, &V39_TESTNET_WALLET[..20]).unwrap();
+        assert_eq!(
+            open("test"),
+            "Error: wallet file ends early while reading the seed"
+        );
+        assert_eq!(
+            recovery(&dir_str, "test"),
+            "Error: wallet file ends early while reading the seed"
+        );
+
+        let mut newer = V39_TESTNET_WALLET.to_vec();
+        newer[..8].copy_from_slice(&77u64.to_le_bytes());
+        std::fs::write(&path, &newer).unwrap();
+        assert_eq!(
+            open("test"),
+            "Error: wallet file version 77 is not supported, this build reads versions 1 to 40"
+        );
+
+        let inspected = json::parse(
+            &inspect_wallet(dir_str.clone(), String::new(), "test".to_string()).unwrap(),
+        )
+        .unwrap();
+        assert_eq!(inspected["readable"], false);
+        assert_eq!(
+            inspected["reason"],
+            "wallet file version 77 is not supported, this build reads versions 1 to 40"
+        );
+    }
+
+    #[test]
+    fn recovery_info_reads_the_ios_shape_and_a_bad_chain_hint_is_an_error() {
+        let _guard = global_client_test_lock();
+        let dir = temp_wallet_dir("recover-ios");
+        let dir_str = dir_string(&dir);
+        std::fs::write(
+            dir.path().join(IOS_WALLET_FILE_NAME),
+            STANDARD.encode(V39_TESTNET_WALLET),
+        )
+        .unwrap();
+
+        let info = recovery(&dir_str, "test");
+        assert_eq!(info["seed_phrase"], SEED_A);
+        assert_eq!(info["birthday"], 1);
+        assert!(dir.path().join(WALLET_FILE_NAME).exists());
+        assert_eq!(recovery(&dir_str, "moon"), "Error: Not a valid chain hint!");
     }
 
     #[test]

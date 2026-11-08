@@ -103,7 +103,8 @@
     "alert-donation-body": "Você quer ajudar o ZingoLabs a tornar o Zcash mais útil? Opte por dar uma gorjeta de um Zenny (0.01 ZEC) para ZingoLabs em cada transação! Se sim, pressione confirmar, caso contrário, pressione Cancelar.",
     "recoverkeys": "Recuperar a última Clave de Recuperação usada",
     "recoverkeysinstall": "Recuperou a última Clave de Recuperação usada neste dispositivo:",
-    "noservers": "Nenhum dos servidores da lista está disponível, provavelmente é um erro de conexão."
+    "noservers": "Nenhum dos servidores da lista está disponível, provavelmente é um erro de conexão.",
+    "recoverfromfile": "Recuperar a frase semente do ficheiro da carteira"
   },
   "loadedapp": {
     "about": "Sobre a Zingo Delegator",
@@ -452,7 +453,9 @@
     "tapreveal": "Toque para revelar",
     "showtransactions": "Mostrar Transações",
     "youreceived": "Você recebeu",
-    "tapcopy-ufvk-message": "Chave de visualização copiada para a área de transferência"
+    "tapcopy-ufvk-message": "Chave de visualização copiada para a área de transferência",
+    "recovered": "Recuperada",
+    "text-readonly-recovered": "Esta frase semente e esta data de nascimento foram lidas do ficheiro da carteira que não pôde ser aberto. Anote-as com cuidado. São a única forma de restaurar esta carteira."
   },
   "send": {
     "Broadcast": "Transmitido e aguardando confirmação Tx:",

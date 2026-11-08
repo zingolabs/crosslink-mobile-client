@@ -16,6 +16,10 @@ import {
   WalletType,
 } from '../AppState';
 import { writeSettings } from '../storage/settingsFile';
+import { read } from '../store/appStore';
+import { addLastSnackbar } from '../store/feedback';
+import WalletService from '../wallet';
+import { parseWalletFileRecoveryInfo } from '../walletFile';
 import {
   enterPhase,
   patch,
@@ -32,6 +36,7 @@ import Snackbars from '../../components/Components/Snackbars';
 import { SetupStackParamList } from '../types';
 import Import from './components/Import';
 import StartMenu from './components/StartMenu';
+import NewSeed from './components/NewSeed';
 import ChooseIndexer from './components/ChooseIndexer';
 import ListedIndexers from './components/ListedIndexers';
 import CustomIndexer from './components/CustomIndexer';
@@ -58,6 +63,27 @@ const setIndexerServer = async (
 };
 
 const getwalletToRestore = (): void => patch({ wallet: {} as WalletType });
+
+const recoverFromFile = async (
+  navigation: NativeStackNavigationProp<SetupStackParamList>,
+): Promise<void> => {
+  const result = await WalletService.readWalletRecoveryInfo(
+    read().indexerServer.chainName,
+  );
+  const info = parseWalletFileRecoveryInfo(result);
+  if (!info) {
+    addLastSnackbar({ message: result, screenName: [ScreenEnum.Boot] });
+    return;
+  }
+  patch({
+    wallet: {
+      seed: info.seed_phrase ?? undefined,
+      ufvk: info.ufvk ?? undefined,
+      birthday: info.birthday,
+    },
+  });
+  navigation.navigate(RouteEnum.RecoveredSeed);
+};
 
 const closeServers = (
   navigation: NativeStackNavigationProp<SetupStackParamList>,
@@ -118,6 +144,7 @@ export default function Setup() {
                   actionButtonsDisabled={false}
                   walletExists={walletExists}
                   openWalletFailed={openFailed}
+                  recoverFromFile={() => recoverFromFile(navigation)}
                   playIntro={coldStart && !walletExists}
                   openCurrentWallet={() => startOpening({ kind: 'open' })}
                   createNewWallet={() => startOpening({ kind: 'create' })}
@@ -143,6 +170,20 @@ export default function Setup() {
                     })
                   }
                   onClickCancel={() => {
+                    if (navigation.canGoBack()) {
+                      navigation.goBack();
+                      return;
+                    }
+                    navigation.replace(RouteEnum.StartMenu);
+                  }}
+                />
+              )}
+            </SetupStack.Screen>
+            <SetupStack.Screen name={RouteEnum.RecoveredSeed}>
+              {({ navigation }) => (
+                <NewSeed
+                  variant="recovered"
+                  onClickOK={() => {
                     if (navigation.canGoBack()) {
                       navigation.goBack();
                       return;

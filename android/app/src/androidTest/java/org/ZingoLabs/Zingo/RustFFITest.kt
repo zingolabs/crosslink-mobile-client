@@ -5,6 +5,7 @@ import org.junit.Test
 import org.junit.experimental.categories.Category
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import org.json.JSONObject
 
 object Seeds {
     const val ABANDON = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art"
@@ -632,9 +633,15 @@ class WalletFileRoundTrip {
         assertThat(uniffi.zingo.getUnifiedAddresses()).isEqualTo(addressesBefore)
         assertThat(uniffi.zingo.saveWallet()).isEqualTo("false")
 
+        val recovery = JSONObject(uniffi.zingo.readWalletRecoveryInfo(walletDir, "regtest"))
+        assertThat(recovery.getString("seed_phrase")).isEqualTo(seed)
+        assertThat(recovery.getInt("birthday")).isEqualTo(1)
+
         assertThat(uniffi.zingo.deleteWallet(walletDir)).isEqualTo("true")
         assertThat(uniffi.zingo.walletExists(walletDir)).isFalse()
         assertThat(uniffi.zingo.deleteWallet(walletDir)).isEqualTo("Error: wallet file not found")
+        assertThat(uniffi.zingo.readWalletRecoveryInfo(walletDir, "regtest")).isEqualTo("Error: wallet file not found")
+        assertThat(uniffi.zingo.initFromFile(walletDir, "", "regtest", "Medium", 1u)).isEqualTo("Error: wallet file not found")
 
         dir.deleteRecursively()
     }
