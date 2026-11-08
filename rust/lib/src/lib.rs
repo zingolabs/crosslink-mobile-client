@@ -126,6 +126,9 @@ fn install_panic_hook_once() {
 
             let bt = Backtrace::force_capture().to_string();
 
+            #[cfg(test)]
+            eprintln!("panic: {payload} at {file:?}:{line:?}:{col:?}");
+
             set_last_panic(PanicReport {
                 msg: payload,
                 file,
@@ -2673,3 +2676,320 @@ mod inspect_probe {
     }
 }
 
+#[cfg(test)]
+mod wallet_file_tests {
+    use base64::Engine as _;
+    use base64::engine::general_purpose::STANDARD;
+
+    use super::*;
+
+    const SEED_A: &str = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
+    const SEED_B: &str = "hospital museum valve antique skate museum unfold vocal weird milk scale social vessel identify crowd hospital control album rib bulb path oven civil tank";
+
+    fn open_offline(dir: &str) -> String {
+        let out = init_from_file(
+            dir.to_string(),
+            String::new(),
+            "regtest".to_string(),
+            "Medium".to_string(),
+            1,
+        )
+        .unwrap();
+        assert!(!out.starts_with("Error:"), "{out}");
+        out
+    }
+
+    fn create_offline(dir: &str, seed: &str) -> String {
+        let out = init_from_seed(
+            dir.to_string(),
+            seed.to_string(),
+            1,
+            String::new(),
+            "regtest".to_string(),
+            "Medium".to_string(),
+            1,
+        )
+        .unwrap();
+        assert!(!out.starts_with("Error:"), "{out}");
+        out
+    }
+
+    fn seed_phrase(seed_json: &str) -> String {
+        json::parse(seed_json).unwrap()["seed_phrase"]
+            .as_str()
+            .unwrap()
+            .to_string()
+    }
+
+    fn addresses() -> (String, String) {
+        (
+            get_unified_addresses().unwrap(),
+            get_transparent_addresses().unwrap(),
+        )
+    }
+
+    fn mark_wallet_dirty() {
+        with_lightclient_read(|lightclient| {
+            RT.block_on(async { lightclient.wallet.write().await.save_required = true });
+            Ok(())
+        })
+        .unwrap();
+    }
+
+    fn raw_wallet_fixture() -> Vec<u8> {
+        let dir = temp_wallet_dir("fixture");
+        create_offline(&dir_string(&dir), SEED_A);
+        reset_lightclient();
+        std::fs::read(dir.path().join(WALLET_FILE_NAME)).unwrap()
+    }
+
+    fn is_raw_wallet(bytes: &[u8]) -> bool {
+        bytes.len() > 8 && bytes[..8] == LightWallet::serialized_version().to_le_bytes()
+    }
+
+    #[test]
+    fn round_trip_through_the_file_keeps_seed_and_addresses() {
+        let _guard = global_client_test_lock();
+        let dir = temp_wallet_dir("roundtrip");
+        let dir_str = dir_string(&dir);
+
+        let created = create_offline(&dir_str, SEED_A);
+        assert!(dir.path().join(WALLET_FILE_NAME).exists());
+        assert_eq!(wallet_exists(dir_str.clone()).unwrap(), true);
+        assert_eq!(save_wallet().unwrap(), "false");
+
+        let new_address = create_new_unified_address("oz".to_string()).unwrap();
+        assert!(!new_address.starts_with("Error:"), "{new_address}");
+        mark_wallet_dirty();
+        assert_eq!(save_wallet().unwrap(), "true");
+        let before = addresses();
+
+        reset_lightclient();
+        let opened = open_offline(&dir_str);
+        assert_eq!(seed_phrase(&opened), seed_phrase(&created));
+        assert_eq!(seed_phrase(&opened), SEED_A);
+        assert_eq!(addresses(), before);
+        assert_eq!(json::parse(&before.0).unwrap().len(), 2);
+        assert_eq!(save_wallet().unwrap(), "false");
+        assert!(is_raw_wallet(
+            &std::fs::read(dir.path().join(WALLET_FILE_NAME)).unwrap()
+        ));
+    }
+
+    #[test]
+    fn legacy_ios_shape_is_renamed_opened_and_rewritten_raw() {
+        let _guard = global_client_test_lock();
+        let fixture = raw_wallet_fixture();
+        let dir = temp_wallet_dir("ios");
+        let dir_str = dir_string(&dir);
+        let text = STANDARD.encode(&fixture);
+        std::fs::write(dir.path().join(IOS_WALLET_FILE_NAME), text.as_bytes()).unwrap();
+        std::fs::write(
+            dir.path().join(IOS_WALLET_BACKUP_FILE_NAME),
+            text.as_bytes(),
+        )
+        .unwrap();
+
+        assert_eq!(wallet_exists(dir_str.clone()).unwrap(), true);
+        assert!(dir.path().join(WALLET_FILE_NAME).exists());
+        assert!(!dir.path().join(IOS_WALLET_FILE_NAME).exists());
+        assert_eq!(wallet_backup_exists(dir_str.clone()).unwrap(), true);
+        assert!(dir.path().join("wallet.backup.dat").exists());
+        assert!(!dir.path().join(IOS_WALLET_BACKUP_FILE_NAME).exists());
+        assert_eq!(
+            std::fs::read(dir.path().join(WALLET_FILE_NAME)).unwrap(),
+            text.as_bytes()
+        );
+
+        let opened = open_offline(&dir_str);
+        assert_eq!(seed_phrase(&opened), SEED_A);
+        assert_eq!(save_wallet().unwrap(), "true");
+        let rewritten = std::fs::read(dir.path().join(WALLET_FILE_NAME)).unwrap();
+        assert!(is_raw_wallet(&rewritten));
+        assert!(rewritten.len() < text.len());
+        assert_eq!(save_wallet().unwrap(), "false");
+        let (_, shape) = LightWallet::read_from_path(
+            &dir.path().join(WALLET_FILE_NAME),
+            chain_from_hint("regtest").unwrap(),
+        )
+        .unwrap();
+        assert_eq!(shape, zingolib::wallet::disk::WalletFileShape::Raw);
+    }
+
+    #[test]
+    fn legacy_ios_shape_already_named_wallet_dat_opens_too() {
+        let _guard = global_client_test_lock();
+        let fixture = raw_wallet_fixture();
+        let dir = temp_wallet_dir("ios-named");
+        std::fs::write(dir.path().join(WALLET_FILE_NAME), STANDARD.encode(&fixture)).unwrap();
+
+        let opened = open_offline(&dir_string(&dir));
+        assert_eq!(seed_phrase(&opened), SEED_A);
+        assert_eq!(save_wallet().unwrap(), "true");
+        assert!(is_raw_wallet(
+            &std::fs::read(dir.path().join(WALLET_FILE_NAME)).unwrap()
+        ));
+    }
+
+    #[test]
+    fn legacy_android_shape_opens_with_no_rewrite() {
+        let _guard = global_client_test_lock();
+        let fixture = raw_wallet_fixture();
+        let dir = temp_wallet_dir("android");
+        let path = dir.path().join(WALLET_FILE_NAME);
+        std::fs::write(&path, &fixture).unwrap();
+        let modified_before = std::fs::metadata(&path).unwrap().modified().unwrap();
+
+        let opened = open_offline(&dir_string(&dir));
+        assert_eq!(seed_phrase(&opened), SEED_A);
+        assert_eq!(save_wallet().unwrap(), "false");
+        assert_eq!(std::fs::read(&path).unwrap(), fixture);
+        assert_eq!(
+            std::fs::metadata(&path).unwrap().modified().unwrap(),
+            modified_before
+        );
+        assert!(!dir.path().join("wallet.dat.tmp").exists());
+    }
+
+    #[test]
+    fn backup_then_restore_swaps_the_two_slots() {
+        let _guard = global_client_test_lock();
+        let dir = temp_wallet_dir("backup");
+        let dir_str = dir_string(&dir);
+        let wallet_path = dir.path().join(WALLET_FILE_NAME);
+        let backup_path = dir.path().join("wallet.backup.dat");
+
+        assert_eq!(wallet_backup_exists(dir_str.clone()).unwrap(), false);
+        create_offline(&dir_str, SEED_A);
+        let bytes_a = std::fs::read(&wallet_path).unwrap();
+        assert_eq!(backup_wallet(dir_str.clone()).unwrap(), "true");
+        assert_eq!(wallet_backup_exists(dir_str.clone()).unwrap(), true);
+        assert_eq!(std::fs::read(&backup_path).unwrap(), bytes_a);
+
+        create_offline(&dir_str, SEED_B);
+        let bytes_b = std::fs::read(&wallet_path).unwrap();
+        assert_ne!(bytes_a, bytes_b);
+
+        assert_eq!(restore_wallet_backup(dir_str.clone()).unwrap(), "true");
+        assert_eq!(std::fs::read(&wallet_path).unwrap(), bytes_a);
+        assert_eq!(std::fs::read(&backup_path).unwrap(), bytes_b);
+        assert!(!dir.path().join("wallet.dat.tmp").exists());
+        assert_eq!(seed_phrase(&open_offline(&dir_str)), SEED_A);
+
+        assert_eq!(restore_wallet_backup(dir_str.clone()).unwrap(), "true");
+        assert_eq!(std::fs::read(&wallet_path).unwrap(), bytes_b);
+        assert_eq!(std::fs::read(&backup_path).unwrap(), bytes_a);
+        assert_eq!(seed_phrase(&open_offline(&dir_str)), SEED_B);
+    }
+
+    #[test]
+    fn delete_and_quarantine_move_or_remove_the_file() {
+        let _guard = global_client_test_lock();
+        let dir = temp_wallet_dir("delete");
+        let dir_str = dir_string(&dir);
+        let wallet_path = dir.path().join(WALLET_FILE_NAME);
+        let legacy_path = dir.path().join(LEGACY_WALLET_FILE_NAME);
+
+        assert_eq!(
+            delete_wallet(dir_str.clone()).unwrap(),
+            "Error: wallet file not found"
+        );
+        assert_eq!(
+            quarantine_wallet(dir_str.clone()).unwrap(),
+            "Error: wallet file not found"
+        );
+        assert_eq!(
+            backup_wallet(dir_str.clone()).unwrap(),
+            "Error: wallet file not found"
+        );
+        assert_eq!(
+            restore_wallet_backup(dir_str.clone()).unwrap(),
+            "Error: wallet or backup file not found"
+        );
+
+        create_offline(&dir_str, SEED_A);
+        assert_eq!(
+            restore_wallet_backup(dir_str.clone()).unwrap(),
+            "Error: wallet or backup file not found"
+        );
+        assert!(wallet_path.exists());
+        assert_eq!(delete_wallet(dir_str.clone()).unwrap(), "true");
+        assert!(!wallet_path.exists());
+        assert_eq!(wallet_exists(dir_str.clone()).unwrap(), false);
+
+        create_offline(&dir_str, SEED_A);
+        let bytes = std::fs::read(&wallet_path).unwrap();
+        assert_eq!(quarantine_wallet(dir_str.clone()).unwrap(), "true");
+        assert!(!wallet_path.exists());
+        assert_eq!(std::fs::read(&legacy_path).unwrap(), bytes);
+        assert_eq!(wallet_exists(dir_str.clone()).unwrap(), false);
+    }
+
+    #[test]
+    fn inspect_wallet_reads_the_file_and_omits_normalize_to() {
+        let _guard = global_client_test_lock();
+        let dir = temp_wallet_dir("inspect");
+        let dir_str = dir_string(&dir);
+
+        let missing = json::parse(
+            &inspect_wallet(dir_str.clone(), String::new(), "regtest".to_string()).unwrap(),
+        )
+        .unwrap();
+        assert_eq!(missing["readable"], false);
+        assert_eq!(missing["reason"], "wallet file not found");
+
+        create_offline(&dir_str, SEED_A);
+        reset_lightclient();
+        let inspected = json::parse(
+            &inspect_wallet(dir_str.clone(), String::new(), "regtest".to_string()).unwrap(),
+        )
+        .unwrap();
+        assert_eq!(inspected["readable"], true);
+        assert_eq!(
+            inspected["format_version"],
+            LightWallet::serialized_version()
+        );
+        assert!(inspected["newest_height"].is_null());
+        assert!(inspected["chain_match"].is_null());
+        assert!(!inspected.has_key("normalize_to"));
+        assert!(dir.path().join(WALLET_FILE_NAME).exists());
+
+        std::fs::write(
+            dir.path().join(WALLET_FILE_NAME),
+            b"this is not a wallet file",
+        )
+        .unwrap();
+        let junk = json::parse(
+            &inspect_wallet(dir_str.clone(), String::new(), "regtest".to_string()).unwrap(),
+        )
+        .unwrap();
+        assert_eq!(junk["readable"], false);
+        assert_eq!(junk["format_version"], 0);
+        assert!(!junk.has_key("normalize_to"));
+
+        let bad_hint =
+            json::parse(&inspect_wallet(dir_str, String::new(), "moon".to_string()).unwrap())
+                .unwrap();
+        assert_eq!(bad_hint["readable"], false);
+    }
+
+    #[test]
+    fn errors_never_carry_the_wallet_payload() {
+        let _guard = global_client_test_lock();
+        let dir = temp_wallet_dir("payload");
+        let secret = STANDARD.encode(b"seed entropy lives here and must not be echoed");
+        std::fs::write(dir.path().join(WALLET_FILE_NAME), secret.as_bytes()).unwrap();
+
+        let out = init_from_file(
+            dir_string(&dir),
+            String::new(),
+            "regtest".to_string(),
+            "Medium".to_string(),
+            1,
+        )
+        .unwrap();
+        assert!(out.starts_with("Error:"), "{out}");
+        assert!(!out.contains(&secret));
+        assert!(!out.contains("seed entropy"));
+    }
+}
