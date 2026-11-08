@@ -104,7 +104,7 @@ const BONDS: FakeBond[] = [
     txid: fakeHexKey(100000 + i),
     finalizer: fakeHexKey(bondRosterIndex(i)),
     amount: i % 2 ? 0.0026 : 0.0022,
-    status: ((i % 5 === 0 ? 1 : 0) as 0 | 1),
+    status: (i % 5 === 0 ? 1 : 0) as 0 | 1,
   })),
 ];
 
@@ -370,7 +370,6 @@ const fakeRpc = {
 
   getValueTransfersList: async () =>
     JSON.stringify({ wallet_events: events, total: events.length }),
-
 
   runSyncProcess: async () => {
     syncLaunched = true;
