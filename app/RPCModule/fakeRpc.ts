@@ -163,7 +163,6 @@ const indexerReport = (uri: string) =>
   });
 
 let wallet: FakeWallet | null = null;
-let backup: FakeWallet | null = null;
 let propose: Propose | null = null;
 let events: WalletValueTransferType[] = baseEvents();
 let syncLaunched = false;
@@ -177,9 +176,6 @@ const txid = () => (txCounter++).toString(16).padStart(64, '0');
 
 const fakeRpc = {
   walletExists: async () => (wallet ? GlobalConst.true : GlobalConst.false),
-
-  walletBackupExists: async () =>
-    backup ? GlobalConst.true : GlobalConst.false,
 
   loadExistingWallet: async (
     uri: string,
@@ -644,13 +640,6 @@ const fakeRpc = {
 
   doSave: async () => 'ok',
 
-  doSaveBackup: async () => {
-    if (wallet) {
-      backup = wallet;
-    }
-    return 'ok';
-  },
-
   deleteExistingWallet: async () => {
     if (!wallet) {
       return GlobalConst.false;
@@ -663,13 +652,6 @@ const fakeRpc = {
     return GlobalConst.true;
   },
 
-  restoreExistingWalletBackup: async () => {
-    if (!backup) {
-      return GlobalConst.false;
-    }
-    wallet = backup;
-    return GlobalConst.true;
-  },
 };
 
 export default fakeRpc;

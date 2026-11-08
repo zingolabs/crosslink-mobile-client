@@ -26,7 +26,6 @@ type TextsType = {
   server: string[];
   view: string[];
   restore: string[];
-  backup: string[];
 };
 
 type NewSeedProps = {

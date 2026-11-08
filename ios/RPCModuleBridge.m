@@ -12,9 +12,6 @@
 RCT_EXTERN_METHOD(walletExists: 
     (RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
-RCT_EXTERN_METHOD(walletBackupExists:
-    (RCTPromiseResolveBlock)resolve 
-                  reject:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(deleteExistingWallet:
     (RCTPromiseResolveBlock)resolve 
                   reject:(RCTPromiseRejectBlock)reject)
@@ -41,13 +38,7 @@ RCT_EXTERN_METHOD(loadExistingWallet:
                   minconfirmations:(NSString)minconfirmations
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
-RCT_EXTERN_METHOD(restoreExistingWalletBackup:
-    (RCTPromiseResolveBlock)resolve 
-                  reject:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(doSave:
-    (RCTPromiseResolveBlock)resolve 
-                  reject:(RCTPromiseRejectBlock)reject)
-RCT_EXTERN_METHOD(doSaveBackup:
     (RCTPromiseResolveBlock)resolve 
                   reject:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(getLatestBlockServerInfo:

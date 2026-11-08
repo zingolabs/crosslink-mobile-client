@@ -635,9 +635,6 @@ final class WalletFileRoundTrip: XCTestCase {
         XCTAssertEqual(try getUnifiedAddresses(), addressesBefore)
         XCTAssertEqual(try saveWallet(), "false")
 
-        XCTAssertEqual(try backupWallet(walletDir: walletDir), "true")
-        XCTAssertTrue(try walletBackupExists(walletDir: walletDir))
-        XCTAssertEqual(try restoreWalletBackup(walletDir: walletDir), "true")
         XCTAssertEqual(try deleteWallet(walletDir: walletDir), "true")
         XCTAssertFalse(try walletExists(walletDir: walletDir))
         XCTAssertEqual(try deleteWallet(walletDir: walletDir), "Error: wallet file not found")

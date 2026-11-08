@@ -278,9 +278,7 @@ fn store_client(lightclient: LightClient) -> Result<(), ZingolibError> {
 }
 
 const WALLET_FILE_NAME: &str = "wallet.dat";
-const WALLET_BACKUP_FILE_NAME: &str = "wallet.backup.dat";
 const IOS_WALLET_FILE_NAME: &str = "wallet.dat.txt";
-const IOS_WALLET_BACKUP_FILE_NAME: &str = "wallet.backup.dat.txt";
 
 fn chain_from_hint(chain_hint: &str) -> Result<ChainType, String> {
     match chain_hint {
@@ -292,20 +290,13 @@ fn chain_from_hint(chain_hint: &str) -> Result<ChainType, String> {
     .map_err(|e| format!("Error: {e}"))
 }
 
-/// Renames the file names the iOS app used to write, once, so zingolib only ever sees
-/// `wallet.dat` and `wallet.backup.dat`. The content is left as it is; the reader sniffs it.
-fn migrate_legacy_file_names(config: &ZingoConfig) -> std::io::Result<()> {
-    let dir = config.get_zingo_wallet_dir();
-    for (legacy, current) in [
-        (dir.join(IOS_WALLET_FILE_NAME), config.get_wallet_pathbuf()),
-        (
-            dir.join(IOS_WALLET_BACKUP_FILE_NAME),
-            wallet_backup_path(config),
-        ),
-    ] {
-        if legacy.exists() && !current.exists() {
-            std::fs::rename(&legacy, &current)?;
-        }
+/// Renames the file name the iOS app used to write, once, so zingolib only ever sees
+/// `wallet.dat`. The content is left as it is; the reader sniffs it.
+fn migrate_legacy_file_name(config: &ZingoConfig) -> std::io::Result<()> {
+    let legacy = config.get_zingo_wallet_dir().join(IOS_WALLET_FILE_NAME);
+    let current = config.get_wallet_pathbuf();
+    if legacy.exists() && !current.exists() {
+        std::fs::rename(&legacy, &current)?;
     }
     Ok(())
 }
@@ -317,49 +308,10 @@ fn wallet_file_config(wallet_dir: &str) -> ZingoConfig {
         .set_wallet_dir(PathBuf::from(wallet_dir))
         .create();
     config.wallet_name = PathBuf::from(WALLET_FILE_NAME);
-    if let Err(e) = migrate_legacy_file_names(&config) {
+    if let Err(e) = migrate_legacy_file_name(&config) {
         log::warn!("legacy wallet file rename failed: {e}");
     }
     config
-}
-
-fn wallet_backup_path(config: &ZingoConfig) -> PathBuf {
-    config.get_zingo_wallet_dir().join(WALLET_BACKUP_FILE_NAME)
-}
-
-fn tmp_sibling(path: &Path) -> PathBuf {
-    let mut name = path
-        .file_name()
-        .map(std::ffi::OsString::from)
-        .unwrap_or_default();
-    name.push(".tmp");
-    path.with_file_name(name)
-}
-
-/// Copies `from` over `to` through a `.tmp` sibling and a rename, so an interrupted copy
-/// leaves any previous file at `to` intact.
-fn copy_file_atomically(from: &Path, to: &Path) -> std::io::Result<()> {
-    let tmp = tmp_sibling(to);
-    std::fs::copy(from, &tmp)?;
-    std::fs::File::open(&tmp)?.sync_all()?;
-    std::fs::rename(&tmp, to)
-}
-
-/// Exchanges two files through three renames. Fails with `NotFound` before touching
-/// anything if either is missing.
-fn swap_files(first: &Path, second: &Path) -> std::io::Result<()> {
-    for path in [first, second] {
-        if !path.exists() {
-            return Err(std::io::Error::new(
-                std::io::ErrorKind::NotFound,
-                format!("no file at {}", path.display()),
-            ));
-        }
-    }
-    let tmp = tmp_sibling(first);
-    std::fs::rename(first, &tmp)?;
-    std::fs::rename(second, first)?;
-    std::fs::rename(&tmp, second)
 }
 
 fn file_operation_result(result: std::io::Result<()>, missing: &str) -> String {
@@ -561,7 +513,7 @@ pub fn init_from_file(
             Ok(c) => c,
             Err(e) => return Ok(e),
         };
-        if let Err(e) = migrate_legacy_file_names(&config) {
+        if let Err(e) = migrate_legacy_file_name(&config) {
             return Ok(format!("Error: {e}"));
         }
         let (lightclient, _shape) = match LightClient::open_from_wallet_path(config) {
@@ -593,35 +545,6 @@ pub fn save_wallet() -> Result<String, ZingolibError> {
 #[uniffi::export]
 pub fn wallet_exists(wallet_dir: String) -> Result<bool, ZingolibError> {
     with_panic_guard(|| Ok(wallet_file_config(&wallet_dir).wallet_path_exists()))
-}
-
-#[uniffi::export]
-pub fn wallet_backup_exists(wallet_dir: String) -> Result<bool, ZingolibError> {
-    with_panic_guard(|| Ok(wallet_backup_path(&wallet_file_config(&wallet_dir)).exists()))
-}
-
-/// Copies `wallet.dat` over `wallet.backup.dat`.
-#[uniffi::export]
-pub fn backup_wallet(wallet_dir: String) -> Result<String, ZingolibError> {
-    with_panic_guard(|| {
-        let config = wallet_file_config(&wallet_dir);
-        Ok(file_operation_result(
-            copy_file_atomically(&config.get_wallet_path(), &wallet_backup_path(&config)),
-            "wallet file not found",
-        ))
-    })
-}
-
-/// Exchanges `wallet.dat` and `wallet.backup.dat`.
-#[uniffi::export]
-pub fn restore_wallet_backup(wallet_dir: String) -> Result<String, ZingolibError> {
-    with_panic_guard(|| {
-        let config = wallet_file_config(&wallet_dir);
-        Ok(file_operation_result(
-            swap_files(&config.get_wallet_path(), &wallet_backup_path(&config)),
-            "wallet or backup file not found",
-        ))
-    })
 }
 
 #[uniffi::export]
@@ -2812,18 +2735,10 @@ mod wallet_file_tests {
         let dir_str = dir_string(&dir);
         let text = STANDARD.encode(&fixture);
         std::fs::write(dir.path().join(IOS_WALLET_FILE_NAME), text.as_bytes()).unwrap();
-        std::fs::write(
-            dir.path().join(IOS_WALLET_BACKUP_FILE_NAME),
-            text.as_bytes(),
-        )
-        .unwrap();
 
         assert_eq!(wallet_exists(dir_str.clone()).unwrap(), true);
         assert!(dir.path().join(WALLET_FILE_NAME).exists());
         assert!(!dir.path().join(IOS_WALLET_FILE_NAME).exists());
-        assert_eq!(wallet_backup_exists(dir_str.clone()).unwrap(), true);
-        assert!(dir.path().join("wallet.backup.dat").exists());
-        assert!(!dir.path().join(IOS_WALLET_BACKUP_FILE_NAME).exists());
         assert_eq!(
             std::fs::read(dir.path().join(WALLET_FILE_NAME)).unwrap(),
             text.as_bytes()
@@ -2880,37 +2795,6 @@ mod wallet_file_tests {
     }
 
     #[test]
-    fn backup_then_restore_swaps_the_two_slots() {
-        let _guard = global_client_test_lock();
-        let dir = temp_wallet_dir("backup");
-        let dir_str = dir_string(&dir);
-        let wallet_path = dir.path().join(WALLET_FILE_NAME);
-        let backup_path = dir.path().join("wallet.backup.dat");
-
-        assert_eq!(wallet_backup_exists(dir_str.clone()).unwrap(), false);
-        create_offline(&dir_str, SEED_A);
-        let bytes_a = std::fs::read(&wallet_path).unwrap();
-        assert_eq!(backup_wallet(dir_str.clone()).unwrap(), "true");
-        assert_eq!(wallet_backup_exists(dir_str.clone()).unwrap(), true);
-        assert_eq!(std::fs::read(&backup_path).unwrap(), bytes_a);
-
-        create_offline(&dir_str, SEED_B);
-        let bytes_b = std::fs::read(&wallet_path).unwrap();
-        assert_ne!(bytes_a, bytes_b);
-
-        assert_eq!(restore_wallet_backup(dir_str.clone()).unwrap(), "true");
-        assert_eq!(std::fs::read(&wallet_path).unwrap(), bytes_a);
-        assert_eq!(std::fs::read(&backup_path).unwrap(), bytes_b);
-        assert!(!dir.path().join("wallet.dat.tmp").exists());
-        assert_eq!(seed_phrase(&open_offline(&dir_str)), SEED_A);
-
-        assert_eq!(restore_wallet_backup(dir_str.clone()).unwrap(), "true");
-        assert_eq!(std::fs::read(&wallet_path).unwrap(), bytes_b);
-        assert_eq!(std::fs::read(&backup_path).unwrap(), bytes_a);
-        assert_eq!(seed_phrase(&open_offline(&dir_str)), SEED_B);
-    }
-
-    #[test]
     fn delete_removes_the_file_and_missing_files_are_stable_errors() {
         let _guard = global_client_test_lock();
         let dir = temp_wallet_dir("delete");
@@ -2921,20 +2805,8 @@ mod wallet_file_tests {
             delete_wallet(dir_str.clone()).unwrap(),
             "Error: wallet file not found"
         );
-        assert_eq!(
-            backup_wallet(dir_str.clone()).unwrap(),
-            "Error: wallet file not found"
-        );
-        assert_eq!(
-            restore_wallet_backup(dir_str.clone()).unwrap(),
-            "Error: wallet or backup file not found"
-        );
 
         create_offline(&dir_str, SEED_A);
-        assert_eq!(
-            restore_wallet_backup(dir_str.clone()).unwrap(),
-            "Error: wallet or backup file not found"
-        );
         assert!(wallet_path.exists());
         assert_eq!(delete_wallet(dir_str.clone()).unwrap(), "true");
         assert!(!wallet_path.exists());
@@ -3044,11 +2916,6 @@ mod wallet_file_tests {
         let dir = temp_wallet_dir("v39-ios");
         let text = STANDARD.encode(V39_TESTNET_WALLET);
         std::fs::write(dir.path().join(IOS_WALLET_FILE_NAME), text.as_bytes()).unwrap();
-        std::fs::write(
-            dir.path().join(IOS_WALLET_BACKUP_FILE_NAME),
-            text.as_bytes(),
-        )
-        .unwrap();
 
         let inspected = json::parse(
             &inspect_wallet(dir_string(&dir), String::new(), "test".to_string()).unwrap(),
@@ -3060,21 +2927,6 @@ mod wallet_file_tests {
 
         let opened = open_testnet_offline(&dir_string(&dir));
         assert_eq!(seed_phrase(&opened), SEED_A);
-        assert_eq!(save_wallet().unwrap(), "true");
-        assert!(is_raw_wallet(
-            &std::fs::read(dir.path().join(WALLET_FILE_NAME)).unwrap()
-        ));
-
-        assert_eq!(restore_wallet_backup(dir_string(&dir)).unwrap(), "true");
-        assert_eq!(
-            std::fs::read(dir.path().join(WALLET_FILE_NAME)).unwrap(),
-            text.as_bytes()
-        );
-        reset_lightclient();
-        assert_eq!(
-            seed_phrase(&open_testnet_offline(&dir_string(&dir))),
-            SEED_A
-        );
         assert_eq!(save_wallet().unwrap(), "true");
         assert!(is_raw_wallet(
             &std::fs::read(dir.path().join(WALLET_FILE_NAME)).unwrap()

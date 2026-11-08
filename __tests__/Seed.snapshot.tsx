@@ -63,12 +63,6 @@ describe('Component Seed - test', () => {
     const seed = render(<Seed {...props} />);
     expect(seed.toJSON()).toMatchSnapshot();
   });
-  props = makeDrawerProps(SeedActionEnum.backup);
-  test('Seed Backup - snapshot', () => {
-    appStore.setState(stateLoaded);
-    const seed = render(<Seed {...props} />);
-    expect(seed.toJSON()).toMatchSnapshot();
-  });
   const contextLoading = defaultSetupDomains;
   contextLoading.translate = mockTranslate;
   contextLoading.wallet = mockWallet;

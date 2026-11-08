@@ -12,10 +12,6 @@ private func walletFileExistsAt(_ walletDir: String) throws -> Bool {
   return try walletExists(walletDir: walletDir)
 }
 
-private func walletBackupFileExistsAt(_ walletDir: String) throws -> Bool {
-  return try walletBackupExists(walletDir: walletDir)
-}
-
 @objc(RPCModule)
 class RPCModule: NSObject {
   
@@ -60,10 +56,6 @@ class RPCModule: NSObject {
     return try walletFileExistsAt(getDocumentsDirectory()) ? "true" : "false"
   }
 
-  func walletBackupFileExists() throws -> String {
-    return try walletBackupFileExistsAt(getDocumentsDirectory()) ? "true" : "false"
-  }
-
   func checkWalletFileResult(_ result: String, _ what: String) throws {
     if result.lowercased().hasPrefix(Constants.ErrorPrefix.rawValue) {
       let err = "Error: [Native] \(what). \(result)"
@@ -81,21 +73,6 @@ class RPCModule: NSObject {
       }
     } catch {
       NSLog("Error: [Native] wallet exists error: \(error.localizedDescription)")
-      DispatchQueue.main.async {
-        resolve("false")
-      }
-    }
-  }
-
-  @objc(walletBackupExists:reject:)
-  func walletBackupExists(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-    do {
-      let result = try walletBackupFileExists()
-      DispatchQueue.main.async {
-        resolve(result)
-      }
-    } catch {
-      NSLog("Error: [Native] wallet backup exists error: \(error.localizedDescription)")
       DispatchQueue.main.async {
         resolve("false")
       }
@@ -137,10 +114,6 @@ class RPCModule: NSObject {
       NSLog(err)
       throw FileError.saveFileError(err)
     }
-  }
-
-  func saveWalletBackupInternal() throws {
-    try checkWalletFileResult(try backupWallet(walletDir: getDocumentsDirectory()), "Couldn't save the wallet backup")
   }
 
   func fnCreateNewWallet(
@@ -249,21 +222,6 @@ class RPCModule: NSObject {
     }
   }
 
-  @objc(restoreExistingWalletBackup:reject:)
-  func restoreExistingWalletBackup(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-    do {
-      try checkWalletFileResult(try restoreWalletBackup(walletDir: getDocumentsDirectory()), "Couldn't restore the wallet backup")
-      DispatchQueue.main.async {
-        resolve("true")
-      }
-    } catch {
-      NSLog("Error: [Native] Restoring existing wallet backup error: \(error.localizedDescription)")
-      DispatchQueue.main.async {
-        resolve("false")
-      }
-    }
-  }
-
   func fnDoSave(_ dict: [AnyHashable: Any]) {
     if let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
       do {
@@ -289,35 +247,6 @@ class RPCModule: NSObject {
     DispatchQueue.global(qos: .userInitiated).async { [weak self] in
         if let self = self {
             self.fnDoSave(dict)
-        }
-    }
-  }
-
-  func fndoSaveBackup(_ dict: [AnyHashable: Any]) {
-    if let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
-      do {
-        try self.saveWalletBackupInternal()
-        DispatchQueue.main.async {
-          resolve("true")
-        }
-      } catch {
-        NSLog("Error: [Native] Saving wallet backup error: \(error.localizedDescription)")
-        DispatchQueue.main.async {
-          resolve("false")
-        }
-      }
-    } else {
-      let err = "Error: [Native] Save wallet backup. Argument problem."
-      NSLog(err)
-    }
-  }
-
-  @objc(doSaveBackup:reject:)
-  func doSaveBackup(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-    let dict: [String: Any] = ["resolve": resolve]
-    DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-        if let self = self {
-            self.fndoSaveBackup(dict)
         }
     }
   }

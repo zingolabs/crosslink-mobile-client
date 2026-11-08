@@ -6,9 +6,9 @@ export enum SecurityTypeEnum {
   rescanScreen = 'rescanScreen',
   settingsScreen = 'settingsScreen',
   changeWalletScreen = 'changeWalletScreen',
-  restoreWalletBackupScreen = 'restoreWalletBackupScreen',
 
   // obsolete options
+  restoreWalletBackupScreen = 'restoreWalletBackupScreen',
   seedScreen = 'seedScreen',
   ufvkScreen = 'ufvkScreen',
 }

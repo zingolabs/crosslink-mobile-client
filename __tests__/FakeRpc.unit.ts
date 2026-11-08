@@ -40,7 +40,6 @@ describe('FakeRpc - wallet lifecycle', () => {
     await expect(
       fakeRpc.loadExistingWallet(SERVER, CHAIN, 'Medium', '1'),
     ).resolves.toMatch(/^error/i);
-    expect(await fakeRpc.walletBackupExists()).toBe(GlobalConst.false);
   });
 
   test('createNewWallet seeds an in-memory wallet', async () => {
@@ -284,16 +283,14 @@ describe('FakeRpc - chain info', () => {
   });
 });
 
-describe('FakeRpc - backup and deletion', () => {
-  test('backup survives delete and restores the wallet', async () => {
-    await expect(fakeRpc.doSaveBackup()).resolves.not.toMatch(/^error/i);
-    expect(await fakeRpc.walletBackupExists()).toBe(GlobalConst.true);
+describe('FakeRpc - deletion', () => {
+  test('delete removes the wallet and reports a second delete as false', async () => {
     expect(await fakeRpc.deleteExistingWallet()).toBe(GlobalConst.true);
     expect(await fakeRpc.walletExists()).toBe(GlobalConst.false);
     await expect(fakeRpc.deleteExistingWallet()).resolves.toBe(
       GlobalConst.false,
     );
-    expect(await fakeRpc.restoreExistingWalletBackup()).toBe(GlobalConst.true);
+    await fakeRpc.createNewWallet(SERVER, CHAIN, 'Medium', '1');
     expect(await fakeRpc.walletExists()).toBe(GlobalConst.true);
   });
 

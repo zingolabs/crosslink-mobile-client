@@ -117,7 +117,6 @@
     "rescanwallet": "Re-Escanear",
     "report": "Informe de Sincronización",
     "changewallet": "Abrir otro Monedero",
-    "restorebackupwallet": "Restaurar Copia de Seguridad",
     "fundpools": "Agrupaciones de Fondos",
     "insight": "Visión Financiera",
     "loadwalletfromseed-basic": "Restaurar otro monedero",
@@ -165,7 +164,6 @@
     "walletstored-message": "Monedero almacenado porque ha finalizado el lote:",
     "sixtyseconds-message": "Monedero almacenado cada 60 segundos, lote:",
     "walletnotfound-error": "Error: No se encuentra ningún monedero.",
-    "backupnotfound-error": "Error: No se encuentra ninguna copia de seguridad de ningún monedero.",
     "of": "de",
     "deletewallet-error": "Error: No se pudo borrar el monedero actual."
   },
@@ -368,7 +366,6 @@
     "security-rescanscreen": "Re-Escanear el Monedero",
     "security-settingsscreen": "Parámetros",
     "security-changewalletscreen": "Abrir otro Monedero",
-    "security-restorewalletbackupscreen": "Restaurar copia de Seguridad",
     "na": "America del Norte",
     "usa": "EEUU",
     "sa": "America del Sur",
@@ -430,12 +427,6 @@
       ],
       "restore": [
         "Restaurar Monedero"
-      ],
-      "backup": [
-        "",
-        "Restaurar",
-        "Realmente quieres \n restaurar tu \n copia de seguridad",
-        "Estás seguro/a?"
       ]
     },
     "title": "Semilla",
@@ -444,9 +435,7 @@
     "server": "Servidor",
     "view": "Visualizar",
     "restore": "Restaurar",
-    "backup": "Copia de seguridad",
     "text-readonly": "Antes de cerrar esta ventana, escriba cuidadosamente esta frase semilla. Es la única manera que puedes restaurar/acceder tu monedero actual.",
-    "text-readonly-backup": "Antes de restaurar la copia de seguridad del monedero anterior, escriba cuidadosamente esta frase semilla. Es la única manera que puedes restaurar/acceder tu monedero actual.",
     "text-readonly-change": "Antes de acceder a otro monedero, escriba cuidadosamente esta frase semilla. Es la única manera que puedes restaurar/acceder tu monedero actual.",
     "text-readonly-server": "Antes de usar otro servidor, escriba cuidadosamente esta frase semilla. Es la única manera que puedes restaurar/acceder tu monedero actual.",
     "text-no-readonly": "Introduce tu Frase Semilla (son 24 palabras)",
@@ -456,9 +445,7 @@
     "birthday-readonly": "Cumpleaños del Monedero",
     "birthday-no-readonly": "Altura de bloque de la primera transacción. (Está bien si no la sabes o no te acuerdas)\nRango de valores entre ",
     "change-warning": "Si cambias a otro monedero, ya no tendrás acceso a este monedero sin la frase semilla.",
-    "backup-warning": "Si cambias a tu monedero anterior (copia de seguridad), ya no tendrás acceso a este monedero sin la frase semilla.",
     "server-warning": "Si cambias a un servidor con diferente tipo de cadena, ya no tendrás acceso a este monedero sin la frase semilla.",
-    "mainnet-warning": "No se va a hacer copia de seguridad del monedero activo, solo está disponible en: 'MAINNET'.",
     "seedplaceholder": "Semilla (24 palabras)",
     "seed-acc": "Campo Frase Semilla",
     "birthday-acc": "Campo Cumpleaños",
@@ -730,12 +717,6 @@
       ],
       "restore": [
         "Restaurar Monedero"
-      ],
-      "backup": [
-        "",
-        "Restaurar",
-        "Realmente quieres \n restaurar tu \n copia de seguridad",
-        "Estás seguro/a?"
       ]
     },
     "privkey": "Gastar/Privada ",
@@ -745,13 +726,10 @@
     "title": "Clave",
     "address": "Dirección",
     "text-readonly": "Antes de cerrar esta ventana, escriba cuidadosamente esta clave de visualización. Es la única manera que puedes restaurar/acceder tu monedero actual.",
-    "text-readonly-backup": "Antes de restaurar la copia de seguridad del monedero anterior, escriba cuidadosamente esta clave de visualización. Es la única manera que puedes restaurar/acceder tu monedero actual.",
     "text-readonly-change": "Antes de acceder a otro monedero, escriba cuidadosamente esta clave de visualización. Es la única manera que puedes restaurar/acceder tu monedero actual.",
     "text-readonly-server": "Antes de usar otro servidor, escriba cuidadosamente esta clave de visualización. Es la única manera que puedes restaurar/acceder tu monedero actual.",
     "change-warning": "Si cambias a otro monedero, ya no tendrás acceso a este monedero sin la frase semilla.",
-    "backup-warning": "Si cambias a tu monedero anterior (copia de seguridad), ya no tendrás acceso a este monedero sin la frase semilla.",
-    "server-warning": "Si cambias a un servidor con diferente tipo de cadena, ya no tendrás acceso a este monedero sin la frase semilla.",
-    "mainnet-warning": "No se va a hacer copia de seguridad del monedero activo, solo está disponible en: 'MAINNET'."
+    "server-warning": "Si cambias a un servidor con diferente tipo de cadena, ya no tendrás acceso a este monedero sin la frase semilla."
   },
   "pools": {
     "title": "Agrupaciones de Fondos",

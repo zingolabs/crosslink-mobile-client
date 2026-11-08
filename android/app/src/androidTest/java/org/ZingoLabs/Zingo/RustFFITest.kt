@@ -632,9 +632,6 @@ class WalletFileRoundTrip {
         assertThat(uniffi.zingo.getUnifiedAddresses()).isEqualTo(addressesBefore)
         assertThat(uniffi.zingo.saveWallet()).isEqualTo("false")
 
-        assertThat(uniffi.zingo.backupWallet(walletDir)).isEqualTo("true")
-        assertThat(uniffi.zingo.walletBackupExists(walletDir)).isTrue()
-        assertThat(uniffi.zingo.restoreWalletBackup(walletDir)).isEqualTo("true")
         assertThat(uniffi.zingo.deleteWallet(walletDir)).isEqualTo("true")
         assertThat(uniffi.zingo.walletExists(walletDir)).isFalse()
         assertThat(uniffi.zingo.deleteWallet(walletDir)).isEqualTo("Error: wallet file not found")

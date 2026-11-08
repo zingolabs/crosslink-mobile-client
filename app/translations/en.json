@@ -117,7 +117,6 @@
     "rescanwallet": "Rescan Wallet",
     "report": "Sync / Rescan Report",
     "changewallet": "Change to another Wallet",
-    "restorebackupwallet": "Restore Last Wallet Backup",
     "fundpools": "Fund Pools",
     "insight": "Financial Insight",
     "loadwalletfromseed-basic": "Restore another wallet",
@@ -165,7 +164,6 @@
     "walletstored-message": "Stored the wallet because a batch is finished:",
     "sixtyseconds-message": "Stored the wallet every 60 seconds, batch:",
     "walletnotfound-error": "Error: Couldn't find any wallet.",
-    "backupnotfound-error": "Error: Couldn't find any backup of any wallet.",
     "of": "of",
     "deletewallet-error": "Error: Couldn't delete the current wallet."
   },
@@ -368,7 +366,6 @@
     "security-rescanscreen": "Rescan Wallet",
     "security-settingsscreen": "Settings",
     "security-changewalletscreen": "Change to another Wallet",
-    "security-restorewalletbackupscreen": "Restore Last Wallet Backup",
     "na": "North America",
     "usa": "USA",
     "sa": "South America",
@@ -430,12 +427,6 @@
       ],
       "restore": [
         "Restore Wallet"
-      ],
-      "backup": [
-        "",
-        "Restore",
-        "You really want \n to restore your \n backup wallet",
-        "Are you certain?"
       ]
     },
     "title": "Seed",
@@ -444,9 +435,7 @@
     "server": "Server",
     "view": "View",
     "restore": "Restore",
-    "backup": "Backup",
     "text-readonly": "Before closing this screen, carefully write down this seed phrase. It is the only way you can restore/access your current wallet.",
-    "text-readonly-backup": "Before restoring the backup of the previous wallet, carefully write down this seed phrase. It is the only way you can restore/access your current wallet.",
     "text-readonly-change": "Before accessing another wallet, carefully write down this seed phrase. It is the only way you can restore/access your current wallet.",
     "text-readonly-server": "Before changing another server, carefully write down this seed phrase. It is the only way you can restore/access your current wallet.",
     "text-no-readonly": "Enter your seed phrase (24 words)",
@@ -456,9 +445,7 @@
     "birthday-readonly": "Wallet Birthday",
     "birthday-no-readonly": "Block height of first transaction. (It's OK, if you don't know)\nValue range between ",
     "change-warning": "If you change to another wallet, you will no longer have access to this wallet without the seed phrase.",
-    "backup-warning": "If you change to your backup wallet, you will no longer have access to this wallet without the seed phrase.",
     "server-warning": "If you change to a server with different chain, you will no longer have access to this wallet without the seed phrase.",
-    "mainnet-warning": "No backup of this wallet, only available in 'MAINNET'.",
     "seedplaceholder": "Seed (24 words)",
     "seed-acc": "Seed Phrase Field",
     "birthday-acc": "Birthday Field",
@@ -731,12 +718,6 @@
       ],
       "restore": [
         "Restore Wallet"
-      ],
-      "backup": [
-        "",
-        "Restore",
-        "You really want \n to restore your \n backup wallet",
-        "Are you certain?"
       ]
     },
     "privkey": "Spending/Private ",
@@ -746,13 +727,10 @@
     "title": "Key",
     "address": "Address",
     "text-readonly": "Before closing this screen, carefully write down this viewing key. It is the only way you can restore/access your current wallet.",
-    "text-readonly-backup": "Before restoring the backup of the previous wallet, carefully write down this viewing key. It is the only way you can restore/access your current wallet.",
     "text-readonly-change": "Before accessing another wallet, carefully write down this viewing key. It is the only way you can restore/access your current wallet.",
     "text-readonly-server": "Before changing another server, carefully write down this viewing key. It is the only way you can restore/access your current wallet.",
     "change-warning": "If you change to another wallet, you will no longer have access to this wallet without the seed phrase.",
-    "backup-warning": "If you change to your backup wallet, you will no longer have access to this wallet without the seed phrase.",
-    "server-warning": "If you change to a server with different chain, you will no longer have access to this wallet without the seed phrase.",
-    "mainnet-warning": "No backup of this wallet, only available in 'MAINNET'."
+    "server-warning": "If you change to a server with different chain, you will no longer have access to this wallet without the seed phrase."
   },
   "pools": {
     "title": "Fund Pools",

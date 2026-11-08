@@ -49,11 +49,6 @@ class RPCModule internal constructor(private val reactContext: ReactApplicationC
         promise.resolve(walletFileExists())
     }
 
-    @ReactMethod
-    fun walletBackupExists(promise: Promise) {
-        promise.resolve(uniffi.zingo.walletBackupExists(getDocumentDirectory()))
-    }
-
     fun saveWalletFile(): Boolean {
         return try {
             uniffi.zingo.initLogging()
@@ -67,21 +62,6 @@ class RPCModule internal constructor(private val reactContext: ReactApplicationC
             }
         } catch (e: Exception) {
             Log.e("MAIN", "Error: [Native] Unexpected error. Couldn't save the wallet. $e")
-            false
-        }
-    }
-
-    private fun saveWalletBackupFile(): Boolean {
-        return try {
-            val resp = uniffi.zingo.backupWallet(getDocumentDirectory())
-            if (resp.lowercase().startsWith(ErrorPrefix.value)) {
-                Log.e("MAIN", "Error: [Native] Couldn't save the wallet backup. $resp")
-                false
-            } else {
-                true
-            }
-        } catch (e: Exception) {
-            Log.e("MAIN", "Error: [Native] Unexpected error. Couldn't save the wallet backup", e)
             false
         }
     }
@@ -145,22 +125,6 @@ class RPCModule internal constructor(private val reactContext: ReactApplicationC
     }
 
     @ReactMethod
-    fun restoreExistingWalletBackup(promise: Promise) {
-        try {
-            val resp = uniffi.zingo.restoreWalletBackup(getDocumentDirectory())
-            if (resp.lowercase().startsWith(ErrorPrefix.value)) {
-                Log.e("MAIN", "Error: [Native] Couldn't restore the wallet backup. $resp")
-                promise.resolve(false)
-            } else {
-                promise.resolve(true)
-            }
-        } catch (e: Exception) {
-            Log.e("MAIN", "Error: [Native] Unexpected error, restoring the wallet backup", e)
-            promise.resolve(false)
-        }
-    }
-
-    @ReactMethod
     fun deleteExistingWallet(promise: Promise) {
         try {
             val resp = uniffi.zingo.deleteWallet(getDocumentDirectory())
@@ -188,27 +152,6 @@ class RPCModule internal constructor(private val reactContext: ReactApplicationC
                 }
             } catch (e: Exception) {
                 val errorMessage = "Error: [Native] saving wallet: ${e.localizedMessage}"
-                Log.e("MAIN", errorMessage, e)
-
-                withContext(Dispatchers.Main) {
-                    promise.resolve(errorMessage)
-                }
-            }
-        }
-    }
-
-    @ReactMethod
-    fun doSaveBackup(promise: Promise) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                uniffi.zingo.initLogging()
-                val resp = saveWalletBackupFile()
-
-                withContext(Dispatchers.Main) {
-                    promise.resolve(resp)
-                }
-            } catch (e: Exception) {
-                val errorMessage = "Error: [Native] saving wallet backup: ${e.localizedMessage}"
                 Log.e("MAIN", errorMessage, e)
 
                 withContext(Dispatchers.Main) {

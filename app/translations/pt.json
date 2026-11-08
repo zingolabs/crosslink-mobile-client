@@ -117,7 +117,6 @@
     "rescanwallet": "Rescanear a Carteira",
     "report": "Sincronizar / Relatório de Rescan",
     "changewallet": "Abrir outra Carteira",
-    "restorebackupwallet": "Restaurar Último Backup da Carteira",
     "fundpools": "Fundos na Pool",
     "insight": "Visão Financeira",
     "loadwalletfromseed-basic": "Restaurar outra Carteira",
@@ -165,7 +164,6 @@
     "walletstored-message": "Armazenou a carteira porque um lote terminou:",
     "sixtyseconds-message": "Armazenou a carteira a cada 60 segundos, lote:",
     "walletnotfound-error": "Erro: não foi possível encontrar nenhuma carteira.",
-    "backupnotfound-error": "Erro: não foi possível encontrar nenhum backup de nenhuma carteira.",
     "of": "of",
     "deletewallet-error": "Erro: não foi possível excluir a carteira atual."
   },
@@ -368,7 +366,6 @@
     "security-rescanscreen": "Rescanear a Carteira",
     "security-settingsscreen": "Configurações",
     "security-changewalletscreen": "Abrir outra Carteira",
-    "security-restorewalletbackupscreen": "Restaurar Último Backup da Carteira",
     "na": "America do Norte",
     "usa": "EUA",
     "sa": "America do Sul",
@@ -430,12 +427,6 @@
       ],
       "restore": [
         "Restaurar Carteira"
-      ],
-      "backup": [
-        "",
-        "Restaurar",
-        "Você realmente deseja \n restaurar sua \n carteira de backup",
-        "Tem certeza?"
       ]
     },
     "title": "Frases de Recuperação",
@@ -444,9 +435,7 @@
     "server": "Servidor",
     "view": "Visualizar",
     "restore": "Restaurar",
-    "backup": "Backup",
     "text-readonly": "Antes de fechar esta tela, anote cuidadosamente essas frases de recuperação. É a única maneira de restaurar/acessar sua carteira atual.",
-    "text-readonly-backup": "Antes de restaurar o backup da carteira anterior, anote cuidadosamente suas frases de recuperação. É a única maneira de restaurar/acessar sua carteira atual.",
     "text-readonly-change": "Antes de acessar outra carteira, anote cuidadosamente essas Frases de recuperação. É a única maneira de restaurar/acessar sua carteira atual.",
     "text-readonly-server": "Antes de mudar para outro servidor, anote cuidadosamente suas frases de recuperação. É a única maneira de restaurar/acessar sua carteira atual.",
     "text-no-readonly": "Insira suas Frases de Recuperação (24 Frases)",
@@ -456,9 +445,7 @@
     "birthday-readonly": "Aniversário da Carteira",
     "birthday-no-readonly": "Altura do bloco da primeira transação. (Tudo bem, se você não sabe)\nIntervalo de valores entre ",
     "change-warning": "Se você alterar para outra carteira, não será possível ter acesso a essa carteira sem as Frases de Recuperação.",
-    "backup-warning": "Se você alterar para sua carteira de backup, não será possível ter acesso a essa carteira sem as Frases de Recuperação.",
     "server-warning": "Se você alterar para um servidor com uma rede diferente, não terá mais acesso a essa carteira sem as Frases de Recuperação.",
-    "mainnet-warning": "Nenhum backup desta carteira, disponível apenas na 'Mainnet'.",
     "seedplaceholder": "Frases de Recuperação (24 Frases)",
     "seed-acc": "Campo das Frases de Recuperação",
     "birthday-acc": "Campo de Aniversário",
@@ -730,12 +717,6 @@
       ],
       "restore": [
         "Restaurar Carteira"
-      ],
-      "backup": [
-        "",
-        "Restaurar",
-        "Você realmente deseja \n restaurar sua \n carteira de backup",
-        "Tem certeza?"
       ]
     },
     "privkey": "Disponível/Privado ",
@@ -745,13 +726,10 @@
     "title": "Chave",
     "address": "Endereço",
     "text-readonly": "Antes de fechar esta tela, anote cuidadosamente esta chave de visualização. É a única maneira de restaurar/acessar sua carteira atual.",
-    "text-readonly-backup": "Antes de restaurar o backup da carteira anterior, anote cuidadosamente esta chave de visualização. É a única maneira de restaurar/acessar sua carteira atual.",
     "text-readonly-change": "Antes de acessar outra carteira, anote cuidadosamente esta chave de visualização. É a única maneira de restaurar/acessar sua carteira atual.",
     "text-readonly-server": "Antes de alterar outro servidor, anote cuidadosamente esta chave de visualização. É a única maneira de restaurar/acessar sua carteira atual.",
     "change-warning": "Se você mudar para outra carteira, não terá mais acesso a esta carteira sem as frases de recuperação.",
-    "backup-warning": "Se você mudar para sua carteira de backup, não terá mais acesso a esta carteira sem as Frases de recuperação",
-    "server-warning": "Se você mudar para um servidor com uma rede diferente, não terá mais acesso a esta carteira sem as frases de recuperação.",
-    "mainnet-warning": "Nenhum backup desta carteira, disponível apenas na 'MAINNET'."
+    "server-warning": "Se você mudar para um servidor com uma rede diferente, não terá mais acesso a esta carteira sem as frases de recuperação."
   },
   "pools": {
     "title": "Fundos nas Pools",
