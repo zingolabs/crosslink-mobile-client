@@ -1,12 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  View,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Platform,
-} from 'react-native';
+import { View, TouchableOpacity, TextInput, Platform } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 import Clipboard from '@react-native-clipboard/clipboard';
@@ -32,18 +26,30 @@ import { ToastProvider, useToast } from 'react-native-toastier';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../Header';
-import ChalkLoop from '../Components/ChalkLoop';
+import { BlurView } from '@react-native-community/blur';
+import { Copy as CopyIcon } from 'lucide-react-native';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
 import Animated, {
   cubicBezier,
   useReducedMotion,
 } from 'react-native-reanimated';
 import type { CSSTransitionProperties } from 'react-native-reanimated';
-import { curve, duration as motionDuration, useTheme } from '../../app/theme';
+import {
+  curve,
+  duration as motionDuration,
+  space,
+  useTheme,
+} from '../../app/theme';
 
 type SeedProps = NativeStackScreenProps<SettingsStackParamList, RouteEnum.Seed>;
 
 const EASE_OUT = cubicBezier(curve[0], curve[1], curve[2], curve[3]);
+
+const copyRow = {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: space.xs,
+} as const;
 
 const Seed: React.FunctionComponent<SeedProps> = ({}) => {
   const navigation: any = useNavigation();
@@ -68,12 +74,12 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
   const reducedMotion = useReducedMotion();
 
   const gridTransition: CSSTransitionProperties = {
-    transitionProperty: reducedMotion ? ['opacity'] : ['opacity', 'transform'],
-    transitionDuration: reducedMotion ? '120ms' : `${motionDuration.enter}ms`,
+    transitionProperty: ['transform'],
+    transitionDuration: `${motionDuration.enter}ms`,
     transitionTimingFunction: EASE_OUT,
   };
 
-  const chalkTransition: CSSTransitionProperties = {
+  const veilTransition: CSSTransitionProperties = {
     transitionProperty: ['opacity'],
     transitionDuration: reducedMotion ? '120ms' : `${motionDuration.enter}ms`,
     transitionTimingFunction: EASE_OUT,
@@ -86,13 +92,11 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
 
   useEffect(() => {
     const loadUfvk = async () => {
-      try {
-        const value = await getUfvk();
-        setUfvk(value || '');
-      } catch (e) {
+      const value = await getUfvk().catch((e: unknown) => {
         console.error('Failed to load ufvk', e);
-        setUfvk('');
-      }
+        return '';
+      });
+      setUfvk(value || '');
     };
 
     loadUfvk();
@@ -137,10 +141,9 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
         }}
       />
 
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{
-          flexGrow: 1,
+      <View
+        style={{
+          flex: 1,
           paddingBottom: insets.bottom + 8,
           paddingHorizontal: 10,
         }}
@@ -153,21 +156,13 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
           }}
         >
           {rows.length > 0 && !!seedPhrase && (
-            <View
-              style={{
-                marginTop: 10,
-                position: 'relative',
-                borderRadius: 20,
-                overflow: 'hidden',
-                padding: 8,
-                rowGap: 8,
-              }}
-            >
+            <>
               <Animated.View
                 style={[
                   {
+                    marginTop: 10,
+                    padding: 8,
                     rowGap: 8,
-                    opacity: seedBlurred ? 0 : 1,
                     transform: [
                       { scale: reducedMotion ? 1 : seedBlurred ? 0.98 : 1 },
                     ],
@@ -209,13 +204,15 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                               Platform.OS === GlobalConst.platformOSandroid
                                 ? 0
                                 : 5,
+                            overflow: 'hidden',
                           }}
                         >
-                          <FadeText>{`${index + 1}`}.</FadeText>
+                          <FadeText style={{ zIndex: 2 }}>
+                            {`${index + 1}`}.
+                          </FadeText>
                           <TextInput
                             style={{
-                              flexGrow: 1,
-                              flexShrink: 1,
+                              flex: 1,
                               color: colors.fgDefault,
                               fontWeight: '400',
                               fontSize: 15,
@@ -237,6 +234,40 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                             autoCorrect={false}
                             returnKeyType="done"
                           />
+                          <Animated.View
+                            style={[
+                              {
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                zIndex: 1,
+                                opacity: seedBlurred ? 1 : 0,
+                                ...veilTransition,
+                                transitionDelay:
+                                  reducedMotion || seedBlurred
+                                    ? '0ms'
+                                    : `${rowIndex * 30}ms`,
+                              },
+                            ]}
+                            pointerEvents="none"
+                          >
+                            <BlurView
+                              style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                              }}
+                              blurType="ultraThinMaterialDark"
+                              blurAmount={8}
+                              reducedTransparencyFallbackColor={
+                                colors.bgSurfaceRaised
+                              }
+                            />
+                          </Animated.View>
                         </View>
                       );
                     })}
@@ -244,50 +275,13 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                 ))}
               </Animated.View>
 
-              <Animated.View
-                style={[
-                  {
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    opacity: seedBlurred ? 1 : 0,
-                    ...chalkTransition,
-                  },
-                ]}
-                pointerEvents={seedBlurred ? 'auto' : 'none'}
-                accessibilityElementsHidden={!seedBlurred}
-                importantForAccessibility={
-                  !seedBlurred ? 'no-hide-descendants' : 'auto'
-                }
-              >
-                <ChalkLoop name="knot" size={240} blurRadius={2} />
-
-                <LiquidPrimaryButton
-                  title="View seed phrase"
-                  onPress={() => setSeedBlurred(false)}
-                  tintColor="rgba(255,255,255,0.10)"
-                  style={{
-                    alignSelf: 'center',
-                    borderRadius: 20,
-                    paddingHorizontal: 18,
-                    paddingVertical: 10,
-                    minWidth: 0,
-                  }}
-                  textStyle={{ fontSize: 16 }}
-                />
-              </Animated.View>
-            </View>
-          )}
-
-          {!seedBlurred && !!seedPhrase && (
-            <TouchableOpacity
-              style={{ alignSelf: 'center' }}
-              onPress={() => {
-                if (seedPhrase) {
+              <LiquidPrimaryButton
+                title={seedBlurred ? 'View seed phrase' : 'Copy seed phrase'}
+                onPress={() => {
+                  if (seedBlurred) {
+                    setSeedBlurred(false);
+                    return;
+                  }
                   Clipboard.setString(seedPhrase);
                   if (addLastSnackbar) {
                     addLastSnackbar({
@@ -296,33 +290,20 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                       screenName: [screenName],
                     });
                   }
-                }
-              }}
-            >
-              <View
-                style={{
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  borderRadius: 16,
-                  backgroundColor: colors.bgSurface,
-                  borderColor: colors.borderFaint,
-                  borderWidth: 1,
-                  paddingVertical: 10,
-                  paddingHorizontal: 20,
-                  marginVertical: 10,
                 }}
-              >
-                <RegText
-                  style={{
-                    color: colors.fgDefault,
-                    fontSize: 16,
-                    fontWeight: 600,
-                  }}
-                >
-                  Copy
-                </RegText>
-              </View>
-            </TouchableOpacity>
+                tintColor="rgba(255,255,255,0.10)"
+                style={{
+                  alignSelf: 'center',
+                  borderRadius: 20,
+                  paddingHorizontal: 18,
+                  paddingVertical: 10,
+                  minWidth: 0,
+                  marginTop: 4,
+                  marginBottom: 6,
+                }}
+                textStyle={{ fontSize: 16 }}
+              />
+            </>
           )}
 
           {!seedPhrase && (
@@ -350,15 +331,15 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                 minWidth: '50%',
                 minHeight: 48,
                 alignItems: 'center',
-                paddingHorizontal: 25,
-                paddingVertical: 15,
+                paddingHorizontal: 20,
+                paddingVertical: 12,
               }}
             >
               <FadeText
                 style={{
                   flexGrow: 1,
                   flexShrink: 1,
-                  fontSize: 20,
+                  fontSize: 17,
                 }}
               >
                 Birthday
@@ -385,14 +366,17 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                   }
                 }}
               >
-                <RegText
-                  color={colors.fgDefault}
-                  style={{ textAlign: 'center' }}
-                >
-                  {!expandBirthday
-                    ? Utils.trimToSmall(birthdayNumber, 1)
-                    : birthdayNumber}
-                </RegText>
+                <View style={copyRow}>
+                  <RegText
+                    color={colors.fgDefault}
+                    style={{ textAlign: 'center' }}
+                  >
+                    {!expandBirthday
+                      ? Utils.trimToSmall(birthdayNumber, 1)
+                      : birthdayNumber}
+                  </RegText>
+                  <CopyIcon size={14} strokeWidth={2} color={colors.fgSubtle} />
+                </View>
               </TouchableOpacity>
             </View>
           )}
@@ -411,15 +395,15 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                 minWidth: '50%',
                 minHeight: 48,
                 alignItems: 'center',
-                paddingHorizontal: 25,
-                paddingVertical: 15,
+                paddingHorizontal: 20,
+                paddingVertical: 12,
               }}
             >
               <FadeText
                 style={{
                   flexGrow: 1,
                   flexShrink: 1,
-                  fontSize: 20,
+                  fontSize: 17,
                 }}
               >
                 UFVK
@@ -437,12 +421,15 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                   }
                 }}
               >
-                <RegText
-                  color={colors.fgDefault}
-                  style={{ textAlign: 'center' }}
-                >
-                  {Utils.trimToSmall(ufvk, 12)}
-                </RegText>
+                <View style={copyRow}>
+                  <RegText
+                    color={colors.fgDefault}
+                    style={{ textAlign: 'center' }}
+                  >
+                    {Utils.trimToSmall(ufvk, 12)}
+                  </RegText>
+                  <CopyIcon size={14} strokeWidth={2} color={colors.fgSubtle} />
+                </View>
               </TouchableOpacity>
             </View>
           ) : (
@@ -450,7 +437,7 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
               style={{
                 flexGrow: 1,
                 flexShrink: 1,
-                fontSize: 20,
+                fontSize: 17,
                 marginTop: 10,
               }}
             >
@@ -458,7 +445,7 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
             </FadeText>
           )}
         </View>
-      </ScrollView>
+      </View>
     </ToastProvider>
   );
 };
