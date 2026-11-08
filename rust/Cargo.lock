@@ -3482,7 +3482,7 @@ dependencies = [
 [[package]]
 name = "pepper-sync"
 version = "0.3.0"
-source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fcrosslink-main#eaa8ed5050638471287fb75c634317aec48cad89"
+source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fzingolib-path-based-wallet-io#1adbc1dcc8e4f903e9f50f761125245c75595398"
 dependencies = [
  "bip32",
  "byteorder",
@@ -8144,6 +8144,7 @@ dependencies = [
  "rusqlite",
  "rustls 0.23.37",
  "serde_json",
+ "tempfile",
  "thiserror 1.0.69",
  "tokio",
  "uniffi",
@@ -8165,7 +8166,7 @@ dependencies = [
 [[package]]
 name = "zingo-memo"
 version = "0.1.0"
-source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fcrosslink-main#eaa8ed5050638471287fb75c634317aec48cad89"
+source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fzingolib-path-based-wallet-io#1adbc1dcc8e4f903e9f50f761125245c75595398"
 dependencies = [
  "zcash_address",
  "zcash_encoding 0.5.0",
@@ -8176,7 +8177,7 @@ dependencies = [
 [[package]]
 name = "zingo-netutils"
 version = "2.0.2"
-source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fcrosslink-main#eaa8ed5050638471287fb75c634317aec48cad89"
+source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fzingolib-path-based-wallet-io#1adbc1dcc8e4f903e9f50f761125245c75595398"
 dependencies = [
  "http",
  "hyper",
@@ -8194,7 +8195,7 @@ dependencies = [
 [[package]]
 name = "zingo-price"
 version = "0.0.1"
-source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fcrosslink-main#eaa8ed5050638471287fb75c634317aec48cad89"
+source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fzingolib-path-based-wallet-io#1adbc1dcc8e4f903e9f50f761125245c75595398"
 dependencies = [
  "byteorder",
  "reqwest",
@@ -8209,7 +8210,7 @@ dependencies = [
 [[package]]
 name = "zingo-status"
 version = "0.2.0"
-source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fcrosslink-main#eaa8ed5050638471287fb75c634317aec48cad89"
+source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fzingolib-path-based-wallet-io#1adbc1dcc8e4f903e9f50f761125245c75595398"
 dependencies = [
  "byteorder",
  "zcash_primitives",
@@ -8219,12 +8220,12 @@ dependencies = [
 [[package]]
 name = "zingo_common_components"
 version = "0.3.0"
-source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fcrosslink-main#eaa8ed5050638471287fb75c634317aec48cad89"
+source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fzingolib-path-based-wallet-io#1adbc1dcc8e4f903e9f50f761125245c75595398"
 
 [[package]]
 name = "zingo_test_vectors"
 version = "0.0.1"
-source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fcrosslink-main#eaa8ed5050638471287fb75c634317aec48cad89"
+source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fzingolib-path-based-wallet-io#1adbc1dcc8e4f903e9f50f761125245c75595398"
 dependencies = [
  "bip0039",
 ]
@@ -8232,9 +8233,10 @@ dependencies = [
 [[package]]
 name = "zingolib"
 version = "3.0.1"
-source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fcrosslink-main#eaa8ed5050638471287fb75c634317aec48cad89"
+source = "git+https://github.com/zingolabs/zingolib-crosslink?branch=feat%2Fzingolib-path-based-wallet-io#1adbc1dcc8e4f903e9f50f761125245c75595398"
 dependencies = [
  "append-only-vec",
+ "base64",
  "bech32",
  "bip0039",
  "bip32",
