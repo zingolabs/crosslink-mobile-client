@@ -278,6 +278,7 @@ fn store_client(lightclient: LightClient) -> Result<(), ZingolibError> {
 }
 
 const WALLET_FILE_NAME: &str = "wallet.dat";
+const WALLET_BACKUP_FILE_NAME: &str = "wallet.backup.dat";
 const IOS_WALLET_FILE_NAME: &str = "wallet.dat.txt";
 const IOS_WALLET_BACKUP_FILE_NAME: &str = "wallet.backup.dat.txt";
 
@@ -299,7 +300,7 @@ fn migrate_legacy_file_names(config: &ZingoConfig) -> std::io::Result<()> {
         (dir.join(IOS_WALLET_FILE_NAME), config.get_wallet_pathbuf()),
         (
             dir.join(IOS_WALLET_BACKUP_FILE_NAME),
-            config.get_wallet_backup_path(),
+            wallet_backup_path(config),
         ),
     ] {
         if legacy.exists() && !current.exists() {
@@ -320,6 +321,45 @@ fn wallet_file_config(wallet_dir: &str) -> ZingoConfig {
         log::warn!("legacy wallet file rename failed: {e}");
     }
     config
+}
+
+fn wallet_backup_path(config: &ZingoConfig) -> PathBuf {
+    config.get_zingo_wallet_dir().join(WALLET_BACKUP_FILE_NAME)
+}
+
+fn tmp_sibling(path: &Path) -> PathBuf {
+    let mut name = path
+        .file_name()
+        .map(std::ffi::OsString::from)
+        .unwrap_or_default();
+    name.push(".tmp");
+    path.with_file_name(name)
+}
+
+/// Copies `from` over `to` through a `.tmp` sibling and a rename, so an interrupted copy
+/// leaves any previous file at `to` intact.
+fn copy_file_atomically(from: &Path, to: &Path) -> std::io::Result<()> {
+    let tmp = tmp_sibling(to);
+    std::fs::copy(from, &tmp)?;
+    std::fs::File::open(&tmp)?.sync_all()?;
+    std::fs::rename(&tmp, to)
+}
+
+/// Exchanges two files through three renames. Fails with `NotFound` before touching
+/// anything if either is missing.
+fn swap_files(first: &Path, second: &Path) -> std::io::Result<()> {
+    for path in [first, second] {
+        if !path.exists() {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                format!("no file at {}", path.display()),
+            ));
+        }
+    }
+    let tmp = tmp_sibling(first);
+    std::fs::rename(first, &tmp)?;
+    std::fs::rename(second, first)?;
+    std::fs::rename(&tmp, second)
 }
 
 fn file_operation_result(result: std::io::Result<()>, missing: &str) -> String {
@@ -557,15 +597,16 @@ pub fn wallet_exists(wallet_dir: String) -> Result<bool, ZingolibError> {
 
 #[uniffi::export]
 pub fn wallet_backup_exists(wallet_dir: String) -> Result<bool, ZingolibError> {
-    with_panic_guard(|| Ok(wallet_file_config(&wallet_dir).wallet_backup_path_exists()))
+    with_panic_guard(|| Ok(wallet_backup_path(&wallet_file_config(&wallet_dir)).exists()))
 }
 
 /// Copies `wallet.dat` over `wallet.backup.dat`.
 #[uniffi::export]
 pub fn backup_wallet(wallet_dir: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
+        let config = wallet_file_config(&wallet_dir);
         Ok(file_operation_result(
-            wallet_file_config(&wallet_dir).copy_wallet_to_backup(),
+            copy_file_atomically(&config.get_wallet_path(), &wallet_backup_path(&config)),
             "wallet file not found",
         ))
     })
@@ -575,8 +616,9 @@ pub fn backup_wallet(wallet_dir: String) -> Result<String, ZingolibError> {
 #[uniffi::export]
 pub fn restore_wallet_backup(wallet_dir: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
+        let config = wallet_file_config(&wallet_dir);
         Ok(file_operation_result(
-            wallet_file_config(&wallet_dir).swap_wallet_with_backup(),
+            swap_files(&config.get_wallet_path(), &wallet_backup_path(&config)),
             "wallet or backup file not found",
         ))
     })
