@@ -83,6 +83,7 @@ platform :ios do
     upload_to_testflight(
       api_key: api_key,
       app_identifier: "org.ZingoLabs.ZingoDelegator",
+      app_platform: "ios",
       app_version: ENV.fetch("MARKETING_VERSION"),
       build_number: ENV.fetch("BUILD_NUMBER"),
       distribute_only: true,
