@@ -281,7 +281,7 @@ describe('FakeRpc - chain info', () => {
     const saveRequired = JSON.parse(await fakeRpc.getWalletSaveRequiredInfo());
     expect(saveRequired.save_required).toBe(false);
     const inspected = JSON.parse(
-      await fakeRpc.inspectWallet('data', SERVER, 'ios'),
+      await fakeRpc.inspectWallet(SERVER, 'test'),
     );
     expect(inspected.readable).toBe(true);
     expect(inspected.chain_match).toBe(true);

@@ -1,4 +1,3 @@
-import { Platform } from 'react-native';
 import isEqual from 'lodash/isEqual';
 import notifee from '@notifee/react-native';
 
@@ -253,7 +252,7 @@ export const runOpening = (input: OpeningInput): void => {
     }
     const quarantined = await quarantineLegacyWalletIfNeeded(
       read().indexerServer.uri,
-      Platform.OS,
+      read().indexerServer.chainName,
     );
     if (quarantined) {
       await finishToSetup();
@@ -269,7 +268,7 @@ export const runOpening = (input: OpeningInput): void => {
     );
     const title = t('loadingapp.readingwallet-label');
     if (isError(result)) {
-      if (await quarantineUnreadableWallet(Platform.OS)) {
+      if (await quarantineUnreadableWallet(server.chainName)) {
         await finishToSetup();
         return;
       }

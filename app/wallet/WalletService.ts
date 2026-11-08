@@ -426,11 +426,14 @@ export default class WalletService {
   }
 
   static async inspectWallet(
-    data: string,
     serverUri: string,
-    platform: string,
+    chainName: string,
   ): Promise<string> {
-    return RPCModule.inspectWallet(data, serverUri, platform);
+    return RPCModule.inspectWallet(serverUri, chainName);
+  }
+
+  static async quarantineWallet(): Promise<string> {
+    return RPCModule.quarantineWallet();
   }
 
   static async getTotalValueToAddressInfo(): Promise<string> {
