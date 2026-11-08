@@ -182,6 +182,11 @@ class RPCModule internal constructor(private val reactContext: ReactApplicationC
         }
     }
 
+    @ReactMethod
+    fun loadExistingWallet(serveruri: String, chainhint: String, performancelevel: String, minconfirmations: String, promise: Promise) {
+        promise.resolve(loadExistingWalletNative(serveruri, chainhint, performancelevel, minconfirmations))
+    }
+
     fun loadExistingWalletNative(serveruri: String, chainhint: String, performancelevel: String, minconfirmations: String): String {
         try {
             // Read the file

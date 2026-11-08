@@ -20,6 +20,7 @@ const hex = (seed: number) => {
   let x = seed * 2654435761;
   let out = '';
   while (out.length < 64) {
+    // eslint-disable-next-line no-bitwise
     x = (x * 1103515245 + 12345) >>> 0;
     out += x.toString(16).padStart(8, '0');
   }
@@ -30,6 +31,7 @@ const B32 = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
 
 const ua = (seed: string) => {
   const n = seed.split('').reduce((acc, c) => acc * 31 + c.charCodeAt(0), 7);
+  // eslint-disable-next-line no-bitwise
   const h = hex(n % 100000) + hex((n >> 3) % 100000);
   return `u1${h
     .slice(0, 104)

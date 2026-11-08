@@ -29,6 +29,7 @@ const HEIGHT = mockInfo.latestBlock;
 const VERSION = 'zingo-fake-1.0.0';
 const BOND_HEIGHT = HEIGHT - 10;
 
+/* eslint-disable no-bitwise */
 const fakeHexKey = (seed: number): string => {
   let x = (seed + 0x9e3779b9) >>> 0;
   let out = '';
@@ -42,6 +43,7 @@ const fakeHexKey = (seed: number): string => {
   }
   return out;
 };
+/* eslint-enable no-bitwise */
 
 const err = (message: string) => `${GlobalConst.error}: ${message}`;
 
@@ -102,7 +104,7 @@ const BONDS: FakeBond[] = [
     txid: fakeHexKey(100000 + i),
     finalizer: fakeHexKey(bondRosterIndex(i)),
     amount: i % 2 ? 0.0026 : 0.0022,
-    status: ((i % 5 === 0 ? 1 : 0) as 0 | 1),
+    status: (i % 5 === 0 ? 1 : 0) as 0 | 1,
   })),
 ];
 
@@ -305,9 +307,69 @@ const fakeRpc = {
       spendable_balance: zats(mockTotalBalance.totalSpendableBalance),
     }),
 
+  getSpendableBalanceWithAddressInfo: async (
+    address: string,
+    _zennies: string,
+  ) => {
+    if (!address) {
+      return err('unknown address format');
+    }
+    return JSON.stringify({
+      spendable_balance: zats(mockTotalBalance.totalSpendableBalance),
+    });
+  },
+
+  getTotalValueToAddressInfo: async () => JSON.stringify({}),
+
+  getTotalSpendsToAddressInfo: async () => JSON.stringify({}),
+
+  getTotalMemobytesToAddressInfo: async () => JSON.stringify({}),
+
+  createNewUnifiedAddressProcess: async (receivers: string) => {
+    const unified = mockAddresses.filter(
+      a => a.addressKind === AddressKindEnum.u,
+    );
+    const next = unified[unified.length - 1];
+    return JSON.stringify({
+      account: 0,
+      address_index: unified.length,
+      has_orchard: receivers.includes('o'),
+      has_sapling: receivers.includes('z'),
+      has_transparent: false,
+      encoded_address: next.address,
+    });
+  },
+
+  createNewTransparentAddressProcess: async () => {
+    const transparent = mockAddresses.filter(
+      a => a.addressKind === AddressKindEnum.t,
+    );
+    const next = transparent[transparent.length - 1];
+    return JSON.stringify({
+      account: 0,
+      address_index: transparent.length,
+      scope: 'External',
+      encoded_address: next.address,
+    });
+  },
+
+  checkMyAddressInfo: async (address: string) => {
+    const match = mockAddresses.find(a => a.address === address);
+    if (!match) {
+      return JSON.stringify({ is_wallet_address: false });
+    }
+    return JSON.stringify({
+      is_wallet_address: true,
+      address_type:
+        match.addressKind === AddressKindEnum.u ? 'unified' : 'transparent',
+      address_index: match.index,
+      account_id: 0,
+      encoded_address: match.address,
+    });
+  },
+
   getValueTransfersList: async () =>
     JSON.stringify({ wallet_events: events, total: events.length }),
-
 
   runSyncProcess: async () => {
     syncLaunched = true;

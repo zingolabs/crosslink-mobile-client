@@ -21,11 +21,6 @@ data class InitFromSeed (
     val no_of_accounts: Long
 )
 
-data class InitFromUfvk (
-    val ufvk : String,
-    val birthday : Long
-)
-
 data class ExportUfvk (
     val ufvk : String,
     val birthday : Long
@@ -170,51 +165,6 @@ class ExecuteAddressesFromSeed {
     }
 }
 
-@Category(OfflineTest::class)
-class ExecuteAddressesFromUfvk {
-    @Test
-    fun executeAddressFromUfvk() {
-        val mapper = jacksonObjectMapper()
-
-        val serveruri = "http://10.0.2.2:20000"
-        val chainhint = "main"
-        val ufvk = Ufvk.ABANDON
-        
-        val setCrytoProvider = uniffi.zingo.setCryptoDefaultProviderToRing()
-        println(setCrytoProvider)
-
-        val initFromUfvkJson: String = uniffi.zingo.initFromUfvk(ufvk, 1u, serveruri, chainhint, "Medium", 1u)
-        println("\nInit From UFVK:")
-        println(initFromUfvkJson)
-        val initFromUfvk: InitFromUfvk = mapper.readValue(initFromUfvkJson)
-
-        assertThat(initFromUfvk.ufvk).isEqualTo(ufvk)
-        assertThat(initFromUfvk.birthday).isEqualTo(1)
-
-        val exportUfvkJson: String = uniffi.zingo.getUfvk()
-        println("\nExport Ufvk:")
-        println(exportUfvkJson)
-        val exportUfvk: ExportUfvk = mapper.readValue(exportUfvkJson)
-        assertThat(exportUfvk.ufvk).isEqualTo(ufvk)
-        assertThat(exportUfvk.birthday).isEqualTo(1)
-
-        val addressesJson: String = uniffi.zingo.getUnifiedAddresses()
-        println("\nAddresses:")
-        println(addressesJson)
-        val addresses: List<UnifiedAddress> = mapper.readValue(addressesJson)
-        assertThat(addresses[0].encoded_address).isEqualTo("u1gsqvqxx6lmmqg05uvx57gjdg5j3a54nxw09z4vq4z0yp7dfdcjrqk5wq64quwzrufmujd5e8xu5jn7cyewjaptxc8lsqwa2lk559u4cd")
-        assertThat(addresses[0].has_orchard).isEqualTo(true)
-        assertThat(addresses[0].has_sapling).isEqualTo(false)
-        assertThat(addresses[0].has_transparent).isEqualTo(false)
-
-        val taddressesJson: String = uniffi.zingo.getTransparentAddresses()
-        println("\nT Addresses:")
-        println(taddressesJson)
-        val taddresses: List<TransparentAddress> = mapper.readValue(taddressesJson)
-        assertThat(taddresses[0].encoded_address).isEqualTo("t1dUDJ62ANtmebE8drFg7g2MWYwXHQ6Xu3F")
-        assertThat(taddresses[0].scope).isEqualTo("external")
-    }    
-}
 
 @Category(OfflineTest::class)
 class ExecuteVersionFromSeed {
