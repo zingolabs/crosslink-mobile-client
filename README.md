@@ -41,6 +41,13 @@ yarn test
 yarn lint
 ```
 
+The Android bridge test runs on a connected emulator or device without any UI. It creates a wallet through the exported `RPCModule` methods, then reopens it from a fresh module instance the way a cold start does. It needs the native libraries from `node rust/android/build_android_local.mjs` and no network.
+
+```sh
+cd android && ./gradlew :app:connectedDebugAndroidTest \
+  -Pandroid.testInstrumentationRunnerArguments.class=org.ZingoLabs.ZingoDelegator.RPCModuleBridgeTest
+```
+
 ## Crash triage
 
 Crash reports from the app land in the delegator-report Worker. The `crash-triage` CLI reads its queue and marks rows triaged.
