@@ -1,12 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  View,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Platform,
-} from 'react-native';
+import { View, TouchableOpacity, TextInput, Platform } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 import Clipboard from '@react-native-clipboard/clipboard';
@@ -137,10 +131,9 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
         }}
       />
 
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{
-          flexGrow: 1,
+      <View
+        style={{
+          flex: 1,
           paddingBottom: insets.bottom + 8,
           paddingHorizontal: 10,
         }}
@@ -483,7 +476,7 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
             </FadeText>
           )}
         </View>
-      </ScrollView>
+      </View>
     </ToastProvider>
   );
 };

@@ -155,640 +155,455 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
       }
     />
   </View>
-  <RCTScrollView
-    contentContainerStyle={
+  <View
+    style={
       {
-        "flexGrow": 1,
+        "flex": 1,
         "paddingBottom": 8,
         "paddingHorizontal": 10,
       }
     }
-    keyboardShouldPersistTaps="handled"
   >
-    <View>
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexGrow": 1,
+          "justifyContent": "flex-start",
+        }
+      }
+    >
       <View
         style={
           {
-            "alignItems": "center",
-            "flexGrow": 1,
-            "justifyContent": "flex-start",
+            "borderRadius": 20,
+            "marginTop": 10,
+            "overflow": "hidden",
+            "padding": 8,
+            "position": "relative",
+            "rowGap": 8,
           }
         }
       >
         <View
+          accessibilityElementsHidden={true}
+          importantForAccessibility="no-hide-descendants"
+          pointerEvents="none"
           style={
-            {
-              "borderRadius": 20,
-              "marginTop": 10,
-              "overflow": "hidden",
-              "padding": 8,
-              "position": "relative",
-              "rowGap": 8,
-            }
+            [
+              {
+                "rowGap": 8,
+                "transform": [
+                  {
+                    "scale": 0.98,
+                  },
+                ],
+                "transitionDuration": "280ms",
+                "transitionProperty": [
+                  "transform",
+                ],
+                "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+              },
+            ]
           }
         >
           <View
-            accessibilityElementsHidden={true}
-            importantForAccessibility="no-hide-descendants"
-            pointerEvents="none"
             style={
-              [
-                {
-                  "rowGap": 8,
-                  "transform": [
-                    {
-                      "scale": 0.98,
-                    },
-                  ],
-                  "transitionDuration": "280ms",
-                  "transitionProperty": [
-                    "transform",
-                  ],
-                  "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
-                },
-              ]
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
             }
           >
             <View
               style={
                 {
-                  "columnGap": 8,
+                  "alignItems": "center",
+                  "backgroundColor": "#222223",
+                  "borderColor": "#ffffff",
+                  "borderRadius": 25,
+                  "borderWidth": 1,
                   "flexDirection": "row",
-                  "justifyContent": "center",
+                  "justifyContent": "flex-start",
+                  "minWidth": "30%",
+                  "overflow": "hidden",
+                  "paddingHorizontal": 10,
+                  "paddingVertical": 5,
+                  "width": "30%",
                 }
               }
             >
-              <View
+              <Text
                 style={
-                  {
-                    "alignItems": "center",
-                    "backgroundColor": "#222223",
-                    "borderColor": "#ffffff",
-                    "borderRadius": 25,
-                    "borderWidth": 1,
-                    "flexDirection": "row",
-                    "justifyContent": "flex-start",
-                    "minWidth": "30%",
-                    "overflow": "hidden",
-                    "paddingHorizontal": 10,
-                    "paddingVertical": 5,
-                    "width": "30%",
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
-                <Text
-                  style={
-                    [
-                      {
-                        "fontSize": 17,
-                        "fontWeight": "400",
-                        "letterSpacing": -0.41,
-                        "lineHeight": 22,
-                      },
-                      {
-                        "color": "#888888",
-                      },
-                      undefined,
-                    ]
+                1
+                .
+              </Text>
+              <TextInput
+                autoCapitalize="none"
+                autoCorrect={false}
+                editable={false}
+                keyboardType="default"
+                returnKeyType="done"
+                style={
+                  {
+                    "backgroundColor": "transparent",
+                    "color": "#c3c3c3",
+                    "flexGrow": 1,
+                    "flexShrink": 1,
+                    "fontSize": 15,
+                    "fontWeight": "400",
+                    "lineHeight": 15,
+                    "marginLeft": 3,
+                    "marginTop": 5,
                   }
-                >
-                  1
-                  .
-                </Text>
-                <TextInput
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  editable={false}
-                  keyboardType="default"
-                  returnKeyType="done"
-                  style={
+                }
+                value="pepe"
+              />
+              <View
+                pointerEvents="none"
+                style={
+                  [
                     {
-                      "backgroundColor": "transparent",
-                      "color": "#c3c3c3",
-                      "flexGrow": 1,
-                      "flexShrink": 1,
-                      "fontSize": 15,
-                      "fontWeight": "400",
-                      "lineHeight": 15,
-                      "marginLeft": 3,
-                      "marginTop": 5,
-                    }
-                  }
-                  value="pepe"
-                />
-                <View
-                  pointerEvents="none"
+                      "bottom": 0,
+                      "left": 0,
+                      "opacity": 1,
+                      "position": "absolute",
+                      "right": 0,
+                      "top": 0,
+                      "transitionDuration": "280ms",
+                      "transitionProperty": [
+                        "opacity",
+                      ],
+                      "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                    },
+                  ]
+                }
+              >
+                <BlurView
+                  blurAmount={20}
+                  blurType="dark"
+                  reducedTransparencyFallbackColor="#011401"
                   style={
                     [
+                      {
+                        "backgroundColor": "transparent",
+                      },
                       {
                         "bottom": 0,
                         "left": 0,
-                        "opacity": 1,
                         "position": "absolute",
                         "right": 0,
                         "top": 0,
-                        "transitionDuration": "280ms",
-                        "transitionProperty": [
-                          "opacity",
-                        ],
-                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
                       },
                     ]
                   }
-                >
-                  <BlurView
-                    blurAmount={20}
-                    blurType="dark"
-                    reducedTransparencyFallbackColor="#011401"
-                    style={
-                      [
-                        {
-                          "backgroundColor": "transparent",
-                        },
-                        {
-                          "bottom": 0,
-                          "left": 0,
-                          "position": "absolute",
-                          "right": 0,
-                          "top": 0,
-                        },
-                      ]
-                    }
-                  />
-                </View>
-              </View>
-              <View
-                style={
-                  {
-                    "alignItems": "center",
-                    "backgroundColor": "#222223",
-                    "borderColor": "#ffffff",
-                    "borderRadius": 25,
-                    "borderWidth": 1,
-                    "flexDirection": "row",
-                    "justifyContent": "flex-start",
-                    "minWidth": "30%",
-                    "overflow": "hidden",
-                    "paddingHorizontal": 10,
-                    "paddingVertical": 5,
-                    "width": "30%",
-                  }
-                }
-              >
-                <Text
-                  style={
-                    [
-                      {
-                        "fontSize": 17,
-                        "fontWeight": "400",
-                        "letterSpacing": -0.41,
-                        "lineHeight": 22,
-                      },
-                      {
-                        "color": "#888888",
-                      },
-                      undefined,
-                    ]
-                  }
-                >
-                  2
-                  .
-                </Text>
-                <TextInput
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  editable={false}
-                  keyboardType="default"
-                  returnKeyType="done"
-                  style={
-                    {
-                      "backgroundColor": "transparent",
-                      "color": "#c3c3c3",
-                      "flexGrow": 1,
-                      "flexShrink": 1,
-                      "fontSize": 15,
-                      "fontWeight": "400",
-                      "lineHeight": 15,
-                      "marginLeft": 3,
-                      "marginTop": 5,
-                    }
-                  }
-                  value="lolo"
                 />
-                <View
-                  pointerEvents="none"
-                  style={
-                    [
-                      {
-                        "bottom": 0,
-                        "left": 0,
-                        "opacity": 1,
-                        "position": "absolute",
-                        "right": 0,
-                        "top": 0,
-                        "transitionDuration": "280ms",
-                        "transitionProperty": [
-                          "opacity",
-                        ],
-                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
-                      },
-                    ]
-                  }
-                >
-                  <BlurView
-                    blurAmount={20}
-                    blurType="dark"
-                    reducedTransparencyFallbackColor="#011401"
-                    style={
-                      [
-                        {
-                          "backgroundColor": "transparent",
-                        },
-                        {
-                          "bottom": 0,
-                          "left": 0,
-                          "position": "absolute",
-                          "right": 0,
-                          "top": 0,
-                        },
-                      ]
-                    }
-                  />
-                </View>
-              </View>
-              <View
-                style={
-                  {
-                    "alignItems": "center",
-                    "backgroundColor": "#222223",
-                    "borderColor": "#ffffff",
-                    "borderRadius": 25,
-                    "borderWidth": 1,
-                    "flexDirection": "row",
-                    "justifyContent": "flex-start",
-                    "minWidth": "30%",
-                    "overflow": "hidden",
-                    "paddingHorizontal": 10,
-                    "paddingVertical": 5,
-                    "width": "30%",
-                  }
-                }
-              >
-                <Text
-                  style={
-                    [
-                      {
-                        "fontSize": 17,
-                        "fontWeight": "400",
-                        "letterSpacing": -0.41,
-                        "lineHeight": 22,
-                      },
-                      {
-                        "color": "#888888",
-                      },
-                      undefined,
-                    ]
-                  }
-                >
-                  3
-                  .
-                </Text>
-                <TextInput
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  editable={false}
-                  keyboardType="default"
-                  returnKeyType="done"
-                  style={
-                    {
-                      "backgroundColor": "transparent",
-                      "color": "#c3c3c3",
-                      "flexGrow": 1,
-                      "flexShrink": 1,
-                      "fontSize": 15,
-                      "fontWeight": "400",
-                      "lineHeight": 15,
-                      "marginLeft": 3,
-                      "marginTop": 5,
-                    }
-                  }
-                  value="titi"
-                />
-                <View
-                  pointerEvents="none"
-                  style={
-                    [
-                      {
-                        "bottom": 0,
-                        "left": 0,
-                        "opacity": 1,
-                        "position": "absolute",
-                        "right": 0,
-                        "top": 0,
-                        "transitionDuration": "280ms",
-                        "transitionProperty": [
-                          "opacity",
-                        ],
-                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
-                      },
-                    ]
-                  }
-                >
-                  <BlurView
-                    blurAmount={20}
-                    blurType="dark"
-                    reducedTransparencyFallbackColor="#011401"
-                    style={
-                      [
-                        {
-                          "backgroundColor": "transparent",
-                        },
-                        {
-                          "bottom": 0,
-                          "left": 0,
-                          "position": "absolute",
-                          "right": 0,
-                          "top": 0,
-                        },
-                      ]
-                    }
-                  />
-                </View>
               </View>
             </View>
             <View
               style={
                 {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-          </View>
-          <View
-            accessibilityElementsHidden={false}
-            importantForAccessibility="auto"
-            pointerEvents="auto"
-            style={
-              [
-                {
                   "alignItems": "center",
-                  "bottom": 0,
-                  "justifyContent": "center",
-                  "left": 0,
-                  "opacity": 1,
-                  "position": "absolute",
-                  "right": 0,
-                  "top": 0,
-                  "transitionDuration": "280ms",
-                  "transitionProperty": [
-                    "opacity",
-                  ],
-                  "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
-                },
-              ]
-            }
-          >
-            <div
-              accessibilityRole="button"
-              accessibilityState={
-                {
-                  "busy": undefined,
-                  "checked": undefined,
-                  "disabled": undefined,
-                  "expanded": undefined,
-                  "selected": undefined,
+                  "backgroundColor": "#222223",
+                  "borderColor": "#ffffff",
+                  "borderRadius": 25,
+                  "borderWidth": 1,
+                  "flexDirection": "row",
+                  "justifyContent": "flex-start",
+                  "minWidth": "30%",
+                  "overflow": "hidden",
+                  "paddingHorizontal": 10,
+                  "paddingVertical": 5,
+                  "width": "30%",
                 }
               }
-              accessible={true}
-              colorScheme="system"
-              effect="clear"
-              focusable={true}
-              interactive={true}
-              onClick={[Function]}
-              onResponderGrant={[Function]}
-              onResponderMove={[Function]}
-              onResponderRelease={[Function]}
-              onResponderTerminate={[Function]}
-              onResponderTerminationRequest={[Function]}
-              onStartShouldSetResponder={[Function]}
-              style={
-                [
-                  {
-                    "alignItems": "center",
-                    "alignSelf": "stretch",
-                    "borderRadius": 9999,
-                    "justifyContent": "center",
-                    "minWidth": 160,
-                    "paddingHorizontal": 20,
-                    "paddingVertical": 14,
-                    "shadowColor": "#000",
-                    "shadowOffset": {
-                      "height": 10,
-                      "width": 0,
-                    },
-                    "shadowOpacity": 0.35,
-                    "shadowRadius": 16,
-                  },
-                  {
-                    "alignSelf": "center",
-                    "borderRadius": 20,
-                    "minWidth": 0,
-                    "paddingHorizontal": 18,
-                    "paddingVertical": 10,
-                  },
-                  undefined,
-                ]
-              }
-              tintColor="rgba(255,255,255,0.10)"
             >
-              <View>
-                <Text
-                  numberOfLines={1}
-                  style={
-                    [
-                      [
-                        {
-                          "color": "white",
-                          "fontSize": 18,
-                          "fontWeight": "600",
-                        },
-                        {
-                          "fontSize": 16,
-                        },
-                      ],
-                      {
-                        "opacity": 1,
-                      },
-                      {
-                        "animationDuration": 350,
-                        "animationName": {
-                          "from": {
-                            "opacity": 0,
-                          },
-                          "to": {
-                            "opacity": 1,
-                          },
-                        },
-                        "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
-                      },
-                    ]
+              <Text
+                style={
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
+                }
+              >
+                2
+                .
+              </Text>
+              <TextInput
+                autoCapitalize="none"
+                autoCorrect={false}
+                editable={false}
+                keyboardType="default"
+                returnKeyType="done"
+                style={
+                  {
+                    "backgroundColor": "transparent",
+                    "color": "#c3c3c3",
+                    "flexGrow": 1,
+                    "flexShrink": 1,
+                    "fontSize": 15,
+                    "fontWeight": "400",
+                    "lineHeight": 15,
+                    "marginLeft": 3,
+                    "marginTop": 5,
                   }
-                >
-                  View seed phrase
-                </Text>
-                <Text
-                  accessible={false}
-                  importantForAccessibility="no-hide-descendants"
-                  numberOfLines={1}
+                }
+                value="lolo"
+              />
+              <View
+                pointerEvents="none"
+                style={
+                  [
+                    {
+                      "bottom": 0,
+                      "left": 0,
+                      "opacity": 1,
+                      "position": "absolute",
+                      "right": 0,
+                      "top": 0,
+                      "transitionDuration": "280ms",
+                      "transitionProperty": [
+                        "opacity",
+                      ],
+                      "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                    },
+                  ]
+                }
+              >
+                <BlurView
+                  blurAmount={20}
+                  blurType="dark"
+                  reducedTransparencyFallbackColor="#011401"
                   style={
                     [
-                      [
-                        {
-                          "color": "white",
-                          "fontSize": 18,
-                          "fontWeight": "600",
-                        },
-                        {
-                          "fontSize": 16,
-                        },
-                      ],
+                      {
+                        "backgroundColor": "transparent",
+                      },
                       {
                         "bottom": 0,
-                        "color": "transparent",
                         "left": 0,
-                        "opacity": 0,
                         "position": "absolute",
                         "right": 0,
-                        "textShadowOffset": {
-                          "height": 0,
-                          "width": 0,
-                        },
                         "top": 0,
-                      },
-                      {
-                        "textShadowColor": "white",
-                        "textShadowRadius": 6,
-                      },
-                      {
-                        "animationDuration": 350,
-                        "animationName": {
-                          "from": {
-                            "opacity": 1,
-                          },
-                          "to": {
-                            "opacity": 0,
-                          },
-                        },
-                        "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
                       },
                     ]
                   }
-                >
-                  View seed phrase
-                </Text>
+                />
               </View>
-            </div>
+            </View>
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#222223",
+                  "borderColor": "#ffffff",
+                  "borderRadius": 25,
+                  "borderWidth": 1,
+                  "flexDirection": "row",
+                  "justifyContent": "flex-start",
+                  "minWidth": "30%",
+                  "overflow": "hidden",
+                  "paddingHorizontal": 10,
+                  "paddingVertical": 5,
+                  "width": "30%",
+                }
+              }
+            >
+              <Text
+                style={
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
+                }
+              >
+                3
+                .
+              </Text>
+              <TextInput
+                autoCapitalize="none"
+                autoCorrect={false}
+                editable={false}
+                keyboardType="default"
+                returnKeyType="done"
+                style={
+                  {
+                    "backgroundColor": "transparent",
+                    "color": "#c3c3c3",
+                    "flexGrow": 1,
+                    "flexShrink": 1,
+                    "fontSize": 15,
+                    "fontWeight": "400",
+                    "lineHeight": 15,
+                    "marginLeft": 3,
+                    "marginTop": 5,
+                  }
+                }
+                value="titi"
+              />
+              <View
+                pointerEvents="none"
+                style={
+                  [
+                    {
+                      "bottom": 0,
+                      "left": 0,
+                      "opacity": 1,
+                      "position": "absolute",
+                      "right": 0,
+                      "top": 0,
+                      "transitionDuration": "280ms",
+                      "transitionProperty": [
+                        "opacity",
+                      ],
+                      "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                    },
+                  ]
+                }
+              >
+                <BlurView
+                  blurAmount={20}
+                  blurType="dark"
+                  reducedTransparencyFallbackColor="#011401"
+                  style={
+                    [
+                      {
+                        "backgroundColor": "transparent",
+                      },
+                      {
+                        "bottom": 0,
+                        "left": 0,
+                        "position": "absolute",
+                        "right": 0,
+                        "top": 0,
+                      },
+                    ]
+                  }
+                />
+              </View>
+            </View>
           </View>
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
         </View>
         <View
+          accessibilityElementsHidden={false}
+          importantForAccessibility="auto"
+          pointerEvents="auto"
           style={
-            {
-              "alignItems": "center",
-              "backgroundColor": "#222223",
-              "borderColor": "#ffffff",
-              "borderRadius": 25,
-              "borderWidth": 1,
-              "flexDirection": "row",
-              "justifyContent": "flex-start",
-              "marginBottom": 10,
-              "marginTop": 10,
-              "minHeight": 48,
-              "minWidth": "50%",
-              "paddingHorizontal": 25,
-              "paddingVertical": 15,
-              "width": "100%",
-            }
+            [
+              {
+                "alignItems": "center",
+                "bottom": 0,
+                "justifyContent": "center",
+                "left": 0,
+                "opacity": 1,
+                "position": "absolute",
+                "right": 0,
+                "top": 0,
+                "transitionDuration": "280ms",
+                "transitionProperty": [
+                  "opacity",
+                ],
+                "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+              },
+            ]
           }
         >
-          <Text
-            style={
-              [
-                {
-                  "fontSize": 17,
-                  "fontWeight": "400",
-                  "letterSpacing": -0.41,
-                  "lineHeight": 22,
-                },
-                {
-                  "color": "#888888",
-                },
-                {
-                  "flexGrow": 1,
-                  "flexShrink": 1,
-                  "fontSize": 20,
-                },
-              ]
-            }
-          >
-            Birthday
-          </Text>
-          <View
+          <div
+            accessibilityRole="button"
             accessibilityState={
               {
                 "busy": undefined,
@@ -798,17 +613,11 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
                 "selected": undefined,
               }
             }
-            accessibilityValue={
-              {
-                "max": undefined,
-                "min": undefined,
-                "now": undefined,
-                "text": undefined,
-              }
-            }
             accessible={true}
-            collapsable={false}
+            colorScheme="system"
+            effect="clear"
             focusable={true}
+            interactive={true}
             onClick={[Function]}
             onResponderGrant={[Function]}
             onResponderMove={[Function]}
@@ -817,33 +626,144 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
             onResponderTerminationRequest={[Function]}
             onStartShouldSetResponder={[Function]}
             style={
-              {
-                "opacity": 1,
-              }
+              [
+                {
+                  "alignItems": "center",
+                  "alignSelf": "stretch",
+                  "borderRadius": 9999,
+                  "justifyContent": "center",
+                  "minWidth": 160,
+                  "paddingHorizontal": 20,
+                  "paddingVertical": 14,
+                  "shadowColor": "#000",
+                  "shadowOffset": {
+                    "height": 10,
+                    "width": 0,
+                  },
+                  "shadowOpacity": 0.35,
+                  "shadowRadius": 16,
+                },
+                {
+                  "alignSelf": "center",
+                  "borderRadius": 20,
+                  "minWidth": 0,
+                  "paddingHorizontal": 18,
+                  "paddingVertical": 10,
+                },
+                undefined,
+              ]
             }
+            tintColor="rgba(255,255,255,0.10)"
           >
-            <Text
-              style={
-                [
-                  {
-                    "fontSize": 17,
-                    "fontWeight": "400",
-                    "letterSpacing": -0.41,
-                    "lineHeight": 22,
-                  },
-                  {
-                    "color": "#c3c3c3",
-                  },
-                  {
-                    "textAlign": "center",
-                  },
-                ]
-              }
-            >
-              1900100
-            </Text>
-          </View>
+            <View>
+              <Text
+                numberOfLines={1}
+                style={
+                  [
+                    [
+                      {
+                        "color": "white",
+                        "fontSize": 18,
+                        "fontWeight": "600",
+                      },
+                      {
+                        "fontSize": 16,
+                      },
+                    ],
+                    {
+                      "opacity": 1,
+                    },
+                    {
+                      "animationDuration": 350,
+                      "animationName": {
+                        "from": {
+                          "opacity": 0,
+                        },
+                        "to": {
+                          "opacity": 1,
+                        },
+                      },
+                      "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                    },
+                  ]
+                }
+              >
+                View seed phrase
+              </Text>
+              <Text
+                accessible={false}
+                importantForAccessibility="no-hide-descendants"
+                numberOfLines={1}
+                style={
+                  [
+                    [
+                      {
+                        "color": "white",
+                        "fontSize": 18,
+                        "fontWeight": "600",
+                      },
+                      {
+                        "fontSize": 16,
+                      },
+                    ],
+                    {
+                      "bottom": 0,
+                      "color": "transparent",
+                      "left": 0,
+                      "opacity": 0,
+                      "position": "absolute",
+                      "right": 0,
+                      "textShadowOffset": {
+                        "height": 0,
+                        "width": 0,
+                      },
+                      "top": 0,
+                    },
+                    {
+                      "textShadowColor": "white",
+                      "textShadowRadius": 6,
+                    },
+                    {
+                      "animationDuration": 350,
+                      "animationName": {
+                        "from": {
+                          "opacity": 1,
+                        },
+                        "to": {
+                          "opacity": 0,
+                        },
+                      },
+                      "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                    },
+                  ]
+                }
+              >
+                View seed phrase
+              </Text>
+            </View>
+          </div>
         </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#222223",
+            "borderColor": "#ffffff",
+            "borderRadius": 25,
+            "borderWidth": 1,
+            "flexDirection": "row",
+            "justifyContent": "flex-start",
+            "marginBottom": 10,
+            "marginTop": 10,
+            "minHeight": 48,
+            "minWidth": "50%",
+            "paddingHorizontal": 25,
+            "paddingVertical": 15,
+            "width": "100%",
+          }
+        }
+      >
         <Text
           style={
             [
@@ -860,16 +780,93 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
                 "flexGrow": 1,
                 "flexShrink": 1,
                 "fontSize": 20,
-                "marginTop": 10,
               },
             ]
           }
         >
-          ... extracting UFVK...
+          Birthday
         </Text>
+        <View
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            {
+              "opacity": 1,
+            }
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 17,
+                  "fontWeight": "400",
+                  "letterSpacing": -0.41,
+                  "lineHeight": 22,
+                },
+                {
+                  "color": "#c3c3c3",
+                },
+                {
+                  "textAlign": "center",
+                },
+              ]
+            }
+          >
+            1900100
+          </Text>
+        </View>
       </View>
+      <Text
+        style={
+          [
+            {
+              "fontSize": 17,
+              "fontWeight": "400",
+              "letterSpacing": -0.41,
+              "lineHeight": 22,
+            },
+            {
+              "color": "#888888",
+            },
+            {
+              "flexGrow": 1,
+              "flexShrink": 1,
+              "fontSize": 20,
+              "marginTop": 10,
+            },
+          ]
+        }
+      >
+        ... extracting UFVK...
+      </Text>
     </View>
-  </RCTScrollView>
+  </View>
 </View>
 `;
 
@@ -1028,640 +1025,455 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
       }
     />
   </View>
-  <RCTScrollView
-    contentContainerStyle={
+  <View
+    style={
       {
-        "flexGrow": 1,
+        "flex": 1,
         "paddingBottom": 8,
         "paddingHorizontal": 10,
       }
     }
-    keyboardShouldPersistTaps="handled"
   >
-    <View>
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexGrow": 1,
+          "justifyContent": "flex-start",
+        }
+      }
+    >
       <View
         style={
           {
-            "alignItems": "center",
-            "flexGrow": 1,
-            "justifyContent": "flex-start",
+            "borderRadius": 20,
+            "marginTop": 10,
+            "overflow": "hidden",
+            "padding": 8,
+            "position": "relative",
+            "rowGap": 8,
           }
         }
       >
         <View
+          accessibilityElementsHidden={true}
+          importantForAccessibility="no-hide-descendants"
+          pointerEvents="none"
           style={
-            {
-              "borderRadius": 20,
-              "marginTop": 10,
-              "overflow": "hidden",
-              "padding": 8,
-              "position": "relative",
-              "rowGap": 8,
-            }
+            [
+              {
+                "rowGap": 8,
+                "transform": [
+                  {
+                    "scale": 0.98,
+                  },
+                ],
+                "transitionDuration": "280ms",
+                "transitionProperty": [
+                  "transform",
+                ],
+                "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+              },
+            ]
           }
         >
           <View
-            accessibilityElementsHidden={true}
-            importantForAccessibility="no-hide-descendants"
-            pointerEvents="none"
             style={
-              [
-                {
-                  "rowGap": 8,
-                  "transform": [
-                    {
-                      "scale": 0.98,
-                    },
-                  ],
-                  "transitionDuration": "280ms",
-                  "transitionProperty": [
-                    "transform",
-                  ],
-                  "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
-                },
-              ]
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
             }
           >
             <View
               style={
                 {
-                  "columnGap": 8,
+                  "alignItems": "center",
+                  "backgroundColor": "#222223",
+                  "borderColor": "#ffffff",
+                  "borderRadius": 25,
+                  "borderWidth": 1,
                   "flexDirection": "row",
-                  "justifyContent": "center",
+                  "justifyContent": "flex-start",
+                  "minWidth": "30%",
+                  "overflow": "hidden",
+                  "paddingHorizontal": 10,
+                  "paddingVertical": 5,
+                  "width": "30%",
                 }
               }
             >
-              <View
+              <Text
                 style={
-                  {
-                    "alignItems": "center",
-                    "backgroundColor": "#222223",
-                    "borderColor": "#ffffff",
-                    "borderRadius": 25,
-                    "borderWidth": 1,
-                    "flexDirection": "row",
-                    "justifyContent": "flex-start",
-                    "minWidth": "30%",
-                    "overflow": "hidden",
-                    "paddingHorizontal": 10,
-                    "paddingVertical": 5,
-                    "width": "30%",
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
-                <Text
-                  style={
-                    [
-                      {
-                        "fontSize": 17,
-                        "fontWeight": "400",
-                        "letterSpacing": -0.41,
-                        "lineHeight": 22,
-                      },
-                      {
-                        "color": "#888888",
-                      },
-                      undefined,
-                    ]
+                1
+                .
+              </Text>
+              <TextInput
+                autoCapitalize="none"
+                autoCorrect={false}
+                editable={false}
+                keyboardType="default"
+                returnKeyType="done"
+                style={
+                  {
+                    "backgroundColor": "transparent",
+                    "color": "#c3c3c3",
+                    "flexGrow": 1,
+                    "flexShrink": 1,
+                    "fontSize": 15,
+                    "fontWeight": "400",
+                    "lineHeight": 15,
+                    "marginLeft": 3,
+                    "marginTop": 5,
                   }
-                >
-                  1
-                  .
-                </Text>
-                <TextInput
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  editable={false}
-                  keyboardType="default"
-                  returnKeyType="done"
-                  style={
+                }
+                value="pepe"
+              />
+              <View
+                pointerEvents="none"
+                style={
+                  [
                     {
-                      "backgroundColor": "transparent",
-                      "color": "#c3c3c3",
-                      "flexGrow": 1,
-                      "flexShrink": 1,
-                      "fontSize": 15,
-                      "fontWeight": "400",
-                      "lineHeight": 15,
-                      "marginLeft": 3,
-                      "marginTop": 5,
-                    }
-                  }
-                  value="pepe"
-                />
-                <View
-                  pointerEvents="none"
+                      "bottom": 0,
+                      "left": 0,
+                      "opacity": 1,
+                      "position": "absolute",
+                      "right": 0,
+                      "top": 0,
+                      "transitionDuration": "280ms",
+                      "transitionProperty": [
+                        "opacity",
+                      ],
+                      "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                    },
+                  ]
+                }
+              >
+                <BlurView
+                  blurAmount={20}
+                  blurType="dark"
+                  reducedTransparencyFallbackColor="#011401"
                   style={
                     [
+                      {
+                        "backgroundColor": "transparent",
+                      },
                       {
                         "bottom": 0,
                         "left": 0,
-                        "opacity": 1,
                         "position": "absolute",
                         "right": 0,
                         "top": 0,
-                        "transitionDuration": "280ms",
-                        "transitionProperty": [
-                          "opacity",
-                        ],
-                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
                       },
                     ]
                   }
-                >
-                  <BlurView
-                    blurAmount={20}
-                    blurType="dark"
-                    reducedTransparencyFallbackColor="#011401"
-                    style={
-                      [
-                        {
-                          "backgroundColor": "transparent",
-                        },
-                        {
-                          "bottom": 0,
-                          "left": 0,
-                          "position": "absolute",
-                          "right": 0,
-                          "top": 0,
-                        },
-                      ]
-                    }
-                  />
-                </View>
-              </View>
-              <View
-                style={
-                  {
-                    "alignItems": "center",
-                    "backgroundColor": "#222223",
-                    "borderColor": "#ffffff",
-                    "borderRadius": 25,
-                    "borderWidth": 1,
-                    "flexDirection": "row",
-                    "justifyContent": "flex-start",
-                    "minWidth": "30%",
-                    "overflow": "hidden",
-                    "paddingHorizontal": 10,
-                    "paddingVertical": 5,
-                    "width": "30%",
-                  }
-                }
-              >
-                <Text
-                  style={
-                    [
-                      {
-                        "fontSize": 17,
-                        "fontWeight": "400",
-                        "letterSpacing": -0.41,
-                        "lineHeight": 22,
-                      },
-                      {
-                        "color": "#888888",
-                      },
-                      undefined,
-                    ]
-                  }
-                >
-                  2
-                  .
-                </Text>
-                <TextInput
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  editable={false}
-                  keyboardType="default"
-                  returnKeyType="done"
-                  style={
-                    {
-                      "backgroundColor": "transparent",
-                      "color": "#c3c3c3",
-                      "flexGrow": 1,
-                      "flexShrink": 1,
-                      "fontSize": 15,
-                      "fontWeight": "400",
-                      "lineHeight": 15,
-                      "marginLeft": 3,
-                      "marginTop": 5,
-                    }
-                  }
-                  value="lolo"
                 />
-                <View
-                  pointerEvents="none"
-                  style={
-                    [
-                      {
-                        "bottom": 0,
-                        "left": 0,
-                        "opacity": 1,
-                        "position": "absolute",
-                        "right": 0,
-                        "top": 0,
-                        "transitionDuration": "280ms",
-                        "transitionProperty": [
-                          "opacity",
-                        ],
-                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
-                      },
-                    ]
-                  }
-                >
-                  <BlurView
-                    blurAmount={20}
-                    blurType="dark"
-                    reducedTransparencyFallbackColor="#011401"
-                    style={
-                      [
-                        {
-                          "backgroundColor": "transparent",
-                        },
-                        {
-                          "bottom": 0,
-                          "left": 0,
-                          "position": "absolute",
-                          "right": 0,
-                          "top": 0,
-                        },
-                      ]
-                    }
-                  />
-                </View>
-              </View>
-              <View
-                style={
-                  {
-                    "alignItems": "center",
-                    "backgroundColor": "#222223",
-                    "borderColor": "#ffffff",
-                    "borderRadius": 25,
-                    "borderWidth": 1,
-                    "flexDirection": "row",
-                    "justifyContent": "flex-start",
-                    "minWidth": "30%",
-                    "overflow": "hidden",
-                    "paddingHorizontal": 10,
-                    "paddingVertical": 5,
-                    "width": "30%",
-                  }
-                }
-              >
-                <Text
-                  style={
-                    [
-                      {
-                        "fontSize": 17,
-                        "fontWeight": "400",
-                        "letterSpacing": -0.41,
-                        "lineHeight": 22,
-                      },
-                      {
-                        "color": "#888888",
-                      },
-                      undefined,
-                    ]
-                  }
-                >
-                  3
-                  .
-                </Text>
-                <TextInput
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  editable={false}
-                  keyboardType="default"
-                  returnKeyType="done"
-                  style={
-                    {
-                      "backgroundColor": "transparent",
-                      "color": "#c3c3c3",
-                      "flexGrow": 1,
-                      "flexShrink": 1,
-                      "fontSize": 15,
-                      "fontWeight": "400",
-                      "lineHeight": 15,
-                      "marginLeft": 3,
-                      "marginTop": 5,
-                    }
-                  }
-                  value="titi"
-                />
-                <View
-                  pointerEvents="none"
-                  style={
-                    [
-                      {
-                        "bottom": 0,
-                        "left": 0,
-                        "opacity": 1,
-                        "position": "absolute",
-                        "right": 0,
-                        "top": 0,
-                        "transitionDuration": "280ms",
-                        "transitionProperty": [
-                          "opacity",
-                        ],
-                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
-                      },
-                    ]
-                  }
-                >
-                  <BlurView
-                    blurAmount={20}
-                    blurType="dark"
-                    reducedTransparencyFallbackColor="#011401"
-                    style={
-                      [
-                        {
-                          "backgroundColor": "transparent",
-                        },
-                        {
-                          "bottom": 0,
-                          "left": 0,
-                          "position": "absolute",
-                          "right": 0,
-                          "top": 0,
-                        },
-                      ]
-                    }
-                  />
-                </View>
               </View>
             </View>
             <View
               style={
                 {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-          </View>
-          <View
-            accessibilityElementsHidden={false}
-            importantForAccessibility="auto"
-            pointerEvents="auto"
-            style={
-              [
-                {
                   "alignItems": "center",
-                  "bottom": 0,
-                  "justifyContent": "center",
-                  "left": 0,
-                  "opacity": 1,
-                  "position": "absolute",
-                  "right": 0,
-                  "top": 0,
-                  "transitionDuration": "280ms",
-                  "transitionProperty": [
-                    "opacity",
-                  ],
-                  "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
-                },
-              ]
-            }
-          >
-            <div
-              accessibilityRole="button"
-              accessibilityState={
-                {
-                  "busy": undefined,
-                  "checked": undefined,
-                  "disabled": undefined,
-                  "expanded": undefined,
-                  "selected": undefined,
+                  "backgroundColor": "#222223",
+                  "borderColor": "#ffffff",
+                  "borderRadius": 25,
+                  "borderWidth": 1,
+                  "flexDirection": "row",
+                  "justifyContent": "flex-start",
+                  "minWidth": "30%",
+                  "overflow": "hidden",
+                  "paddingHorizontal": 10,
+                  "paddingVertical": 5,
+                  "width": "30%",
                 }
               }
-              accessible={true}
-              colorScheme="system"
-              effect="clear"
-              focusable={true}
-              interactive={true}
-              onClick={[Function]}
-              onResponderGrant={[Function]}
-              onResponderMove={[Function]}
-              onResponderRelease={[Function]}
-              onResponderTerminate={[Function]}
-              onResponderTerminationRequest={[Function]}
-              onStartShouldSetResponder={[Function]}
-              style={
-                [
-                  {
-                    "alignItems": "center",
-                    "alignSelf": "stretch",
-                    "borderRadius": 9999,
-                    "justifyContent": "center",
-                    "minWidth": 160,
-                    "paddingHorizontal": 20,
-                    "paddingVertical": 14,
-                    "shadowColor": "#000",
-                    "shadowOffset": {
-                      "height": 10,
-                      "width": 0,
-                    },
-                    "shadowOpacity": 0.35,
-                    "shadowRadius": 16,
-                  },
-                  {
-                    "alignSelf": "center",
-                    "borderRadius": 20,
-                    "minWidth": 0,
-                    "paddingHorizontal": 18,
-                    "paddingVertical": 10,
-                  },
-                  undefined,
-                ]
-              }
-              tintColor="rgba(255,255,255,0.10)"
             >
-              <View>
-                <Text
-                  numberOfLines={1}
-                  style={
-                    [
-                      [
-                        {
-                          "color": "white",
-                          "fontSize": 18,
-                          "fontWeight": "600",
-                        },
-                        {
-                          "fontSize": 16,
-                        },
-                      ],
-                      {
-                        "opacity": 1,
-                      },
-                      {
-                        "animationDuration": 350,
-                        "animationName": {
-                          "from": {
-                            "opacity": 0,
-                          },
-                          "to": {
-                            "opacity": 1,
-                          },
-                        },
-                        "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
-                      },
-                    ]
+              <Text
+                style={
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
+                }
+              >
+                2
+                .
+              </Text>
+              <TextInput
+                autoCapitalize="none"
+                autoCorrect={false}
+                editable={false}
+                keyboardType="default"
+                returnKeyType="done"
+                style={
+                  {
+                    "backgroundColor": "transparent",
+                    "color": "#c3c3c3",
+                    "flexGrow": 1,
+                    "flexShrink": 1,
+                    "fontSize": 15,
+                    "fontWeight": "400",
+                    "lineHeight": 15,
+                    "marginLeft": 3,
+                    "marginTop": 5,
                   }
-                >
-                  View seed phrase
-                </Text>
-                <Text
-                  accessible={false}
-                  importantForAccessibility="no-hide-descendants"
-                  numberOfLines={1}
+                }
+                value="lolo"
+              />
+              <View
+                pointerEvents="none"
+                style={
+                  [
+                    {
+                      "bottom": 0,
+                      "left": 0,
+                      "opacity": 1,
+                      "position": "absolute",
+                      "right": 0,
+                      "top": 0,
+                      "transitionDuration": "280ms",
+                      "transitionProperty": [
+                        "opacity",
+                      ],
+                      "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                    },
+                  ]
+                }
+              >
+                <BlurView
+                  blurAmount={20}
+                  blurType="dark"
+                  reducedTransparencyFallbackColor="#011401"
                   style={
                     [
-                      [
-                        {
-                          "color": "white",
-                          "fontSize": 18,
-                          "fontWeight": "600",
-                        },
-                        {
-                          "fontSize": 16,
-                        },
-                      ],
+                      {
+                        "backgroundColor": "transparent",
+                      },
                       {
                         "bottom": 0,
-                        "color": "transparent",
                         "left": 0,
-                        "opacity": 0,
                         "position": "absolute",
                         "right": 0,
-                        "textShadowOffset": {
-                          "height": 0,
-                          "width": 0,
-                        },
                         "top": 0,
-                      },
-                      {
-                        "textShadowColor": "white",
-                        "textShadowRadius": 6,
-                      },
-                      {
-                        "animationDuration": 350,
-                        "animationName": {
-                          "from": {
-                            "opacity": 1,
-                          },
-                          "to": {
-                            "opacity": 0,
-                          },
-                        },
-                        "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
                       },
                     ]
                   }
-                >
-                  View seed phrase
-                </Text>
+                />
               </View>
-            </div>
+            </View>
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#222223",
+                  "borderColor": "#ffffff",
+                  "borderRadius": 25,
+                  "borderWidth": 1,
+                  "flexDirection": "row",
+                  "justifyContent": "flex-start",
+                  "minWidth": "30%",
+                  "overflow": "hidden",
+                  "paddingHorizontal": 10,
+                  "paddingVertical": 5,
+                  "width": "30%",
+                }
+              }
+            >
+              <Text
+                style={
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
+                }
+              >
+                3
+                .
+              </Text>
+              <TextInput
+                autoCapitalize="none"
+                autoCorrect={false}
+                editable={false}
+                keyboardType="default"
+                returnKeyType="done"
+                style={
+                  {
+                    "backgroundColor": "transparent",
+                    "color": "#c3c3c3",
+                    "flexGrow": 1,
+                    "flexShrink": 1,
+                    "fontSize": 15,
+                    "fontWeight": "400",
+                    "lineHeight": 15,
+                    "marginLeft": 3,
+                    "marginTop": 5,
+                  }
+                }
+                value="titi"
+              />
+              <View
+                pointerEvents="none"
+                style={
+                  [
+                    {
+                      "bottom": 0,
+                      "left": 0,
+                      "opacity": 1,
+                      "position": "absolute",
+                      "right": 0,
+                      "top": 0,
+                      "transitionDuration": "280ms",
+                      "transitionProperty": [
+                        "opacity",
+                      ],
+                      "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                    },
+                  ]
+                }
+              >
+                <BlurView
+                  blurAmount={20}
+                  blurType="dark"
+                  reducedTransparencyFallbackColor="#011401"
+                  style={
+                    [
+                      {
+                        "backgroundColor": "transparent",
+                      },
+                      {
+                        "bottom": 0,
+                        "left": 0,
+                        "position": "absolute",
+                        "right": 0,
+                        "top": 0,
+                      },
+                    ]
+                  }
+                />
+              </View>
+            </View>
           </View>
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
         </View>
         <View
+          accessibilityElementsHidden={false}
+          importantForAccessibility="auto"
+          pointerEvents="auto"
           style={
-            {
-              "alignItems": "center",
-              "backgroundColor": "#222223",
-              "borderColor": "#ffffff",
-              "borderRadius": 25,
-              "borderWidth": 1,
-              "flexDirection": "row",
-              "justifyContent": "flex-start",
-              "marginBottom": 10,
-              "marginTop": 10,
-              "minHeight": 48,
-              "minWidth": "50%",
-              "paddingHorizontal": 25,
-              "paddingVertical": 15,
-              "width": "100%",
-            }
+            [
+              {
+                "alignItems": "center",
+                "bottom": 0,
+                "justifyContent": "center",
+                "left": 0,
+                "opacity": 1,
+                "position": "absolute",
+                "right": 0,
+                "top": 0,
+                "transitionDuration": "280ms",
+                "transitionProperty": [
+                  "opacity",
+                ],
+                "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+              },
+            ]
           }
         >
-          <Text
-            style={
-              [
-                {
-                  "fontSize": 17,
-                  "fontWeight": "400",
-                  "letterSpacing": -0.41,
-                  "lineHeight": 22,
-                },
-                {
-                  "color": "#888888",
-                },
-                {
-                  "flexGrow": 1,
-                  "flexShrink": 1,
-                  "fontSize": 20,
-                },
-              ]
-            }
-          >
-            Birthday
-          </Text>
-          <View
+          <div
+            accessibilityRole="button"
             accessibilityState={
               {
                 "busy": undefined,
@@ -1671,17 +1483,11 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
                 "selected": undefined,
               }
             }
-            accessibilityValue={
-              {
-                "max": undefined,
-                "min": undefined,
-                "now": undefined,
-                "text": undefined,
-              }
-            }
             accessible={true}
-            collapsable={false}
+            colorScheme="system"
+            effect="clear"
             focusable={true}
+            interactive={true}
             onClick={[Function]}
             onResponderGrant={[Function]}
             onResponderMove={[Function]}
@@ -1690,33 +1496,144 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
             onResponderTerminationRequest={[Function]}
             onStartShouldSetResponder={[Function]}
             style={
-              {
-                "opacity": 1,
-              }
+              [
+                {
+                  "alignItems": "center",
+                  "alignSelf": "stretch",
+                  "borderRadius": 9999,
+                  "justifyContent": "center",
+                  "minWidth": 160,
+                  "paddingHorizontal": 20,
+                  "paddingVertical": 14,
+                  "shadowColor": "#000",
+                  "shadowOffset": {
+                    "height": 10,
+                    "width": 0,
+                  },
+                  "shadowOpacity": 0.35,
+                  "shadowRadius": 16,
+                },
+                {
+                  "alignSelf": "center",
+                  "borderRadius": 20,
+                  "minWidth": 0,
+                  "paddingHorizontal": 18,
+                  "paddingVertical": 10,
+                },
+                undefined,
+              ]
             }
+            tintColor="rgba(255,255,255,0.10)"
           >
-            <Text
-              style={
-                [
-                  {
-                    "fontSize": 17,
-                    "fontWeight": "400",
-                    "letterSpacing": -0.41,
-                    "lineHeight": 22,
-                  },
-                  {
-                    "color": "#c3c3c3",
-                  },
-                  {
-                    "textAlign": "center",
-                  },
-                ]
-              }
-            >
-              1900100
-            </Text>
-          </View>
+            <View>
+              <Text
+                numberOfLines={1}
+                style={
+                  [
+                    [
+                      {
+                        "color": "white",
+                        "fontSize": 18,
+                        "fontWeight": "600",
+                      },
+                      {
+                        "fontSize": 16,
+                      },
+                    ],
+                    {
+                      "opacity": 1,
+                    },
+                    {
+                      "animationDuration": 350,
+                      "animationName": {
+                        "from": {
+                          "opacity": 0,
+                        },
+                        "to": {
+                          "opacity": 1,
+                        },
+                      },
+                      "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                    },
+                  ]
+                }
+              >
+                View seed phrase
+              </Text>
+              <Text
+                accessible={false}
+                importantForAccessibility="no-hide-descendants"
+                numberOfLines={1}
+                style={
+                  [
+                    [
+                      {
+                        "color": "white",
+                        "fontSize": 18,
+                        "fontWeight": "600",
+                      },
+                      {
+                        "fontSize": 16,
+                      },
+                    ],
+                    {
+                      "bottom": 0,
+                      "color": "transparent",
+                      "left": 0,
+                      "opacity": 0,
+                      "position": "absolute",
+                      "right": 0,
+                      "textShadowOffset": {
+                        "height": 0,
+                        "width": 0,
+                      },
+                      "top": 0,
+                    },
+                    {
+                      "textShadowColor": "white",
+                      "textShadowRadius": 6,
+                    },
+                    {
+                      "animationDuration": 350,
+                      "animationName": {
+                        "from": {
+                          "opacity": 1,
+                        },
+                        "to": {
+                          "opacity": 0,
+                        },
+                      },
+                      "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                    },
+                  ]
+                }
+              >
+                View seed phrase
+              </Text>
+            </View>
+          </div>
         </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#222223",
+            "borderColor": "#ffffff",
+            "borderRadius": 25,
+            "borderWidth": 1,
+            "flexDirection": "row",
+            "justifyContent": "flex-start",
+            "marginBottom": 10,
+            "marginTop": 10,
+            "minHeight": 48,
+            "minWidth": "50%",
+            "paddingHorizontal": 25,
+            "paddingVertical": 15,
+            "width": "100%",
+          }
+        }
+      >
         <Text
           style={
             [
@@ -1733,16 +1650,93 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
                 "flexGrow": 1,
                 "flexShrink": 1,
                 "fontSize": 20,
-                "marginTop": 10,
               },
             ]
           }
         >
-          ... extracting UFVK...
+          Birthday
         </Text>
+        <View
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            {
+              "opacity": 1,
+            }
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 17,
+                  "fontWeight": "400",
+                  "letterSpacing": -0.41,
+                  "lineHeight": 22,
+                },
+                {
+                  "color": "#c3c3c3",
+                },
+                {
+                  "textAlign": "center",
+                },
+              ]
+            }
+          >
+            1900100
+          </Text>
+        </View>
       </View>
+      <Text
+        style={
+          [
+            {
+              "fontSize": 17,
+              "fontWeight": "400",
+              "letterSpacing": -0.41,
+              "lineHeight": 22,
+            },
+            {
+              "color": "#888888",
+            },
+            {
+              "flexGrow": 1,
+              "flexShrink": 1,
+              "fontSize": 20,
+              "marginTop": 10,
+            },
+          ]
+        }
+      >
+        ... extracting UFVK...
+      </Text>
     </View>
-  </RCTScrollView>
+  </View>
 </View>
 `;
 
@@ -2795,640 +2789,455 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
       }
     />
   </View>
-  <RCTScrollView
-    contentContainerStyle={
+  <View
+    style={
       {
-        "flexGrow": 1,
+        "flex": 1,
         "paddingBottom": 8,
         "paddingHorizontal": 10,
       }
     }
-    keyboardShouldPersistTaps="handled"
   >
-    <View>
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexGrow": 1,
+          "justifyContent": "flex-start",
+        }
+      }
+    >
       <View
         style={
           {
-            "alignItems": "center",
-            "flexGrow": 1,
-            "justifyContent": "flex-start",
+            "borderRadius": 20,
+            "marginTop": 10,
+            "overflow": "hidden",
+            "padding": 8,
+            "position": "relative",
+            "rowGap": 8,
           }
         }
       >
         <View
+          accessibilityElementsHidden={true}
+          importantForAccessibility="no-hide-descendants"
+          pointerEvents="none"
           style={
-            {
-              "borderRadius": 20,
-              "marginTop": 10,
-              "overflow": "hidden",
-              "padding": 8,
-              "position": "relative",
-              "rowGap": 8,
-            }
+            [
+              {
+                "rowGap": 8,
+                "transform": [
+                  {
+                    "scale": 0.98,
+                  },
+                ],
+                "transitionDuration": "280ms",
+                "transitionProperty": [
+                  "transform",
+                ],
+                "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+              },
+            ]
           }
         >
           <View
-            accessibilityElementsHidden={true}
-            importantForAccessibility="no-hide-descendants"
-            pointerEvents="none"
             style={
-              [
-                {
-                  "rowGap": 8,
-                  "transform": [
-                    {
-                      "scale": 0.98,
-                    },
-                  ],
-                  "transitionDuration": "280ms",
-                  "transitionProperty": [
-                    "transform",
-                  ],
-                  "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
-                },
-              ]
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
             }
           >
             <View
               style={
                 {
-                  "columnGap": 8,
+                  "alignItems": "center",
+                  "backgroundColor": "#222223",
+                  "borderColor": "#ffffff",
+                  "borderRadius": 25,
+                  "borderWidth": 1,
                   "flexDirection": "row",
-                  "justifyContent": "center",
+                  "justifyContent": "flex-start",
+                  "minWidth": "30%",
+                  "overflow": "hidden",
+                  "paddingHorizontal": 10,
+                  "paddingVertical": 5,
+                  "width": "30%",
                 }
               }
             >
-              <View
+              <Text
                 style={
-                  {
-                    "alignItems": "center",
-                    "backgroundColor": "#222223",
-                    "borderColor": "#ffffff",
-                    "borderRadius": 25,
-                    "borderWidth": 1,
-                    "flexDirection": "row",
-                    "justifyContent": "flex-start",
-                    "minWidth": "30%",
-                    "overflow": "hidden",
-                    "paddingHorizontal": 10,
-                    "paddingVertical": 5,
-                    "width": "30%",
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
-                <Text
-                  style={
-                    [
-                      {
-                        "fontSize": 17,
-                        "fontWeight": "400",
-                        "letterSpacing": -0.41,
-                        "lineHeight": 22,
-                      },
-                      {
-                        "color": "#888888",
-                      },
-                      undefined,
-                    ]
+                1
+                .
+              </Text>
+              <TextInput
+                autoCapitalize="none"
+                autoCorrect={false}
+                editable={false}
+                keyboardType="default"
+                returnKeyType="done"
+                style={
+                  {
+                    "backgroundColor": "transparent",
+                    "color": "#c3c3c3",
+                    "flexGrow": 1,
+                    "flexShrink": 1,
+                    "fontSize": 15,
+                    "fontWeight": "400",
+                    "lineHeight": 15,
+                    "marginLeft": 3,
+                    "marginTop": 5,
                   }
-                >
-                  1
-                  .
-                </Text>
-                <TextInput
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  editable={false}
-                  keyboardType="default"
-                  returnKeyType="done"
-                  style={
+                }
+                value="pepe"
+              />
+              <View
+                pointerEvents="none"
+                style={
+                  [
                     {
-                      "backgroundColor": "transparent",
-                      "color": "#c3c3c3",
-                      "flexGrow": 1,
-                      "flexShrink": 1,
-                      "fontSize": 15,
-                      "fontWeight": "400",
-                      "lineHeight": 15,
-                      "marginLeft": 3,
-                      "marginTop": 5,
-                    }
-                  }
-                  value="pepe"
-                />
-                <View
-                  pointerEvents="none"
+                      "bottom": 0,
+                      "left": 0,
+                      "opacity": 1,
+                      "position": "absolute",
+                      "right": 0,
+                      "top": 0,
+                      "transitionDuration": "280ms",
+                      "transitionProperty": [
+                        "opacity",
+                      ],
+                      "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                    },
+                  ]
+                }
+              >
+                <BlurView
+                  blurAmount={20}
+                  blurType="dark"
+                  reducedTransparencyFallbackColor="#011401"
                   style={
                     [
+                      {
+                        "backgroundColor": "transparent",
+                      },
                       {
                         "bottom": 0,
                         "left": 0,
-                        "opacity": 1,
                         "position": "absolute",
                         "right": 0,
                         "top": 0,
-                        "transitionDuration": "280ms",
-                        "transitionProperty": [
-                          "opacity",
-                        ],
-                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
                       },
                     ]
                   }
-                >
-                  <BlurView
-                    blurAmount={20}
-                    blurType="dark"
-                    reducedTransparencyFallbackColor="#011401"
-                    style={
-                      [
-                        {
-                          "backgroundColor": "transparent",
-                        },
-                        {
-                          "bottom": 0,
-                          "left": 0,
-                          "position": "absolute",
-                          "right": 0,
-                          "top": 0,
-                        },
-                      ]
-                    }
-                  />
-                </View>
-              </View>
-              <View
-                style={
-                  {
-                    "alignItems": "center",
-                    "backgroundColor": "#222223",
-                    "borderColor": "#ffffff",
-                    "borderRadius": 25,
-                    "borderWidth": 1,
-                    "flexDirection": "row",
-                    "justifyContent": "flex-start",
-                    "minWidth": "30%",
-                    "overflow": "hidden",
-                    "paddingHorizontal": 10,
-                    "paddingVertical": 5,
-                    "width": "30%",
-                  }
-                }
-              >
-                <Text
-                  style={
-                    [
-                      {
-                        "fontSize": 17,
-                        "fontWeight": "400",
-                        "letterSpacing": -0.41,
-                        "lineHeight": 22,
-                      },
-                      {
-                        "color": "#888888",
-                      },
-                      undefined,
-                    ]
-                  }
-                >
-                  2
-                  .
-                </Text>
-                <TextInput
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  editable={false}
-                  keyboardType="default"
-                  returnKeyType="done"
-                  style={
-                    {
-                      "backgroundColor": "transparent",
-                      "color": "#c3c3c3",
-                      "flexGrow": 1,
-                      "flexShrink": 1,
-                      "fontSize": 15,
-                      "fontWeight": "400",
-                      "lineHeight": 15,
-                      "marginLeft": 3,
-                      "marginTop": 5,
-                    }
-                  }
-                  value="lolo"
                 />
-                <View
-                  pointerEvents="none"
-                  style={
-                    [
-                      {
-                        "bottom": 0,
-                        "left": 0,
-                        "opacity": 1,
-                        "position": "absolute",
-                        "right": 0,
-                        "top": 0,
-                        "transitionDuration": "280ms",
-                        "transitionProperty": [
-                          "opacity",
-                        ],
-                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
-                      },
-                    ]
-                  }
-                >
-                  <BlurView
-                    blurAmount={20}
-                    blurType="dark"
-                    reducedTransparencyFallbackColor="#011401"
-                    style={
-                      [
-                        {
-                          "backgroundColor": "transparent",
-                        },
-                        {
-                          "bottom": 0,
-                          "left": 0,
-                          "position": "absolute",
-                          "right": 0,
-                          "top": 0,
-                        },
-                      ]
-                    }
-                  />
-                </View>
-              </View>
-              <View
-                style={
-                  {
-                    "alignItems": "center",
-                    "backgroundColor": "#222223",
-                    "borderColor": "#ffffff",
-                    "borderRadius": 25,
-                    "borderWidth": 1,
-                    "flexDirection": "row",
-                    "justifyContent": "flex-start",
-                    "minWidth": "30%",
-                    "overflow": "hidden",
-                    "paddingHorizontal": 10,
-                    "paddingVertical": 5,
-                    "width": "30%",
-                  }
-                }
-              >
-                <Text
-                  style={
-                    [
-                      {
-                        "fontSize": 17,
-                        "fontWeight": "400",
-                        "letterSpacing": -0.41,
-                        "lineHeight": 22,
-                      },
-                      {
-                        "color": "#888888",
-                      },
-                      undefined,
-                    ]
-                  }
-                >
-                  3
-                  .
-                </Text>
-                <TextInput
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  editable={false}
-                  keyboardType="default"
-                  returnKeyType="done"
-                  style={
-                    {
-                      "backgroundColor": "transparent",
-                      "color": "#c3c3c3",
-                      "flexGrow": 1,
-                      "flexShrink": 1,
-                      "fontSize": 15,
-                      "fontWeight": "400",
-                      "lineHeight": 15,
-                      "marginLeft": 3,
-                      "marginTop": 5,
-                    }
-                  }
-                  value="titi"
-                />
-                <View
-                  pointerEvents="none"
-                  style={
-                    [
-                      {
-                        "bottom": 0,
-                        "left": 0,
-                        "opacity": 1,
-                        "position": "absolute",
-                        "right": 0,
-                        "top": 0,
-                        "transitionDuration": "280ms",
-                        "transitionProperty": [
-                          "opacity",
-                        ],
-                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
-                      },
-                    ]
-                  }
-                >
-                  <BlurView
-                    blurAmount={20}
-                    blurType="dark"
-                    reducedTransparencyFallbackColor="#011401"
-                    style={
-                      [
-                        {
-                          "backgroundColor": "transparent",
-                        },
-                        {
-                          "bottom": 0,
-                          "left": 0,
-                          "position": "absolute",
-                          "right": 0,
-                          "top": 0,
-                        },
-                      ]
-                    }
-                  />
-                </View>
               </View>
             </View>
             <View
               style={
                 {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-          </View>
-          <View
-            accessibilityElementsHidden={false}
-            importantForAccessibility="auto"
-            pointerEvents="auto"
-            style={
-              [
-                {
                   "alignItems": "center",
-                  "bottom": 0,
-                  "justifyContent": "center",
-                  "left": 0,
-                  "opacity": 1,
-                  "position": "absolute",
-                  "right": 0,
-                  "top": 0,
-                  "transitionDuration": "280ms",
-                  "transitionProperty": [
-                    "opacity",
-                  ],
-                  "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
-                },
-              ]
-            }
-          >
-            <div
-              accessibilityRole="button"
-              accessibilityState={
-                {
-                  "busy": undefined,
-                  "checked": undefined,
-                  "disabled": undefined,
-                  "expanded": undefined,
-                  "selected": undefined,
+                  "backgroundColor": "#222223",
+                  "borderColor": "#ffffff",
+                  "borderRadius": 25,
+                  "borderWidth": 1,
+                  "flexDirection": "row",
+                  "justifyContent": "flex-start",
+                  "minWidth": "30%",
+                  "overflow": "hidden",
+                  "paddingHorizontal": 10,
+                  "paddingVertical": 5,
+                  "width": "30%",
                 }
               }
-              accessible={true}
-              colorScheme="system"
-              effect="clear"
-              focusable={true}
-              interactive={true}
-              onClick={[Function]}
-              onResponderGrant={[Function]}
-              onResponderMove={[Function]}
-              onResponderRelease={[Function]}
-              onResponderTerminate={[Function]}
-              onResponderTerminationRequest={[Function]}
-              onStartShouldSetResponder={[Function]}
-              style={
-                [
-                  {
-                    "alignItems": "center",
-                    "alignSelf": "stretch",
-                    "borderRadius": 9999,
-                    "justifyContent": "center",
-                    "minWidth": 160,
-                    "paddingHorizontal": 20,
-                    "paddingVertical": 14,
-                    "shadowColor": "#000",
-                    "shadowOffset": {
-                      "height": 10,
-                      "width": 0,
-                    },
-                    "shadowOpacity": 0.35,
-                    "shadowRadius": 16,
-                  },
-                  {
-                    "alignSelf": "center",
-                    "borderRadius": 20,
-                    "minWidth": 0,
-                    "paddingHorizontal": 18,
-                    "paddingVertical": 10,
-                  },
-                  undefined,
-                ]
-              }
-              tintColor="rgba(255,255,255,0.10)"
             >
-              <View>
-                <Text
-                  numberOfLines={1}
-                  style={
-                    [
-                      [
-                        {
-                          "color": "white",
-                          "fontSize": 18,
-                          "fontWeight": "600",
-                        },
-                        {
-                          "fontSize": 16,
-                        },
-                      ],
-                      {
-                        "opacity": 1,
-                      },
-                      {
-                        "animationDuration": 350,
-                        "animationName": {
-                          "from": {
-                            "opacity": 0,
-                          },
-                          "to": {
-                            "opacity": 1,
-                          },
-                        },
-                        "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
-                      },
-                    ]
+              <Text
+                style={
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
+                }
+              >
+                2
+                .
+              </Text>
+              <TextInput
+                autoCapitalize="none"
+                autoCorrect={false}
+                editable={false}
+                keyboardType="default"
+                returnKeyType="done"
+                style={
+                  {
+                    "backgroundColor": "transparent",
+                    "color": "#c3c3c3",
+                    "flexGrow": 1,
+                    "flexShrink": 1,
+                    "fontSize": 15,
+                    "fontWeight": "400",
+                    "lineHeight": 15,
+                    "marginLeft": 3,
+                    "marginTop": 5,
                   }
-                >
-                  View seed phrase
-                </Text>
-                <Text
-                  accessible={false}
-                  importantForAccessibility="no-hide-descendants"
-                  numberOfLines={1}
+                }
+                value="lolo"
+              />
+              <View
+                pointerEvents="none"
+                style={
+                  [
+                    {
+                      "bottom": 0,
+                      "left": 0,
+                      "opacity": 1,
+                      "position": "absolute",
+                      "right": 0,
+                      "top": 0,
+                      "transitionDuration": "280ms",
+                      "transitionProperty": [
+                        "opacity",
+                      ],
+                      "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                    },
+                  ]
+                }
+              >
+                <BlurView
+                  blurAmount={20}
+                  blurType="dark"
+                  reducedTransparencyFallbackColor="#011401"
                   style={
                     [
-                      [
-                        {
-                          "color": "white",
-                          "fontSize": 18,
-                          "fontWeight": "600",
-                        },
-                        {
-                          "fontSize": 16,
-                        },
-                      ],
+                      {
+                        "backgroundColor": "transparent",
+                      },
                       {
                         "bottom": 0,
-                        "color": "transparent",
                         "left": 0,
-                        "opacity": 0,
                         "position": "absolute",
                         "right": 0,
-                        "textShadowOffset": {
-                          "height": 0,
-                          "width": 0,
-                        },
                         "top": 0,
-                      },
-                      {
-                        "textShadowColor": "white",
-                        "textShadowRadius": 6,
-                      },
-                      {
-                        "animationDuration": 350,
-                        "animationName": {
-                          "from": {
-                            "opacity": 1,
-                          },
-                          "to": {
-                            "opacity": 0,
-                          },
-                        },
-                        "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
                       },
                     ]
                   }
-                >
-                  View seed phrase
-                </Text>
+                />
               </View>
-            </div>
+            </View>
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#222223",
+                  "borderColor": "#ffffff",
+                  "borderRadius": 25,
+                  "borderWidth": 1,
+                  "flexDirection": "row",
+                  "justifyContent": "flex-start",
+                  "minWidth": "30%",
+                  "overflow": "hidden",
+                  "paddingHorizontal": 10,
+                  "paddingVertical": 5,
+                  "width": "30%",
+                }
+              }
+            >
+              <Text
+                style={
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
+                }
+              >
+                3
+                .
+              </Text>
+              <TextInput
+                autoCapitalize="none"
+                autoCorrect={false}
+                editable={false}
+                keyboardType="default"
+                returnKeyType="done"
+                style={
+                  {
+                    "backgroundColor": "transparent",
+                    "color": "#c3c3c3",
+                    "flexGrow": 1,
+                    "flexShrink": 1,
+                    "fontSize": 15,
+                    "fontWeight": "400",
+                    "lineHeight": 15,
+                    "marginLeft": 3,
+                    "marginTop": 5,
+                  }
+                }
+                value="titi"
+              />
+              <View
+                pointerEvents="none"
+                style={
+                  [
+                    {
+                      "bottom": 0,
+                      "left": 0,
+                      "opacity": 1,
+                      "position": "absolute",
+                      "right": 0,
+                      "top": 0,
+                      "transitionDuration": "280ms",
+                      "transitionProperty": [
+                        "opacity",
+                      ],
+                      "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                    },
+                  ]
+                }
+              >
+                <BlurView
+                  blurAmount={20}
+                  blurType="dark"
+                  reducedTransparencyFallbackColor="#011401"
+                  style={
+                    [
+                      {
+                        "backgroundColor": "transparent",
+                      },
+                      {
+                        "bottom": 0,
+                        "left": 0,
+                        "position": "absolute",
+                        "right": 0,
+                        "top": 0,
+                      },
+                    ]
+                  }
+                />
+              </View>
+            </View>
           </View>
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
         </View>
         <View
+          accessibilityElementsHidden={false}
+          importantForAccessibility="auto"
+          pointerEvents="auto"
           style={
-            {
-              "alignItems": "center",
-              "backgroundColor": "#222223",
-              "borderColor": "#ffffff",
-              "borderRadius": 25,
-              "borderWidth": 1,
-              "flexDirection": "row",
-              "justifyContent": "flex-start",
-              "marginBottom": 10,
-              "marginTop": 10,
-              "minHeight": 48,
-              "minWidth": "50%",
-              "paddingHorizontal": 25,
-              "paddingVertical": 15,
-              "width": "100%",
-            }
+            [
+              {
+                "alignItems": "center",
+                "bottom": 0,
+                "justifyContent": "center",
+                "left": 0,
+                "opacity": 1,
+                "position": "absolute",
+                "right": 0,
+                "top": 0,
+                "transitionDuration": "280ms",
+                "transitionProperty": [
+                  "opacity",
+                ],
+                "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+              },
+            ]
           }
         >
-          <Text
-            style={
-              [
-                {
-                  "fontSize": 17,
-                  "fontWeight": "400",
-                  "letterSpacing": -0.41,
-                  "lineHeight": 22,
-                },
-                {
-                  "color": "#888888",
-                },
-                {
-                  "flexGrow": 1,
-                  "flexShrink": 1,
-                  "fontSize": 20,
-                },
-              ]
-            }
-          >
-            Birthday
-          </Text>
-          <View
+          <div
+            accessibilityRole="button"
             accessibilityState={
               {
                 "busy": undefined,
@@ -3438,17 +3247,11 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
                 "selected": undefined,
               }
             }
-            accessibilityValue={
-              {
-                "max": undefined,
-                "min": undefined,
-                "now": undefined,
-                "text": undefined,
-              }
-            }
             accessible={true}
-            collapsable={false}
+            colorScheme="system"
+            effect="clear"
             focusable={true}
+            interactive={true}
             onClick={[Function]}
             onResponderGrant={[Function]}
             onResponderMove={[Function]}
@@ -3457,33 +3260,144 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
             onResponderTerminationRequest={[Function]}
             onStartShouldSetResponder={[Function]}
             style={
-              {
-                "opacity": 1,
-              }
+              [
+                {
+                  "alignItems": "center",
+                  "alignSelf": "stretch",
+                  "borderRadius": 9999,
+                  "justifyContent": "center",
+                  "minWidth": 160,
+                  "paddingHorizontal": 20,
+                  "paddingVertical": 14,
+                  "shadowColor": "#000",
+                  "shadowOffset": {
+                    "height": 10,
+                    "width": 0,
+                  },
+                  "shadowOpacity": 0.35,
+                  "shadowRadius": 16,
+                },
+                {
+                  "alignSelf": "center",
+                  "borderRadius": 20,
+                  "minWidth": 0,
+                  "paddingHorizontal": 18,
+                  "paddingVertical": 10,
+                },
+                undefined,
+              ]
             }
+            tintColor="rgba(255,255,255,0.10)"
           >
-            <Text
-              style={
-                [
-                  {
-                    "fontSize": 17,
-                    "fontWeight": "400",
-                    "letterSpacing": -0.41,
-                    "lineHeight": 22,
-                  },
-                  {
-                    "color": "#c3c3c3",
-                  },
-                  {
-                    "textAlign": "center",
-                  },
-                ]
-              }
-            >
-              1900100
-            </Text>
-          </View>
+            <View>
+              <Text
+                numberOfLines={1}
+                style={
+                  [
+                    [
+                      {
+                        "color": "white",
+                        "fontSize": 18,
+                        "fontWeight": "600",
+                      },
+                      {
+                        "fontSize": 16,
+                      },
+                    ],
+                    {
+                      "opacity": 1,
+                    },
+                    {
+                      "animationDuration": 350,
+                      "animationName": {
+                        "from": {
+                          "opacity": 0,
+                        },
+                        "to": {
+                          "opacity": 1,
+                        },
+                      },
+                      "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                    },
+                  ]
+                }
+              >
+                View seed phrase
+              </Text>
+              <Text
+                accessible={false}
+                importantForAccessibility="no-hide-descendants"
+                numberOfLines={1}
+                style={
+                  [
+                    [
+                      {
+                        "color": "white",
+                        "fontSize": 18,
+                        "fontWeight": "600",
+                      },
+                      {
+                        "fontSize": 16,
+                      },
+                    ],
+                    {
+                      "bottom": 0,
+                      "color": "transparent",
+                      "left": 0,
+                      "opacity": 0,
+                      "position": "absolute",
+                      "right": 0,
+                      "textShadowOffset": {
+                        "height": 0,
+                        "width": 0,
+                      },
+                      "top": 0,
+                    },
+                    {
+                      "textShadowColor": "white",
+                      "textShadowRadius": 6,
+                    },
+                    {
+                      "animationDuration": 350,
+                      "animationName": {
+                        "from": {
+                          "opacity": 1,
+                        },
+                        "to": {
+                          "opacity": 0,
+                        },
+                      },
+                      "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                    },
+                  ]
+                }
+              >
+                View seed phrase
+              </Text>
+            </View>
+          </div>
         </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#222223",
+            "borderColor": "#ffffff",
+            "borderRadius": 25,
+            "borderWidth": 1,
+            "flexDirection": "row",
+            "justifyContent": "flex-start",
+            "marginBottom": 10,
+            "marginTop": 10,
+            "minHeight": 48,
+            "minWidth": "50%",
+            "paddingHorizontal": 25,
+            "paddingVertical": 15,
+            "width": "100%",
+          }
+        }
+      >
         <Text
           style={
             [
@@ -3500,16 +3414,93 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
                 "flexGrow": 1,
                 "flexShrink": 1,
                 "fontSize": 20,
-                "marginTop": 10,
               },
             ]
           }
         >
-          ... extracting UFVK...
+          Birthday
         </Text>
+        <View
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            {
+              "opacity": 1,
+            }
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 17,
+                  "fontWeight": "400",
+                  "letterSpacing": -0.41,
+                  "lineHeight": 22,
+                },
+                {
+                  "color": "#c3c3c3",
+                },
+                {
+                  "textAlign": "center",
+                },
+              ]
+            }
+          >
+            1900100
+          </Text>
+        </View>
       </View>
+      <Text
+        style={
+          [
+            {
+              "fontSize": 17,
+              "fontWeight": "400",
+              "letterSpacing": -0.41,
+              "lineHeight": 22,
+            },
+            {
+              "color": "#888888",
+            },
+            {
+              "flexGrow": 1,
+              "flexShrink": 1,
+              "fontSize": 20,
+              "marginTop": 10,
+            },
+          ]
+        }
+      >
+        ... extracting UFVK...
+      </Text>
     </View>
-  </RCTScrollView>
+  </View>
 </View>
 `;
 
@@ -3668,640 +3659,455 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
       }
     />
   </View>
-  <RCTScrollView
-    contentContainerStyle={
+  <View
+    style={
       {
-        "flexGrow": 1,
+        "flex": 1,
         "paddingBottom": 8,
         "paddingHorizontal": 10,
       }
     }
-    keyboardShouldPersistTaps="handled"
   >
-    <View>
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexGrow": 1,
+          "justifyContent": "flex-start",
+        }
+      }
+    >
       <View
         style={
           {
-            "alignItems": "center",
-            "flexGrow": 1,
-            "justifyContent": "flex-start",
+            "borderRadius": 20,
+            "marginTop": 10,
+            "overflow": "hidden",
+            "padding": 8,
+            "position": "relative",
+            "rowGap": 8,
           }
         }
       >
         <View
+          accessibilityElementsHidden={true}
+          importantForAccessibility="no-hide-descendants"
+          pointerEvents="none"
           style={
-            {
-              "borderRadius": 20,
-              "marginTop": 10,
-              "overflow": "hidden",
-              "padding": 8,
-              "position": "relative",
-              "rowGap": 8,
-            }
+            [
+              {
+                "rowGap": 8,
+                "transform": [
+                  {
+                    "scale": 0.98,
+                  },
+                ],
+                "transitionDuration": "280ms",
+                "transitionProperty": [
+                  "transform",
+                ],
+                "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+              },
+            ]
           }
         >
           <View
-            accessibilityElementsHidden={true}
-            importantForAccessibility="no-hide-descendants"
-            pointerEvents="none"
             style={
-              [
-                {
-                  "rowGap": 8,
-                  "transform": [
-                    {
-                      "scale": 0.98,
-                    },
-                  ],
-                  "transitionDuration": "280ms",
-                  "transitionProperty": [
-                    "transform",
-                  ],
-                  "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
-                },
-              ]
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
             }
           >
             <View
               style={
                 {
-                  "columnGap": 8,
+                  "alignItems": "center",
+                  "backgroundColor": "#222223",
+                  "borderColor": "#ffffff",
+                  "borderRadius": 25,
+                  "borderWidth": 1,
                   "flexDirection": "row",
-                  "justifyContent": "center",
+                  "justifyContent": "flex-start",
+                  "minWidth": "30%",
+                  "overflow": "hidden",
+                  "paddingHorizontal": 10,
+                  "paddingVertical": 5,
+                  "width": "30%",
                 }
               }
             >
-              <View
+              <Text
                 style={
-                  {
-                    "alignItems": "center",
-                    "backgroundColor": "#222223",
-                    "borderColor": "#ffffff",
-                    "borderRadius": 25,
-                    "borderWidth": 1,
-                    "flexDirection": "row",
-                    "justifyContent": "flex-start",
-                    "minWidth": "30%",
-                    "overflow": "hidden",
-                    "paddingHorizontal": 10,
-                    "paddingVertical": 5,
-                    "width": "30%",
-                  }
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
                 }
               >
-                <Text
-                  style={
-                    [
-                      {
-                        "fontSize": 17,
-                        "fontWeight": "400",
-                        "letterSpacing": -0.41,
-                        "lineHeight": 22,
-                      },
-                      {
-                        "color": "#888888",
-                      },
-                      undefined,
-                    ]
+                1
+                .
+              </Text>
+              <TextInput
+                autoCapitalize="none"
+                autoCorrect={false}
+                editable={false}
+                keyboardType="default"
+                returnKeyType="done"
+                style={
+                  {
+                    "backgroundColor": "transparent",
+                    "color": "#c3c3c3",
+                    "flexGrow": 1,
+                    "flexShrink": 1,
+                    "fontSize": 15,
+                    "fontWeight": "400",
+                    "lineHeight": 15,
+                    "marginLeft": 3,
+                    "marginTop": 5,
                   }
-                >
-                  1
-                  .
-                </Text>
-                <TextInput
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  editable={false}
-                  keyboardType="default"
-                  returnKeyType="done"
-                  style={
+                }
+                value="pepe"
+              />
+              <View
+                pointerEvents="none"
+                style={
+                  [
                     {
-                      "backgroundColor": "transparent",
-                      "color": "#c3c3c3",
-                      "flexGrow": 1,
-                      "flexShrink": 1,
-                      "fontSize": 15,
-                      "fontWeight": "400",
-                      "lineHeight": 15,
-                      "marginLeft": 3,
-                      "marginTop": 5,
-                    }
-                  }
-                  value="pepe"
-                />
-                <View
-                  pointerEvents="none"
+                      "bottom": 0,
+                      "left": 0,
+                      "opacity": 1,
+                      "position": "absolute",
+                      "right": 0,
+                      "top": 0,
+                      "transitionDuration": "280ms",
+                      "transitionProperty": [
+                        "opacity",
+                      ],
+                      "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                    },
+                  ]
+                }
+              >
+                <BlurView
+                  blurAmount={20}
+                  blurType="dark"
+                  reducedTransparencyFallbackColor="#011401"
                   style={
                     [
+                      {
+                        "backgroundColor": "transparent",
+                      },
                       {
                         "bottom": 0,
                         "left": 0,
-                        "opacity": 1,
                         "position": "absolute",
                         "right": 0,
                         "top": 0,
-                        "transitionDuration": "280ms",
-                        "transitionProperty": [
-                          "opacity",
-                        ],
-                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
                       },
                     ]
                   }
-                >
-                  <BlurView
-                    blurAmount={20}
-                    blurType="dark"
-                    reducedTransparencyFallbackColor="#011401"
-                    style={
-                      [
-                        {
-                          "backgroundColor": "transparent",
-                        },
-                        {
-                          "bottom": 0,
-                          "left": 0,
-                          "position": "absolute",
-                          "right": 0,
-                          "top": 0,
-                        },
-                      ]
-                    }
-                  />
-                </View>
-              </View>
-              <View
-                style={
-                  {
-                    "alignItems": "center",
-                    "backgroundColor": "#222223",
-                    "borderColor": "#ffffff",
-                    "borderRadius": 25,
-                    "borderWidth": 1,
-                    "flexDirection": "row",
-                    "justifyContent": "flex-start",
-                    "minWidth": "30%",
-                    "overflow": "hidden",
-                    "paddingHorizontal": 10,
-                    "paddingVertical": 5,
-                    "width": "30%",
-                  }
-                }
-              >
-                <Text
-                  style={
-                    [
-                      {
-                        "fontSize": 17,
-                        "fontWeight": "400",
-                        "letterSpacing": -0.41,
-                        "lineHeight": 22,
-                      },
-                      {
-                        "color": "#888888",
-                      },
-                      undefined,
-                    ]
-                  }
-                >
-                  2
-                  .
-                </Text>
-                <TextInput
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  editable={false}
-                  keyboardType="default"
-                  returnKeyType="done"
-                  style={
-                    {
-                      "backgroundColor": "transparent",
-                      "color": "#c3c3c3",
-                      "flexGrow": 1,
-                      "flexShrink": 1,
-                      "fontSize": 15,
-                      "fontWeight": "400",
-                      "lineHeight": 15,
-                      "marginLeft": 3,
-                      "marginTop": 5,
-                    }
-                  }
-                  value="lolo"
                 />
-                <View
-                  pointerEvents="none"
-                  style={
-                    [
-                      {
-                        "bottom": 0,
-                        "left": 0,
-                        "opacity": 1,
-                        "position": "absolute",
-                        "right": 0,
-                        "top": 0,
-                        "transitionDuration": "280ms",
-                        "transitionProperty": [
-                          "opacity",
-                        ],
-                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
-                      },
-                    ]
-                  }
-                >
-                  <BlurView
-                    blurAmount={20}
-                    blurType="dark"
-                    reducedTransparencyFallbackColor="#011401"
-                    style={
-                      [
-                        {
-                          "backgroundColor": "transparent",
-                        },
-                        {
-                          "bottom": 0,
-                          "left": 0,
-                          "position": "absolute",
-                          "right": 0,
-                          "top": 0,
-                        },
-                      ]
-                    }
-                  />
-                </View>
-              </View>
-              <View
-                style={
-                  {
-                    "alignItems": "center",
-                    "backgroundColor": "#222223",
-                    "borderColor": "#ffffff",
-                    "borderRadius": 25,
-                    "borderWidth": 1,
-                    "flexDirection": "row",
-                    "justifyContent": "flex-start",
-                    "minWidth": "30%",
-                    "overflow": "hidden",
-                    "paddingHorizontal": 10,
-                    "paddingVertical": 5,
-                    "width": "30%",
-                  }
-                }
-              >
-                <Text
-                  style={
-                    [
-                      {
-                        "fontSize": 17,
-                        "fontWeight": "400",
-                        "letterSpacing": -0.41,
-                        "lineHeight": 22,
-                      },
-                      {
-                        "color": "#888888",
-                      },
-                      undefined,
-                    ]
-                  }
-                >
-                  3
-                  .
-                </Text>
-                <TextInput
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  editable={false}
-                  keyboardType="default"
-                  returnKeyType="done"
-                  style={
-                    {
-                      "backgroundColor": "transparent",
-                      "color": "#c3c3c3",
-                      "flexGrow": 1,
-                      "flexShrink": 1,
-                      "fontSize": 15,
-                      "fontWeight": "400",
-                      "lineHeight": 15,
-                      "marginLeft": 3,
-                      "marginTop": 5,
-                    }
-                  }
-                  value="titi"
-                />
-                <View
-                  pointerEvents="none"
-                  style={
-                    [
-                      {
-                        "bottom": 0,
-                        "left": 0,
-                        "opacity": 1,
-                        "position": "absolute",
-                        "right": 0,
-                        "top": 0,
-                        "transitionDuration": "280ms",
-                        "transitionProperty": [
-                          "opacity",
-                        ],
-                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
-                      },
-                    ]
-                  }
-                >
-                  <BlurView
-                    blurAmount={20}
-                    blurType="dark"
-                    reducedTransparencyFallbackColor="#011401"
-                    style={
-                      [
-                        {
-                          "backgroundColor": "transparent",
-                        },
-                        {
-                          "bottom": 0,
-                          "left": 0,
-                          "position": "absolute",
-                          "right": 0,
-                          "top": 0,
-                        },
-                      ]
-                    }
-                  />
-                </View>
               </View>
             </View>
             <View
               style={
                 {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-            <View
-              style={
-                {
-                  "columnGap": 8,
-                  "flexDirection": "row",
-                  "justifyContent": "center",
-                }
-              }
-            />
-          </View>
-          <View
-            accessibilityElementsHidden={false}
-            importantForAccessibility="auto"
-            pointerEvents="auto"
-            style={
-              [
-                {
                   "alignItems": "center",
-                  "bottom": 0,
-                  "justifyContent": "center",
-                  "left": 0,
-                  "opacity": 1,
-                  "position": "absolute",
-                  "right": 0,
-                  "top": 0,
-                  "transitionDuration": "280ms",
-                  "transitionProperty": [
-                    "opacity",
-                  ],
-                  "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
-                },
-              ]
-            }
-          >
-            <div
-              accessibilityRole="button"
-              accessibilityState={
-                {
-                  "busy": undefined,
-                  "checked": undefined,
-                  "disabled": undefined,
-                  "expanded": undefined,
-                  "selected": undefined,
+                  "backgroundColor": "#222223",
+                  "borderColor": "#ffffff",
+                  "borderRadius": 25,
+                  "borderWidth": 1,
+                  "flexDirection": "row",
+                  "justifyContent": "flex-start",
+                  "minWidth": "30%",
+                  "overflow": "hidden",
+                  "paddingHorizontal": 10,
+                  "paddingVertical": 5,
+                  "width": "30%",
                 }
               }
-              accessible={true}
-              colorScheme="system"
-              effect="clear"
-              focusable={true}
-              interactive={true}
-              onClick={[Function]}
-              onResponderGrant={[Function]}
-              onResponderMove={[Function]}
-              onResponderRelease={[Function]}
-              onResponderTerminate={[Function]}
-              onResponderTerminationRequest={[Function]}
-              onStartShouldSetResponder={[Function]}
-              style={
-                [
-                  {
-                    "alignItems": "center",
-                    "alignSelf": "stretch",
-                    "borderRadius": 9999,
-                    "justifyContent": "center",
-                    "minWidth": 160,
-                    "paddingHorizontal": 20,
-                    "paddingVertical": 14,
-                    "shadowColor": "#000",
-                    "shadowOffset": {
-                      "height": 10,
-                      "width": 0,
-                    },
-                    "shadowOpacity": 0.35,
-                    "shadowRadius": 16,
-                  },
-                  {
-                    "alignSelf": "center",
-                    "borderRadius": 20,
-                    "minWidth": 0,
-                    "paddingHorizontal": 18,
-                    "paddingVertical": 10,
-                  },
-                  undefined,
-                ]
-              }
-              tintColor="rgba(255,255,255,0.10)"
             >
-              <View>
-                <Text
-                  numberOfLines={1}
-                  style={
-                    [
-                      [
-                        {
-                          "color": "white",
-                          "fontSize": 18,
-                          "fontWeight": "600",
-                        },
-                        {
-                          "fontSize": 16,
-                        },
-                      ],
-                      {
-                        "opacity": 1,
-                      },
-                      {
-                        "animationDuration": 350,
-                        "animationName": {
-                          "from": {
-                            "opacity": 0,
-                          },
-                          "to": {
-                            "opacity": 1,
-                          },
-                        },
-                        "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
-                      },
-                    ]
+              <Text
+                style={
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
+                }
+              >
+                2
+                .
+              </Text>
+              <TextInput
+                autoCapitalize="none"
+                autoCorrect={false}
+                editable={false}
+                keyboardType="default"
+                returnKeyType="done"
+                style={
+                  {
+                    "backgroundColor": "transparent",
+                    "color": "#c3c3c3",
+                    "flexGrow": 1,
+                    "flexShrink": 1,
+                    "fontSize": 15,
+                    "fontWeight": "400",
+                    "lineHeight": 15,
+                    "marginLeft": 3,
+                    "marginTop": 5,
                   }
-                >
-                  View seed phrase
-                </Text>
-                <Text
-                  accessible={false}
-                  importantForAccessibility="no-hide-descendants"
-                  numberOfLines={1}
+                }
+                value="lolo"
+              />
+              <View
+                pointerEvents="none"
+                style={
+                  [
+                    {
+                      "bottom": 0,
+                      "left": 0,
+                      "opacity": 1,
+                      "position": "absolute",
+                      "right": 0,
+                      "top": 0,
+                      "transitionDuration": "280ms",
+                      "transitionProperty": [
+                        "opacity",
+                      ],
+                      "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                    },
+                  ]
+                }
+              >
+                <BlurView
+                  blurAmount={20}
+                  blurType="dark"
+                  reducedTransparencyFallbackColor="#011401"
                   style={
                     [
-                      [
-                        {
-                          "color": "white",
-                          "fontSize": 18,
-                          "fontWeight": "600",
-                        },
-                        {
-                          "fontSize": 16,
-                        },
-                      ],
+                      {
+                        "backgroundColor": "transparent",
+                      },
                       {
                         "bottom": 0,
-                        "color": "transparent",
                         "left": 0,
-                        "opacity": 0,
                         "position": "absolute",
                         "right": 0,
-                        "textShadowOffset": {
-                          "height": 0,
-                          "width": 0,
-                        },
                         "top": 0,
-                      },
-                      {
-                        "textShadowColor": "white",
-                        "textShadowRadius": 6,
-                      },
-                      {
-                        "animationDuration": 350,
-                        "animationName": {
-                          "from": {
-                            "opacity": 1,
-                          },
-                          "to": {
-                            "opacity": 0,
-                          },
-                        },
-                        "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
                       },
                     ]
                   }
-                >
-                  View seed phrase
-                </Text>
+                />
               </View>
-            </div>
+            </View>
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#222223",
+                  "borderColor": "#ffffff",
+                  "borderRadius": 25,
+                  "borderWidth": 1,
+                  "flexDirection": "row",
+                  "justifyContent": "flex-start",
+                  "minWidth": "30%",
+                  "overflow": "hidden",
+                  "paddingHorizontal": 10,
+                  "paddingVertical": 5,
+                  "width": "30%",
+                }
+              }
+            >
+              <Text
+                style={
+                  [
+                    {
+                      "fontSize": 17,
+                      "fontWeight": "400",
+                      "letterSpacing": -0.41,
+                      "lineHeight": 22,
+                    },
+                    {
+                      "color": "#888888",
+                    },
+                    undefined,
+                  ]
+                }
+              >
+                3
+                .
+              </Text>
+              <TextInput
+                autoCapitalize="none"
+                autoCorrect={false}
+                editable={false}
+                keyboardType="default"
+                returnKeyType="done"
+                style={
+                  {
+                    "backgroundColor": "transparent",
+                    "color": "#c3c3c3",
+                    "flexGrow": 1,
+                    "flexShrink": 1,
+                    "fontSize": 15,
+                    "fontWeight": "400",
+                    "lineHeight": 15,
+                    "marginLeft": 3,
+                    "marginTop": 5,
+                  }
+                }
+                value="titi"
+              />
+              <View
+                pointerEvents="none"
+                style={
+                  [
+                    {
+                      "bottom": 0,
+                      "left": 0,
+                      "opacity": 1,
+                      "position": "absolute",
+                      "right": 0,
+                      "top": 0,
+                      "transitionDuration": "280ms",
+                      "transitionProperty": [
+                        "opacity",
+                      ],
+                      "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                    },
+                  ]
+                }
+              >
+                <BlurView
+                  blurAmount={20}
+                  blurType="dark"
+                  reducedTransparencyFallbackColor="#011401"
+                  style={
+                    [
+                      {
+                        "backgroundColor": "transparent",
+                      },
+                      {
+                        "bottom": 0,
+                        "left": 0,
+                        "position": "absolute",
+                        "right": 0,
+                        "top": 0,
+                      },
+                    ]
+                  }
+                />
+              </View>
+            </View>
           </View>
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "columnGap": 8,
+                "flexDirection": "row",
+                "justifyContent": "center",
+              }
+            }
+          />
         </View>
         <View
+          accessibilityElementsHidden={false}
+          importantForAccessibility="auto"
+          pointerEvents="auto"
           style={
-            {
-              "alignItems": "center",
-              "backgroundColor": "#222223",
-              "borderColor": "#ffffff",
-              "borderRadius": 25,
-              "borderWidth": 1,
-              "flexDirection": "row",
-              "justifyContent": "flex-start",
-              "marginBottom": 10,
-              "marginTop": 10,
-              "minHeight": 48,
-              "minWidth": "50%",
-              "paddingHorizontal": 25,
-              "paddingVertical": 15,
-              "width": "100%",
-            }
+            [
+              {
+                "alignItems": "center",
+                "bottom": 0,
+                "justifyContent": "center",
+                "left": 0,
+                "opacity": 1,
+                "position": "absolute",
+                "right": 0,
+                "top": 0,
+                "transitionDuration": "280ms",
+                "transitionProperty": [
+                  "opacity",
+                ],
+                "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+              },
+            ]
           }
         >
-          <Text
-            style={
-              [
-                {
-                  "fontSize": 17,
-                  "fontWeight": "400",
-                  "letterSpacing": -0.41,
-                  "lineHeight": 22,
-                },
-                {
-                  "color": "#888888",
-                },
-                {
-                  "flexGrow": 1,
-                  "flexShrink": 1,
-                  "fontSize": 20,
-                },
-              ]
-            }
-          >
-            Birthday
-          </Text>
-          <View
+          <div
+            accessibilityRole="button"
             accessibilityState={
               {
                 "busy": undefined,
@@ -4311,17 +4117,11 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
                 "selected": undefined,
               }
             }
-            accessibilityValue={
-              {
-                "max": undefined,
-                "min": undefined,
-                "now": undefined,
-                "text": undefined,
-              }
-            }
             accessible={true}
-            collapsable={false}
+            colorScheme="system"
+            effect="clear"
             focusable={true}
+            interactive={true}
             onClick={[Function]}
             onResponderGrant={[Function]}
             onResponderMove={[Function]}
@@ -4330,33 +4130,144 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
             onResponderTerminationRequest={[Function]}
             onStartShouldSetResponder={[Function]}
             style={
-              {
-                "opacity": 1,
-              }
+              [
+                {
+                  "alignItems": "center",
+                  "alignSelf": "stretch",
+                  "borderRadius": 9999,
+                  "justifyContent": "center",
+                  "minWidth": 160,
+                  "paddingHorizontal": 20,
+                  "paddingVertical": 14,
+                  "shadowColor": "#000",
+                  "shadowOffset": {
+                    "height": 10,
+                    "width": 0,
+                  },
+                  "shadowOpacity": 0.35,
+                  "shadowRadius": 16,
+                },
+                {
+                  "alignSelf": "center",
+                  "borderRadius": 20,
+                  "minWidth": 0,
+                  "paddingHorizontal": 18,
+                  "paddingVertical": 10,
+                },
+                undefined,
+              ]
             }
+            tintColor="rgba(255,255,255,0.10)"
           >
-            <Text
-              style={
-                [
-                  {
-                    "fontSize": 17,
-                    "fontWeight": "400",
-                    "letterSpacing": -0.41,
-                    "lineHeight": 22,
-                  },
-                  {
-                    "color": "#c3c3c3",
-                  },
-                  {
-                    "textAlign": "center",
-                  },
-                ]
-              }
-            >
-              1900100
-            </Text>
-          </View>
+            <View>
+              <Text
+                numberOfLines={1}
+                style={
+                  [
+                    [
+                      {
+                        "color": "white",
+                        "fontSize": 18,
+                        "fontWeight": "600",
+                      },
+                      {
+                        "fontSize": 16,
+                      },
+                    ],
+                    {
+                      "opacity": 1,
+                    },
+                    {
+                      "animationDuration": 350,
+                      "animationName": {
+                        "from": {
+                          "opacity": 0,
+                        },
+                        "to": {
+                          "opacity": 1,
+                        },
+                      },
+                      "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                    },
+                  ]
+                }
+              >
+                View seed phrase
+              </Text>
+              <Text
+                accessible={false}
+                importantForAccessibility="no-hide-descendants"
+                numberOfLines={1}
+                style={
+                  [
+                    [
+                      {
+                        "color": "white",
+                        "fontSize": 18,
+                        "fontWeight": "600",
+                      },
+                      {
+                        "fontSize": 16,
+                      },
+                    ],
+                    {
+                      "bottom": 0,
+                      "color": "transparent",
+                      "left": 0,
+                      "opacity": 0,
+                      "position": "absolute",
+                      "right": 0,
+                      "textShadowOffset": {
+                        "height": 0,
+                        "width": 0,
+                      },
+                      "top": 0,
+                    },
+                    {
+                      "textShadowColor": "white",
+                      "textShadowRadius": 6,
+                    },
+                    {
+                      "animationDuration": 350,
+                      "animationName": {
+                        "from": {
+                          "opacity": 1,
+                        },
+                        "to": {
+                          "opacity": 0,
+                        },
+                      },
+                      "animationTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                    },
+                  ]
+                }
+              >
+                View seed phrase
+              </Text>
+            </View>
+          </div>
         </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#222223",
+            "borderColor": "#ffffff",
+            "borderRadius": 25,
+            "borderWidth": 1,
+            "flexDirection": "row",
+            "justifyContent": "flex-start",
+            "marginBottom": 10,
+            "marginTop": 10,
+            "minHeight": 48,
+            "minWidth": "50%",
+            "paddingHorizontal": 25,
+            "paddingVertical": 15,
+            "width": "100%",
+          }
+        }
+      >
         <Text
           style={
             [
@@ -4373,15 +4284,92 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
                 "flexGrow": 1,
                 "flexShrink": 1,
                 "fontSize": 20,
-                "marginTop": 10,
               },
             ]
           }
         >
-          ... extracting UFVK...
+          Birthday
         </Text>
+        <View
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            {
+              "opacity": 1,
+            }
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 17,
+                  "fontWeight": "400",
+                  "letterSpacing": -0.41,
+                  "lineHeight": 22,
+                },
+                {
+                  "color": "#c3c3c3",
+                },
+                {
+                  "textAlign": "center",
+                },
+              ]
+            }
+          >
+            1900100
+          </Text>
+        </View>
       </View>
+      <Text
+        style={
+          [
+            {
+              "fontSize": 17,
+              "fontWeight": "400",
+              "letterSpacing": -0.41,
+              "lineHeight": 22,
+            },
+            {
+              "color": "#888888",
+            },
+            {
+              "flexGrow": 1,
+              "flexShrink": 1,
+              "fontSize": 20,
+              "marginTop": 10,
+            },
+          ]
+        }
+      >
+        ... extracting UFVK...
+      </Text>
     </View>
-  </RCTScrollView>
+  </View>
 </View>
 `;
