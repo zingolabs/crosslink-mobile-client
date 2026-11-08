@@ -133,7 +133,7 @@ class ExecuteAddressesFromSeed {
         val mapper = jacksonObjectMapper()
 
         val serveruri = "http://10.0.2.2:20000"
-        val chainhint = "main"
+        val chainhint = "test"
         val seed = Seeds.ABANDON
         
         val setCrytoProvider = uniffi.zingo.setCryptoDefaultProviderToRing()
@@ -151,7 +151,7 @@ class ExecuteAddressesFromSeed {
         println("\nAddresses:")
         println(addressesJson)
         val addresses: List<UnifiedAddress> = mapper.readValue(addressesJson)
-        assertThat(addresses[0].encoded_address).isEqualTo("u1gsqvqxx6lmmqg05uvx57gjdg5j3a54nxw09z4vq4z0yp7dfdcjrqk5wq64quwzrufmujd5e8xu5jn7cyewjaptxc8lsqwa2lk559u4cd")
+        assertThat(addresses[0].encoded_address).isEqualTo("utest1sncndplmjvr6mfwtlevyugt95ywzr46f8yesvyvjgzyq5zj2nel3u8whfcuccz37wz4jjkn5pgszsn74fjc9s2gkrqfjw6l6hsh42cfg")
         assertThat(addresses[0].has_orchard).isEqualTo(true)
         assertThat(addresses[0].has_sapling).isEqualTo(false)
         assertThat(addresses[0].has_transparent).isEqualTo(false)
@@ -160,7 +160,7 @@ class ExecuteAddressesFromSeed {
         println("\nT Addresses:")
         println(taddressesJson)
         val taddresses: List<TransparentAddress> = mapper.readValue(taddressesJson)
-        assertThat(taddresses[0].encoded_address).isEqualTo("t1dUDJ62ANtmebE8drFg7g2MWYwXHQ6Xu3F")
+        assertThat(taddresses[0].encoded_address).isEqualTo("tmBsTi2xWTjUdEXnuTceL7fecEQKeWaPDJd")
         assertThat(taddresses[0].scope).isEqualTo("external")
     }
 }
@@ -173,7 +173,7 @@ class ExecuteVersionFromSeed {
         val mapper = jacksonObjectMapper()
 
         val serveruri = "http://10.0.2.2:20000"
-        val chainhint = "main"
+        val chainhint = "test"
         val seed = Seeds.ABANDON
         
         val setCrytoProvider = uniffi.zingo.setCryptoDefaultProviderToRing()
