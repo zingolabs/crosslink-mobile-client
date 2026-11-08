@@ -425,17 +425,6 @@ export default class WalletService {
     return RPCModule.selectBestIndexer(network);
   }
 
-  static async inspectWallet(
-    serverUri: string,
-    chainName: string,
-  ): Promise<string> {
-    return RPCModule.inspectWallet(serverUri, chainName);
-  }
-
-  static async quarantineWallet(): Promise<string> {
-    return RPCModule.quarantineWallet();
-  }
-
   static async getTotalValueToAddressInfo(): Promise<string> {
     return RPCModule.getTotalValueToAddressInfo();
   }

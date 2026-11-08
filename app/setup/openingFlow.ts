@@ -24,10 +24,6 @@ import {
 import { WalletKindEnum } from '../wallet/enums';
 import { resetScheduledActions } from '../storage/scheduledActionsFile';
 import { discoverIndexers, probeIndexer, selectBestIndexer } from '../indexers';
-import {
-  quarantineLegacyWalletIfNeeded,
-  quarantineUnreadableWallet,
-} from '../legacyWallet';
 import { reportFailure } from '../reporting';
 import { BootInfo, OpenRequest, SessionHandle } from '../lifecycle/phase';
 import { patch, read } from '../store/appStore';
@@ -250,15 +246,6 @@ export const runOpening = (input: OpeningInput): void => {
         }
       }
     }
-    const quarantined = await quarantineLegacyWalletIfNeeded(
-      read().indexerServer.uri,
-      read().indexerServer.chainName,
-    );
-    if (quarantined) {
-      await finishToSetup();
-      return;
-    }
-
     const server = read().indexerServer;
     const result: string = await WalletService.loadExistingWallet(
       server.uri,
@@ -268,10 +255,6 @@ export const runOpening = (input: OpeningInput): void => {
     );
     const title = t('loadingapp.readingwallet-label');
     if (isError(result)) {
-      if (await quarantineUnreadableWallet(server.chainName)) {
-        await finishToSetup();
-        return;
-      }
       await walletErrorHandle(result, title, true);
       return;
     }

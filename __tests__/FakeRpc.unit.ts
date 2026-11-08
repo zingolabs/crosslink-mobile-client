@@ -280,11 +280,6 @@ describe('FakeRpc - chain info', () => {
     expect(version.read_version).toBeGreaterThan(0);
     const saveRequired = JSON.parse(await fakeRpc.getWalletSaveRequiredInfo());
     expect(saveRequired.save_required).toBe(false);
-    const inspected = JSON.parse(
-      await fakeRpc.inspectWallet(SERVER, 'test'),
-    );
-    expect(inspected.readable).toBe(true);
-    expect(inspected.chain_match).toBe(true);
     expect(await fakeRpc.doSave()).not.toMatch(/^error/i);
   });
 });

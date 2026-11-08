@@ -278,7 +278,6 @@ fn store_client(lightclient: LightClient) -> Result<(), ZingolibError> {
 }
 
 const WALLET_FILE_NAME: &str = "wallet.dat";
-const LEGACY_WALLET_FILE_NAME: &str = "wallet.legacy.dat";
 const IOS_WALLET_FILE_NAME: &str = "wallet.dat.txt";
 const IOS_WALLET_BACKUP_FILE_NAME: &str = "wallet.backup.dat.txt";
 
@@ -588,27 +587,6 @@ pub fn delete_wallet(wallet_dir: String) -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         Ok(file_operation_result(
             wallet_file_config(&wallet_dir).remove_wallet_file(),
-            "wallet file not found",
-        ))
-    })
-}
-
-/// Moves `wallet.dat` aside as `wallet.legacy.dat`, keeping it for a later seed export. An
-/// earlier quarantined file is never overwritten; the new one gets a timestamp in its name.
-#[uniffi::export]
-pub fn quarantine_wallet(wallet_dir: String) -> Result<String, ZingolibError> {
-    with_panic_guard(|| {
-        let config = wallet_file_config(&wallet_dir);
-        let dir = config.get_zingo_wallet_dir();
-        let mut legacy = dir.join(LEGACY_WALLET_FILE_NAME);
-        if legacy.exists() {
-            let stamp = std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .map_or(0, |d| d.as_secs());
-            legacy = dir.join(format!("wallet.legacy.{stamp}.dat"));
-        }
-        Ok(file_operation_result(
-            std::fs::rename(config.get_wallet_path(), legacy),
             "wallet file not found",
         ))
     })
@@ -2891,19 +2869,14 @@ mod wallet_file_tests {
     }
 
     #[test]
-    fn delete_and_quarantine_move_or_remove_the_file() {
+    fn delete_removes_the_file_and_missing_files_are_stable_errors() {
         let _guard = global_client_test_lock();
         let dir = temp_wallet_dir("delete");
         let dir_str = dir_string(&dir);
         let wallet_path = dir.path().join(WALLET_FILE_NAME);
-        let legacy_path = dir.path().join(LEGACY_WALLET_FILE_NAME);
 
         assert_eq!(
             delete_wallet(dir_str.clone()).unwrap(),
-            "Error: wallet file not found"
-        );
-        assert_eq!(
-            quarantine_wallet(dir_str.clone()).unwrap(),
             "Error: wallet file not found"
         );
         assert_eq!(
@@ -2924,25 +2897,10 @@ mod wallet_file_tests {
         assert_eq!(delete_wallet(dir_str.clone()).unwrap(), "true");
         assert!(!wallet_path.exists());
         assert_eq!(wallet_exists(dir_str.clone()).unwrap(), false);
-
-        create_offline(&dir_str, SEED_A);
-        let bytes = std::fs::read(&wallet_path).unwrap();
-        assert_eq!(quarantine_wallet(dir_str.clone()).unwrap(), "true");
-        assert!(!wallet_path.exists());
-        assert_eq!(std::fs::read(&legacy_path).unwrap(), bytes);
-        assert_eq!(wallet_exists(dir_str.clone()).unwrap(), false);
-
-        create_offline(&dir_str, SEED_B);
-        let second = std::fs::read(&wallet_path).unwrap();
-        assert_eq!(quarantine_wallet(dir_str.clone()).unwrap(), "true");
-        assert_eq!(std::fs::read(&legacy_path).unwrap(), bytes);
-        let stamped: Vec<_> = std::fs::read_dir(dir.path())
-            .unwrap()
-            .map(|entry| entry.unwrap().file_name().into_string().unwrap())
-            .filter(|name| name.starts_with("wallet.legacy.") && name != LEGACY_WALLET_FILE_NAME)
-            .collect();
-        assert_eq!(stamped.len(), 1);
-        assert_eq!(std::fs::read(dir.path().join(&stamped[0])).unwrap(), second);
+        assert_eq!(
+            delete_wallet(dir_str.clone()).unwrap(),
+            "Error: wallet file not found"
+        );
     }
 
     #[test]
@@ -3082,7 +3040,7 @@ mod wallet_file_tests {
     }
 
     #[test]
-    fn a_wallet_from_another_chain_is_reported_unreadable_and_can_be_quarantined() {
+    fn a_wallet_from_another_chain_is_reported_unreadable_and_left_in_place() {
         let _guard = global_client_test_lock();
         let dir = temp_wallet_dir("v39-chain");
         std::fs::write(dir.path().join(WALLET_FILE_NAME), V39_TESTNET_WALLET).unwrap();
@@ -3102,9 +3060,8 @@ mod wallet_file_tests {
         )
         .unwrap();
         assert!(opened.starts_with("Error:"), "{opened}");
-        assert_eq!(quarantine_wallet(dir_string(&dir)).unwrap(), "true");
         assert_eq!(
-            std::fs::read(dir.path().join(LEGACY_WALLET_FILE_NAME)).unwrap(),
+            std::fs::read(dir.path().join(WALLET_FILE_NAME)).unwrap(),
             V39_TESTNET_WALLET
         );
     }

@@ -126,20 +126,6 @@ class RPCModule: NSObject {
     }
   }
 
-  @objc(quarantineWallet:reject:)
-  func quarantineWalletFile(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-    do {
-      try checkWalletFileResult(try quarantineWallet(walletDir: getDocumentsDirectory()), "quarantining wallet")
-      DispatchQueue.main.async {
-        resolve("true")
-      }
-    } catch {
-      NSLog("Error: [Native] quarantining wallet \(error.localizedDescription)")
-      DispatchQueue.main.async {
-        resolve("false")
-      }
-    }
-  }
   
   func saveWalletInternal() throws {
     do {
@@ -476,44 +462,6 @@ class RPCModule: NSObject {
       DispatchQueue.global(qos: .userInitiated).async { [weak self] in
           if let self = self {
               self.fnSelectBestIndexer(dict)
-          }
-      }
-  }
-
-  func fnInspectWallet(_ dict: [AnyHashable: Any]) {
-    if let serveruri = dict["serveruri"] as? String,
-       let chainhint = dict["chainhint"] as? String,
-       let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
-      do {
-        let resp = try inspectWallet(walletDir: getDocumentsDirectory(), serverUri: serveruri, chainHint: chainhint)
-        let respStr = String(resp)
-        DispatchQueue.main.async {
-          resolve(respStr)
-        }
-      } catch {
-        let err = "Error: [Native] Inspect wallet. \(error.localizedDescription)"
-        NSLog(err)
-        DispatchQueue.main.async {
-          resolve(err)
-        }
-      }
-    } else {
-      let err = "Error: [Native] Inspect wallet. Argument problem."
-      NSLog(err)
-      if let resolve = dict["resolve"] as? RCTPromiseResolveBlock {
-          DispatchQueue.main.async {
-            resolve(err)
-          }
-      }
-    }
-  }
-
-  @objc(inspectWallet:chainhint:resolve:reject:)
-  func inspectWalletInfo(_ serveruri: String, chainhint: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-      let dict: [String: Any] = ["serveruri": serveruri, "chainhint": chainhint, "resolve": resolve]
-      DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-          if let self = self {
-              self.fnInspectWallet(dict)
           }
       }
   }

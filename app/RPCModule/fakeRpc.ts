@@ -617,27 +617,6 @@ const fakeRpc = {
 
   getZenniesDonationAddress: async () => mockAddresses[1].address,
 
-  inspectWallet: async (_serverUri: string, _chainName: string) =>
-    JSON.stringify({
-      readable: true,
-      format_version: 2,
-      newest_height: HEIGHT,
-      chain_match: true,
-      reason: '',
-    }),
-
-  quarantineWallet: async () => {
-    if (!wallet) {
-      return GlobalConst.false;
-    }
-    wallet = null;
-    propose = null;
-    events = baseEvents();
-    syncLaunched = false;
-    syncComplete = false;
-    return GlobalConst.true;
-  },
-
   discoverIndexers: async (_network: string) => indexerReport(serverUri),
 
   probeIndexer: async (uri: string, _network: string) => indexerReport(uri),

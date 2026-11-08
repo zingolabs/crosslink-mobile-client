@@ -177,22 +177,6 @@ class RPCModule internal constructor(private val reactContext: ReactApplicationC
     }
 
     @ReactMethod
-    fun quarantineWallet(promise: Promise) {
-        try {
-            val resp = uniffi.zingo.quarantineWallet(getDocumentDirectory())
-            if (resp.lowercase().startsWith(ErrorPrefix.value)) {
-                Log.e("MAIN", "Error: [Native] Couldn't quarantine the wallet. $resp")
-                promise.resolve(false)
-            } else {
-                promise.resolve(true)
-            }
-        } catch (e: Exception) {
-            Log.e("MAIN", "Error: [Native] Unexpected error, quarantining the wallet", e)
-            promise.resolve(false)
-        }
-    }
-
-    @ReactMethod
     fun doSave(promise: Promise) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -309,27 +293,6 @@ class RPCModule internal constructor(private val reactContext: ReactApplicationC
                 }
             } catch (e: Exception) {
                 val errorMessage = "Error: [Native] select best indexer: ${e.localizedMessage}"
-                Log.e("MAIN", errorMessage, e)
-
-                withContext(Dispatchers.Main) {
-                    promise.resolve(errorMessage)
-                }
-            }
-        }
-    }
-
-    @ReactMethod
-    fun inspectWallet(serveruri: String, chainhint: String, promise: Promise) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                uniffi.zingo.initLogging()
-                val resp = uniffi.zingo.inspectWallet(getDocumentDirectory(), serveruri, chainhint)
-
-                withContext(Dispatchers.Main) {
-                    promise.resolve(resp)
-                }
-            } catch (e: Exception) {
-                val errorMessage = "Error: [Native] inspect wallet: ${e.localizedMessage}"
                 Log.e("MAIN", errorMessage, e)
 
                 withContext(Dispatchers.Main) {

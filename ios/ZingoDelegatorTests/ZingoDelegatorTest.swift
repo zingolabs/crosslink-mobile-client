@@ -638,8 +638,7 @@ final class WalletFileRoundTrip: XCTestCase {
         XCTAssertEqual(try backupWallet(walletDir: walletDir), "true")
         XCTAssertTrue(try walletBackupExists(walletDir: walletDir))
         XCTAssertEqual(try restoreWalletBackup(walletDir: walletDir), "true")
-        XCTAssertEqual(try quarantineWallet(walletDir: walletDir), "true")
-        XCTAssertTrue(FileManager.default.fileExists(atPath: walletDir + "/wallet.legacy.dat"))
+        XCTAssertEqual(try deleteWallet(walletDir: walletDir), "true")
         XCTAssertFalse(try walletExists(walletDir: walletDir))
         XCTAssertEqual(try deleteWallet(walletDir: walletDir), "Error: wallet file not found")
 
