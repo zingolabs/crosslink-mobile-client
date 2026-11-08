@@ -129,7 +129,7 @@ class BackgroundSyncWorker(private val context: Context, workerParams: WorkerPar
         }
 
         // checking if the wallet file exists
-        val exists: Boolean = rpcModule.fileExists(WalletFileName.value)
+        val exists: Boolean = rpcModule.walletFileExists()
 
         if (exists) {
             try {

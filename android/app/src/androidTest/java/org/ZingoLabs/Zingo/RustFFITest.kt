@@ -139,7 +139,7 @@ class ExecuteAddressesFromSeed {
         val setCrytoProvider = uniffi.zingo.setCryptoDefaultProviderToRing()
         println(setCrytoProvider)
 
-        val initFromSeedJson: String = uniffi.zingo.initFromSeed(seed, 1u, serveruri, chainhint, "Medium", 1u)
+        val initFromSeedJson: String = uniffi.zingo.initFromSeed(context.filesDir.absolutePath, seed, 1u, serveruri, chainhint, "Medium", 1u)
         println("\nInit from seed:")
         println(initFromSeedJson)
         val initFromSeed: InitFromSeed = mapper.readValue(initFromSeedJson)
@@ -179,7 +179,7 @@ class ExecuteVersionFromSeed {
         val setCrytoProvider = uniffi.zingo.setCryptoDefaultProviderToRing()
         println(setCrytoProvider)
 
-        val initFromSeedJson: String = uniffi.zingo.initFromSeed(seed, 1u, serveruri, chainhint, "Medium", 1u)
+        val initFromSeedJson: String = uniffi.zingo.initFromSeed(context.filesDir.absolutePath, seed, 1u, serveruri, chainhint, "Medium", 1u)
         println("\nInit from seed:")
         println(initFromSeedJson)
         val initFromSeed: InitFromSeed = mapper.readValue(initFromSeedJson)
@@ -208,7 +208,7 @@ class ExecuteSyncFromSeed {
         val setCrytoProvider = uniffi.zingo.setCryptoDefaultProviderToRing()
         println(setCrytoProvider)
 
-        val initFromSeedJson: String = uniffi.zingo.initFromSeed(seed, 1u, serveruri, chainhint, "Medium", 1u)
+        val initFromSeedJson: String = uniffi.zingo.initFromSeed(context.filesDir.absolutePath, seed, 1u, serveruri, chainhint, "Medium", 1u)
         println("\nInit from seed:")
         println(initFromSeedJson)
         val initFromSeed: InitFromSeed = mapper.readValue(initFromSeedJson)
@@ -271,7 +271,7 @@ class ExecuteSendFromOrchard {
         val setCrytoProvider = uniffi.zingo.setCryptoDefaultProviderToRing()
         println(setCrytoProvider)
 
-        val initFromSeedJson: String = uniffi.zingo.initFromSeed(seed, 1u, serveruri, chainhint, "Medium", 1u)
+        val initFromSeedJson: String = uniffi.zingo.initFromSeed(context.filesDir.absolutePath, seed, 1u, serveruri, chainhint, "Medium", 1u)
         println("\nInit from seed:")
         println(initFromSeedJson)
         val initFromSeed: InitFromSeed = mapper.readValue(initFromSeedJson)
@@ -371,7 +371,7 @@ class UpdateCurrentPriceAndValueTransfersFromSeed {
         val setCrytoProvider = uniffi.zingo.setCryptoDefaultProviderToRing()
         println(setCrytoProvider)
 
-        val initFromSeedJson: String = uniffi.zingo.initFromSeed(seed, 1u, serveruri, chainhint, "Medium", 1u)
+        val initFromSeedJson: String = uniffi.zingo.initFromSeed(context.filesDir.absolutePath, seed, 1u, serveruri, chainhint, "Medium", 1u)
         println("\nInit from seed:")
         println(initFromSeedJson)
         val initFromSeed: InitFromSeed = mapper.readValue(initFromSeedJson)
@@ -450,7 +450,7 @@ class ExecuteSaplingBalanceFromSeed {
         val setCrytoProvider = uniffi.zingo.setCryptoDefaultProviderToRing()
         println(setCrytoProvider)
 
-        val initFromSeedJson: String = uniffi.zingo.initFromSeed(seed, 1u, serveruri, chainhint, "Medium", 1u)
+        val initFromSeedJson: String = uniffi.zingo.initFromSeed(context.filesDir.absolutePath, seed, 1u, serveruri, chainhint, "Medium", 1u)
         println("\nInit from seed:")
         println(initFromSeedJson)
         val initFromSeed: InitFromSeed = mapper.readValue(initFromSeedJson)
@@ -539,7 +539,7 @@ class ExecuteParseAddresses {
         val setCrytoProvider = uniffi.zingo.setCryptoDefaultProviderToRing()
         println(setCrytoProvider)
 
-        val initFromSeedJson: String = uniffi.zingo.initFromSeed(seed, 1u, serveruri, chainhint, "Medium", 1u)
+        val initFromSeedJson: String = uniffi.zingo.initFromSeed(context.filesDir.absolutePath, seed, 1u, serveruri, chainhint, "Medium", 1u)
         println("\nInit from seed:")
         println(initFromSeedJson)
         val initFromSeed: InitFromSeed = mapper.readValue(initFromSeedJson)
@@ -577,7 +577,7 @@ class ExecuteParseAddresses {
         val setCrytoProvider = uniffi.zingo.setCryptoDefaultProviderToRing()
         println(setCrytoProvider)
 
-        val initFromSeedJson: String = uniffi.zingo.initFromSeed(seed, 1u, serveruri, chainhint, "Medium", 1u)
+        val initFromSeedJson: String = uniffi.zingo.initFromSeed(context.filesDir.absolutePath, seed, 1u, serveruri, chainhint, "Medium", 1u)
         println("\nInit from seed:")
         println(initFromSeedJson)
         val initFromSeed: InitFromSeed = mapper.readValue(initFromSeedJson)
