@@ -229,6 +229,7 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
                     "flexDirection": "row",
                     "justifyContent": "flex-start",
                     "minWidth": "30%",
+                    "overflow": "hidden",
                     "paddingHorizontal": 10,
                     "paddingVertical": 5,
                     "width": "30%",
@@ -275,6 +276,46 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
                   }
                   value="pepe"
                 />
+                <View
+                  pointerEvents="none"
+                  style={
+                    [
+                      {
+                        "bottom": 0,
+                        "left": 0,
+                        "opacity": 1,
+                        "position": "absolute",
+                        "right": 0,
+                        "top": 0,
+                        "transitionDuration": "280ms",
+                        "transitionProperty": [
+                          "opacity",
+                        ],
+                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                      },
+                    ]
+                  }
+                >
+                  <BlurView
+                    blurAmount={20}
+                    blurType="dark"
+                    reducedTransparencyFallbackColor="#011401"
+                    style={
+                      [
+                        {
+                          "backgroundColor": "transparent",
+                        },
+                        {
+                          "bottom": 0,
+                          "left": 0,
+                          "position": "absolute",
+                          "right": 0,
+                          "top": 0,
+                        },
+                      ]
+                    }
+                  />
+                </View>
               </View>
               <View
                 style={
@@ -287,6 +328,7 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
                     "flexDirection": "row",
                     "justifyContent": "flex-start",
                     "minWidth": "30%",
+                    "overflow": "hidden",
                     "paddingHorizontal": 10,
                     "paddingVertical": 5,
                     "width": "30%",
@@ -333,6 +375,46 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
                   }
                   value="lolo"
                 />
+                <View
+                  pointerEvents="none"
+                  style={
+                    [
+                      {
+                        "bottom": 0,
+                        "left": 0,
+                        "opacity": 1,
+                        "position": "absolute",
+                        "right": 0,
+                        "top": 0,
+                        "transitionDuration": "280ms",
+                        "transitionProperty": [
+                          "opacity",
+                        ],
+                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                      },
+                    ]
+                  }
+                >
+                  <BlurView
+                    blurAmount={20}
+                    blurType="dark"
+                    reducedTransparencyFallbackColor="#011401"
+                    style={
+                      [
+                        {
+                          "backgroundColor": "transparent",
+                        },
+                        {
+                          "bottom": 0,
+                          "left": 0,
+                          "position": "absolute",
+                          "right": 0,
+                          "top": 0,
+                        },
+                      ]
+                    }
+                  />
+                </View>
               </View>
               <View
                 style={
@@ -345,6 +427,7 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
                     "flexDirection": "row",
                     "justifyContent": "flex-start",
                     "minWidth": "30%",
+                    "overflow": "hidden",
                     "paddingHorizontal": 10,
                     "paddingVertical": 5,
                     "width": "30%",
@@ -391,6 +474,46 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
                   }
                   value="titi"
                 />
+                <View
+                  pointerEvents="none"
+                  style={
+                    [
+                      {
+                        "bottom": 0,
+                        "left": 0,
+                        "opacity": 1,
+                        "position": "absolute",
+                        "right": 0,
+                        "top": 0,
+                        "transitionDuration": "280ms",
+                        "transitionProperty": [
+                          "opacity",
+                        ],
+                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                      },
+                    ]
+                  }
+                >
+                  <BlurView
+                    blurAmount={20}
+                    blurType="dark"
+                    reducedTransparencyFallbackColor="#011401"
+                    style={
+                      [
+                        {
+                          "backgroundColor": "transparent",
+                        },
+                        {
+                          "bottom": 0,
+                          "left": 0,
+                          "position": "absolute",
+                          "right": 0,
+                          "top": 0,
+                        },
+                      ]
+                    }
+                  />
+                </View>
               </View>
             </View>
             <View
@@ -481,25 +604,6 @@ exports[`Component Seed - test Seed Backup - snapshot 1`] = `
               ]
             }
           >
-            <BlurView
-              blurAmount={20}
-              blurType="dark"
-              reducedTransparencyFallbackColor="#011401"
-              style={
-                [
-                  {
-                    "backgroundColor": "transparent",
-                  },
-                  {
-                    "bottom": 0,
-                    "left": 0,
-                    "position": "absolute",
-                    "right": 0,
-                    "top": 0,
-                  },
-                ]
-              }
-            />
             <div
               accessibilityRole="button"
               accessibilityState={
@@ -998,6 +1102,7 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
                     "flexDirection": "row",
                     "justifyContent": "flex-start",
                     "minWidth": "30%",
+                    "overflow": "hidden",
                     "paddingHorizontal": 10,
                     "paddingVertical": 5,
                     "width": "30%",
@@ -1044,6 +1149,46 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
                   }
                   value="pepe"
                 />
+                <View
+                  pointerEvents="none"
+                  style={
+                    [
+                      {
+                        "bottom": 0,
+                        "left": 0,
+                        "opacity": 1,
+                        "position": "absolute",
+                        "right": 0,
+                        "top": 0,
+                        "transitionDuration": "280ms",
+                        "transitionProperty": [
+                          "opacity",
+                        ],
+                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                      },
+                    ]
+                  }
+                >
+                  <BlurView
+                    blurAmount={20}
+                    blurType="dark"
+                    reducedTransparencyFallbackColor="#011401"
+                    style={
+                      [
+                        {
+                          "backgroundColor": "transparent",
+                        },
+                        {
+                          "bottom": 0,
+                          "left": 0,
+                          "position": "absolute",
+                          "right": 0,
+                          "top": 0,
+                        },
+                      ]
+                    }
+                  />
+                </View>
               </View>
               <View
                 style={
@@ -1056,6 +1201,7 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
                     "flexDirection": "row",
                     "justifyContent": "flex-start",
                     "minWidth": "30%",
+                    "overflow": "hidden",
                     "paddingHorizontal": 10,
                     "paddingVertical": 5,
                     "width": "30%",
@@ -1102,6 +1248,46 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
                   }
                   value="lolo"
                 />
+                <View
+                  pointerEvents="none"
+                  style={
+                    [
+                      {
+                        "bottom": 0,
+                        "left": 0,
+                        "opacity": 1,
+                        "position": "absolute",
+                        "right": 0,
+                        "top": 0,
+                        "transitionDuration": "280ms",
+                        "transitionProperty": [
+                          "opacity",
+                        ],
+                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                      },
+                    ]
+                  }
+                >
+                  <BlurView
+                    blurAmount={20}
+                    blurType="dark"
+                    reducedTransparencyFallbackColor="#011401"
+                    style={
+                      [
+                        {
+                          "backgroundColor": "transparent",
+                        },
+                        {
+                          "bottom": 0,
+                          "left": 0,
+                          "position": "absolute",
+                          "right": 0,
+                          "top": 0,
+                        },
+                      ]
+                    }
+                  />
+                </View>
               </View>
               <View
                 style={
@@ -1114,6 +1300,7 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
                     "flexDirection": "row",
                     "justifyContent": "flex-start",
                     "minWidth": "30%",
+                    "overflow": "hidden",
                     "paddingHorizontal": 10,
                     "paddingVertical": 5,
                     "width": "30%",
@@ -1160,6 +1347,46 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
                   }
                   value="titi"
                 />
+                <View
+                  pointerEvents="none"
+                  style={
+                    [
+                      {
+                        "bottom": 0,
+                        "left": 0,
+                        "opacity": 1,
+                        "position": "absolute",
+                        "right": 0,
+                        "top": 0,
+                        "transitionDuration": "280ms",
+                        "transitionProperty": [
+                          "opacity",
+                        ],
+                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                      },
+                    ]
+                  }
+                >
+                  <BlurView
+                    blurAmount={20}
+                    blurType="dark"
+                    reducedTransparencyFallbackColor="#011401"
+                    style={
+                      [
+                        {
+                          "backgroundColor": "transparent",
+                        },
+                        {
+                          "bottom": 0,
+                          "left": 0,
+                          "position": "absolute",
+                          "right": 0,
+                          "top": 0,
+                        },
+                      ]
+                    }
+                  />
+                </View>
               </View>
             </View>
             <View
@@ -1250,25 +1477,6 @@ exports[`Component Seed - test Seed Change - snapshot 1`] = `
               ]
             }
           >
-            <BlurView
-              blurAmount={20}
-              blurType="dark"
-              reducedTransparencyFallbackColor="#011401"
-              style={
-                [
-                  {
-                    "backgroundColor": "transparent",
-                  },
-                  {
-                    "bottom": 0,
-                    "left": 0,
-                    "position": "absolute",
-                    "right": 0,
-                    "top": 0,
-                  },
-                ]
-              }
-            />
             <div
               accessibilityRole="button"
               accessibilityState={
@@ -2661,6 +2869,7 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
                     "flexDirection": "row",
                     "justifyContent": "flex-start",
                     "minWidth": "30%",
+                    "overflow": "hidden",
                     "paddingHorizontal": 10,
                     "paddingVertical": 5,
                     "width": "30%",
@@ -2707,6 +2916,46 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
                   }
                   value="pepe"
                 />
+                <View
+                  pointerEvents="none"
+                  style={
+                    [
+                      {
+                        "bottom": 0,
+                        "left": 0,
+                        "opacity": 1,
+                        "position": "absolute",
+                        "right": 0,
+                        "top": 0,
+                        "transitionDuration": "280ms",
+                        "transitionProperty": [
+                          "opacity",
+                        ],
+                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                      },
+                    ]
+                  }
+                >
+                  <BlurView
+                    blurAmount={20}
+                    blurType="dark"
+                    reducedTransparencyFallbackColor="#011401"
+                    style={
+                      [
+                        {
+                          "backgroundColor": "transparent",
+                        },
+                        {
+                          "bottom": 0,
+                          "left": 0,
+                          "position": "absolute",
+                          "right": 0,
+                          "top": 0,
+                        },
+                      ]
+                    }
+                  />
+                </View>
               </View>
               <View
                 style={
@@ -2719,6 +2968,7 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
                     "flexDirection": "row",
                     "justifyContent": "flex-start",
                     "minWidth": "30%",
+                    "overflow": "hidden",
                     "paddingHorizontal": 10,
                     "paddingVertical": 5,
                     "width": "30%",
@@ -2765,6 +3015,46 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
                   }
                   value="lolo"
                 />
+                <View
+                  pointerEvents="none"
+                  style={
+                    [
+                      {
+                        "bottom": 0,
+                        "left": 0,
+                        "opacity": 1,
+                        "position": "absolute",
+                        "right": 0,
+                        "top": 0,
+                        "transitionDuration": "280ms",
+                        "transitionProperty": [
+                          "opacity",
+                        ],
+                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                      },
+                    ]
+                  }
+                >
+                  <BlurView
+                    blurAmount={20}
+                    blurType="dark"
+                    reducedTransparencyFallbackColor="#011401"
+                    style={
+                      [
+                        {
+                          "backgroundColor": "transparent",
+                        },
+                        {
+                          "bottom": 0,
+                          "left": 0,
+                          "position": "absolute",
+                          "right": 0,
+                          "top": 0,
+                        },
+                      ]
+                    }
+                  />
+                </View>
               </View>
               <View
                 style={
@@ -2777,6 +3067,7 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
                     "flexDirection": "row",
                     "justifyContent": "flex-start",
                     "minWidth": "30%",
+                    "overflow": "hidden",
                     "paddingHorizontal": 10,
                     "paddingVertical": 5,
                     "width": "30%",
@@ -2823,6 +3114,46 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
                   }
                   value="titi"
                 />
+                <View
+                  pointerEvents="none"
+                  style={
+                    [
+                      {
+                        "bottom": 0,
+                        "left": 0,
+                        "opacity": 1,
+                        "position": "absolute",
+                        "right": 0,
+                        "top": 0,
+                        "transitionDuration": "280ms",
+                        "transitionProperty": [
+                          "opacity",
+                        ],
+                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                      },
+                    ]
+                  }
+                >
+                  <BlurView
+                    blurAmount={20}
+                    blurType="dark"
+                    reducedTransparencyFallbackColor="#011401"
+                    style={
+                      [
+                        {
+                          "backgroundColor": "transparent",
+                        },
+                        {
+                          "bottom": 0,
+                          "left": 0,
+                          "position": "absolute",
+                          "right": 0,
+                          "top": 0,
+                        },
+                      ]
+                    }
+                  />
+                </View>
               </View>
             </View>
             <View
@@ -2913,25 +3244,6 @@ exports[`Component Seed - test Seed Server - snapshot 1`] = `
               ]
             }
           >
-            <BlurView
-              blurAmount={20}
-              blurType="dark"
-              reducedTransparencyFallbackColor="#011401"
-              style={
-                [
-                  {
-                    "backgroundColor": "transparent",
-                  },
-                  {
-                    "bottom": 0,
-                    "left": 0,
-                    "position": "absolute",
-                    "right": 0,
-                    "top": 0,
-                  },
-                ]
-              }
-            />
             <div
               accessibilityRole="button"
               accessibilityState={
@@ -3430,6 +3742,7 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
                     "flexDirection": "row",
                     "justifyContent": "flex-start",
                     "minWidth": "30%",
+                    "overflow": "hidden",
                     "paddingHorizontal": 10,
                     "paddingVertical": 5,
                     "width": "30%",
@@ -3476,6 +3789,46 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
                   }
                   value="pepe"
                 />
+                <View
+                  pointerEvents="none"
+                  style={
+                    [
+                      {
+                        "bottom": 0,
+                        "left": 0,
+                        "opacity": 1,
+                        "position": "absolute",
+                        "right": 0,
+                        "top": 0,
+                        "transitionDuration": "280ms",
+                        "transitionProperty": [
+                          "opacity",
+                        ],
+                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                      },
+                    ]
+                  }
+                >
+                  <BlurView
+                    blurAmount={20}
+                    blurType="dark"
+                    reducedTransparencyFallbackColor="#011401"
+                    style={
+                      [
+                        {
+                          "backgroundColor": "transparent",
+                        },
+                        {
+                          "bottom": 0,
+                          "left": 0,
+                          "position": "absolute",
+                          "right": 0,
+                          "top": 0,
+                        },
+                      ]
+                    }
+                  />
+                </View>
               </View>
               <View
                 style={
@@ -3488,6 +3841,7 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
                     "flexDirection": "row",
                     "justifyContent": "flex-start",
                     "minWidth": "30%",
+                    "overflow": "hidden",
                     "paddingHorizontal": 10,
                     "paddingVertical": 5,
                     "width": "30%",
@@ -3534,6 +3888,46 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
                   }
                   value="lolo"
                 />
+                <View
+                  pointerEvents="none"
+                  style={
+                    [
+                      {
+                        "bottom": 0,
+                        "left": 0,
+                        "opacity": 1,
+                        "position": "absolute",
+                        "right": 0,
+                        "top": 0,
+                        "transitionDuration": "280ms",
+                        "transitionProperty": [
+                          "opacity",
+                        ],
+                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                      },
+                    ]
+                  }
+                >
+                  <BlurView
+                    blurAmount={20}
+                    blurType="dark"
+                    reducedTransparencyFallbackColor="#011401"
+                    style={
+                      [
+                        {
+                          "backgroundColor": "transparent",
+                        },
+                        {
+                          "bottom": 0,
+                          "left": 0,
+                          "position": "absolute",
+                          "right": 0,
+                          "top": 0,
+                        },
+                      ]
+                    }
+                  />
+                </View>
               </View>
               <View
                 style={
@@ -3546,6 +3940,7 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
                     "flexDirection": "row",
                     "justifyContent": "flex-start",
                     "minWidth": "30%",
+                    "overflow": "hidden",
                     "paddingHorizontal": 10,
                     "paddingVertical": 5,
                     "width": "30%",
@@ -3592,6 +3987,46 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
                   }
                   value="titi"
                 />
+                <View
+                  pointerEvents="none"
+                  style={
+                    [
+                      {
+                        "bottom": 0,
+                        "left": 0,
+                        "opacity": 1,
+                        "position": "absolute",
+                        "right": 0,
+                        "top": 0,
+                        "transitionDuration": "280ms",
+                        "transitionProperty": [
+                          "opacity",
+                        ],
+                        "transitionTimingFunction": "cubic-bezier(0.23, 1, 0.32, 1)",
+                      },
+                    ]
+                  }
+                >
+                  <BlurView
+                    blurAmount={20}
+                    blurType="dark"
+                    reducedTransparencyFallbackColor="#011401"
+                    style={
+                      [
+                        {
+                          "backgroundColor": "transparent",
+                        },
+                        {
+                          "bottom": 0,
+                          "left": 0,
+                          "position": "absolute",
+                          "right": 0,
+                          "top": 0,
+                        },
+                      ]
+                    }
+                  />
+                </View>
               </View>
             </View>
             <View
@@ -3682,25 +4117,6 @@ exports[`Component Seed - test Seed View - snapshot 1`] = `
               ]
             }
           >
-            <BlurView
-              blurAmount={20}
-              blurType="dark"
-              reducedTransparencyFallbackColor="#011401"
-              style={
-                [
-                  {
-                    "backgroundColor": "transparent",
-                  },
-                  {
-                    "bottom": 0,
-                    "left": 0,
-                    "position": "absolute",
-                    "right": 0,
-                    "top": 0,
-                  },
-                ]
-              }
-            />
             <div
               accessibilityRole="button"
               accessibilityState={

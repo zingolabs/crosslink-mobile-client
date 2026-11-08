@@ -208,6 +208,7 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                               Platform.OS === GlobalConst.platformOSandroid
                                 ? 0
                                 : 5,
+                            overflow: 'hidden',
                           }}
                         >
                           <FadeText>{`${index + 1}`}.</FadeText>
@@ -236,6 +237,33 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                             autoCorrect={false}
                             returnKeyType="done"
                           />
+                          <Animated.View
+                            style={[
+                              {
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                opacity: seedBlurred ? 1 : 0,
+                                ...veilTransition,
+                              },
+                            ]}
+                            pointerEvents="none"
+                          >
+                            <BlurView
+                              style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                              }}
+                              blurType="dark"
+                              blurAmount={20}
+                              reducedTransparencyFallbackColor={colors.bgCanvas}
+                            />
+                          </Animated.View>
                         </View>
                       );
                     })}
@@ -263,19 +291,6 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                   !seedBlurred ? 'no-hide-descendants' : 'auto'
                 }
               >
-                <BlurView
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                  }}
-                  blurType="dark"
-                  blurAmount={20}
-                  reducedTransparencyFallbackColor={colors.bgCanvas}
-                />
-
                 <LiquidPrimaryButton
                   title="View seed phrase"
                   onPress={() => setSeedBlurred(false)}
