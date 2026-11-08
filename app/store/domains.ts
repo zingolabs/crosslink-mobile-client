@@ -22,7 +22,7 @@ import { CurrencyEnum } from '../AppState/enums/CurrencyEnum';
 import { SelectServerEnum } from '../AppState/enums/SelectServerEnum';
 import { ScreenEnum } from '../AppState/enums/ScreenEnum';
 import { PerformanceLevelEnum } from '../wallet/enums';
-import { SyncStatusType } from '../wallet/types';
+import type { SyncStatus } from '../wallet/generated/SyncStatus';
 
 export interface SettingsValue {
   indexerServer: ServerType;
@@ -113,7 +113,7 @@ export interface WalletDataValue {
   valueTransfers: ValueTransferType[] | null;
   valueTransfersTotal: number | null;
   info: InfoType;
-  syncingStatus: SyncStatusType;
+  syncingStatus: SyncStatus;
   defaultUnifiedAddress: string;
   somePending: boolean;
   shieldingAmount: number;
@@ -136,7 +136,7 @@ export const defaultWalletData: WalletDataValue = {
   valueTransfers: null,
   valueTransfersTotal: null,
   info: {} as InfoType,
-  syncingStatus: {} as SyncStatusType,
+  syncingStatus: {} as SyncStatus,
   defaultUnifiedAddress: '',
   somePending: false,
   shieldingAmount: 0,

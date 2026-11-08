@@ -15,7 +15,7 @@ import {
 import { writeSettings } from '../storage/settingsFile';
 import WalletService from '../wallet';
 import { createAlert } from '../createAlert';
-import { SeedType, UfvkType, WalletKindType } from '../wallet/types';
+import * as rpc from '../wallet/rpc';
 import {
   createUpdateRecoveryWalletInfo,
   hasRecoveryWalletInfo,
@@ -43,9 +43,6 @@ type WalletKind = SessionHandle['walletKind'];
 const screenName = ScreenEnum.Boot;
 
 const t = (key: string): string => read().translate(key) as string;
-
-const isError = (value: string | null | undefined): boolean =>
-  !value || value.toLowerCase().startsWith(GlobalConst.error);
 
 const alert = (title: string, error: string): void => {
   createAlert(
@@ -113,19 +110,18 @@ export const runOpening = (input: OpeningInput): void => {
       saplingPool: false,
       transparentPool: false,
     };
-    const walletKindStr: string = await WalletService.walletKindInfo();
-    try {
-      const walletKindJSON: WalletKindType = await JSON.parse(walletKindStr);
+    const walletKind = await rpc.getWalletKind();
+    if (walletKind.ok) {
       kind.readOnly =
-        walletKindJSON.kind ===
+        walletKind.value.kind ===
           WalletKindEnum.LoadedFromUnifiedFullViewingKey ||
-        walletKindJSON.kind === WalletKindEnum.NoKeysFound;
-      kind.orchardPool = walletKindJSON.orchard;
-      kind.saplingPool = walletKindJSON.sapling;
-      kind.transparentPool = walletKindJSON.transparent;
+        walletKind.value.kind === WalletKindEnum.NoKeysFound;
+      kind.orchardPool = walletKind.value.orchard;
+      kind.saplingPool = walletKind.value.sapling;
+      kind.transparentPool = walletKind.value.transparent;
       await syncRecoveryWalletInfo(kind.readOnly);
-    } catch (e) {
-      snack(walletKindStr);
+    } else {
+      snack(walletKind.error);
     }
     patch({ ...kind });
     return kind;
@@ -248,35 +244,20 @@ export const runOpening = (input: OpeningInput): void => {
       }
     }
     const server = read().indexerServer;
-    const result: string = await WalletService.loadExistingWallet(
+    const result = await rpc.loadExistingWallet(
       server.uri,
       server.chainName,
       read().performanceLevel,
       GlobalConst.minConfirmations.toString(),
     );
     const title = t('loadingapp.readingwallet-label');
-    if (isError(result)) {
-      if (isWalletFileError(result)) {
-        reportFailure(title, result);
-        fail(title, result);
+    if (!result.ok) {
+      if (isWalletFileError(result.error)) {
+        reportFailure(title, result.error);
+        fail(title, result.error);
         return;
       }
-      await walletErrorHandle(result, title, true);
-      return;
-    }
-    let resultJson: SeedType & UfvkType;
-    try {
-      resultJson = await JSON.parse(result);
-    } catch (e: unknown) {
-      await walletErrorHandle(
-        e instanceof Error ? e.message : String(e),
-        title,
-        true,
-      );
-      return;
-    }
-    if (resultJson.error) {
-      await walletErrorHandle(resultJson.error, title, true);
+      await walletErrorHandle(result.error, title, true);
       return;
     }
 
@@ -303,34 +284,20 @@ export const runOpening = (input: OpeningInput): void => {
 
   const createFlow = async (): Promise<void> => {
     const server = read().indexerServer;
-    const seed: string = await WalletService.createNewWallet(
+    const seed = await rpc.createNewWallet(
       server.uri,
       server.chainName,
       read().performanceLevel,
       GlobalConst.minConfirmations.toString(),
     );
     const title = t('loadingapp.creatingwallet-label');
-    if (isError(seed)) {
-      await walletErrorHandle(seed, title, false);
-      return;
-    }
-    let seedJSON = {} as SeedType;
-    try {
-      seedJSON = await JSON.parse(seed);
-    } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : String(e);
-      reportFailure(title, message);
-      await walletErrorHandle(message, title, false);
-      return;
-    }
-    if (seedJSON.error) {
-      reportFailure(title, seedJSON.error);
-      await walletErrorHandle(seedJSON.error, title, false);
+    if (!seed.ok) {
+      await walletErrorHandle(seed.error, title, false);
       return;
     }
     const wallet: WalletType = {
-      seed: seedJSON.seed_phrase || '',
-      birthday: seedJSON.birthday || 0,
+      seed: seed.value.seed_phrase || '',
+      birthday: seed.value.birthday || 0,
     };
     if (read().recoveryWalletInfoOnDevice) {
       await createUpdateRecoveryWalletInfo(wallet);
@@ -382,7 +349,7 @@ export const runOpening = (input: OpeningInput): void => {
         : String(parsedBirthday);
 
     const server = read().indexerServer;
-    const result: string = await WalletService.restoreWalletFromSeed(
+    const result = await rpc.restoreWalletFromSeed(
       seed.toLowerCase(),
       walletBirthday,
       server.uri,
@@ -391,23 +358,8 @@ export const runOpening = (input: OpeningInput): void => {
       GlobalConst.minConfirmations.toString(),
     );
     const title = t('loadingapp.readingwallet-label');
-    if (isError(result)) {
-      await walletErrorHandle(result, title, false);
-      return;
-    }
-    let resultJson: SeedType & UfvkType;
-    try {
-      resultJson = await JSON.parse(result);
-    } catch (e: unknown) {
-      await walletErrorHandle(
-        e instanceof Error ? e.message : String(e),
-        title,
-        false,
-      );
-      return;
-    }
-    if (resultJson.error) {
-      await walletErrorHandle(resultJson.error, title, false);
+    if (!result.ok) {
+      await walletErrorHandle(result.error, title, false);
       return;
     }
 

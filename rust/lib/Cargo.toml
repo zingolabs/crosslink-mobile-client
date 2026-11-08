@@ -14,6 +14,7 @@ zingo-netutils = { workspace = true }
 zingo_common_components = { workspace = true }
 zingolib = { workspace = true }
 pepper-sync = { workspace = true }
+zingo-status = { git = "https://github.com/zingolabs/zingolib-crosslink", branch = "feat/crosslink-main" }
 
 zcash_encoding = { git = "https://github.com/ShieldedLabs/crosslink_monolith.git", rev = "0735e958575f5567f2cc9a28c5ae426e0adce468", features = [
     "std",
@@ -55,7 +56,9 @@ log = "0.4"
 uniffi = "0.31"
 tokio = "1"
 rustls = { version = "0.23", features = ["ring"] }
+serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+ts-rs = "12"
 bip0039 = { version = "0.13.4", features = ["rand"] }
 thiserror = "1"
 once_cell = "1"
@@ -64,7 +67,6 @@ rusqlite = { version = "0.37.0", features = ["bundled"] }
 [dev-dependencies]
 base64 = { workspace = true }
 libc = "0.2"
-serde = { version = "1", features = ["derive"] }
 tempfile = "3"
 
 [build-dependencies]

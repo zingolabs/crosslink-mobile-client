@@ -13,7 +13,33 @@ import {
   WalletKindEnum,
   WalletValueTransferKindEnum,
 } from '../wallet/enums';
-import { WalletValueTransferType } from '../wallet/types';
+import type { Balance } from '../wallet/generated/Balance';
+import type { CheckAddress } from '../wallet/generated/CheckAddress';
+import type { ConfigWalletPerformance } from '../wallet/generated/ConfigWalletPerformance';
+import type { Confirm } from '../wallet/generated/Confirm';
+import type { ParseAddress } from '../wallet/generated/ParseAddress';
+import type { Propose } from '../wallet/generated/Propose';
+import type { Roster } from '../wallet/generated/Roster';
+import type { Seed } from '../wallet/generated/Seed';
+import type { SpendableBalance } from '../wallet/generated/SpendableBalance';
+import type { StakingKind } from '../wallet/generated/StakingKind';
+import type { SyncPoll } from '../wallet/generated/SyncPoll';
+import type { SyncStatus } from '../wallet/generated/SyncStatus';
+import type { TransparentAddress } from '../wallet/generated/TransparentAddress';
+import type { Ufvk } from '../wallet/generated/Ufvk';
+import type { UnifiedAddress } from '../wallet/generated/UnifiedAddress';
+import type { ValueTransfer } from '../wallet/generated/ValueTransfer';
+import type { ValueTransferKind } from '../wallet/generated/ValueTransferKind';
+import type { ValueTransfers } from '../wallet/generated/ValueTransfers';
+import type { WalletBonds } from '../wallet/generated/WalletBonds';
+import type { WalletFileRecoveryInfo } from '../wallet/generated/WalletFileRecoveryInfo';
+import type { WalletHeight } from '../wallet/generated/WalletHeight';
+import type { WalletInfo } from '../wallet/generated/WalletInfo';
+import type { WalletKind } from '../wallet/generated/WalletKind';
+import type { WalletSaveRequired } from '../wallet/generated/WalletSaveRequired';
+import type { WalletVersion } from '../wallet/generated/WalletVersion';
+import type { WithdrawStake } from '../wallet/generated/WithdrawStake';
+import type { ZecPrice } from '../wallet/generated/ZecPrice';
 import { mockAddresses } from '../../__mocks__/dataMocks/mockAddresses';
 import { mockInfo } from '../../__mocks__/dataMocks/mockInfo';
 import { mockIndexerServer } from '../../__mocks__/dataMocks/mockServers';
@@ -49,7 +75,9 @@ const err = (message: string) => `${GlobalConst.error}: ${message}`;
 
 const zats = (amount: number) => Math.round(amount * ZATS);
 
-const KINDS: Record<ValueTransferKindEnum, WalletValueTransferKindEnum> = {
+const payload = <T>(value: T): string => JSON.stringify(value);
+
+const KINDS: Record<ValueTransferKindEnum, ValueTransferKind> = {
   [ValueTransferKindEnum.Sent]: WalletValueTransferKindEnum.sent,
   [ValueTransferKindEnum.Received]: WalletValueTransferKindEnum.received,
   [ValueTransferKindEnum.MemoToSelf]: WalletValueTransferKindEnum.memoToSelf,
@@ -65,8 +93,8 @@ const KINDS: Record<ValueTransferKindEnum, WalletValueTransferKindEnum> = {
   [ValueTransferKindEnum.Unknown]: WalletValueTransferKindEnum.rejection,
 };
 
-type Propose = {
-  kind: WalletValueTransferKindEnum;
+type Proposal = {
+  kind: ValueTransferKind;
   amount: number;
   address: string;
 };
@@ -77,6 +105,16 @@ type FakeWallet = {
   ufvk: string;
   readOnly: boolean;
 };
+
+const seedPayload = (w: FakeWallet): string =>
+  payload<Seed>({
+    seed_phrase: w.seed,
+    birthday: w.birthday,
+    no_of_accounts: 1,
+  });
+
+const ufvkPayload = (w: FakeWallet): string =>
+  payload<Ufvk>({ ufvk: w.ufvk, birthday: w.birthday });
 
 type FakeBond = {
   txid: string;
@@ -115,7 +153,7 @@ const ROSTER = [
   })),
 ];
 
-const bondEvents = (): WalletValueTransferType[] =>
+const bondEvents = (): ValueTransfer[] =>
   BONDS.map((b, i) => ({
     txid: b.txid,
     datetime: Math.floor(Date.now() / 1000) - 3600 * (i + 1),
@@ -126,11 +164,12 @@ const bondEvents = (): WalletValueTransferType[] =>
     kind: WalletValueTransferKindEnum.createBond,
     value: zats(b.amount),
     recipient_address: b.finalizer,
+    pool_received: null,
     memos: [],
     staking_action: null,
   }));
 
-const baseEvents = (): WalletValueTransferType[] => [
+const baseEvents = (): ValueTransfer[] => [
   ...bondEvents(),
   ...mockValueTransfers.map(v => ({
     txid: v.txid,
@@ -138,13 +177,21 @@ const baseEvents = (): WalletValueTransferType[] => [
     status: v.status,
     blockheight: v.blockheight,
     transaction_fee: zats(v.fee ?? 0),
-    zec_price: v.zecPrice,
+    zec_price: v.zecPrice ?? null,
     kind: KINDS[v.kind],
     value: zats(v.amount ?? 0),
-    recipient_address: v.address,
-    pool_received: v.poolType,
-    memos: v.memos,
-    staking_action: v.stakingAction,
+    recipient_address: v.address ?? null,
+    pool_received: v.poolType ?? null,
+    memos: v.memos ?? [],
+    staking_action: v.stakingAction
+      ? {
+          kind: v.stakingAction.kind as StakingKind,
+          val: zats(v.stakingAction.val),
+          target: v.stakingAction.target,
+          target_address: null,
+          unique_public_key: v.stakingAction.unique_public_key,
+        }
+      : null,
   })),
 ];
 
@@ -163,8 +210,8 @@ const indexerReport = (uri: string) =>
   });
 
 let wallet: FakeWallet | null = null;
-let propose: Propose | null = null;
-let events: WalletValueTransferType[] = baseEvents();
+let propose: Proposal | null = null;
+let events: ValueTransfer[] = baseEvents();
 let syncLaunched = false;
 let syncComplete = false;
 let serverUri = mockIndexerServer.uri;
@@ -189,11 +236,7 @@ const fakeRpc = {
     serverUri = uri;
     chainName = name as ChainNameEnum;
     performanceLevel = level as PerformanceLevelEnum;
-    return JSON.stringify({
-      seed_phrase: wallet.seed,
-      ufvk: wallet.ufvk,
-      birthday: wallet.birthday,
-    });
+    return wallet.readOnly ? ufvkPayload(wallet) : seedPayload(wallet);
   },
 
   createNewWallet: async (
@@ -215,10 +258,7 @@ const fakeRpc = {
       readOnly: false,
     };
     wallet = created;
-    return JSON.stringify({
-      seed_phrase: created.seed,
-      birthday: created.birthday,
-    });
+    return seedPayload(created);
   },
 
   restoreWalletFromSeed: async (
@@ -243,19 +283,14 @@ const fakeRpc = {
       readOnly,
     };
     wallet = restored;
-    return readOnly
-      ? JSON.stringify({ ufvk: restored.ufvk, birthday: restored.birthday })
-      : JSON.stringify({
-          seed_phrase: restored.seed,
-          birthday: restored.birthday,
-        });
+    return readOnly ? ufvkPayload(restored) : seedPayload(restored);
   },
 
   walletKindInfo: async () => {
     if (!wallet) {
       return err('wallet not found');
     }
-    return JSON.stringify({
+    return payload<WalletKind>({
       kind: wallet.readOnly
         ? WalletKindEnum.LoadedFromUnifiedFullViewingKey
         : WalletKindEnum.LoadedFromSeedPhrase,
@@ -269,37 +304,37 @@ const fakeRpc = {
     if (!wallet || wallet.readOnly) {
       return err('wallet not found');
     }
-    return JSON.stringify({
-      seed_phrase: wallet.seed,
-      birthday: wallet.birthday,
-    });
+    return seedPayload(wallet);
   },
 
   getUfvkInfo: async () => {
     if (!wallet) {
       return err('wallet not found');
     }
-    return JSON.stringify({ ufvk: wallet.ufvk, birthday: wallet.birthday });
+    return ufvkPayload(wallet);
   },
 
   getBalanceInfo: async () =>
-    JSON.stringify({
-      total_orchard_balance: zats(mockTotalBalance.totalOrchardBalance),
-      total_sapling_balance: zats(mockTotalBalance.totalSaplingBalance),
-      total_transparent_balance: zats(mockTotalBalance.totalTransparentBalance),
+    payload<Balance>({
+      confirmed_ironwood_balance: 0,
+      unconfirmed_ironwood_balance: 0,
+      total_ironwood_balance: 0,
       confirmed_orchard_balance: zats(mockTotalBalance.confirmedOrchardBalance),
+      unconfirmed_orchard_balance: 0,
+      total_orchard_balance: zats(mockTotalBalance.totalOrchardBalance),
       confirmed_sapling_balance: zats(mockTotalBalance.confirmedSaplingBalance),
+      unconfirmed_sapling_balance: 0,
+      total_sapling_balance: zats(mockTotalBalance.totalSaplingBalance),
       confirmed_transparent_balance: zats(
         mockTotalBalance.confirmedTransparentBalance,
       ),
-      unconfirmed_orchard_balance: 0,
-      unconfirmed_sapling_balance: 0,
       unconfirmed_transparent_balance: 0,
+      total_transparent_balance: zats(mockTotalBalance.totalTransparentBalance),
       staked_amount: zats(mockTotalBalance.stakedAmount),
     }),
 
   getSpendableBalanceTotalInfo: async () =>
-    JSON.stringify({
+    payload<SpendableBalance>({
       spendable_balance: zats(mockTotalBalance.totalSpendableBalance),
     }),
 
@@ -310,7 +345,7 @@ const fakeRpc = {
     if (!address) {
       return err('unknown address format');
     }
-    return JSON.stringify({
+    return payload<SpendableBalance>({
       spendable_balance: zats(mockTotalBalance.totalSpendableBalance),
     });
   },
@@ -326,7 +361,7 @@ const fakeRpc = {
       a => a.addressKind === AddressKindEnum.u,
     );
     const next = unified[unified.length - 1];
-    return JSON.stringify({
+    return payload<UnifiedAddress>({
       account: 0,
       address_index: unified.length,
       has_orchard: receivers.includes('o'),
@@ -341,10 +376,10 @@ const fakeRpc = {
       a => a.addressKind === AddressKindEnum.t,
     );
     const next = transparent[transparent.length - 1];
-    return JSON.stringify({
+    return payload<TransparentAddress>({
       account: 0,
       address_index: transparent.length,
-      scope: 'External',
+      scope: 'external',
       encoded_address: next.address,
     });
   },
@@ -352,9 +387,9 @@ const fakeRpc = {
   checkMyAddressInfo: async (address: string) => {
     const match = mockAddresses.find(a => a.address === address);
     if (!match) {
-      return JSON.stringify({ is_wallet_address: false });
+      return payload<CheckAddress>({ is_wallet_address: false });
     }
-    return JSON.stringify({
+    return payload<CheckAddress>({
       is_wallet_address: true,
       address_type:
         match.addressKind === AddressKindEnum.u ? 'unified' : 'transparent',
@@ -365,7 +400,7 @@ const fakeRpc = {
   },
 
   getValueTransfersList: async () =>
-    JSON.stringify({ wallet_events: events, total: events.length }),
+    payload<ValueTransfers>({ wallet_events: events }),
 
   runSyncProcess: async () => {
     syncLaunched = true;
@@ -381,7 +416,7 @@ const fakeRpc = {
 
   pauseSyncProcess: async () => 'OK',
 
-  statusSyncInfo: async () => JSON.stringify(mockSyncingStatus),
+  statusSyncInfo: async () => payload<SyncStatus>(mockSyncingStatus),
 
   pollSyncInfo: async () => {
     if (!syncLaunched) {
@@ -391,13 +426,17 @@ const fakeRpc = {
       return 'sync task is not complete';
     }
     const start = wallet ? wallet.birthday : 0;
-    return JSON.stringify({
+    return payload<SyncPoll>({
       sync_complete: {
         sync_start_height: start,
         sync_end_height: HEIGHT,
         blocks_scanned: HEIGHT - start,
         sapling_outputs_scanned: 0,
         orchard_outputs_scanned: 0,
+        ironwood_outputs_scanned: 0,
+        percentage_total_outputs_scanned: 100,
+        total_outputs_scanned: 0,
+        total_outputs: 0,
       },
     });
   },
@@ -416,7 +455,7 @@ const fakeRpc = {
       return err('invalid propose json');
     }
     propose = { kind: WalletValueTransferKindEnum.sent, amount, address };
-    return JSON.stringify({ fee: FEE_ZATS, amount });
+    return payload<Propose>({ fee: FEE_ZATS });
   },
 
   confirmProcess: async () => {
@@ -434,30 +473,33 @@ const fakeRpc = {
         status: ValueTransferStatusEnum.confirmed,
         blockheight: HEIGHT,
         transaction_fee: FEE_ZATS,
+        zec_price: null,
         kind: current.kind,
         value: current.amount,
-        recipient_address: current.address || undefined,
+        recipient_address: current.address || null,
+        pool_received: null,
+        memos: [],
         staking_action: null,
       },
     ];
-    return JSON.stringify({ txids: [created] });
+    return payload<Confirm>({ txids: [created] });
   },
 
-  stakeProcess: async (payload: string) => {
+  stakeProcess: async (stakeJson: string) => {
     if (!wallet) {
       return err('wallet not found');
     }
     let amount = 0;
     let address = '';
     try {
-      const json = JSON.parse(payload);
+      const json = JSON.parse(stakeJson);
       amount = Number(json.amount_zats ?? 0);
       address = String(json.finalizer_address ?? '');
     } catch (e) {
       return err('invalid stake json');
     }
     propose = { kind: WalletValueTransferKindEnum.createBond, amount, address };
-    return JSON.stringify({ fee: FEE_ZATS, amount });
+    return payload<Propose>({ fee: FEE_ZATS });
   },
 
   beginUnstakeProcess: async (createTxid: string) => {
@@ -472,7 +514,7 @@ const fakeRpc = {
       amount: 0,
       address: '',
     };
-    return JSON.stringify({ fee: FEE_ZATS, amount: 0 });
+    return payload<Propose>({ fee: FEE_ZATS });
   },
 
   withdrawStakeProcess: async (createTxid: string) => {
@@ -482,7 +524,7 @@ const fakeRpc = {
     if (!/^[0-9a-fA-F]{64}$/.test(createTxid)) {
       return err('withdraw_stake requires a 64-hex create bond txid');
     }
-    return JSON.stringify({ txid: txid() });
+    return payload<WithdrawStake>({ txid: txid() });
   },
 
   retargetBondProcess: async (createTxid: string, finalizer: string) => {
@@ -497,7 +539,7 @@ const fakeRpc = {
       amount: 0,
       address: finalizer,
     };
-    return JSON.stringify({ fee: FEE_ZATS, amount: 0 });
+    return payload<Propose>({ fee: FEE_ZATS });
   },
 
   requestFaucetFundsProcess: async (address: string) => {
@@ -508,10 +550,10 @@ const fakeRpc = {
   },
 
   infoServerInfo: async () =>
-    JSON.stringify({
+    payload<WalletInfo>({
       version: '0.0.1',
       git_commit: 'fakecommit',
-      server_uri: serverUri,
+      indexer_uri: serverUri,
       vendor: 'zingo',
       taddr_support: true,
       chain_name: chainName,
@@ -520,12 +562,13 @@ const fakeRpc = {
       latest_block_height: HEIGHT,
     }),
 
-  getLatestBlockWalletInfo: async () => JSON.stringify({ height: HEIGHT }),
+  getLatestBlockWalletInfo: async () =>
+    payload<WalletHeight>({ height: HEIGHT }),
 
   getLatestBlockServerInfo: async (_serverUri: string) => String(HEIGHT),
 
   getUnifiedAddressesInfo: async () =>
-    JSON.stringify(
+    payload<UnifiedAddress[]>(
       mockAddresses
         .filter(a => a.addressKind === AddressKindEnum.u)
         .map(a => ({
@@ -539,7 +582,7 @@ const fakeRpc = {
     ),
 
   getTransparentAddressesInfo: async () =>
-    JSON.stringify(
+    payload<TransparentAddress[]>(
       mockAddresses
         .filter(a => a.addressKind === AddressKindEnum.t)
         .map(a => ({
@@ -551,7 +594,7 @@ const fakeRpc = {
     ),
 
   getRosterInfo: async () =>
-    JSON.stringify({
+    payload<Roster>({
       roster_members: ROSTER.map((m, i) => ({
         pubkey: m.pubkey,
         finalizer_address: fakeFinalizerAddress(i),
@@ -564,7 +607,7 @@ const fakeRpc = {
     }),
 
   getWalletBondsInfo: async () =>
-    JSON.stringify({
+    payload<WalletBonds>({
       bonds: BONDS.map((b, i) => ({
         created_in_txid: b.txid,
         bond_key: fakeHexKey(50000 + i),
@@ -579,24 +622,24 @@ const fakeRpc = {
     }),
 
   getConfigWalletPerformanceInfo: async () =>
-    JSON.stringify({ performance_level: performanceLevel }),
+    payload<ConfigWalletPerformance>({ performance_level: performanceLevel }),
 
   getWalletVersionInfo: async () =>
-    JSON.stringify({ current_version: 2, read_version: 2 }),
+    payload<WalletVersion>({ current_version: 2, read_version: 2 }),
 
   getWalletSaveRequiredInfo: async () =>
-    JSON.stringify({ save_required: false }),
+    payload<WalletSaveRequired>({ save_required: false }),
 
   getVersionInfo: async () => VERSION,
 
   zecPriceInfo: async (_withTor: string) =>
-    JSON.stringify({ current_price: mockZecPrice.zecPrice }),
+    payload<ZecPrice>({ current_price: mockZecPrice.zecPrice }),
 
   parseAddressInfo: async (address: string) => {
     if (!address) {
       return err('empty address');
     }
-    return JSON.stringify({
+    return payload<ParseAddress>({
       status: ParseAddressStatusEnum.successAddressParse,
       chain_name: chainName,
       address_kind: WalletAddressKindEnum.unifiedAddressKind,
@@ -644,9 +687,9 @@ const fakeRpc = {
     if (!wallet) {
       return err('wallet file not found');
     }
-    return JSON.stringify({
-      seed_phrase: wallet.seed ?? null,
-      ufvk: wallet.ufvk ?? null,
+    return payload<WalletFileRecoveryInfo>({
+      seed_phrase: wallet.seed || null,
+      ufvk: wallet.ufvk || null,
       birthday: wallet.birthday,
       chain_name: chainName,
       format_version: 40,

@@ -114,3 +114,6 @@ fastlane/README.md
 
 # local secrets for the release lane
 /.env.local
+
+# ts-rs default export dir; the app reads app/wallet/generated
+rust/lib/bindings/

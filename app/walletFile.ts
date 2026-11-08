@@ -1,4 +1,7 @@
 import { GlobalConst } from './AppState';
+import type { WalletFileRecoveryInfo } from './wallet/generated/WalletFileRecoveryInfo';
+
+export type { WalletFileRecoveryInfo };
 
 const WALLET_FILE_ERROR_PREFIX = `${GlobalConst.error}: wallet file`;
 
@@ -10,14 +13,6 @@ const WALLET_FILE_ERROR_PREFIX = `${GlobalConst.error}: wallet file`;
  */
 export const isWalletFileError = (result: string | null | undefined): boolean =>
   !!result && result.toLowerCase().startsWith(WALLET_FILE_ERROR_PREFIX);
-
-export type WalletFileRecoveryInfo = {
-  seed_phrase: string | null;
-  ufvk: string | null;
-  birthday: number;
-  chain_name: string;
-  format_version: number;
-};
 
 /**
  * The recovery information the native side read from the front of the

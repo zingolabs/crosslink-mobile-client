@@ -48,11 +48,18 @@ use zingolib::data::receivers::transaction_request_from_receivers;
 use zingolib::lightclient::LightClient;
 use zingolib::perspective::sync_progress::{SessionReport, SyncProgress};
 use zingolib::utils::conversion::address_from_str;
-use zingolib::wallet::keys::{
-    WalletAddressRef,
-    unified::{ReceiverSelection, UnifiedKeyStore},
-};
+use zingolib::wallet::keys::unified::{ReceiverSelection, UnifiedKeyStore};
 use zingolib::wallet::{LightWallet, SeedDerivation, WalletBase, WalletSettings};
+
+mod payloads;
+
+use payloads::{
+    AddressKind, Balance, ChainName, CheckAddress, ConfigWalletPerformance, Confirm, ParseAddress,
+    Propose, Receiver, Roster, Seed, SpendableBalance, SyncPoll, SyncStatus, TransparentAddress,
+    Ufvk, UnifiedAddress, ValueTransfers, WalletBonds, WalletFileRecoveryInfo, WalletHeight,
+    WalletInfo, WalletKeyKind, WalletKind, WalletSaveRequired, WalletVersion, WithdrawStake,
+    ZecPrice, to_json,
+};
 
 #[derive(Debug, thiserror::Error, uniffi::Error)]
 pub enum ZingolibError {
@@ -554,14 +561,7 @@ pub fn read_wallet_recovery_info(
         let path = wallet_file_config(&wallet_dir).get_wallet_pathbuf();
         Ok(
             match LightWallet::read_recovery_info_from_path(&path, chain) {
-                Ok(info) => object! {
-                    "seed_phrase" => info.seed_phrase.map_or(json::JsonValue::Null, json::JsonValue::from),
-                    "ufvk" => info.unified_full_viewing_key.map_or(json::JsonValue::Null, json::JsonValue::from),
-                    "birthday" => info.birthday,
-                    "chain_name" => info.chain_name,
-                    "format_version" => info.version,
-                }
-                .dump(),
+                Ok(info) => to_json(&WalletFileRecoveryInfo::from(info)),
                 Err(e) => format!("Error: {e}"),
             },
         )
@@ -790,12 +790,13 @@ pub fn get_latest_block_wallet() -> Result<String, ZingolibError> {
         with_lightclient_read(|lightclient| {
             Ok(RT.block_on(async move {
                 let wallet = lightclient.wallet.write().await;
-                object! {
-                    "height" => json::JsonValue::from(
-                        wallet.sync_state.last_known_chain_height().map(u32::from).unwrap_or(0)
-                    )
-                }
-                .pretty(2)
+                to_json(&WalletHeight {
+                    height: wallet
+                        .sync_state
+                        .last_known_chain_height()
+                        .map(u32::from)
+                        .unwrap_or(0),
+                })
             }))
         })
     })
@@ -807,7 +808,7 @@ pub fn get_value_transfers() -> Result<String, ZingolibError> {
         with_lightclient_read(|lightclient| {
             Ok(RT.block_on(async move {
                 match lightclient.wallet_events(true).await {
-                    Ok(wallet_events) => json::JsonValue::from(wallet_events).pretty(2),
+                    Ok(wallet_events) => to_json(&ValueTransfers::from(wallet_events)),
                     Err(e) => format!("Error: {e}"),
                 }
             }))
@@ -826,10 +827,9 @@ pub fn poll_sync() -> Result<String, ZingolibError> {
                 PollReport::NoHandle => "Sync task has not been launched.".to_string(),
                 PollReport::NotReady => "Sync task is not complete.".to_string(),
                 PollReport::Ready(result) => match result {
-                    Ok(sync_result) => json::object! {
-                        "sync_complete" => json::JsonValue::from(SessionReport::from(sync_result))
-                    }
-                    .pretty(2),
+                    Ok(sync_result) => to_json(&SyncPoll {
+                        sync_complete: SessionReport::from(sync_result).into(),
+                    }),
                     Err(e) => format!("Error: {e}"),
                 },
             })
@@ -890,7 +890,7 @@ pub fn status_sync() -> Result<String, ZingolibError> {
             Ok(RT.block_on(async {
                 let wallet = lightclient.wallet.read().await;
                 match pepper_sync::sync_status(&*wallet).await {
-                    Ok(status) => json::JsonValue::from(SyncProgress::from(status)).pretty(2),
+                    Ok(status) => to_json(&SyncStatus::from(SyncProgress::from(status))),
                     Err(e) => format!("Error: {e}"),
                 }
             }))
@@ -923,7 +923,13 @@ pub fn run_rescan() -> Result<String, ZingolibError> {
 pub fn info_server() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         with_lightclient_read(|lightclient| {
-            Ok(RT.block_on(async move { lightclient.do_info().await }))
+            Ok(RT.block_on(async move {
+                let indexer_uri = lightclient.indexer_uri();
+                match zingolib::grpc_connector::get_info(indexer_uri.clone()).await {
+                    Ok(info) => to_json(&WalletInfo::new(info, indexer_uri.to_string())),
+                    Err(e) => e,
+                }
+            }))
         })
     })
 }
@@ -934,7 +940,7 @@ pub fn get_roster() -> Result<String, ZingolibError> {
         with_lightclient_read(|lightclient| {
             Ok(RT.block_on(async move {
                 match lightclient.get_roster_info().await {
-                    Ok(roster_info) => JsonValue::from(roster_info).pretty(2).to_string(),
+                    Ok(roster_info) => to_json(&Roster::from(roster_info)),
                     Err(e) => {
                         format!("Error: {e}")
                     }
@@ -973,8 +979,7 @@ pub fn get_seed() -> Result<String, ZingolibError> {
             Ok(RT.block_on(async move {
                 let wallet = lightclient.wallet.read().await;
                 match wallet.recovery_info() {
-                    Some(recovery_info) => serde_json::to_string_pretty(&recovery_info)
-                        .unwrap_or_else(|_| "Error: get seed. failed to serialize".to_string()),
+                    Some(recovery_info) => to_json(&Seed::from(recovery_info)),
                     None => {
                         "Error: get seed. no mnemonic found. wallet loaded from key.".to_string()
                     }
@@ -999,11 +1004,10 @@ pub fn get_ufvk() -> Result<String, ZingolibError> {
                     Ok(ufvk) => ufvk,
                     Err(e) => return format!("Error: {e}"),
                 };
-                object! {
-                    "ufvk" => ufvk.encode(&wallet.network),
-                    "birthday" => u32::from(wallet.birthday)
-                }
-                .pretty(2)
+                to_json(&Ufvk {
+                    ufvk: ufvk.encode(&wallet.network),
+                    birthday: u32::from(wallet.birthday),
+                })
             }))
         })
     })
@@ -1040,45 +1044,70 @@ pub fn wallet_kind() -> Result<String, ZingolibError> {
         with_lightclient_read(|lightclient| {
             Ok(RT.block_on(async move {
                 let wallet = lightclient.wallet.read().await;
-                if wallet.mnemonic().is_some() {
-                    object! {"kind" => "Loaded from seed or mnemonic phrase)",
-                            "transparent" => true,
-                            "sapling" => true,
-                            "orchard" => true,
+                let kind = if wallet.mnemonic().is_some() {
+                    WalletKind {
+                        kind: WalletKeyKind::SeedPhrase,
+                        transparent: true,
+                        sapling: true,
+                        orchard: true,
                     }
-                    .pretty(2)
                 } else {
                     match wallet
                         .unified_key_store
                         .get(&AccountId::ZERO)
                         .expect("account 0 must always exist")
                     {
-                        UnifiedKeyStore::Spend(_) => object! {
-                            "kind" => "Loaded from unified spending key",
-                            "transparent" => true,
-                            "sapling" => true,
-                            "orchard" => true,
-                        }
-                        .pretty(2),
-                        UnifiedKeyStore::View(ufvk) => object! {
-                            "kind" => "Loaded from unified full viewing key",
-                            "transparent" => ufvk.transparent().is_some(),
-                            "sapling" => ufvk.sapling().is_some(),
-                            "orchard" => ufvk.orchard().is_some(),
-                        }
-                        .pretty(2),
-                        UnifiedKeyStore::Empty => object! {
-                            "kind" => "No keys found",
-                            "transparent" => false,
-                            "sapling" => false,
-                            "orchard" => false,
-                        }
-                        .pretty(2),
+                        UnifiedKeyStore::Spend(_) => WalletKind {
+                            kind: WalletKeyKind::UnifiedSpendingKey,
+                            transparent: true,
+                            sapling: true,
+                            orchard: true,
+                        },
+                        UnifiedKeyStore::View(ufvk) => WalletKind {
+                            kind: WalletKeyKind::UnifiedFullViewingKey,
+                            transparent: ufvk.transparent().is_some(),
+                            sapling: ufvk.sapling().is_some(),
+                            orchard: ufvk.orchard().is_some(),
+                        },
+                        UnifiedKeyStore::Empty => WalletKind {
+                            kind: WalletKeyKind::NoKeysFound,
+                            transparent: false,
+                            sapling: false,
+                            orchard: false,
+                        },
                     }
-                }
+                };
+                to_json(&kind)
             }))
         })
     })
+}
+
+fn unified_address_payload(
+    id: &zingolib::wallet::keys::unified::UnifiedAddressId,
+    unified_address: &zcash_keys::address::UnifiedAddress,
+    network: &ChainType,
+) -> UnifiedAddress {
+    UnifiedAddress {
+        account: u32::from(id.account_id),
+        address_index: id.address_index,
+        has_orchard: unified_address.has_orchard(),
+        has_sapling: unified_address.has_sapling(),
+        has_transparent: unified_address.has_transparent(),
+        encoded_address: unified_address.encode(network),
+    }
+}
+
+fn transparent_address_payload(
+    id: &transparent::TransparentAddressId,
+    encoded_address: &str,
+) -> TransparentAddress {
+    TransparentAddress {
+        account: u32::from(id.account_id()),
+        address_index: id.address_index().index(),
+        scope: id.scope().into(),
+        encoded_address: encoded_address.to_string(),
+    }
 }
 
 fn make_decoded_chain_pair(
@@ -1100,66 +1129,43 @@ pub fn parse_address(address: String) -> Result<String, ZingolibError> {
             Ok("Error: The address is empty".to_string())
         } else {
             if let Some((recipient_address, chain_name)) = make_decoded_chain_pair(&address) {
-                let chain_name_string = match chain_name {
-                    ChainType::Mainnet => "main",
-                    ChainType::Testnet(_) => "test",
-                    ChainType::Regtest(_) => "regtest",
+                let chain = match chain_name {
+                    ChainType::Mainnet => ChainName::Main,
+                    ChainType::Testnet(_) => ChainName::Test,
+                    ChainType::Regtest(_) => ChainName::Regtest,
                 };
-                Ok(match recipient_address {
-                    Address::Sapling(_) => object! {
-                        "status" => "success",
-                        "chain_name" => chain_name_string,
-                        "address_kind" => "sapling",
-                    }
-                    .pretty(2),
-                    Address::Transparent(_) => object! {
-                        "status" => "success",
-                        "chain_name" => chain_name_string,
-                        "address_kind" => "transparent",
-                    }
-                    .pretty(2),
-                    Address::Tex(_) => object! {
-                        "status" => "success",
-                        "chain_name" => chain_name_string,
-                        "address_kind" => "tex",
-                    }
-                    .pretty(2),
+                let parsed = match recipient_address {
+                    Address::Sapling(_) => ParseAddress::valid(chain, AddressKind::Sapling),
+                    Address::Transparent(_) => ParseAddress::valid(chain, AddressKind::Transparent),
+                    Address::Tex(_) => ParseAddress::valid(chain, AddressKind::Tex),
                     Address::Unified(ua) => {
                         let mut receivers_available = vec![];
                         if ua.sapling().is_some() {
-                            receivers_available.push("sapling")
+                            receivers_available.push(Receiver::Sapling);
                         }
                         if ua.transparent().is_some() {
-                            receivers_available.push("transparent")
+                            receivers_available.push(Receiver::Transparent);
                         }
-                        if ua.orchard().is_some() {
-                            receivers_available.push("orchard");
-                            object! {
-                                "status" => "success",
-                                "chain_name" => chain_name_string,
-                                "address_kind" => "unified",
-                                "receivers_available" => receivers_available,
-                                "only_orchard_ua" => zcash_keys::address::UnifiedAddress::from_receivers(ua.orchard().cloned(), None, None).expect("To construct UA").encode(&chain_name),
-                            }
-                            .pretty(2)
-                        } else {
-                            object! {
-                                "status" => "success",
-                                "chain_name" => chain_name_string,
-                                "address_kind" => "unified",
-                                "receivers_available" => receivers_available,
-                            }
-                            .pretty(2)
+                        let only_orchard_ua = ua.orchard().map(|orchard| {
+                            receivers_available.push(Receiver::Orchard);
+                            zcash_keys::address::UnifiedAddress::from_receivers(
+                                Some(*orchard),
+                                None,
+                                None,
+                            )
+                            .expect("To construct UA")
+                            .encode(&chain_name)
+                        });
+                        ParseAddress {
+                            receivers_available: Some(receivers_available),
+                            only_orchard_ua,
+                            ..ParseAddress::valid(chain, AddressKind::Unified)
                         }
                     }
-                })
+                };
+                Ok(to_json(&parsed))
             } else {
-                Ok(object! {
-                    "status" => "Invalid address",
-                    "chain_name" => json::JsonValue::Null,
-                    "address_kind" => json::JsonValue::Null,
-                }
-                .pretty(2))
+                Ok(to_json(&ParseAddress::invalid()))
             }
         }
     })
@@ -1176,7 +1182,7 @@ pub fn get_balance() -> Result<String, ZingolibError> {
         with_lightclient_read(|lightclient| {
             Ok(RT.block_on(async move {
                 match lightclient.account_balance(AccountId::ZERO).await {
-                    Ok(bal) => json::JsonValue::from(bal).pretty(2),
+                    Ok(bal) => to_json(&Balance::from(bal)),
                     Err(e) => format!("Error: {e}"),
                 }
             }))
@@ -1252,7 +1258,9 @@ pub fn zec_price(tor: String) -> Result<String, ZingolibError> {
 
                 let mut wallet = lightclient.wallet.write().await;
                 match wallet.update_current_price(tor_client).await {
-                    Ok(price) => object! { "current_price" => price }.pretty(2),
+                    Ok(price) => to_json(&ZecPrice {
+                        current_price: price,
+                    }),
                     Err(e) => format!("Error: {e}"),
                 }
             }))
@@ -1281,7 +1289,9 @@ pub fn get_spendable_balance_with_address(
                     .max_send_value(address, zennies, AccountId::ZERO)
                     .await
                 {
-                    Ok(bal) => object! { "spendable_balance" => bal.into_u64() }.pretty(2),
+                    Ok(bal) => to_json(&SpendableBalance {
+                        spendable_balance: bal.into_u64(),
+                    }),
                     Err(e) => format!("error: {e}"),
                 }
             }))
@@ -1300,10 +1310,9 @@ pub fn get_spendable_balance_total() -> Result<String, ZingolibError> {
                         Ok(bal) => bal,
                         Err(e) => return format!("Error: {e}"),
                     };
-                object! {
-                    "spendable_balance" => spendable_balance.into_u64(),
-                }
-                .pretty(2)
+                to_json(&SpendableBalance {
+                    spendable_balance: spendable_balance.into_u64(),
+                })
             }))
         })
     })
@@ -1357,7 +1366,17 @@ pub fn remove_tor_client() -> Result<String, ZingolibError> {
 pub fn get_unified_addresses() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         with_lightclient_read(|lightclient| {
-            Ok(RT.block_on(async move { lightclient.unified_addresses_json().await.pretty(2) }))
+            Ok(RT.block_on(async move {
+                let wallet = lightclient.wallet.read().await;
+                let addresses: Vec<UnifiedAddress> = wallet
+                    .unified_addresses()
+                    .iter()
+                    .map(|(id, unified_address)| {
+                        unified_address_payload(id, unified_address, &wallet.network)
+                    })
+                    .collect();
+                to_json(&addresses)
+            }))
         })
     })
 }
@@ -1366,11 +1385,15 @@ pub fn get_unified_addresses() -> Result<String, ZingolibError> {
 pub fn get_transparent_addresses() -> Result<String, ZingolibError> {
     with_panic_guard(|| {
         with_lightclient_read(|lightclient| {
-            Ok(
-                RT.block_on(
-                    async move { lightclient.transparent_addresses_json().await.pretty(2) },
-                ),
-            )
+            Ok(RT.block_on(async move {
+                let wallet = lightclient.wallet.read().await;
+                let addresses: Vec<TransparentAddress> = wallet
+                    .transparent_addresses()
+                    .iter()
+                    .map(|(id, encoded_address)| transparent_address_payload(id, encoded_address))
+                    .collect();
+                to_json(&addresses)
+            }))
         })
     })
 }
@@ -1390,15 +1413,9 @@ pub fn create_new_unified_address(receivers: String) -> Result<String, ZingolibE
                     sapling: receivers.contains('z'),
                 };
                 match wallet.generate_unified_address(receivers_available, AccountId::ZERO) {
-                    Ok((id, unified_address)) => json::object! {
-                        "account" => u32::from(AccountId::ZERO),
-                        "address_index" => id.address_index,
-                        "has_orchard" => unified_address.has_orchard(),
-                        "has_sapling" => unified_address.has_sapling(),
-                        "has_transparent" => unified_address.has_transparent(),
-                        "encoded_address" => unified_address.encode(&network),
+                    Ok((id, unified_address)) => {
+                        to_json(&unified_address_payload(&id, &unified_address, &network))
                     }
-                    .pretty(2),
                     Err(e) => format!("Error: {e}"),
                 }
             }))
@@ -1419,14 +1436,10 @@ pub fn create_new_transparent_address() -> Result<String, ZingolibError> {
                 let mut wallet = lightclient.wallet.write().await;
                 let network = wallet.network;
                 match wallet.generate_transparent_address(AccountId::ZERO, true) {
-                    Ok((id, transparent_address)) => {
-                        json::object! {
-                            "account" => u32::from(id.account_id()),
-                            "address_index" => id.address_index().index(),
-                            "scope" => id.scope().to_string(),
-                            "encoded_address" => transparent::encode_address(&network,  transparent_address),
-                        }.pretty(2)
-                    }
+                    Ok((id, transparent_address)) => to_json(&transparent_address_payload(
+                        &id,
+                        &transparent::encode_address(&network, transparent_address),
+                    )),
                     Err(e) => format!("Error: {e}"),
                 }
             }))
@@ -1443,63 +1456,7 @@ pub fn check_my_address(address: String) -> Result<String, ZingolibError> {
             Ok(RT.block_on(async move {
                 let wallet = lightclient.wallet.read().await;
                 match wallet.is_address_derived_by_keys(&address) {
-                    Ok(address_ref) => address_ref.map_or(
-                        json::object! { "is_wallet_address" => false },
-                        |address_ref| match address_ref {
-                            WalletAddressRef::Unified {
-                                account_id,
-                                address_index,
-                                has_orchard,
-                                has_sapling,
-                                has_transparent,
-                                encoded_address,
-                            } => json::object! {
-                                "is_wallet_address" => true,
-                                "address_type" => "unified".to_string(),
-                                "address_index" => address_index,
-                                "account_id" => u32::from(account_id),
-                                "has_orchard" => has_orchard,
-                                "has_sapling" => has_sapling,
-                                "has_transparent" => has_transparent,
-                                "encoded_address" => encoded_address,
-                            },
-                            WalletAddressRef::OrchardInternal {
-                                account_id,
-                                diversifier_index,
-                                encoded_address,
-                            } => json::object! {
-                                "is_wallet_address" => true,
-                                "address_type" => "orchard_internal".to_string(),
-                                "account_id" => u32::from(account_id),
-                                "diversifier_index" => u128::from(diversifier_index).to_string(),
-                                "encoded_address" => encoded_address,
-                            },
-                            WalletAddressRef::SaplingExternal {
-                                account_id,
-                                diversifier_index,
-                                encoded_address,
-                            } => json::object! {
-                                "is_wallet_address" => true,
-                                "address_type" => "sapling".to_string(),
-                                "account_id" => u32::from(account_id),
-                                "diversifier_index" => u128::from(diversifier_index).to_string(),
-                                "encoded_address" => encoded_address,
-                            },
-                            WalletAddressRef::Transparent {
-                                account_id,
-                                scope,
-                                address_index,
-                                encoded_address,
-                            } => json::object! {
-                                "is_wallet_address" => true,
-                                "address_type" => "transparent".to_string(),
-                                "account_id" => u32::from(account_id),
-                                "scope" => scope.to_string(),
-                                "address_index" => address_index.index(),
-                                "encoded_address" => encoded_address,
-                            },
-                        },
-                    ).pretty(2),
+                    Ok(address_ref) => to_json(&CheckAddress::from(address_ref)),
                     Err(e) => format!("Error: {e}"),
                 }
             }))
@@ -1513,7 +1470,9 @@ pub fn get_wallet_save_required() -> Result<String, ZingolibError> {
         with_lightclient_read(|lightclient| {
             Ok(RT.block_on(async move {
                 let wallet = lightclient.wallet.read().await;
-                object! { "save_required" => wallet.save_required }.pretty(2)
+                to_json(&WalletSaveRequired {
+                    save_required: wallet.save_required,
+                })
             }))
         })
     })
@@ -1556,13 +1515,9 @@ pub fn get_config_wallet_performance() -> Result<String, ZingolibError> {
         with_lightclient_read(|lightclient| {
             Ok(RT.block_on(async move {
                 let wallet = lightclient.wallet.read().await;
-                let performance_level = match wallet.wallet_settings.sync_config.performance_level {
-                    PerformanceLevel::Low => "Low",
-                    PerformanceLevel::Medium => "Medium",
-                    PerformanceLevel::High => "High",
-                    PerformanceLevel::Maximum => "Maximum",
-                };
-                object! { "performance_level" => performance_level }.pretty(2)
+                to_json(&ConfigWalletPerformance {
+                    performance_level: wallet.wallet_settings.sync_config.performance_level.into(),
+                })
             }))
         })
     })
@@ -1574,13 +1529,10 @@ pub fn get_wallet_version() -> Result<String, ZingolibError> {
         with_lightclient_read(|lightclient| {
             Ok(RT.block_on(async move {
                 let wallet = lightclient.wallet.read().await;
-                let current_version = wallet.current_version();
-                let read_version = wallet.read_version();
-                object! {
-                    "current_version" => current_version,
-                    "read_version" => read_version
-                }
-                .pretty(2)
+                to_json(&WalletVersion {
+                    current_version: wallet.current_version(),
+                    read_version: wallet.read_version(),
+                })
             }))
         })
     })
@@ -1655,19 +1607,14 @@ pub fn send(send_json: String) -> Result<String, ZingolibError> {
                     Err(e) => return format!("Error: Request Error: {e}"),
                 };
 
-                match lightclient.propose_send(request, AccountId::ZERO).await {
-                    Ok(proposal) => {
-                        let fee = match total_fee(&proposal) {
-                            Ok(fee) => fee,
-                            Err(e) => return object! { "error" => e.to_string() }.pretty(2),
-                        };
-                        object! { "fee" => fee.into_u64() }
-                    }
-                    Err(e) => {
-                        object! { "error" => e.to_string() }
-                    }
-                }
-                .pretty(2)
+                let propose = match lightclient.propose_send(request, AccountId::ZERO).await {
+                    Ok(proposal) => match total_fee(&proposal) {
+                        Ok(fee) => Propose::fee(fee.into_u64()),
+                        Err(e) => Propose::error(e),
+                    },
+                    Err(e) => Propose::error(e),
+                };
+                to_json(&propose)
             }))
         } else {
             Err(ZingolibError::LightclientNotInitialized)
@@ -1709,19 +1656,17 @@ pub fn stake(stake_json: String) -> Result<String, ZingolibError> {
                     None => return "Error: Missing address".to_string(),
                 };
 
-                match lightclient
+                let propose = match lightclient
                     .propose_stake(amount, finalizer_address, AccountId::ZERO)
                     .await
                 {
-                    Ok(proposal) => {
-                        let fee = match total_fee(&proposal.proportional_fee_proposal()) {
-                            Ok(fee) => fee,
-                            Err(e) => return object! { "error" => e.to_string() }.pretty(2),
-                        };
-                        object! { "fee" => fee.into_u64() }.pretty(2)
-                    }
-                    Err(e) => object! { "error" => e.to_string() }.pretty(2),
-                }
+                    Ok(proposal) => match total_fee(&proposal.proportional_fee_proposal()) {
+                        Ok(fee) => Propose::fee(fee.into_u64()),
+                        Err(e) => Propose::error(e),
+                    },
+                    Err(e) => Propose::error(e),
+                };
+                to_json(&propose)
             }))
         } else {
             Err(ZingolibError::LightclientNotInitialized)
@@ -1744,7 +1689,7 @@ pub fn withdraw_stake(withdraw_stake_json: String) -> Result<String, ZingolibErr
             Ok(RT.block_on(async move {
                 let json_args = match json::parse(&withdraw_stake_json) {
                     Ok(parsed) => parsed,
-                    Err(_) => return object! { "error" => "invalid JSON" }.pretty(2),
+                    Err(_) => return to_json(&WithdrawStake::error("invalid JSON")),
                 };
 
                 let txid_bytes = match json_args["txid"]
@@ -1752,12 +1697,12 @@ pub fn withdraw_stake(withdraw_stake_json: String) -> Result<String, ZingolibErr
                     .and_then(|s| parse_hex_32(s).ok())
                 {
                     Some(t) => t,
-                    None => return object! { "error" => "missing/invalid txid" }.pretty(2),
+                    None => return to_json(&WithdrawStake::error("missing/invalid txid")),
                 };
 
                 let unfiltered_txs = match lightclient.transaction_summaries(false).await {
                     Ok(t) => t,
-                    Err(e) => return object! { "error" => e.to_string() }.pretty(2),
+                    Err(e) => return to_json(&WithdrawStake::error(e)),
                 };
 
                 let found_tx = match unfiltered_txs
@@ -1766,15 +1711,15 @@ pub fn withdraw_stake(withdraw_stake_json: String) -> Result<String, ZingolibErr
                     .find(|tx| tx.txid.to_string() == hex::encode(txid_bytes))
                 {
                     Some(t) => t,
-                    None => return object! { "error" => "tx not found" }.pretty(2),
+                    None => return to_json(&WithdrawStake::error("tx not found")),
                 };
 
                 let bond_key = found_tx.staking_action.as_ref().unwrap().bond_key();
 
                 let res = lightclient.withdraw_bond(bond_key, AccountId::ZERO).await;
                 match res {
-                    Ok(txid) => object! { "txid" => txid.to_string() }.pretty(2),
-                    Err(e) => object! { "error" => e.to_string() }.pretty(2),
+                    Ok(txid) => to_json(&WithdrawStake::txid(txid)),
+                    Err(e) => to_json(&WithdrawStake::error(e)),
                 }
             }))
         } else {
@@ -1813,19 +1758,17 @@ pub fn begin_unstake(begin_unstake_json: String) -> Result<String, ZingolibError
 
                 let bond_key = found_tx.staking_action.as_ref().unwrap().bond_key();
 
-                match lightclient
+                let propose = match lightclient
                     .propose_begin_unstake(bond_key, AccountId::ZERO)
                     .await
                 {
-                    Ok(proposal) => {
-                        let fee = match total_fee(&proposal.proportional_fee_proposal()) {
-                            Ok(fee) => fee,
-                            Err(e) => return object! { "error" => e.to_string() }.pretty(2),
-                        };
-                        object! { "fee" => fee.into_u64() }.pretty(2)
-                    }
-                    Err(e) => object! { "error" => e.to_string() }.pretty(2),
-                }
+                    Ok(proposal) => match total_fee(&proposal.proportional_fee_proposal()) {
+                        Ok(fee) => Propose::fee(fee.into_u64()),
+                        Err(e) => Propose::error(e),
+                    },
+                    Err(e) => Propose::error(e),
+                };
+                to_json(&propose)
             }))
         } else {
             Err(ZingolibError::LightclientNotInitialized)
@@ -1861,19 +1804,17 @@ pub fn retarget_bond(retarget_bond_json: String) -> Result<String, ZingolibError
                     None => return "Error: Missing new finalizer".to_string(),
                 };
 
-                match lightclient
+                let propose = match lightclient
                     .propose_retarget_bond(bond_key, new_finalizer_address, AccountId::ZERO)
                     .await
                 {
-                    Ok(proposal) => {
-                        let fee = match total_fee(&proposal.proportional_fee_proposal()) {
-                            Ok(fee) => fee,
-                            Err(e) => return object! { "error" => e.to_string() }.pretty(2),
-                        };
-                        object! { "fee" => fee.into_u64() }.pretty(2)
-                    }
-                    Err(e) => object! { "error" => e.to_string() }.pretty(2),
-                }
+                    Ok(proposal) => match total_fee(&proposal.proportional_fee_proposal()) {
+                        Ok(fee) => Propose::fee(fee.into_u64()),
+                        Err(e) => Propose::error(e),
+                    },
+                    Err(e) => Propose::error(e),
+                };
+                to_json(&propose)
             }))
         } else {
             Err(ZingolibError::LightclientNotInitialized)
@@ -1919,17 +1860,13 @@ pub fn confirm() -> Result<String, ZingolibError> {
             .map_err(|_| ZingolibError::LightclientLockPoisoned)?;
         if let Some(lightclient) = &mut *guard {
             Ok(RT.block_on(async move {
-                match lightclient
-                    .send_stored_proposal(true)
-                    .await {
+                let confirm = match lightclient.send_stored_proposal(true).await {
                     Ok(txids) => {
-                        object! { "txids" => txids.iter().map(|txid| txid.to_string()).collect::<Vec<_>>() }
+                        Confirm::txids(txids.iter().map(|txid| txid.to_string()).collect())
                     }
-                    Err(e) => {
-                        object! { "error" => e.to_string() }
-                    }
-                }
-                .pretty(2)
+                    Err(e) => Confirm::error(e),
+                };
+                to_json(&confirm)
             }))
         } else {
             Err(ZingolibError::LightclientNotInitialized)
@@ -1968,12 +1905,9 @@ pub fn get_wallet_bonds() -> Result<String, ZingolibError> {
         if let Some(lightclient) = &mut *guard {
             Ok(RT.block_on(async move {
                 match lightclient.get_wallet_bonds().await {
-                    Ok(bonds) => bonds.into(),
-                    Err(e) => {
-                        object! { "error" => e.to_string() }
-                    }
+                    Ok(bonds) => to_json(&WalletBonds::from(bonds)),
+                    Err(e) => format!("Error: {e}"),
                 }
-                .pretty(2)
             }))
         } else {
             Err(ZingolibError::LightclientNotInitialized)

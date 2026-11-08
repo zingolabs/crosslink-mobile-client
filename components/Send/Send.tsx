@@ -39,7 +39,6 @@ import {
   ScreenEnum,
 } from '../../app/AppState';
 import { parseZcashURI } from '../../app/uris';
-import WalletService from '../../app/wallet';
 import Utils from '../../app/utils';
 import { SessionStackParamList } from '../../app/types';
 import {
@@ -50,8 +49,8 @@ import {
   useWalletData,
 } from '../../app/store';
 import { createAlert } from '../../app/createAlert';
-import { SendProposeType } from '../../app/wallet/types';
-import { SpendablebalanceType } from '../../app/wallet/types';
+import * as rpc from '../../app/wallet/rpc';
+import type { Propose } from '../../app/wallet/generated/Propose';
 import { ToastProvider, useToast } from 'react-native-toastier';
 import Snackbars from '../Components/Snackbars';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -95,7 +94,7 @@ type AddressSendability = {
   spendable: number | null;
   error: string;
 };
-type Proposal = { fee: number; error: string; amountText?: string };
+type Proposal = { fee: number; error: string };
 
 const Send: React.FunctionComponent<SendProps> = ({
   sendTransaction,
@@ -288,23 +287,18 @@ const Send: React.FunctionComponent<SendProps> = ({
 
   const updateToFieldRef = useRef<typeof updateToField>(async () => {});
 
-  const runSendPropose = async (proposeJSON: string): Promise<string> => {
+  const runSendPropose = async (
+    proposeJSON: string,
+  ): Promise<rpc.RpcResult<Propose>> => {
     try {
-      const proposeStr: string = await WalletService.sendProcess(proposeJSON);
-      if (proposeStr) {
-        if (proposeStr.toLowerCase().startsWith(GlobalConst.error)) {
-          console.log(`Error propose ${proposeStr}`);
-          return proposeStr;
-        }
-      } else {
-        console.log('Internal Error propose');
-        return 'Error: Internal RPC Error: propose';
+      const propose = await rpc.proposeSend(proposeJSON);
+      if (!propose.ok) {
+        console.log(`Error propose ${propose.error}`);
       }
-
-      return proposeStr;
+      return propose;
     } catch (error) {
       console.log(`Critical Error propose ${error}`);
-      return `Error: ${error}`;
+      return { ok: false, error: `Error: ${error}` };
     }
   };
 
@@ -347,49 +341,23 @@ const Send: React.FunctionComponent<SendProps> = ({
         donation,
       );
 
-      const runProposeStr = await runSendPropose(JSON.stringify(sendJson));
+      const runPropose = await runSendPropose(JSON.stringify(sendJson));
 
-      if (
-        runProposeStr &&
-        runProposeStr.toLowerCase().startsWith(GlobalConst.error)
-      ) {
-        return { fee: 0, error: runProposeStr };
+      if (!runPropose.ok) {
+        return { fee: 0, error: runPropose.error };
       }
-
-      try {
-        const runProposeJson: SendProposeType = JSON.parse(runProposeStr);
-
-        if (runProposeJson.error) {
-          return { fee: 0, error: runProposeJson.error };
-        }
-
-        const result: Proposal = {
-          fee:
-            runProposeJson.fee !== undefined ? runProposeJson.fee / 10 ** 8 : 0,
-          error: '',
-        };
-
-        if (runProposeJson.amount !== undefined) {
-          const newAmount =
-            runProposeJson.amount / 10 ** 8 -
-            (donation &&
-            indexerServer.chainName === ChainNameEnum.mainChainName &&
-            !donationAddress
-              ? Utils.parseStringLocaleToNumberFloat(
-                  Utils.getZenniesDonationAmount(),
-                )
-              : 0);
-          result.amountText = Utils.parseNumberFloatToStringLocale(
-            newAmount,
-            8,
-          );
-        }
-        return result;
-      } catch {
-        return { fee: 0, error: runProposeStr };
+      if (runPropose.value.error) {
+        return { fee: 0, error: runPropose.value.error };
       }
+      return {
+        fee:
+          runPropose.value.fee !== undefined
+            ? runPropose.value.fee / 10 ** 8
+            : 0,
+        error: '',
+      };
     },
-    [defaultUnifiedAddress, donation, donationAddress, indexerServer],
+    [defaultUnifiedAddress, donation, indexerServer],
   );
 
   const updateToField = async (
@@ -547,45 +515,29 @@ const Send: React.FunctionComponent<SendProps> = ({
     const address = addressText;
     const zenniesForZingo = donationAddress ? false : donation;
     (async () => {
-      const runSpendableBalanceStr =
-        await WalletService.getSpendableBalanceWithAddressInfo(
-          address,
-          zenniesForZingo ? 'true' : 'false',
-        );
+      const runSpendable = await rpc.getSpendableBalanceWithAddress(
+        address,
+        zenniesForZingo,
+      );
       if (cancelled) {
         return;
       }
-      if (
-        runSpendableBalanceStr &&
-        runSpendableBalanceStr.toLowerCase().startsWith(GlobalConst.error)
-      ) {
+      if (!runSpendable.ok) {
         setAddressSendability({
           address,
           spendable: null,
-          error: runSpendableBalanceStr,
+          error: runSpendable.error,
         });
         return;
       }
-      try {
-        const runSpendableBalanceJson: SpendablebalanceType = JSON.parse(
-          runSpendableBalanceStr,
-        );
-        setAddressSendability({
-          address,
-          spendable:
-            runSpendableBalanceJson.spendable_balance !== undefined
-              ? runSpendableBalanceJson.spendable_balance / 10 ** 8
-              : null,
-          error: '',
-        });
-      } catch (e) {
-        const message = e instanceof Error ? e.message : String(e);
-        setAddressSendability({
-          address,
-          spendable: null,
-          error: `${runSpendableBalanceStr} ${message}`,
-        });
-      }
+      setAddressSendability({
+        address,
+        spendable:
+          runSpendable.value.spendable_balance !== undefined
+            ? runSpendable.value.spendable_balance / 10 ** 8
+            : null,
+        error: '',
+      });
     })();
     return () => {
       cancelled = true;
@@ -606,9 +558,6 @@ const Send: React.FunctionComponent<SendProps> = ({
         return;
       }
       setProposal(result);
-      if (result.amountText !== undefined) {
-        updateToFieldRef.current(null, result.amountText, null, null, null);
-      }
     });
     return () => {
       cancelled = true;
