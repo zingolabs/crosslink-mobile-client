@@ -32,7 +32,7 @@ import { ToastProvider, useToast } from 'react-native-toastier';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderTitle } from '../Header';
-import ChalkLoop from '../Components/ChalkLoop';
+import { BlurView } from '@react-native-community/blur';
 import LiquidPrimaryButton from '../Components/LiquidButton/LiquidPrimaryButton';
 import Animated, {
   cubicBezier,
@@ -68,12 +68,12 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
   const reducedMotion = useReducedMotion();
 
   const gridTransition: CSSTransitionProperties = {
-    transitionProperty: reducedMotion ? ['opacity'] : ['opacity', 'transform'],
-    transitionDuration: reducedMotion ? '120ms' : `${motionDuration.enter}ms`,
+    transitionProperty: ['transform'],
+    transitionDuration: `${motionDuration.enter}ms`,
     transitionTimingFunction: EASE_OUT,
   };
 
-  const chalkTransition: CSSTransitionProperties = {
+  const veilTransition: CSSTransitionProperties = {
     transitionProperty: ['opacity'],
     transitionDuration: reducedMotion ? '120ms' : `${motionDuration.enter}ms`,
     transitionTimingFunction: EASE_OUT,
@@ -167,7 +167,6 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                 style={[
                   {
                     rowGap: 8,
-                    opacity: seedBlurred ? 0 : 1,
                     transform: [
                       { scale: reducedMotion ? 1 : seedBlurred ? 0.98 : 1 },
                     ],
@@ -255,7 +254,7 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                     justifyContent: 'center',
                     alignItems: 'center',
                     opacity: seedBlurred ? 1 : 0,
-                    ...chalkTransition,
+                    ...veilTransition,
                   },
                 ]}
                 pointerEvents={seedBlurred ? 'auto' : 'none'}
@@ -264,7 +263,18 @@ const Seed: React.FunctionComponent<SeedProps> = ({}) => {
                   !seedBlurred ? 'no-hide-descendants' : 'auto'
                 }
               >
-                <ChalkLoop name="knot" size={240} blurRadius={2} />
+                <BlurView
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                  }}
+                  blurType="dark"
+                  blurAmount={20}
+                  reducedTransparencyFallbackColor={colors.bgCanvas}
+                />
 
                 <LiquidPrimaryButton
                   title="View seed phrase"
