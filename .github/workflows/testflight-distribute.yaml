@@ -1,0 +1,41 @@
+name: TestFlight Distribute
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Marketing version, for example 0.0.6
+        required: true
+      build:
+        description: TestFlight build number of that version
+        required: true
+
+jobs:
+  distribute:
+    name: Send build ${{ inputs.version }} (${{ inputs.build }}) to external testers
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Ruby and bundler
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Apple credentials
+        env:
+          API_KEY_P8_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+        run: |
+          set -euo pipefail
+          echo "${API_KEY_P8_BASE64}" | base64 --decode > "${RUNNER_TEMP}/AuthKey.p8"
+          echo "APP_STORE_CONNECT_API_KEY_PATH=${RUNNER_TEMP}/AuthKey.p8" >> "$GITHUB_ENV"
+
+      - name: Distribute
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          MARKETING_VERSION: ${{ inputs.version }}
+          BUILD_NUMBER: ${{ inputs.build }}
+        run: bundle exec fastlane ios distribute
