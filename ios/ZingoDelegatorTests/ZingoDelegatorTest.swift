@@ -144,6 +144,12 @@ private func isError(_ s: String) -> Bool {
     return s.lowercased().hasPrefix("error")
 }
 
+private func testWalletDir() -> String {
+    let dir = NSTemporaryDirectory() + "ZingoDelegatorTests-" + UUID().uuidString
+    try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+    return dir
+}
+
 private func setCryptoProvider() {
   do {
     _ = try setCryptoDefaultProviderToRing()
@@ -185,7 +191,7 @@ final class OfflineTestSuite: XCTestCase {
         let seed = Seeds.ABANDON
 
         do {
-            let initJson = try initFromSeed(seed: seed, birthday:UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
+            let initJson = try initFromSeed(walletDir: testWalletDir(), seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
             print("\nInit from seed:\n\(initJson)")
             let initRes: InitFromSeed = try decodeJSON(initJson)
             XCTAssertEqual(initRes.seed_phrase, seed)
@@ -282,7 +288,7 @@ final class OfflineTestSuite: XCTestCase {
         let seed = Seeds.ABANDON
 
         do {
-          let initJson = try initFromSeed(seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
+          let initJson = try initFromSeed(walletDir: testWalletDir(), seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
           print("\nInit from seed:\n\(initJson)")
           let initRes: InitFromSeed = try decodeJSON(initJson)
           XCTAssertEqual(initRes.seed_phrase, seed)
@@ -311,7 +317,7 @@ final class ExecuteSyncFromSeed: XCTestCase {
         let seed = Seeds.ABANDON
 
         do {
-          let initJson = try initFromSeed(seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
+          let initJson = try initFromSeed(walletDir: testWalletDir(), seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
           print("\nInit from seed:\n\(initJson)")
           let initRes: InitFromSeed = try decodeJSON(initJson)
           XCTAssertEqual(initRes.seed_phrase, seed)
@@ -373,7 +379,7 @@ final class ExecuteSendFromOrchard: XCTestCase {
         let seed = Seeds.HOSPITAL
 
         do {
-          let initJson = try initFromSeed(seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
+          let initJson = try initFromSeed(walletDir: testWalletDir(), seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
           print("\nInit from seed:\n\(initJson)")
           let initRes: InitFromSeed = try decodeJSON(initJson)
           XCTAssertEqual(initRes.seed_phrase, seed)
@@ -473,7 +479,7 @@ final class UpdateCurrentPriceAndValueTransfersFromSeed: XCTestCase {
         let tor = "false"
 
         do {
-          let initJson = try initFromSeed(seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
+          let initJson = try initFromSeed(walletDir: testWalletDir(), seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
           print("\nInit from seed:\n\(initJson)")
           let initRes: InitFromSeed = try decodeJSON(initJson)
           XCTAssertEqual(initRes.seed_phrase, seed)
@@ -540,7 +546,7 @@ final class ExecuteSaplingBalanceFromSeed: XCTestCase {
         let seed = Seeds.HOSPITAL
 
         do {
-          let initJson = try initFromSeed(seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
+          let initJson = try initFromSeed(walletDir: testWalletDir(), seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
           print("\nInit from seed:\n\(initJson)")
           let initRes: InitFromSeed = try decodeJSON(initJson)
           XCTAssertEqual(initRes.seed_phrase, seed)
@@ -607,7 +613,7 @@ final class ExecuteParseAddresses: XCTestCase {
         let seed = Seeds.HOSPITAL
 
         do {
-          let initJson = try initFromSeed(seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
+          let initJson = try initFromSeed(walletDir: testWalletDir(), seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
           print("\nInit from seed:\n\(initJson)")
           let initRes: InitFromSeed = try decodeJSON(initJson)
           XCTAssertEqual(initRes.seed_phrase, seed)
@@ -638,7 +644,7 @@ final class ExecuteParseAddresses: XCTestCase {
         let seed = Seeds.HOSPITAL
 
         do {
-          let initJson = try initFromSeed(seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
+          let initJson = try initFromSeed(walletDir: testWalletDir(), seed: seed, birthday: UInt32(1), serverUri: serveruri, chainHint: chainhint, performanceLevel: "Medium", minConfirmations: UInt32(1))
           print("\nInit from seed:\n\(initJson)")
           let initRes: InitFromSeed = try decodeJSON(initJson)
           XCTAssertEqual(initRes.seed_phrase, seed)

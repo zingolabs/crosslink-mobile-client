@@ -389,7 +389,7 @@ extension AppDelegate {
 
         var exists: String = "false"
         do {
-            exists = try rpcmodule.fileExists(Constants.WalletFileName.rawValue)
+            exists = try rpcmodule.walletFileExists()
         } catch {
             NSLog("BGTask syncingProcessBackgroundTask - Wallet exists error: \(error.localizedDescription)")
         }

@@ -18,6 +18,9 @@ RCT_EXTERN_METHOD(walletBackupExists:
 RCT_EXTERN_METHOD(deleteExistingWallet:
     (RCTPromiseResolveBlock)resolve 
                   reject:(RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(quarantineWallet:
+    (RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(createNewWallet:
     (NSString)serveruri 
                   chainhint:(NSString)chainhint
@@ -68,9 +71,8 @@ RCT_EXTERN_METHOD(selectBestIndexer:
                   network:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(inspectWallet:
-    (NSString)walletb64
-                  serveruri:(NSString)serveruri
-                  platform:(NSString)platform
+    (NSString)serveruri
+                  chainhint:(NSString)chainhint
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(getLatestBlockWalletInfo:

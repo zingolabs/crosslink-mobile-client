@@ -8,10 +8,6 @@
 import Foundation
 
 enum Constants: String {
-    // wallet files
-    case WalletFileName = "wallet.dat.txt"
-    case WalletBackupFileName = "wallet.backup.dat.txt"
-
     case BackgroundFileName = "background.json"
     case ErrorPrefix = "error"
     case SyncPrefix = "sync task"
