@@ -8,6 +8,14 @@
 import Foundation
 import React
 
+private func walletFileExistsAt(_ walletDir: String) throws -> Bool {
+  return try walletExists(walletDir: walletDir)
+}
+
+private func walletBackupFileExistsAt(_ walletDir: String) throws -> Bool {
+  return try walletBackupExists(walletDir: walletDir)
+}
+
 @objc(RPCModule)
 class RPCModule: NSObject {
   
@@ -49,11 +57,11 @@ class RPCModule: NSObject {
   }
 
   func walletFileExists() throws -> String {
-    return try walletExists(walletDir: getDocumentsDirectory()) ? "true" : "false"
+    return try walletFileExistsAt(getDocumentsDirectory()) ? "true" : "false"
   }
 
   func walletBackupFileExists() throws -> String {
-    return try walletBackupExists(walletDir: getDocumentsDirectory()) ? "true" : "false"
+    return try walletBackupFileExistsAt(getDocumentsDirectory()) ? "true" : "false"
   }
 
   func checkWalletFileResult(_ result: String, _ what: String) throws {
