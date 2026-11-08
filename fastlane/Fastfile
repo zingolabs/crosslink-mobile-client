@@ -65,7 +65,7 @@ platform :ios do
       ipa: "build/ZingoDelegator.ipa",
       distribute_external: true,
       groups: ["Apr 2026 - CrossLink Workshop"],
-      changelog: ENV.fetch("GITHUB_REF_NAME", marketing_version)
+      changelog: "release-#{marketing_version}"
     )
   end
 end
