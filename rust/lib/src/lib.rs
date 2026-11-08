@@ -1,7 +1,5 @@
 uniffi::setup_scaffolding!();
 
-#[warn(unused)]
-#[warn(missing_docs)]
 #[macro_use]
 extern crate lazy_static;
 extern crate android_logger;
