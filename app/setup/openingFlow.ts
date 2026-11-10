@@ -14,6 +14,7 @@ import {
 } from '../AppState';
 import { writeSettings } from '../storage/settingsFile';
 import WalletService from '../wallet';
+import RPCModule from '../RPCModule';
 import { createAlert } from '../createAlert';
 import { SeedType, UfvkType, WalletKindType } from '../wallet/types';
 import {
@@ -198,12 +199,8 @@ export const runOpening = (input: OpeningInput): void => {
         fail(title, t('loadingapp.noservers'));
         return;
       }
-      if (start) {
-        serverErrorTries = 1;
-        run();
-        return;
-      }
-      fail(title, result);
+      serverErrorTries = 1;
+      run();
       return;
     }
     snack(t('loadingapp.serversecondtry'), SnackbarDurationEnum.longer);
@@ -301,7 +298,16 @@ export const runOpening = (input: OpeningInput): void => {
     sessionOpened({ walletKind, launching: boot.launching });
   };
 
+  const removePhantomWallet = async (existedBefore: boolean) => {
+    const existsNow = await WalletService.walletExists();
+    if (!existedBefore && existsNow && existsNow !== GlobalConst.false) {
+      await RPCModule.deleteExistingWallet();
+    }
+  };
+
   const createFlow = async (): Promise<void> => {
+    const existsBefore = await WalletService.walletExists();
+    const existedBefore = !!existsBefore && existsBefore !== GlobalConst.false;
     const server = read().indexerServer;
     const seed: string = await WalletService.createNewWallet(
       server.uri,
@@ -311,6 +317,7 @@ export const runOpening = (input: OpeningInput): void => {
     );
     const title = t('loadingapp.creatingwallet-label');
     if (isError(seed)) {
+      await removePhantomWallet(existedBefore);
       await walletErrorHandle(seed, title, false);
       return;
     }
@@ -320,11 +327,13 @@ export const runOpening = (input: OpeningInput): void => {
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e);
       reportFailure(title, message);
+      await removePhantomWallet(existedBefore);
       await walletErrorHandle(message, title, false);
       return;
     }
     if (seedJSON.error) {
       reportFailure(title, seedJSON.error);
+      await removePhantomWallet(existedBefore);
       await walletErrorHandle(seedJSON.error, title, false);
       return;
     }
@@ -446,7 +455,9 @@ export const runOpening = (input: OpeningInput): void => {
         patch({ indexerServer: server });
         await writeSettings('indexerServer', server);
       } else {
-        snack(t('loadingapp.noservers'));
+        snack(t('loadingapp.noservers'), SnackbarDurationEnum.long);
+        openingFailed();
+        return;
       }
     }
 
