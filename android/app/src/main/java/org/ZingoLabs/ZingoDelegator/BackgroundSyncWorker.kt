@@ -32,28 +32,34 @@ import kotlin.time.toDuration
 import kotlin.time.toJavaDuration
 import org.ZingoLabs.ZingoDelegator.Constants.*
 import java.io.FileInputStream
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class ScanRanges (
     val priority : String = "",
     val start_block : String = "",
     val end_block : String = ""
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class SyncStatus (
     val scan_ranges : List<ScanRanges> = emptyList(),
     val sync_start_height : Long = 0L,
     val session_blocks_scanned : Long = 0L,
     val total_blocks_scanned : Long = 0L,
-    val percentage_session_blocks_scanned : Double = 0.0,
+    val total_blocks : Long = 0L,
     val percentage_total_blocks_scanned : Double = 0.0,
     val session_sapling_outputs_scanned : Long = 0L,
     val total_sapling_outputs_scanned : Long = 0L,
     val session_orchard_outputs_scanned : Long = 0L,
     val total_orchard_outputs_scanned : Long = 0L,
-    val percentage_session_outputs_scanned : Double = 0.0,
-    val percentage_total_outputs_scanned : Double = 0.0
+    val session_ironwood_outputs_scanned : Long = 0L,
+    val total_ironwood_outputs_scanned : Long = 0L,
+    val percentage_total_outputs_scanned : Double = 0.0,
+    val total_outputs_scanned : Long = 0L,
+    val total_outputs : Long = 0L
 )
 
 class BackgroundSyncWorker(private val context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
