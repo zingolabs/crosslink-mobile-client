@@ -235,7 +235,7 @@ pub struct ValueTransfer {
     pub status: ValueTransferStatus,
     pub blockheight: u64,
     pub transaction_fee: Option<u64>,
-    pub zec_price: Option<f32>,
+    pub zec_price: Option<f64>,
     pub kind: ValueTransferKind,
     pub value: u64,
     pub recipient_address: Option<String>,
@@ -252,7 +252,7 @@ impl From<WalletEvent> for ValueTransfer {
             status: event.status.into(),
             blockheight: u64::from(event.blockheight),
             transaction_fee: event.transaction_fee,
-            zec_price: event.zec_price,
+            zec_price: event.zec_price.map(f64::from),
             kind: event.kind.into(),
             value: event.value,
             recipient_address: event.recipient_address,
@@ -319,14 +319,14 @@ pub struct SyncStatus {
     pub session_blocks_scanned: u32,
     pub total_blocks_scanned: u32,
     pub total_blocks: u32,
-    pub percentage_total_blocks_scanned: f32,
+    pub percentage_total_blocks_scanned: f64,
     pub session_sapling_outputs_scanned: u32,
     pub total_sapling_outputs_scanned: u32,
     pub session_orchard_outputs_scanned: u32,
     pub total_orchard_outputs_scanned: u32,
     pub session_ironwood_outputs_scanned: u32,
     pub total_ironwood_outputs_scanned: u32,
-    pub percentage_total_outputs_scanned: f32,
+    pub percentage_total_outputs_scanned: f64,
     pub total_outputs_scanned: u64,
     pub total_outputs: u64,
 }
@@ -348,14 +348,14 @@ impl From<SyncProgress> for SyncStatus {
             session_blocks_scanned: status.session_blocks_scanned,
             total_blocks_scanned: status.total_blocks_scanned,
             total_blocks: status.total_blocks,
-            percentage_total_blocks_scanned: progress.percentage_total_blocks_scanned,
+            percentage_total_blocks_scanned: f64::from(progress.percentage_total_blocks_scanned),
             session_sapling_outputs_scanned: status.session_sapling_outputs_scanned,
             total_sapling_outputs_scanned: status.total_sapling_outputs_scanned,
             session_orchard_outputs_scanned: status.session_orchard_outputs_scanned,
             total_orchard_outputs_scanned: status.total_orchard_outputs_scanned,
             session_ironwood_outputs_scanned: status.session_ironwood_outputs_scanned,
             total_ironwood_outputs_scanned: status.total_ironwood_outputs_scanned,
-            percentage_total_outputs_scanned: progress.percentage_total_outputs_scanned,
+            percentage_total_outputs_scanned: f64::from(progress.percentage_total_outputs_scanned),
             total_outputs_scanned: status.total_outputs_scanned,
             total_outputs: status.total_outputs,
         }
@@ -370,7 +370,7 @@ pub struct SyncSession {
     pub sapling_outputs_scanned: u32,
     pub orchard_outputs_scanned: u32,
     pub ironwood_outputs_scanned: u32,
-    pub percentage_total_outputs_scanned: f32,
+    pub percentage_total_outputs_scanned: f64,
     pub total_outputs_scanned: u64,
     pub total_outputs: u64,
 }
@@ -385,7 +385,7 @@ impl From<SessionReport> for SyncSession {
             sapling_outputs_scanned: result.sapling_outputs_scanned,
             orchard_outputs_scanned: result.orchard_outputs_scanned,
             ironwood_outputs_scanned: result.ironwood_outputs_scanned,
-            percentage_total_outputs_scanned: report.percentage_total_outputs_scanned,
+            percentage_total_outputs_scanned: f64::from(report.percentage_total_outputs_scanned),
             total_outputs_scanned: result.total_outputs_scanned,
             total_outputs: result.total_outputs,
         }
@@ -584,7 +584,7 @@ pub struct ConfigWalletPerformance {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ZecPrice {
-    pub current_price: f32,
+    pub current_price: f64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

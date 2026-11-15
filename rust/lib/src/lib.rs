@@ -1248,7 +1248,7 @@ pub fn zec_price(tor: String) -> Result<String, ZingolibError> {
                 let mut wallet = lightclient.wallet.write().await;
                 match wallet.update_current_price(tor_client).await {
                     Ok(price) => to_json(&ZecPrice {
-                        current_price: price,
+                        current_price: f64::from(price),
                     }),
                     Err(e) => format!("Error: {e}"),
                 }
