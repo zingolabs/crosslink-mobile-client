@@ -100,8 +100,7 @@ jobs:
 
       - name: Cargo default stable
         run: |
-          rustup update
-          rustup upgrade
+          rustup toolchain uninstall stable
           rustup toolchain install stable --profile minimal --component rust-src
           rustup default stable
 
