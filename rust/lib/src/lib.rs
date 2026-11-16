@@ -2154,7 +2154,7 @@ mod tests {
         println!("chosen: {chosen}");
         assert!(!chosen.is_empty(), "select_best_indexer failed");
         assert!(!chosen.to_lowercase().starts_with("error"), "{chosen}");
-        assert_eq!(chosen, "http://88.198.67.189:18234/");
+        assert_eq!(chosen, "http://45.63.75.9:18234/");
     }
 
     #[test]
@@ -2198,7 +2198,7 @@ mod tests {
         let _ = set_crypto_default_provider_to_ring();
         let seed = init_new(
             dir_string(&dir),
-            "http://88.198.67.189:18234".to_string(),
+            "http://45.63.75.9:18234".to_string(),
             "test".to_string(),
             "Medium".to_string(),
             1,
