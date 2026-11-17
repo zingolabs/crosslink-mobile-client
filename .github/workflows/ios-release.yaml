@@ -86,6 +86,7 @@ jobs:
 
       - name: Version from package.json
         run: |
+          echo "ARTIFACT_TAG=${GITHUB_REF_NAME//\//-}" >> "$GITHUB_ENV"
           echo "MARKETING_VERSION=$(node -p "require('./package.json').version")" >> "$GITHUB_ENV"
 
       - name: Apple credentials
@@ -110,21 +111,21 @@ jobs:
 
       - name: Collect artifacts
         run: |
-          mv build/ZingoDelegator.ipa "ZingoDelegator-${{ github.ref_name }}.ipa"
-          mv build/ZingoDelegator.app.dSYM.zip "ZingoDelegator-${{ github.ref_name }}-dSYM.zip"
+          mv build/ZingoDelegator.ipa "ZingoDelegator-${{ env.ARTIFACT_TAG }}.ipa"
+          mv build/ZingoDelegator.app.dSYM.zip "ZingoDelegator-${{ env.ARTIFACT_TAG }}-dSYM.zip"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ZingoDelegator-${{ github.ref_name }}-ios
+          name: ZingoDelegator-${{ env.ARTIFACT_TAG }}-ios
           path: |
-            ZingoDelegator-${{ github.ref_name }}.ipa
-            ZingoDelegator-${{ github.ref_name }}-dSYM.zip
+            ZingoDelegator-${{ env.ARTIFACT_TAG }}.ipa
+            ZingoDelegator-${{ env.ARTIFACT_TAG }}-dSYM.zip
 
       - name: Attach to release
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            ZingoDelegator-${{ github.ref_name }}.ipa
-            ZingoDelegator-${{ github.ref_name }}-dSYM.zip
+            ZingoDelegator-${{ env.ARTIFACT_TAG }}.ipa
+            ZingoDelegator-${{ env.ARTIFACT_TAG }}-dSYM.zip
