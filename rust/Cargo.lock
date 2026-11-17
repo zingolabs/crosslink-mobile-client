@@ -8161,6 +8161,7 @@ dependencies = [
  "zcash_protocol",
  "zcash_transparent",
  "zingo-netutils",
+ "zingo-status",
  "zingo_common_components",
  "zingolib",
 ]
